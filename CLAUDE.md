@@ -12,12 +12,12 @@ The PRD chain ships from Lesson 1 and the tech-stack-selector ships from Lesson 
 
 ### Task Router — Where to start
 
-| Skill | Use it when |
-| --- | --- |
-| **Bootstrap (lesson focus)** | |
-| `/10x-bootstrapper` | You have a hand-off at `context/foundation/tech-stack.md` (written by `/10x-tech-stack-selector`) and you are ready to scaffold the project into the current directory. The skill reads the hand-off, looks up the chosen card in the starter registry, runs its CLI through one of three cwd strategies (scaffold into a temp directory then move files up; scaffold directly into the current directory; clone a starter repo without keeping its git history), preserves `context/` always, sidelines other clashes as `.scaffold` siblings, runs a light pre-scaffold recency check and a deeper post-scaffold audit, and writes a verification log to `context/changes/bootstrap-verification/verification.md`. Use AFTER `/10x-tech-stack-selector`. |
-| **Re-run upstream if needed** | |
-| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` | Bundled so you can fix the PRD or swap the stack mid-flight. If `/10x-bootstrapper` surfaces a registry-drift refusal or you change your mind on the starter, re-run `/10x-tech-stack-selector` to regenerate `tech-stack.md` and re-invoke. |
+| Skill                                                                | Use it when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bootstrap (lesson focus)**                                         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/10x-bootstrapper`                                                  | You have a hand-off at `context/foundation/tech-stack.md` (written by `/10x-tech-stack-selector`) and you are ready to scaffold the project into the current directory. The skill reads the hand-off, looks up the chosen card in the starter registry, runs its CLI through one of three cwd strategies (scaffold into a temp directory then move files up; scaffold directly into the current directory; clone a starter repo without keeping its git history), preserves `context/` always, sidelines other clashes as `.scaffold` siblings, runs a light pre-scaffold recency check and a deeper post-scaffold audit, and writes a verification log to `context/changes/bootstrap-verification/verification.md`. Use AFTER `/10x-tech-stack-selector`. |
+| **Re-run upstream if needed**                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` | Bundled so you can fix the PRD or swap the stack mid-flight. If `/10x-bootstrapper` surfaces a registry-drift refusal or you change your mind on the starter, re-run `/10x-tech-stack-selector` to regenerate `tech-stack.md` and re-invoke.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ### How the chain hands off
 
@@ -35,7 +35,7 @@ The PRD chain ships from Lesson 1 and the tech-stack-selector ships from Lesson 
 
 When the skill moves files from a temp scaffold directory up into your current working directory, it applies a strict matrix:
 
-- **`context/**`** — anything the scaffold tried to write under `context/` is **dropped**. Your `context/` is the source of truth for the bootstrap chain (PRD, tech-stack hand-off, plans, frames) and is never overwritten.
+- **`context/**`** — anything the scaffold tried to write under `context/`is **dropped**. Your`context/` is the source of truth for the bootstrap chain (PRD, tech-stack hand-off, plans, frames) and is never overwritten.
 - **`.gitignore`** — append-merged: your existing lines stay in order, then the scaffold's lines are de-duped against your set and appended with a separator comment. Git's ignore semantics are additive, so combining is safe.
 - **`package.json`, `README.md`, `CLAUDE.md`, `AGENTS.md`, root-level `*.md`** — your existing file wins; the scaffold's copy lands as `<filename>.scaffold` sibling. You can `diff README.md README.md.scaffold` to see what the starter shipped vs what you had.
 - **Anything else** — moves silently if no conflict, sidelined as `<filename>.scaffold` if there is one. The matrix never deletes user files.
@@ -90,11 +90,11 @@ The first bootstrap run on this project surfaced two gaps in the shipped skill. 
    ```yaml
    audit_commands:
      js:
-       npm: "npm audit --json"
-       pnpm: "pnpm audit --json"
-       yarn: "yarn npm audit --json"
-       bun: "bun audit --json"
-       _default: "npm audit --json"
+       npm: 'npm audit --json'
+       pnpm: 'pnpm audit --json'
+       yarn: 'yarn npm audit --json'
+       bun: 'bun audit --json'
+       _default: 'npm audit --json'
    ```
 
    Companion edits live in `references/post-scaffold-verification.md` (per-ecosystem invocation block) and `SKILL.md` (Step 1 lookup paragraph).
@@ -102,3 +102,27 @@ The first bootstrap run on this project surfaced two gaps in the shipped skill. 
 2. **Temp scaffold dir name has no leading dot.** The shipped skill substituted `{name}=.bootstrap-scaffold` for the `subdir-then-move` and `git-clone` strategies. `create-next-app` rejects names starting with `.` ("name cannot start with a period" — npm naming restriction), so the patched version uses `bootstrap-scaffold` (no leading dot). Search-and-replace across `SKILL.md`, `references/scaffold-merge.md`, `references/handoff-consumer.md`, `references/refusal-protocol.md`, `references/bootstrapper-config.yaml`, `references/verification-log-schema.md`.
 
 The audit trail of the first run lives in `context/changes/bootstrap-verification/verification.md` — the **Skill gaps observed during this run** subsection documents both fixes verbatim.
+
+### Reference repositories
+
+The user has other projects this one may draw patterns from. **Inspiration, not canon** — weigh against this project's own PRD/tech-stack each time. See `context/foundation/reference-repos.md` for the full breakdown of what to inherit vs ignore.
+
+Quick pointer:
+
+- **`wykonczymy`** at `/Users/konradantonik/workspace/yolo/wykonczymy` — production Next.js 16 + React 19 app. Permission scope already granted in `.claude/settings.local.json`. Use for tooling conventions (mise, husky, lint-staged, prettier, vitest, ESLint), component composition patterns, Zustand/TanStack patterns. **Ignore** its Payload CMS layer — this project uses Supabase per `context/foundation/tech-stack.md`.
+
+### Tooling conventions (mirrored from `wykonczymy`)
+
+- **Node**: pinned to 24 via `mise.toml`. Use `mise install` once after cloning.
+- **Package manager**: pnpm (lockfile is `pnpm-lock.yaml`).
+- **Format**: Prettier 3 with `prettier-plugin-tailwindcss`. Config in `.prettierrc`. Run `pnpm format` (check) or `pnpm format:fix` (write).
+- **Lint**: ESLint 9 flat config (`eslint.config.mjs`). Run `pnpm lint`.
+- **Tests**: Vitest 4. Specs under `src/__tests__/**/*.test.ts`. Run `pnpm test` / `pnpm test:watch`.
+- **Pre-commit**: husky runs `lint-staged` on changed files (eslint --fix + prettier --write for JS/TS, prettier for JSON/CSS/MD).
+- **Typecheck**: `pnpm typecheck` runs `tsc --noEmit`.
+
+### shadcn
+
+Initialized with `--preset nova` (CLI default, `radix-nova` style, `neutral` base). Config in `components.json`. After init, `globals.css` was patched to fix the `--font-sans: var(--font-sans)` circular reference (literal `"Geist"` font family names instead — required for Tailwind v4 `@theme inline`, see `vercel-plugin:shadcn` skill).
+
+Add components with `pnpm dlx shadcn@latest add <component>`. To swap the color palette later, replace the `@theme inline` and `:root` / `.dark` blocks in `src/app/globals.css` — token names stay (`--primary`, `--background`, etc.), only OKLCH values change. Use [tweakcn.com](https://tweakcn.com) for visual tuning.
