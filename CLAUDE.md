@@ -155,4 +155,6 @@ Adding a new third-party service (Supabase, Resend, etc.) always follows that th
 3. `vercel env add <NAME>` for each env var, then `vercel env pull .env.local`.
 4. First `git push` triggers a preview deploy. Merge to `main` triggers production.
 
-**Status of this repo (as of last update):** no `origin` remote yet, not yet `vercel link`-ed (`.vercel/` directory absent). First Vercel-touching task (Phase A1 of the sprint plan) starts with the `gh repo create` → `vercel link` sequence above. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
+**Vercel account in use for this project:** `admin-63074310` (personal scope). The same logged-in CLI also has access to one team — `wykonczymys-projects` — which hosts the unrelated `wykonczymy` reference repo and is **not** for this project. When `vercel link` prompts for a scope, pick the personal one (`admin-63074310`), not the team. Confirm anytime with `vercel whoami` (should print `admin-63074310`); if it prints something else, run `vercel logout` + `vercel login` before any Vercel-touching work.
+
+**Status of this repo (as of last update):** GitHub remote is `https://github.com/ex-Plant/coding-learning-companion` (public). Not yet `vercel link`-ed (`.vercel/` directory absent). First Vercel-touching task is `vercel link` → pick personal scope → name the project `coding-learning-companion`. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
