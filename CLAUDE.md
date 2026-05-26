@@ -126,3 +126,33 @@ Quick pointer:
 Initialized with `--preset nova` (CLI default, `radix-nova` style, `neutral` base). Config in `components.json`. After init, `globals.css` was patched to fix the `--font-sans: var(--font-sans)` circular reference (literal `"Geist"` font family names instead — required for Tailwind v4 `@theme inline`, see `vercel-plugin:shadcn` skill).
 
 Add components with `pnpm dlx shadcn@latest add <component>`. To swap the color palette later, replace the `@theme inline` and `:root` / `.dark` blocks in `src/app/globals.css` — token names stay (`--primary`, `--background`, etc.), only OKLCH values change. Use [tweakcn.com](https://tweakcn.com) for visual tuning.
+
+### Deployment + env management (Vercel CLI)
+
+User has a Vercel account. **The Vercel CLI is the canonical surface for everything Vercel-touching on this project** — deploys, environment variables, logs, domains, project linking. Heavy use is expected and intentional.
+
+**Hard rule: no manual editing of `.env.local`.** All env vars flow through Vercel:
+
+1. `vercel link` — link the local repo to a Vercel project (one-time, creates `.vercel/`).
+2. `vercel env add <NAME>` — interactive prompt: paste value, pick environments (production / preview / development). Repeat per var.
+3. `vercel env pull .env.local` — sync down to a gitignored `.env.local`. Re-run any time a var changes upstream.
+
+Adding a new third-party service (Supabase, Resend, etc.) always follows that three-step ritual. Never `echo "FOO=bar" >> .env.local` — it'll be silently overwritten on the next pull and won't propagate to preview / prod deploys.
+
+**Deploys:**
+
+- `vercel` — preview deploy from the current branch (also fires automatically on `git push` once GitHub integration is set up).
+- `vercel --prod` — production deploy.
+- `vercel logs <url>` — runtime logs for a specific deploy.
+- `vercel ls` — list recent deploys for the linked project.
+
+**Project config:** prefer `vercel.ts` (typed) over `vercel.json` when config is needed. See `vercel-plugin:vercel-cli` skill for current syntax — the API has shifted; don't rely on training data.
+
+**GitHub integration is part of the deploy story** — Vercel's GitHub integration is the v1 CI gate (per `tech-stack.md`; no `.github/workflows/*` ships in v1). The chain is: push to a GitHub repo → Vercel receives the webhook → Vercel builds + deploys (preview per branch / push, production on `main`). This means **the GitHub repo is a prerequisite, not a "later" concern**. First-time setup ritual on this repo:
+
+1. `gh repo create <name> --source=. --private --push` (gh CLI is already authed as `ex-Plant`).
+2. `vercel link` — picks the GitHub repo and creates a Vercel project linked to it.
+3. `vercel env add <NAME>` for each env var, then `vercel env pull .env.local`.
+4. First `git push` triggers a preview deploy. Merge to `main` triggers production.
+
+**Status of this repo (as of last update):** no `origin` remote yet, not yet `vercel link`-ed (`.vercel/` directory absent). First Vercel-touching task (Phase A1 of the sprint plan) starts with the `gh repo create` → `vercel link` sequence above. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
