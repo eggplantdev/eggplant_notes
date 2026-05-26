@@ -80,6 +80,7 @@ This project uses **pnpm**, not npm. The `context/foundation/tech-stack.md` hand
 - Add deps with `pnpm add <pkg>` / `pnpm add -D <pkg>`.
 - Audit with `pnpm audit --json` — **not** `npm audit`, which fails with `ENOLOCK` because there is no `package-lock.json`.
 - If you ever need to override a transitive dep, use `pnpm.overrides` in `package.json`, not `npm overrides`.
+- **`pnpm.supportedArchitectures` is set** (`os: [darwin, linux]`, `cpu: [arm64, x64]`). Without it, pnpm pulled the wrong-arch Supabase CLI binary (`@supabase/cli-darwin-x64` on an arm64 Mac), causing `No matching Supabase CLI binary binary found for darwin-arm64` at runtime. The config forces pnpm to fetch both arch binaries so the native one resolves locally and CI/x64 stays covered. Keep it when adding other CLIs that ship platform-specific binaries.
 
 ### Bootstrap fixes applied to the `/10x-bootstrapper` skill
 
