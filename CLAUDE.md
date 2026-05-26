@@ -129,6 +129,8 @@ Add components with `pnpm dlx shadcn@latest add <component>`. To swap the color 
 
 ### Deployment + env management (Vercel CLI)
 
+> **DEFERRED (2026-05-26).** Vercel is not needed for local development and has been pushed to deploy time (sprint-plan Phase F). The provisional team-scope linkage and the Vercel-account cleanup are both parked until then. The rest of this section describes the intended workflow for when Vercel comes back into the picture — it is the plan, not the current state. **For local dev right now, env vars live directly in a git-ignored `.env.local`; the "no manual env editing" rule below only applies once env management migrates to `vercel env`.**
+
 User has a Vercel account. **The Vercel CLI is the canonical surface for everything Vercel-touching on this project** — deploys, environment variables, logs, domains, project linking. Heavy use is expected and intentional.
 
 **Hard rule: no manual editing of `.env.local`.** All env vars flow through Vercel:
