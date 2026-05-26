@@ -155,6 +155,14 @@ Adding a new third-party service (Supabase, Resend, etc.) always follows that th
 3. `vercel env add <NAME>` for each env var, then `vercel env pull .env.local`.
 4. First `git push` triggers a preview deploy. Merge to `main` triggers production.
 
-**Vercel account in use for this project:** `admin-63074310` (personal scope). The same logged-in CLI also has access to one team — `wykonczymys-projects` — which hosts the unrelated `wykonczymy` reference repo and is **not** for this project. When `vercel link` prompts for a scope, pick the personal one (`admin-63074310`), not the team. Confirm anytime with `vercel whoami` (should print `admin-63074310`); if it prints something else, run `vercel logout` + `vercel login` before any Vercel-touching work.
+**Vercel account in use for this project:**
 
-**Status of this repo (as of last update):** GitHub remote is `https://github.com/ex-Plant/coding-learning-companion` (public). Not yet `vercel link`-ed (`.vercel/` directory absent). First Vercel-touching task is `vercel link` → pick personal scope → name the project `coding-learning-companion`. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
+- **CLI logged-in user:** `admin-63074310` (personal scope).
+- **Available scopes from this login:** the personal scope (`admin-63074310`) plus one team — `wykonczymys-projects`, which also hosts the unrelated `wykonczymy` reference repo.
+- **Current project linkage (provisional):** the project is currently linked to the `wykonczymys-projects` team (orgId `team_BWfyTqJnjIqZBkHwBL0elgS4`, projectId `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9`). This was an accident at the `vercel link` scope prompt where the team was the default. **The user has flagged Vercel-account hygiene as a separate cleanup task and may move this project to a different scope (personal or a different account entirely) later.** Until that cleanup happens, work continues against the current `wykonczymys-projects` linkage.
+- **Implications of the current linkage:** billing and team-member access for `coding-learning-companion` are currently shared with `wykonczymy` under the same Vercel team. Env vars added via `vercel env add` land in the team-scoped project, not the user's personal Vercel.
+- **Confirm CLI state anytime** with `vercel whoami` (should print `admin-63074310`) and `cat .vercel/project.json` (orgId tells you which scope the link is in: `team_*` = team, anything else = personal). If `vercel whoami` prints something else, run `vercel logout` + `vercel login` before any Vercel-touching work.
+
+**Status of this repo (as of last update):** GitHub remote is `https://github.com/ex-Plant/coding-learning-companion` (public). Vercel-linked to the `wykonczymys-projects` team scope as described above; `.vercel/project.json` is committable but git-ignored by Vercel CLI convention. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
+
+**Open follow-up:** user to clean up their Vercel accounts (consolidate or separate), then decide whether to keep the current linkage, move to personal scope on this account, or re-link to a different account entirely. Pending that decision, the current linkage is a known-imperfect baseline, not a final state.
