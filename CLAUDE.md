@@ -10,18 +10,17 @@ The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the c
 
 Live course structure (`10x list`):
 
-| Module | Title                                | Lessons | State                 | This project                    |
-| ------ | ------------------------------------ | ------- | --------------------- | ------------------------------- |
-| M0     | Prework                              | 1       | unlocked              | n/a                             |
-| M1     | Agentic Environment                  | 5       | unlocked              | **L1–L4 fetched**, L5 unfetched |
-| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25) | not fetched                     |
-| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01) | not fetched                     |
-| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                               |
-| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                               |
+| Module | Title                                | Lessons | State                 | This project                 |
+| ------ | ------------------------------------ | ------- | --------------------- | ---------------------------- |
+| M0     | Prework                              | 1       | unlocked              | n/a                          |
+| M1     | Agentic Environment                  | 5       | unlocked              | **L1–L4 done**, L5 unfetched |
+| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25) | not fetched                  |
+| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01) | not fetched                  |
+| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                            |
+| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                            |
 
-- **Done:** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `verification.md`), m1l4 (`/10x-agents-md` → canonical `AGENTS.md`; `/10x-rule-review` run on both rule files; trims applied).
+- **Done:** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `verification.md`), **m1l4 complete** (`/10x-agents-md` → canonical `AGENTS.md`; `/10x-rule-review` on both rule files + trims; `/10x-lesson` → `context/foundation/lessons.md` created).
 - **Next chain link:** m1l5 "From Localhost to Production" (`/10x-infra-research` → `context/foundation/infrastructure.md` → Plan-Mode deploy → `context/deployment/deploy-plan.md`).
-- **Open m1l4 item — `context/foundation/lessons.md` still does not exist.** It is the `/10x-lesson` artifact, self-bootstrapped on first invocation. The sentinel below lists it as a foundation path — a forward-pointer, not a missing file.
 - **Build axis (separate from lessons):** app build follows `@context/changes/v1-sprint-plan/plan.md` (deadline 2026-06-10), currently **Phase A** — Supabase deps + `supabase init` done; no migrations / `src/lib` helpers / auth pages yet.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
