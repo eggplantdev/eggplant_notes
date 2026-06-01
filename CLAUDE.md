@@ -72,6 +72,30 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 
 ## Project-specific notes (outside the 10x-cli sentinel — durable across re-fetches)
 
+### Course & lesson progress (10xDevs 3.0) — as of 2026-06-01
+
+The sentinel block above is the **m1l3 lesson bundle as shipped**, nothing more. Its `Module 1, Lesson 3` heading and its "the chain ends here in v1; a future Lesson 4 will set up agent context" / "Memory Architecture" language describe the bootstrapper lesson in isolation — **not** the live course state. Do not read the sentinel as "this project is stuck at L3." For actual progress, **this section is authoritative**.
+
+Live course structure (`10x list`):
+
+| Module | Title                                | Lessons | State                  | This project                |
+| ------ | ------------------------------------ | ------- | ---------------------- | --------------------------- |
+| M0     | Prework                              | 1       | unlocked               | n/a                         |
+| M1     | Agentic Environment                  | 5       | unlocked               | **L1–L3 done**, L4–L5 unfetched |
+| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25)  | not fetched                 |
+| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01)  | not fetched                 |
+| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08    | —                           |
+| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15    | —                           |
+
+- **Done (artifacts on disk):** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `context/changes/bootstrap-verification/verification.md`).
+- **Next chain link:** m1l4 "Agent Onboarding: AGENTS.md, AI Rules, and Feedback Loops" (`/10x-agents-md`, `/10x-rule-review`, `/10x-lesson`). Then m1l5 "From Localhost to Production" (`/10x-infra-research` → `context/foundation/infrastructure.md` → Plan-Mode deploy → `context/deployment/deploy-plan.md`).
+- **`context/foundation/lessons.md` is referenced inside the sentinel** ("Foundation paths used by this lesson") **but does NOT exist yet.** It is the m1l4 `/10x-lesson` artifact — created when m1l4 is fetched and run, not before. Until then the reference is a forward-pointer, not a missing file to hunt for.
+- **`AGENTS.md` and this `CLAUDE.md` were hand-written, not produced by the m1l4 skills.** Once m1l4 is fetched, run `/10x-rule-review` against both to score them (length, code-paste, precision, redundancy, ordering).
+
+**Before any `10x get`:** the CLI session expired 2026-05-21 — re-auth with `10x auth` (interactive magic-link) first, or `get` returns 403. CLI is 1.6.1, latest 1.7.0 (`pnpm add -g @przeprogramowani/10x-cli`; not npm).
+
+**Build progress is a separate axis** from course progress. The app build follows the hand-rolled `context/changes/v1-sprint-plan/` (deadline 2026-06-10) and is currently at **Phase A only**: `@supabase/ssr` + `@supabase/supabase-js` installed and `supabase init` run (`supabase/config.toml`), but no migrations, no `src/lib` Supabase helpers, no auth pages. Phases B–F untouched. See `plan.md` for the phase breakdown and cut order.
+
 ### Package manager: pnpm
 
 This project uses **pnpm**, not npm. The `context/foundation/tech-stack.md` hand-off carried `package_manager: npm` but it was overridden to `pnpm` at bootstrap time and the lockfile is `pnpm-lock.yaml`. When in doubt:
