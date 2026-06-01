@@ -1,98 +1,27 @@
-<!-- BEGIN @przeprogramowani/10x-cli -->
-
-## 10xDevs AI Toolkit — Module 1, Lesson 3
-
-Scaffold the project for the stack you picked in Lesson 2, with the **bootstrap chain**:
-
-```
-(/10x-init  →  /10x-shape  →  /10x-prd)  →  /10x-tech-stack-selector  →  /10x-bootstrapper
-```
-
-The PRD chain ships from Lesson 1 and the tech-stack-selector ships from Lesson 2 — both re-included in this lesson so you can fix the PRD or swap the stack mid-flight. `/10x-bootstrapper` is the lesson's main topic. The chain ends here in v1; a future Lesson 4 will set up agent context (`CLAUDE.md`, `AGENTS.md`).
-
-### Task Router — Where to start
-
-| Skill                                                                | Use it when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bootstrap (lesson focus)**                                         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/10x-bootstrapper`                                                  | You have a hand-off at `context/foundation/tech-stack.md` (written by `/10x-tech-stack-selector`) and you are ready to scaffold the project into the current directory. The skill reads the hand-off, looks up the chosen card in the starter registry, runs its CLI through one of three cwd strategies (scaffold into a temp directory then move files up; scaffold directly into the current directory; clone a starter repo without keeping its git history), preserves `context/` always, sidelines other clashes as `.scaffold` siblings, runs a light pre-scaffold recency check and a deeper post-scaffold audit, and writes a verification log to `context/changes/bootstrap-verification/verification.md`. Use AFTER `/10x-tech-stack-selector`. |
-| **Re-run upstream if needed**                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` | Bundled so you can fix the PRD or swap the stack mid-flight. If `/10x-bootstrapper` surfaces a registry-drift refusal or you change your mind on the starter, re-run `/10x-tech-stack-selector` to regenerate `tech-stack.md` and re-invoke.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-
-### How the chain hands off
-
-- `/10x-tech-stack-selector` (Lesson 2) writes `context/foundation/tech-stack.md` with a 4-key frontmatter (`starter_id`, `package_manager`, `project_name`, `hints`) plus a one-paragraph `## Why this stack` body.
-- `/10x-bootstrapper` reads that file FULLY (no fallback to conversation history). If it is absent, the skill refuses with a one-sentence redirect to `/10x-tech-stack-selector` and stops — no inline mini-handoff, no standalone-mode in v1.
-- The chosen `starter_id` is looked up in `/skills/10x-tech-stack-selector/references/starter-registry.yaml`. The skill consumes that registry; it does not own it. A CI validator (`scripts/validate-starter-registry-sync.mjs`) prevents bootstrapper from referencing a `starter_id` absent from the registry.
-- The skill writes `context/changes/bootstrap-verification/verification.md` as the audit-trail log for the run. Schema in `/skills/10x-bootstrapper/references/verification-log-schema.md`.
-
-### What bootstrapper captures (and what it does NOT)
-
-- **Captured (v1)**: scaffold via the chosen card's `cmd_template` (CLI delegation, not inline file generation), three cwd strategies dispatched from `bootstrapper-config.yaml` (`subdir-then-move`, `native-cwd`, `git-clone`), strict conflict policy producing `.scaffold` siblings + always preserving `context/`, two verification slots (light pre-scaffold recency check + deep post-scaffold language-aware audit), severity-tiered audit summary, full verification log on disk.
-- **NOT captured in v1 (deliberate)**: `AGENTS.md` / `CLAUDE.md` generation (deferred to a future Lesson 4 — "Memory Architecture"); per-starter cert-element placement overlays (live with the future agent-context skill, not here); CI workflow files; AI-as-bridge fallback for stacks outside the registry (deferred to v2 — in v1 chain-mode tech-stack-selector already gates on the registry, so the case cannot arise); standalone-mode where the user names a stack inline without a hand-off (deferred to v2); compensation actions for `bootstrapper_confidence: best-effort` or `quality_override: true` (surfaced in conversation but no automated follow-up — that, too, is the future memory-architecture skill's job).
-
-### The conflict policy
-
-When the skill moves files from a temp scaffold directory up into your current working directory, it applies a strict matrix:
-
-- **`context/**`** — anything the scaffold tried to write under `context/`is **dropped**. Your`context/` is the source of truth for the bootstrap chain (PRD, tech-stack hand-off, plans, frames) and is never overwritten.
-- **`.gitignore`** — append-merged: your existing lines stay in order, then the scaffold's lines are de-duped against your set and appended with a separator comment. Git's ignore semantics are additive, so combining is safe.
-- **`package.json`, `README.md`, `CLAUDE.md`, `AGENTS.md`, root-level `*.md`** — your existing file wins; the scaffold's copy lands as `<filename>.scaffold` sibling. You can `diff README.md README.md.scaffold` to see what the starter shipped vs what you had.
-- **Anything else** — moves silently if no conflict, sidelined as `<filename>.scaffold` if there is one. The matrix never deletes user files.
-
-For the `git-clone` strategy (10x-astro-starter and similar): the cloned `.git/` is deleted before move-up, so the upstream starter's history does not leak into your repo. You initialise your own history afterwards (`git init`).
-
-### Verification log
-
-Every run writes `context/changes/bootstrap-verification/verification.md`. Sections:
-
-- **`## Hand-off`** — verbatim copy of the tech-stack.md frontmatter and `## Why this stack` body.
-- **`## Pre-scaffold verification`** — recency findings table (npm package version + `time.modified` for JS starters; GitHub `pushed_at` for any starter with a GitHub `docs_url`).
-- **`## Scaffold log`** — the resolved CLI invocation, exit code, files moved, conflicts surfaced as `.scaffold` siblings, `.gitignore` handling.
-- **`## Post-scaffold audit`** — full per-language audit output (`npm audit --json` for JS, `pip-audit` for Python, `cargo audit` for Rust, etc.). Severity-tiered: CRITICAL and HIGH surfaced inline in chat, MODERATE and LOW log-only. Direct-vs-transitive split where the tool supports it.
-- **`## Hints recorded but not acted on`** — every hint from the hand-off bootstrapper read but did not act on in v1. Audit-trail completeness for the future memory-architecture skill.
-- **`## Next steps`** — pointer text. v1 names "your project is scaffolded and verified — happy hacking" and flags the future Lesson 4 skill as the next chain link.
-
-The folder (`context/changes/bootstrap-verification/`) deliberately has no `change.md`. Bootstrap runs are one-shot artifacts, not tracked workflow changes — the folder hosts the log and nothing else. Re-runs apply a warn-and-confirm guard before overwriting; the escape hatch is `verification-v2.md` (and so on).
-
-### Foundation paths used by this lesson
-
-- `context/foundation/tech-stack.md` — input (from Lesson 2)
-- `context/changes/bootstrap-verification/verification.md` — output (the audit-trail log)
-- `context/foundation/lessons.md` — recurring rules & pitfalls
-- `docs/reference/contract-surfaces.md` — load-bearing names registry
-
-### Universal language
-
-The shipped skill carries no 10xDevs / cohort / certification references. The post-scaffold audit dispatches by `language_family` against a small lookup table; cohorts whose stack lands in `java`, `php`, `dart`, or a multi-language combination see a "no built-in audit tool for this ecosystem" log line and a recommended external tool, not a fake "0 findings" record.
-
-Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
-
-<!-- END @przeprogramowani/10x-cli -->
-
 ## Project-specific notes (outside the 10x-cli sentinel — durable across re-fetches)
 
 ### Course & lesson progress (10xDevs 3.0) — as of 2026-06-01
 
-The sentinel block above is the **m1l3 lesson bundle as shipped**, nothing more. Its `Module 1, Lesson 3` heading and its "the chain ends here in v1; a future Lesson 4 will set up agent context" / "Memory Architecture" language describe the bootstrapper lesson in isolation — **not** the live course state. Do not read the sentinel as "this project is stuck at L3." For actual progress, **this section is authoritative**.
+The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the currently-fetched lesson bundle (now **m1l4**), auto-managed by `10x get` and rewritten on every fetch. Never hand-edit inside its BEGIN/END markers — edits die on the next fetch. For durable project truth, **this section is authoritative**.
 
 Live course structure (`10x list`):
 
-| Module | Title                                | Lessons | State                  | This project                |
-| ------ | ------------------------------------ | ------- | ---------------------- | --------------------------- |
-| M0     | Prework                              | 1       | unlocked               | n/a                         |
-| M1     | Agentic Environment                  | 5       | unlocked               | **L1–L3 done**, L4–L5 unfetched |
-| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25)  | not fetched                 |
-| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01)  | not fetched                 |
-| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08    | —                           |
-| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15    | —                           |
+| Module | Title                                | Lessons | State                 | This project                    |
+| ------ | ------------------------------------ | ------- | --------------------- | ------------------------------- |
+| M0     | Prework                              | 1       | unlocked              | n/a                             |
+| M1     | Agentic Environment                  | 5       | unlocked              | **L1–L4 fetched**, L5 unfetched |
+| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25) | not fetched                     |
+| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01) | not fetched                     |
+| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                               |
+| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                               |
 
 - **Done (artifacts on disk):** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `context/changes/bootstrap-verification/verification.md`).
-- **Next chain link:** m1l4 "Agent Onboarding: AGENTS.md, AI Rules, and Feedback Loops" (`/10x-agents-md`, `/10x-rule-review`, `/10x-lesson`). Then m1l5 "From Localhost to Production" (`/10x-infra-research` → `context/foundation/infrastructure.md` → Plan-Mode deploy → `context/deployment/deploy-plan.md`).
-- **`context/foundation/lessons.md` is referenced inside the sentinel** ("Foundation paths used by this lesson") **but does NOT exist yet.** It is the m1l4 `/10x-lesson` artifact — created when m1l4 is fetched and run, not before. Until then the reference is a forward-pointer, not a missing file to hunt for.
-- **`AGENTS.md` and this `CLAUDE.md` were hand-written, not produced by the m1l4 skills.** Once m1l4 is fetched, run `/10x-rule-review` against both to score them (length, code-paste, precision, redundancy, ordering).
+- **m1l4 skills installed (2026-06-01):** `/10x-agents-md`, `/10x-rule-review`, `/10x-lesson` (+ `skill-explainer` prompt). Fetched, not yet run — see the two open items below.
+- **Next chain link:** m1l5 "From Localhost to Production" (`/10x-infra-research` → `context/foundation/infrastructure.md` → Plan-Mode deploy → `context/deployment/deploy-plan.md`).
+- **Open m1l4 item — `context/foundation/lessons.md` still does not exist.** It is the `/10x-lesson` artifact; the skill self-bootstraps the file on first invocation. The sentinel below lists it as a foundation path — a forward-pointer, not a missing file to hunt for.
+- **Open m1l4 item — `AGENTS.md` and this `CLAUDE.md` were hand-written, not produced by the m1l4 skills.** Run `/10x-rule-review` on both (5-axis scorecard; length verdict OK ≤200 non-empty lines, WARN 201–500, FAIL 501+; this file is ~149 non-empty = OK on length, so any findings will be precision/redundancy/ordering, not size).
 
-**Before any `10x get`:** the CLI session expired 2026-05-21 — re-auth with `10x auth` (interactive magic-link) first, or `get` returns 403. CLI is 1.6.1, latest 1.7.0 (`pnpm add -g @przeprogramowani/10x-cli`; not npm).
+**`10x get` notes:** re-fetching any lesson reverts the two in-place bootstrapper patches documented below — re-apply with `git checkout HEAD -- .claude/skills/10x-bootstrapper/` (done after the m1l4 fetch, 2026-06-01). CLI was 1.6.1 at last fetch; latest 1.7.0 (`pnpm add -g @przeprogramowani/10x-cli`; not npm).
 
 **Build progress is a separate axis** from course progress. The app build follows the hand-rolled `context/changes/v1-sprint-plan/` (deadline 2026-06-10) and is currently at **Phase A only**: `@supabase/ssr` + `@supabase/supabase-js` installed and `supabase init` run (`supabase/config.toml`), but no migrations, no `src/lib` Supabase helpers, no auth pages. Phases B–F untouched. See `plan.md` for the phase breakdown and cut order.
 
@@ -110,19 +39,7 @@ This project uses **pnpm**, not npm. The `context/foundation/tech-stack.md` hand
 
 The first bootstrap run on this project surfaced two gaps in the shipped skill. Both were patched in-place under `.claude/skills/10x-bootstrapper/`; the patches survive in this repo but will be **lost on the next `10x get m1l3`** unless re-applied. If you re-fetch the lesson, re-apply these:
 
-1. **`bootstrapper-config.yaml` → `audit_commands.js` is a map, not a string.** The shipped skill hardcoded `js: "npm audit --json"`, which is wrong on pnpm/yarn/bun projects. The patched version routes by resolved package manager:
-
-   ```yaml
-   audit_commands:
-     js:
-       npm: 'npm audit --json'
-       pnpm: 'pnpm audit --json'
-       yarn: 'yarn npm audit --json'
-       bun: 'bun audit --json'
-       _default: 'npm audit --json'
-   ```
-
-   Companion edits live in `references/post-scaffold-verification.md` (per-ecosystem invocation block) and `SKILL.md` (Step 1 lookup paragraph).
+1. **`bootstrapper-config.yaml` → `audit_commands.js` is a map, not a string.** The shipped skill hardcoded `js: "npm audit --json"`, which is wrong on pnpm/yarn/bun projects. The patched version routes by resolved package manager — a `js:` map keyed by `npm` / `pnpm` / `yarn` / `bun` with an `_default`. Read the live value at `@.claude/skills/10x-bootstrapper/references/bootstrapper-config.yaml` (kept there, not pasted here, so this note can't drift from it). Companion edits live in `references/post-scaffold-verification.md` (per-ecosystem invocation block) and `SKILL.md` (Step 1 lookup paragraph).
 
 2. **Temp scaffold dir name has no leading dot.** The shipped skill substituted `{name}=.bootstrap-scaffold` for the `subdir-then-move` and `git-clone` strategies. `create-next-app` rejects names starting with `.` ("name cannot start with a period" — npm naming restriction), so the patched version uses `bootstrap-scaffold` (no leading dot). Search-and-replace across `SKILL.md`, `references/scaffold-merge.md`, `references/handoff-consumer.md`, `references/refusal-protocol.md`, `references/bootstrapper-config.yaml`, `references/verification-log-schema.md`.
 
@@ -138,13 +55,12 @@ Quick pointer:
 
 ### Tooling conventions (mirrored from `wykonczymy`)
 
-- **Node**: pinned to 24 via `mise.toml`. Use `mise install` once after cloning.
-- **Package manager**: pnpm (lockfile is `pnpm-lock.yaml`).
-- **Format**: Prettier 3 with `prettier-plugin-tailwindcss`. Config in `.prettierrc`. Run `pnpm format` (check) or `pnpm format:fix` (write).
-- **Lint**: ESLint 9 flat config (`eslint.config.mjs`). Run `pnpm lint`.
-- **Tests**: Vitest 4. Specs under `src/__tests__/**/*.test.ts`. Run `pnpm test` / `pnpm test:watch`.
+Scripts and tool versions live in `@package.json` — don't restate them here (it drifts). Non-obvious bits only:
+
+- **Node**: pinned to 24 via `mise.toml` — run `mise install` once after cloning.
+- **Test specs**: live under `src/__tests__/**/*.test.ts` (Vitest).
 - **Pre-commit**: husky runs `lint-staged` on changed files (eslint --fix + prettier --write for JS/TS, prettier for JSON/CSS/MD).
-- **Typecheck**: `pnpm typecheck` runs `tsc --noEmit`.
+- **Formatter detail**: Prettier runs `prettier-plugin-tailwindcss` (Tailwind class sorting); config in `.prettierrc`.
 
 ### shadcn
 
@@ -158,22 +74,11 @@ Add components with `pnpm dlx shadcn@latest add <component>`. To swap the color 
 
 User has a Vercel account. **The Vercel CLI is the canonical surface for everything Vercel-touching on this project** — deploys, environment variables, logs, domains, project linking. Heavy use is expected and intentional.
 
-**Hard rule: no manual editing of `.env.local`.** All env vars flow through Vercel:
+**Hard rule: no manual editing of `.env.local`.** All env vars flow through Vercel: `vercel link` → `vercel env add <NAME>` (per var) → `vercel env pull .env.local`. Same three-step ritual for every new service (Supabase, Resend, …). Never `echo "FOO=bar" >> .env.local` — it's silently overwritten on the next pull and won't propagate to preview/prod.
 
-1. `vercel link` — link the local repo to a Vercel project (one-time, creates `.vercel/`).
-2. `vercel env add <NAME>` — interactive prompt: paste value, pick environments (production / preview / development). Repeat per var.
-3. `vercel env pull .env.local` — sync down to a gitignored `.env.local`. Re-run any time a var changes upstream.
+**Deploys:** `vercel` = preview (also auto-fires on `git push` once GitHub integration is live); `vercel --prod` = production; `vercel logs <url>` / `vercel ls` for runtime logs + deploy list.
 
-Adding a new third-party service (Supabase, Resend, etc.) always follows that three-step ritual. Never `echo "FOO=bar" >> .env.local` — it'll be silently overwritten on the next pull and won't propagate to preview / prod deploys.
-
-**Deploys:**
-
-- `vercel` — preview deploy from the current branch (also fires automatically on `git push` once GitHub integration is set up).
-- `vercel --prod` — production deploy.
-- `vercel logs <url>` — runtime logs for a specific deploy.
-- `vercel ls` — list recent deploys for the linked project.
-
-**Project config:** prefer `vercel.ts` (typed) over `vercel.json` when config is needed. See `vercel-plugin:vercel-cli` skill for current syntax — the API has shifted; don't rely on training data.
+**Project config:** prefer `vercel.ts` (typed) over `vercel.json`. Full/current CLI syntax: `vercel-plugin:vercel-cli` skill — the API has shifted, don't trust training data.
 
 **GitHub integration is part of the deploy story** — Vercel's GitHub integration is the v1 CI gate (per `tech-stack.md`; no `.github/workflows/*` ships in v1). The chain is: push to a GitHub repo → Vercel receives the webhook → Vercel builds + deploys (preview per branch / push, production on `main`). This means **the GitHub repo is a prerequisite, not a "later" concern**. First-time setup ritual on this repo:
 
@@ -193,3 +98,104 @@ Adding a new third-party service (Supabase, Resend, etc.) always follows that th
 **Status of this repo (as of last update):** GitHub remote is `https://github.com/ex-Plant/coding-learning-companion` (public). Vercel-linked to the `wykonczymys-projects` team scope as described above; `.vercel/project.json` is committable but git-ignored by Vercel CLI convention. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
 
 **Open follow-up:** user to clean up their Vercel accounts (consolidate or separate), then decide whether to keep the current linkage, move to personal scope on this account, or re-link to a different account entirely. Pending that decision, the current linkage is a known-imperfect baseline, not a final state.
+
+<!-- BEGIN @przeprogramowani/10x-cli -->
+
+## 10xDevs AI Toolkit — Module 1, Lesson 4
+
+Onboard the agent to the project you scaffolded in Lesson 3 with the **agent-context chain**:
+
+```
+(/10x-init  →  /10x-shape  →  /10x-prd  →  /10x-tech-stack-selector  →  /10x-bootstrapper)  →  /10x-agents-md  →  /10x-rule-review  →  /10x-lesson
+```
+
+The PRD → tech-stack → bootstrap chain ships from Lessons 1–3 (re-included so you can fix the project mid-flight). `/10x-agents-md`, `/10x-rule-review`, and `/10x-lesson` are the lesson's main topics. The chain extends in Lesson 5 to the infra/deploy step.
+
+### Task Router — Where to start
+
+| Skill                                                                                                                                  | Use it when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Agent context (lesson focus)**                                                                                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/10x-agents-md`                                                                                                                       | The repo is scaffolded but the agent has no project-specific onboarding. Inspects the repo (package manifest, README, scripts, lint/test config, layout, commit history) and writes a concise, ordered "Repository Guidelines" to `AGENTS.md` (or, when invoked from a subdirectory, a directory-level `AGENTS.md` reframed around local conventions and the dominant unit). Use as an alternative to the host's built-in `/init` or as a fallback for tools without one. Repo-level body targets ~200 lines; directory-level guides target 120–250 words. |
+| `/10x-rule-review <path>`                                                                                                              | You have a rules-for-AI file (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*.mdc`, `.github/copilot-instructions.md`, `.windsurfrules`, nested per-area files) and want a 5-axis scorecard: length, embedded code/config snippets, precision of language, redundancy with public knowledge, and rule ordering. Tool-agnostic — scores the artifact's condition, not the project. Default output is read-only; only Check 5 (reorder) may edit, and only with explicit approval.                                                                                |
+| `/10x-lesson [seed]`                                                                                                                   | You spotted a recurring rule worth surfacing for future runs of `/10x-frame`, `/10x-research`, `/10x-plan`, `/10x-plan-review`, `/10x-implement`, and `/10x-impl-review`. Appends a single entry (Context / Problem / Rule / Applies to) to `context/foundation/lessons.md`. Self-bootstraps the file with the canonical `# Lessons Learned` header on first use. Append-only — never reorders or rewrites prior entries.                                                                                                                                  |
+| **Re-run upstream if needed**                                                                                                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` / `/10x-bootstrapper` / `/10x-stack-assess` / `/10x-health-check` | Bundled so you can fix the PRD, swap the stack, or re-scaffold mid-flight. If `/10x-rule-review` flags a `FAIL` you can't shrink your way out of, that often points back to ambiguous PRD or stack decisions — re-run the upstream skill rather than padding `AGENTS.md` with corrections.                                                                                                                                                                                                                                                                 |
+
+### How the chain hands off
+
+- `/10x-agents-md` writes (or surgically updates) `AGENTS.md` at the resolved scope. Repo-level scope = the file lives at the repo root and frames the project as a whole; directory-level scope = the file lives next to the code it governs and reframes around the local unit, dropping repo-wide framing entirely. The skill never silently overwrites — it switches to an update flow when the target exists.
+- `/10x-rule-review` reads any rules-for-AI markdown file you point it at and prints a 5-check scorecard (`OK` / `WARN` / `FAIL`) with concrete fixes. It does not depend on `/10x-agents-md` having run; you can review `.cursor/rules/`, copilot instructions, or a hand-written `CLAUDE.md` the same way.
+- `/10x-lesson` self-bootstraps `context/foundation/lessons.md` on first use, then appends one Context/Problem/Rule/Applies-to entry per invocation. The file is consumed as a prior by the planning- and review-phase skills introduced later in the workflow — `/10x-frame`, `/10x-research`, `/10x-plan`, `/10x-plan-review`, `/10x-implement`, `/10x-impl-review`.
+
+### What the lesson's skills capture (and what they do NOT)
+
+- **`/10x-agents-md` captures**: project structure, build/test/lint commands actually present in scripts, commit conventions inferred from history, repo-specific tripwires the agent would otherwise miss, references to canonical files via `@`-paths instead of pasting their content. Directory-level scope additionally captures: local naming/layout patterns inferred from siblings, allowed/forbidden imports, the test pattern used by neighbours, and tripwires visible in the immediate area.
+- **`/10x-agents-md` does NOT** paste in the contents of `tsconfig.json` / `eslint.config` / framework docs the agent already knows; it does NOT generate generic "write clean code" intentions; it does NOT replace the host's built-in `/init` when one exists — it's positioned as an alternative or fallback, not a default.
+- **`/10x-rule-review` captures**: a length verdict (OK ≤ 200 non-empty lines, WARN 201–500, FAIL 501+), code/config blocks that should be `@`-references instead, vague-intention language, redundancy with framework docs the agent already has from training, and a Check 5 reorder proposal that surfaces critical rules to the top.
+- **`/10x-rule-review` does NOT** edit the file by default; it does NOT score project content (architecture, stack choices) — it scores the rule artifact's condition; it does NOT generate a "fixed version" of the file (Check 5 may move sections with explicit approval, never rewrite rule wording).
+- **`/10x-lesson` captures**: one entry per invocation with a short imperative H2 title (the title IS the rule), Context (subsystem / phase / file pattern, specific enough to pattern-match), Problem (what concretely breaks without the rule, ideally with a past incident), Rule (1–2 imperative sentences pasteable verbatim into a future review finding), Applies to (subset of `frame`, `research`, `plan`, `plan-review`, `implement`, `impl-review`, or `all`).
+- **`/10x-lesson` does NOT** edit or remove existing lessons — the file is append-only by design (rewriting recurring rules without thought is the failure mode this convention prevents); it does NOT batch multiple rules per invocation; it does NOT pre-fill fields proactively (the user does the writing — that's the price of capturing rules outside a structured review).
+
+### The inclusion test (the filter for AGENTS.md / CLAUDE.md)
+
+Before you add a rule to any rules-for-AI file, ask: _could the agent know this without this file? Could public training data — books, blogs, repos in this stack — have prepared it for this?_ If yes, drop it. If no, keep it. The file is onboarding for an agent that already knows TypeScript / Python / your framework but does NOT know your local conventions.
+
+Belongs:
+
+- non-obvious project conventions (error-response shape, file naming, allowed import paths)
+- project-specific traps and "embarrassing" workarounds tied to history or dependency bugs
+- referenced canonical files via `@`-paths (e.g. `@src/features/users/user.service.ts` as a pattern reference, not pasted code)
+
+Does NOT belong:
+
+- mainstream framework documentation
+- README content the agent will read anyway (link with `@README.md`)
+- popular generic advice ("use TypeScript strict mode") that's already enforced by config
+- intention statements ("write clean code", "follow good practices") — convert to a checkable behaviour or drop
+
+### U-shaped attention and granular rules
+
+LLMs attend most strongly to the start and end of context (Lost-in-the-Middle / U-shaped attention). A long monolithic `CLAUDE.md` puts its middle rules in the weakest attention zone. Two practical consequences:
+
+1. **Most important rules go to the top** of any rule file.
+2. **Per-area rules belong next to their code** — nested `AGENTS.md` / `CLAUDE.md` inside `src/api/`, `.cursor/rules/*.mdc` with file globs, etc. Granular files are loaded selectively and arrive whole near the start of their own section, instead of being buried at line 400 of one big file.
+
+`/10x-rule-review` Check 5 (reorder) operationalizes consequence (1); the inclusion test plus directory-level `/10x-agents-md` operationalizes consequence (2).
+
+### The five-pattern calibration drill
+
+Before writing a rule, validate that the agent actually breaks the convention without it. Pick one pattern from your project (error-response shape, file naming, import style, module structure, date handling). Then:
+
+1. Ask the agent to implement against the pattern 3–5 times from a clean state, no rule.
+2. Note where it broke the convention; capture run time, files explored, and visible cost/tokens if the host surfaces them.
+3. Add a 1–3-sentence rule to the appropriate scope (root or area-level).
+4. Re-run the same task in a fresh session and compare convention adherence, time, files, and iterations.
+
+If the agent already trends toward the convention without the rule, you don't need the rule. If it systematically picks the wrong pattern, you've found a high-leverage rule to add. This drill is what "earning a rule from a recurring failure" actually looks like.
+
+### Hierarchy and tool interop
+
+- **Claude Code** loads `CLAUDE.md` from the user dir (`~/.claude/CLAUDE.md`), the repo root, and any subdirectory the agent works under. Deeper files override or supplement higher ones.
+- **Codex** and **GitHub Copilot** load `AGENTS.md` from the current directory upward — closest file wins.
+- One canonical file is preferable to three duplicates. A common pattern: `AGENTS.md` as source of truth, `CLAUDE.md` as a thin Claude-Code shim with `@AGENTS.md` import, `.github/copilot-instructions.md` only if Copilot needs its own additions. Symlink (`ln -s AGENTS.md CLAUDE.md`) is the simplest deduplication when tools require both names.
+- Auto-memory (e.g. Claude Code's `~/.claude/projects/<dir-with-slashes-as-dashes>/memory/MEMORY.md`) is local to the machine and not a substitute for `AGENTS.md`. Team-binding rules live in the repo; auto-memory is a personal cache, periodically reviewable.
+
+### Inner-loop hooks (deterministic feedback without prompting)
+
+Mechanical, non-pickable checks belong in hooks (e.g. Claude Code's `PostToolUse`), not in the rule file. The agent finishes an edit; a formatter or fast lint runs; the result feeds back without you reminding it. Settings template (`settings.json.template`) ships in the lesson pack as the wiring entry point. Keep procedural workflows (deeper review, release checklist, deploy on sandbox) in skills, and reserve hooks for deterministic tool signals.
+
+### Foundation paths used by this lesson
+
+- `AGENTS.md` / `CLAUDE.md` (and per-area variants) — `/10x-agents-md` output
+- `context/foundation/lessons.md` — `/10x-lesson` output (append-only register, consumed by future planning/review skills)
+- `context/foundation/prd.md`, `context/foundation/tech-stack.md` — inputs from earlier lessons, still present
+- `docs/reference/contract-surfaces.md` — load-bearing names registry (scaffolded by `/10x-init`)
+
+### Universal language
+
+The shipped skills carry no 10xDevs / cohort / certification references. `/10x-agents-md` discovers from the repo it's invoked in; `/10x-rule-review` is tool-agnostic and treats every file as "a rules-for-AI artifact"; `/10x-lesson` writes one entry shape regardless of project domain. The 5-pattern calibration drill is illustrative — substitute patterns from your own stack.
+
+Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
+
+<!-- END @przeprogramowani/10x-cli -->
