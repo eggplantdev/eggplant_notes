@@ -16,7 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Next.js 16 ≠ your training data** (see the sentinel above) — verify against `node_modules/next/dist/docs/` before writing routing/rendering code.
 - **App Router only.** Server Components by default; add `'use client'` only when needed; fetch data in Server Components; `loading.tsx`/`error.tsx` for streaming/boundaries; route groups `(group)` for organization.
 - **Never hand-edit auto-managed sentinel blocks.** `<!-- BEGIN:nextjs-agent-rules -->` here (Next.js) and `<!-- BEGIN @przeprogramowani/10x-cli -->` in `CLAUDE.md` (10x-cli) are rewritten by their tools — edits there are lost on the next run.
-- **Env vars** currently live in a git-ignored `.env.local` (edit directly). Migration to Vercel `vercel env` is deferred to deploy time; once live, env flows through `vercel env add`/`pull`, never manual edits.
+- **Env vars** currently live in a git-ignored `.env.local` (edit directly). The app is deployed but has **no services wired yet**; once you add one (Supabase, Resend, …), its vars flow through `vercel env add` → `vercel env pull .env.local`, never manual edits.
 - **Never write to `context/archive/`** — archived changes are immutable.
 
 ## Project structure
@@ -59,12 +59,13 @@ Vitest 4. Specs under `src/__tests__/**/*.test.ts`. All: `pnpm test`; single fil
 - shadcn was init'd `--preset nova` (`radix-nova`, `neutral`). `globals.css` was patched to drop a `--font-sans` circular reference (literal `"Geist"` names, required for Tailwind v4 `@theme inline`). Swap palettes by editing the `@theme inline` / `:root` / `.dark` OKLCH blocks in `src/app/globals.css`; token names stay. Visual tuning: tweakcn.com.
 - `wykonczymy` (`/Users/konradantonik/workspace/yolo/wykonczymy`) is a reference repo for tooling/component patterns only (mise, husky, lint-staged, prettier, vitest, ESLint, Zustand/TanStack). **Ignore its Payload CMS layer** — this project uses Supabase. Full guidance: `@context/foundation/reference-repos.md`.
 
-## Vercel (deferred to deploy time — sprint Phase F)
+## Vercel (LIVE — scaffold deployed 2026-06-01)
 
-Vercel is the canonical surface for deploys, env, logs, domains, linking; not needed for local dev right now.
+Vercel is the canonical surface for deploys, env, logs, domains, linking. The empty scaffold is already in production; env/services come online as build phases land.
 
 - **Env ritual (once active):** `vercel link` → `vercel env add <NAME>` (per var, pick prod/preview/dev) → `vercel env pull .env.local`. Same for every new service (Supabase, Resend, …). Never `echo >> .env.local` — overwritten on next pull, won't reach preview/prod.
 - **Deploys:** `vercel` = preview (also auto-fires on `git push` once GitHub integration is live); `vercel --prod` = production; `vercel logs <url>` / `vercel ls`.
 - **First-time setup ritual:** `gh repo create <name> --source=. --private --push` (gh authed as `ex-Plant`) → `vercel link` → `vercel env add` per var → `vercel env pull` → first push triggers preview, merge to `main` triggers prod.
-- **Account state (provisional):** CLI user `admin-63074310`. Project is linked to the `wykonczymys-projects` team (orgId `team_BWfyTqJnjIqZBkHwBL0elgS4`, projectId `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9`) — an accident at the `vercel link` scope prompt; billing/access shared with the unrelated `wykonczymy`. **Open follow-up:** clean up Vercel accounts, then decide whether to keep, move to personal scope, or re-link. Confirm anytime: `vercel whoami` (expect `admin-63074310`) + `cat .vercel/project.json` (`team_*` orgId = team scope).
+- **Account state (current, 2026-06-01):** CLI user `eggplantdev` (`admin@eggplantdev.com`, hobby plan). Project lives under the **personal** account scope `eggplants-projects-07c20257` (orgId `team_eTY61jJROGLC3P8x6Tvi1doZ`, projectId `prj_jYwukp9E4Qy8uzDbyPfQliNdTvCt`), git-connected to `github.com/ex-Plant/coding-learning-companion`. Live prod alias: `https://coding-learning-companion-theta.vercel.app`. The link is repo-level (`.vercel/repo.json`, not `project.json`). Confirm anytime: `vercel whoami` (expect `eggplantdev`) + `cat .vercel/repo.json` (orgId `team_eTY6…` = personal scope). **Note:** `vercel whoami` returns `Not authorized` if `.vercel/` is stale-linked to a team you can't access — `rm -rf .vercel && vercel link --yes --project coding-learning-companion` (no `--scope`; personal accounts reject `--scope`) fixes both link and whoami.
+- **Open follow-ups:** (1) the old accidental project `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9` still exists under the unrelated `wykonczymys-projects` team (orgId `team_BWfyTqJnjIqZBkHwBL0elgS4`) — delete it when convenient. (2) **Region:** prod functions run in `iad1` (US East); switch to `fra1` (EU) to co-locate with Supabase before/at Phase A.
 - **Config:** prefer typed `vercel.ts` over `vercel.json`. CLI syntax has shifted — use the `vercel-plugin:vercel-cli` skill, not training data.

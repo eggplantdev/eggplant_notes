@@ -14,7 +14,7 @@
 
 ## Two independent axes
 
-1. **Course (10xDevs)** — M1 lessons l1–l4 **done**; **l5 (deploy) in progress**. m2l2 skills fetched but not applied.
+1. **Course (10xDevs)** — M1 lessons **l1–l5 done** (scaffold deployed to Vercel 2026-06-01). m2l2 skills fetched but not applied.
 2. **App build** — still at **Phase A** (foundation): Supabase deps + `supabase init` done; **no migrations, no `src/lib` helpers, no auth pages, no features**. `src/` is bare scaffold.
 
 ## What the last session did (committed: `8431b04`→`46dd7a3`)
@@ -37,17 +37,13 @@
 - `lessons/` — stray top-level dir (the real lessons file is `context/foundation/lessons.md`). Verify before touching.
 - `.claude/statusline-command.sh`, `supabase/` — pre-existing, user's.
 
-## Immediate next step (chosen path: m1l5 deploy-first)
+## Immediate next step (m1l5 deploy — DONE)
 
-Per `infrastructure.md` + the m1l5 lesson, do the **first deploy of the _empty scaffold_** to Vercel via **Plan Mode** (read-only plan → approve → execute), persisting the approved plan to **`context/deployment/deploy-plan.md`**. The empty scaffold deploy needs **no Supabase** yet (Supabase is Phase A, after deploy).
+The scaffold is **live in production**: `https://coding-learning-companion-theta.vercel.app`, under the personal Vercel scope `eggplants-projects-07c20257`, git-connected, function region `fra1`. Full record: **`context/deployment/deploy-plan.md`**. The wrong-scope link (`wykonczymys-projects` team) was removed and re-linked to the personal account on 2026-06-01.
 
-**Hard prerequisite (H-likelihood risk in the register):** the project is linked to the **wrong Vercel scope** (`wykonczymys-projects` team). The user must re-link before deploying — interactive:
+**Next: start the Phase-A build** via the m2l2 change-planning chain (`/10x-roadmap` → `/10x-new` → `/10x-plan` → `/10x-plan-review` → `/10x-implement`) against `@context/changes/v1-sprint-plan/plan.md`. Phase A = Supabase migrations + `src/lib` helpers + auth. Add service env vars via `vercel env add` → `vercel env pull` (never hand-edit `.env.local`).
 
-```
-rm -rf .vercel && vercel link   # choose personal scope admin-63074310, NOT the team
-```
-
-Then pin functions to EU (`fra1`) to match Supabase, enable Spend Management, then `vercel` (preview) → `vercel --prod`.
+Leftover cleanup: delete the orphaned `wykonczymys-projects` Vercel project `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9` when convenient.
 
 ## Standing rules / gotchas
 

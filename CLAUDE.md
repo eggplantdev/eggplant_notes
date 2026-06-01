@@ -10,17 +10,17 @@ The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the c
 
 Live course structure (`10x list`):
 
-| Module | Title                                | Lessons | State                 | This project                  |
-| ------ | ------------------------------------ | ------- | --------------------- | ----------------------------- |
-| M0     | Prework                              | 1       | unlocked              | n/a                           |
-| M1     | Agentic Environment                  | 5       | unlocked              | **L1–L4 done; L5 deploy WIP** |
-| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25) | skills fetched (m2l2)         |
-| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01) | not fetched                   |
-| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                             |
-| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                             |
+| Module | Title                                | Lessons | State                 | This project                   |
+| ------ | ------------------------------------ | ------- | --------------------- | ------------------------------ |
+| M0     | Prework                              | 1       | unlocked              | n/a                            |
+| M1     | Agentic Environment                  | 5       | unlocked              | **L1–L5 done (scaffold live)** |
+| M2     | 10xDevs Workflow                     | 5       | unlocked (2026-05-25) | skills fetched (m2l2)          |
+| M3     | AI Development Quality & Maintenance | 5       | unlocked (2026-06-01) | not fetched                    |
+| M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                              |
+| M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                              |
 
 - **Done:** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `verification.md`), **m1l4 complete** (`/10x-agents-md` → canonical `AGENTS.md`; `/10x-rule-review` on both rule files + trims; `/10x-lesson` → `context/foundation/lessons.md` created).
-- **m1l5 in progress:** `/10x-infra-research` done → `context/foundation/infrastructure.md` (**Vercel**; runner-up Cloudflare). Next: Plan-Mode deploy → `context/deployment/deploy-plan.md` → first deploy of the empty scaffold (no Supabase needed yet). **m2l2 skills fetched** (`/10x-roadmap`, `/10x-new`, `/10x-plan`, `/10x-implement`, `/10x-archive`) but not yet applied — those drive the Phase-A build after deploy.
+- **m1l5 complete (2026-06-01):** `/10x-infra-research` → `context/foundation/infrastructure.md` (**Vercel** chosen). Scaffold **deployed to production** under personal scope `eggplants-projects-07c20257` (git-connected; live at `https://coding-learning-companion-theta.vercel.app`); deploy record in `context/deployment/deploy-plan.md`. Region set to `fra1` (EU, Supabase co-location). **m2l2 skills fetched** (`/10x-roadmap`, `/10x-new`, `/10x-plan`, `/10x-implement`, `/10x-archive`) but not yet applied — those drive the Phase-A build next.
 - **Build axis (separate from lessons):** app build follows `@context/changes/v1-sprint-plan/plan.md` (deadline 2026-06-10), currently **Phase A** — Supabase deps + `supabase init` done; no migrations / `src/lib` helpers / auth pages yet.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
