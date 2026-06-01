@@ -38,7 +38,7 @@ Symptom that flagged the bad link: `vercel whoami` returned `Not authorized` eve
 ## Follow-ups
 
 - [x] Region → `fra1` (done 2026-06-01, ahead of Supabase to avoid cross-region latency).
-- [ ] Delete the orphaned `wykonczymys-projects` project `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9` when convenient (shared team, low priority).
+- [x] Orphaned `wykonczymys-projects` project `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9` unlinked/removed (2026-06-01) — repo is now solely under the personal scope.
 - [x] **Supabase env:** auto-provisioned by the Marketplace integration to **production + preview** (not development). Prod redeployed to pick it up. Future services: add via `vercel env add`, never hand-edit.
 - [ ] **Local dev env:** use a local Supabase stack (`supabase start`) with local keys in `.env.local` — _not_ hosted prod/preview creds. `vercel env pull` (development) intentionally won't fetch the hosted Supabase vars. Wire this when Phase-A code first connects to Supabase.
 - [ ] Consider typed `vercel.ts` config (over `vercel.json`) once build settings need to be version-controlled.
