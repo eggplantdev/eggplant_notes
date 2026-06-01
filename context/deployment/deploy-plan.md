@@ -20,6 +20,9 @@
 | Framework / Node | nextjs / 24.x                                                                            |
 | Function region  | `fra1` (EU — co-located with future Supabase EU region)                                  |
 | CI gate          | Vercel GitHub integration — push to `main` → prod; PR/branch → preview                   |
+| Services         | **Supabase** via Vercel Marketplace integration (env auto-provisioned, prod+preview)     |
+
+Production was re-promoted 2026-06-01 (`vercel --prod`, deploy `dpl_2BesJNx9uDyS8a2yEGJeYsfbtL2p`) so the live `theta` alias runs in `fra1` and carries the Supabase env. A preview deploy (`dpl_8aBapj9…`) preceded it; preview URLs return HTTP 401 by default (Vercel Deployment Protection, not a failure).
 
 ## What happened (scope cleanup)
 
@@ -36,5 +39,6 @@ Symptom that flagged the bad link: `vercel whoami` returned `Not authorized` eve
 
 - [x] Region → `fra1` (done 2026-06-01, ahead of Supabase to avoid cross-region latency).
 - [ ] Delete the orphaned `wykonczymys-projects` project `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9` when convenient (shared team, low priority).
-- [ ] **Env migration (Phase A+):** as services come online (Supabase, Resend, …), add vars via `vercel env add` → `vercel env pull .env.local`. Never hand-edit `.env.local` — overwritten on next pull.
+- [x] **Supabase env:** auto-provisioned by the Marketplace integration to **production + preview** (not development). Prod redeployed to pick it up. Future services: add via `vercel env add`, never hand-edit.
+- [ ] **Local dev env:** use a local Supabase stack (`supabase start`) with local keys in `.env.local` — _not_ hosted prod/preview creds. `vercel env pull` (development) intentionally won't fetch the hosted Supabase vars. Wire this when Phase-A code first connects to Supabase.
 - [ ] Consider typed `vercel.ts` config (over `vercel.json`) once build settings need to be version-controlled.

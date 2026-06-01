@@ -16,7 +16,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Next.js 16 ≠ your training data** (see the sentinel above) — verify against `node_modules/next/dist/docs/` before writing routing/rendering code.
 - **App Router only.** Server Components by default; add `'use client'` only when needed; fetch data in Server Components; `loading.tsx`/`error.tsx` for streaming/boundaries; route groups `(group)` for organization.
 - **Never hand-edit auto-managed sentinel blocks.** `<!-- BEGIN:nextjs-agent-rules -->` here (Next.js) and `<!-- BEGIN @przeprogramowani/10x-cli -->` in `CLAUDE.md` (10x-cli) are rewritten by their tools — edits there are lost on the next run.
-- **Env vars** currently live in a git-ignored `.env.local` (edit directly). The app is deployed but has **no services wired yet**; once you add one (Supabase, Resend, …), its vars flow through `vercel env add` → `vercel env pull .env.local`, never manual edits.
+- **Env vars on Vercel:** the **Supabase Marketplace integration** is installed and auto-provisioned its keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_*`, …) — scoped to **production + preview only, not development**. Add future services the same way (`vercel env add`), never hand-edit. **Local dev uses a local Supabase stack** (`supabase start`) with its own local keys in `.env.local`, _not_ the hosted prod/preview creds — keeps production secrets off your machine and matches the devcontainer wiring (`host.docker.internal`). So `vercel env pull` (development target) intentionally won't fetch the hosted Supabase vars.
 - **Never write to `context/archive/`** — archived changes are immutable.
 
 ## Project structure
