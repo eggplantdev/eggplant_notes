@@ -1,8 +1,12 @@
-## Project-specific notes (outside the 10x-cli sentinel — durable across re-fetches)
+# CLAUDE.md — Claude Code entry point
 
-### Course & lesson progress (10xDevs 3.0) — as of 2026-06-01
+**Read @AGENTS.md first — it is the canonical, cross-tool onboarding** (the bare `@AGENTS.md` above is a Claude Code import, so its content is inlined here): hard rules (pnpm-not-npm, Next.js-16-is-different, App Router), structure, commands, style/conventions, testing, commits/CI, pnpm specifics, tooling tripwires, and Vercel state. This file adds only the 10x-workflow-local tracking below, plus the auto-managed 10x-cli lesson block.
 
-The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the currently-fetched lesson bundle (now **m1l4**), auto-managed by `10x get` and rewritten on every fetch. Never hand-edit inside its BEGIN/END markers — edits die on the next fetch. For durable project truth, **this section is authoritative**.
+> Also active for Claude Code: the user's global rules in `~/.claude/rules/*` (Next.js, React, TypeScript, code-style, styling). Those are invisible to non-Claude agents, so `@AGENTS.md` restates the project-relevant subset for cross-tool parity.
+
+## Course & lesson progress (10xDevs 3.0) — as of 2026-06-01
+
+The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the currently-fetched lesson bundle (now **m1l4**), auto-managed by `10x get` and rewritten on every fetch. Never hand-edit inside its BEGIN/END markers.
 
 Live course structure (`10x list`):
 
@@ -15,89 +19,10 @@ Live course structure (`10x list`):
 | M4     | Large Scale & Legacy Projects        | 5       | locked → 2026-06-08   | —                               |
 | M5     | AI-Native Teamwork                   | 5       | locked → 2026-06-15   | —                               |
 
-- **Done (artifacts on disk):** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `context/changes/bootstrap-verification/verification.md`).
-- **m1l4 skills installed (2026-06-01):** `/10x-agents-md`, `/10x-rule-review`, `/10x-lesson` (+ `skill-explainer` prompt). Fetched, not yet run — see the two open items below.
+- **Done:** m1l1 (`shape-notes.md` + `prd.md`), m1l2 (`tech-stack.md`), m1l3 (scaffold + `verification.md`), m1l4 (`/10x-agents-md` → canonical `AGENTS.md`; `/10x-rule-review` run on both rule files; trims applied).
 - **Next chain link:** m1l5 "From Localhost to Production" (`/10x-infra-research` → `context/foundation/infrastructure.md` → Plan-Mode deploy → `context/deployment/deploy-plan.md`).
-- **Open m1l4 item — `context/foundation/lessons.md` still does not exist.** It is the `/10x-lesson` artifact; the skill self-bootstraps the file on first invocation. The sentinel below lists it as a foundation path — a forward-pointer, not a missing file to hunt for.
-- **Open m1l4 item — `AGENTS.md` and this `CLAUDE.md` were hand-written, not produced by the m1l4 skills.** Run `/10x-rule-review` on both (5-axis scorecard; length verdict OK ≤200 non-empty lines, WARN 201–500, FAIL 501+; this file is ~149 non-empty = OK on length, so any findings will be precision/redundancy/ordering, not size).
-
-**`10x get` notes:** re-fetching any lesson reverts the two in-place bootstrapper patches documented below — re-apply with `git checkout HEAD -- .claude/skills/10x-bootstrapper/` (done after the m1l4 fetch, 2026-06-01). CLI was 1.6.1 at last fetch; latest 1.7.0 (`pnpm add -g @przeprogramowani/10x-cli`; not npm).
-
-**Build progress is a separate axis** from course progress. The app build follows the hand-rolled `context/changes/v1-sprint-plan/` (deadline 2026-06-10) and is currently at **Phase A only**: `@supabase/ssr` + `@supabase/supabase-js` installed and `supabase init` run (`supabase/config.toml`), but no migrations, no `src/lib` Supabase helpers, no auth pages. Phases B–F untouched. See `plan.md` for the phase breakdown and cut order.
-
-### Package manager: pnpm
-
-This project uses **pnpm**, not npm. The `context/foundation/tech-stack.md` hand-off carried `package_manager: npm` but it was overridden to `pnpm` at bootstrap time and the lockfile is `pnpm-lock.yaml`. When in doubt:
-
-- Run scripts with `pnpm <script>` (`pnpm dev`, `pnpm build`, `pnpm lint`).
-- Add deps with `pnpm add <pkg>` / `pnpm add -D <pkg>`.
-- Audit with `pnpm audit --json` — **not** `npm audit`, which fails with `ENOLOCK` because there is no `package-lock.json`.
-- If you ever need to override a transitive dep, use `pnpm.overrides` in `package.json`, not `npm overrides`.
-- **`pnpm.supportedArchitectures` is set** (`os: [darwin, linux]`, `cpu: [arm64, x64]`). Without it, pnpm pulled the wrong-arch Supabase CLI binary (`@supabase/cli-darwin-x64` on an arm64 Mac), causing `No matching Supabase CLI binary binary found for darwin-arm64` at runtime. The config forces pnpm to fetch both arch binaries so the native one resolves locally and CI/x64 stays covered. Keep it when adding other CLIs that ship platform-specific binaries.
-
-### Bootstrap fixes applied to the `/10x-bootstrapper` skill
-
-The first bootstrap run on this project surfaced two gaps in the shipped skill. Both were patched in-place under `.claude/skills/10x-bootstrapper/`; the patches survive in this repo but will be **lost on the next `10x get m1l3`** unless re-applied. If you re-fetch the lesson, re-apply these:
-
-1. **`bootstrapper-config.yaml` → `audit_commands.js` is a map, not a string.** The shipped skill hardcoded `js: "npm audit --json"`, which is wrong on pnpm/yarn/bun projects. The patched version routes by resolved package manager — a `js:` map keyed by `npm` / `pnpm` / `yarn` / `bun` with an `_default`. Read the live value at `@.claude/skills/10x-bootstrapper/references/bootstrapper-config.yaml` (kept there, not pasted here, so this note can't drift from it). Companion edits live in `references/post-scaffold-verification.md` (per-ecosystem invocation block) and `SKILL.md` (Step 1 lookup paragraph).
-
-2. **Temp scaffold dir name has no leading dot.** The shipped skill substituted `{name}=.bootstrap-scaffold` for the `subdir-then-move` and `git-clone` strategies. `create-next-app` rejects names starting with `.` ("name cannot start with a period" — npm naming restriction), so the patched version uses `bootstrap-scaffold` (no leading dot). Search-and-replace across `SKILL.md`, `references/scaffold-merge.md`, `references/handoff-consumer.md`, `references/refusal-protocol.md`, `references/bootstrapper-config.yaml`, `references/verification-log-schema.md`.
-
-The audit trail of the first run lives in `context/changes/bootstrap-verification/verification.md` — the **Skill gaps observed during this run** subsection documents both fixes verbatim.
-
-### Reference repositories
-
-The user has other projects this one may draw patterns from. **Inspiration, not canon** — weigh against this project's own PRD/tech-stack each time. See `context/foundation/reference-repos.md` for the full breakdown of what to inherit vs ignore.
-
-Quick pointer:
-
-- **`wykonczymy`** at `/Users/konradantonik/workspace/yolo/wykonczymy` — production Next.js 16 + React 19 app. Permission scope already granted in `.claude/settings.local.json`. Use for tooling conventions (mise, husky, lint-staged, prettier, vitest, ESLint), component composition patterns, Zustand/TanStack patterns. **Ignore** its Payload CMS layer — this project uses Supabase per `context/foundation/tech-stack.md`.
-
-### Tooling conventions (mirrored from `wykonczymy`)
-
-Scripts and tool versions live in `@package.json` — don't restate them here (it drifts). Non-obvious bits only:
-
-- **Node**: pinned to 24 via `mise.toml` — run `mise install` once after cloning.
-- **Test specs**: live under `src/__tests__/**/*.test.ts` (Vitest).
-- **Pre-commit**: husky runs `lint-staged` on changed files (eslint --fix + prettier --write for JS/TS, prettier for JSON/CSS/MD).
-- **Formatter detail**: Prettier runs `prettier-plugin-tailwindcss` (Tailwind class sorting); config in `.prettierrc`.
-
-### shadcn
-
-Initialized with `--preset nova` (CLI default, `radix-nova` style, `neutral` base). Config in `components.json`. After init, `globals.css` was patched to fix the `--font-sans: var(--font-sans)` circular reference (literal `"Geist"` font family names instead — required for Tailwind v4 `@theme inline`, see `vercel-plugin:shadcn` skill).
-
-Add components with `pnpm dlx shadcn@latest add <component>`. To swap the color palette later, replace the `@theme inline` and `:root` / `.dark` blocks in `src/app/globals.css` — token names stay (`--primary`, `--background`, etc.), only OKLCH values change. Use [tweakcn.com](https://tweakcn.com) for visual tuning.
-
-### Deployment + env management (Vercel CLI)
-
-> **DEFERRED (2026-05-26).** Vercel is not needed for local development and has been pushed to deploy time (sprint-plan Phase F). The provisional team-scope linkage and the Vercel-account cleanup are both parked until then. The rest of this section describes the intended workflow for when Vercel comes back into the picture — it is the plan, not the current state. **For local dev right now, env vars live directly in a git-ignored `.env.local`; the "no manual env editing" rule below only applies once env management migrates to `vercel env`.**
-
-User has a Vercel account. **The Vercel CLI is the canonical surface for everything Vercel-touching on this project** — deploys, environment variables, logs, domains, project linking. Heavy use is expected and intentional.
-
-**Hard rule: no manual editing of `.env.local`.** All env vars flow through Vercel: `vercel link` → `vercel env add <NAME>` (per var) → `vercel env pull .env.local`. Same three-step ritual for every new service (Supabase, Resend, …). Never `echo "FOO=bar" >> .env.local` — it's silently overwritten on the next pull and won't propagate to preview/prod.
-
-**Deploys:** `vercel` = preview (also auto-fires on `git push` once GitHub integration is live); `vercel --prod` = production; `vercel logs <url>` / `vercel ls` for runtime logs + deploy list.
-
-**Project config:** prefer `vercel.ts` (typed) over `vercel.json`. Full/current CLI syntax: `vercel-plugin:vercel-cli` skill — the API has shifted, don't trust training data.
-
-**GitHub integration is part of the deploy story** — Vercel's GitHub integration is the v1 CI gate (per `tech-stack.md`; no `.github/workflows/*` ships in v1). The chain is: push to a GitHub repo → Vercel receives the webhook → Vercel builds + deploys (preview per branch / push, production on `main`). This means **the GitHub repo is a prerequisite, not a "later" concern**. First-time setup ritual on this repo:
-
-1. `gh repo create <name> --source=. --private --push` (gh CLI is already authed as `ex-Plant`).
-2. `vercel link` — picks the GitHub repo and creates a Vercel project linked to it.
-3. `vercel env add <NAME>` for each env var, then `vercel env pull .env.local`.
-4. First `git push` triggers a preview deploy. Merge to `main` triggers production.
-
-**Vercel account in use for this project:**
-
-- **CLI logged-in user:** `admin-63074310` (personal scope).
-- **Available scopes from this login:** the personal scope (`admin-63074310`) plus one team — `wykonczymys-projects`, which also hosts the unrelated `wykonczymy` reference repo.
-- **Current project linkage (provisional):** the project is currently linked to the `wykonczymys-projects` team (orgId `team_BWfyTqJnjIqZBkHwBL0elgS4`, projectId `prj_xiMPGCdLzFUsgDmWHRiEtVzG9JK9`). This was an accident at the `vercel link` scope prompt where the team was the default. **The user has flagged Vercel-account hygiene as a separate cleanup task and may move this project to a different scope (personal or a different account entirely) later.** Until that cleanup happens, work continues against the current `wykonczymys-projects` linkage.
-- **Implications of the current linkage:** billing and team-member access for `coding-learning-companion` are currently shared with `wykonczymy` under the same Vercel team. Env vars added via `vercel env add` land in the team-scoped project, not the user's personal Vercel.
-- **Confirm CLI state anytime** with `vercel whoami` (should print `admin-63074310`) and `cat .vercel/project.json` (orgId tells you which scope the link is in: `team_*` = team, anything else = personal). If `vercel whoami` prints something else, run `vercel logout` + `vercel login` before any Vercel-touching work.
-
-**Status of this repo (as of last update):** GitHub remote is `https://github.com/ex-Plant/coding-learning-companion` (public). Vercel-linked to the `wykonczymys-projects` team scope as described above; `.vercel/project.json` is committable but git-ignored by Vercel CLI convention. Vercel CLI installed locally is currently 54.1.0; latest is 54.4.x. Run `pnpm add -g vercel@latest` to update.
-
-**Open follow-up:** user to clean up their Vercel accounts (consolidate or separate), then decide whether to keep the current linkage, move to personal scope on this account, or re-link to a different account entirely. Pending that decision, the current linkage is a known-imperfect baseline, not a final state.
+- **Open m1l4 item — `context/foundation/lessons.md` still does not exist.** It is the `/10x-lesson` artifact, self-bootstrapped on first invocation. The sentinel below lists it as a foundation path — a forward-pointer, not a missing file.
+- **Build axis (separate from lessons):** app build follows `@context/changes/v1-sprint-plan/plan.md` (deadline 2026-06-10), currently **Phase A** — Supabase deps + `supabase init` done; no migrations / `src/lib` helpers / auth pages yet.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
