@@ -6,9 +6,8 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { passwordSchema } from '@/features/auth/schema'
-
 import { updatePassword } from '@/features/auth/actions/update-password'
+import { passwordSchema } from '@/features/auth/schema'
 
 export default function UpdatePasswordPage() {
   const [formError, setFormError] = useState<string | undefined>(undefined)

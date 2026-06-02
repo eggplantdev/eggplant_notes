@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env'
 
 // Auth pages a signed-in user has no business on -> bounce them to the dashboard.
 // `/update-password` is deliberately NOT here: the recovery flow lands there WITH a

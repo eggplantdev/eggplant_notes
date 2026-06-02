@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from './env'
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env'
 
 // Per-request Supabase client for Server Components, Server Actions, and route handlers.
 export async function createClient() {

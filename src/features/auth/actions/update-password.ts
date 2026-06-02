@@ -2,18 +2,15 @@
 
 import { redirect } from 'next/navigation'
 
-import { validateInput } from '@/features/auth/validate'
+import { runAuthAction } from '@/features/auth/run-auth-action'
 import { updatePasswordSchema } from '@/features/auth/schema'
-import { createClient } from '@/lib/supabase/server'
 import type { ActionResultT } from '@/types/action'
 
 export async function updatePassword(input: unknown): Promise<ActionResultT> {
-  const parsed = validateInput(updatePasswordSchema, input)
-  if (!parsed.success) return parsed
-
-  const supabase = await createClient()
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
-  if (error) return { success: false, error: error.message }
+  const result = await runAuthAction(updatePasswordSchema, input, (supabase, data) =>
+    supabase.auth.updateUser({ password: data.password }),
+  )
+  if (!result.success) return result
 
   redirect('/dashboard')
 }

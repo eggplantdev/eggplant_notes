@@ -7,9 +7,8 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { emailSchema } from '@/features/auth/schema'
-
 import { resetPassword } from '@/features/auth/actions/reset-password'
+import { emailSchema } from '@/features/auth/schema'
 
 export default function ResetPasswordPage() {
   const [formError, setFormError] = useState<string | undefined>(undefined)
