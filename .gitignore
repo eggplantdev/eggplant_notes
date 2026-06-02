@@ -56,3 +56,6 @@ next-env.d.ts
 
 # 10x-cli skills — installed globally (~/.claude/skills); re-fetched per-project by `10x get`, not committed
 /.claude/skills/
+
+# 10xDevs course lesson sources — copyrighted course material, re-fetched per-project by `10x get`, not committed
+/lessons/
