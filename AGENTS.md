@@ -21,7 +21,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Project structure — feature-first, tiered
 
-Organize by **domain**, not by technical type. Tiers, and the one-directional promotion rule between them:
+Organize by **domain**, not by technical type. The named tiers + route rule below are this project's binding layout; the portable decision procedure (promotion, deletion test, rationale) lives in the Claude `feature-first-structure` skill. Tiers, and the one-directional promotion rule between them:
 
 - `src/features/<domain>/` — **domain code lives here; this is the default home.** Each feature owns its `components/`, `actions/`, `schemas.ts`, `types.ts`, hooks. New code is **born here**, inside its feature (e.g. `src/features/auth/`).
 - `src/components/` — **non-domain primitives**: `ui/` (shadcn), `forms/` (TanStack `useAppForm` layer). These have **zero domain knowledge** — never put feature logic here, and don't move a feature-only helper here just because it's a component.
@@ -29,7 +29,7 @@ Organize by **domain**, not by technical type. Tiers, and the one-directional pr
 - `src/types/` — cross-feature shared `*T` types (e.g. `action.ts`). Co-locate feature-only types in their feature; promote here on the **2nd** consumer.
 - `src/hooks/`, `src/stores/` (Zustand) — only genuinely cross-feature ones; feature-scoped hooks/stores stay in the feature.
 - **Promotion rule:** keep code in its feature until a **second** feature needs it, _then_ lift it to the shared tier (`src/types/`, `src/components/`, `src/lib/`). Never promote on the first use.
-- `src/app/` — App Router routes **only** (Next forces routing here); route files stay thin and import from `features/`. Route groups mirror features (`(auth-pages)` ↔ `features/auth`). API routes under `src/app/api/`.
+- `src/app/` — App Router routes **only** (Next forces routing here); route files stay thin and import from `features/`. Route groups mirror features (`(auth-pages)` ↔ `features/auth`). **All Route Handlers (`route.ts`) live under `src/app/api/`** — including auth/OAuth/email callbacks (e.g. `/api/auth/confirm`, not a bare `/auth/confirm`). Form/data mutations use **Server Actions** in `features/<domain>/actions/`, never route handlers.
 - `src/__tests__/**/*.test.ts` — Vitest specs.
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
 - `context/foundation/` — `@context/foundation/prd.md` (the contract), `@context/foundation/tech-stack.md`; sprint plan at `@context/changes/v1-sprint-plan/plan.md`.
