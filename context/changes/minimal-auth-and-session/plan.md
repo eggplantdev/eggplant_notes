@@ -359,25 +359,25 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Automated
 
-- [x] 1.1 Stack reports healthy: `supabase status`
-- [x] 1.2 `.env.local` exists with both `NEXT_PUBLIC_SUPABASE_*` vars
+- [x] 1.1 Stack reports healthy: `supabase status` — 1d86328
+- [x] 1.2 `.env.local` exists with both `NEXT_PUBLIC_SUPABASE_*` vars — 1d86328
 
 #### Manual
 
-- [x] 1.3 Studio loads
-- [x] 1.4 Inbucket/mailpit loads
+- [x] 1.3 Studio loads — 1d86328
+- [x] 1.4 Inbucket/mailpit loads — 1d86328
 
 ### Phase 2: SSR clients + proxy session refresh
 
 #### Automated
 
-- [ ] 2.1 Type check passes
-- [ ] 2.2 Lint passes
-- [ ] 2.3 Build compiles `proxy.ts`
+- [x] 2.1 Type check passes
+- [x] 2.2 Lint passes
+- [x] 2.3 Build compiles `proxy.ts`
 
 #### Manual
 
-- [ ] 2.4 Session cookie refreshes on page load without error
+- [x] 2.4 Session cookie refreshes on page load without error
 
 ### Phase 3: TanStack Form infra + auth pages + Server Actions
 
