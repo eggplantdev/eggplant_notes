@@ -399,9 +399,9 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Automated
 
-- [ ] 4.1 Type check passes
-- [ ] 4.2 Lint passes
-- [ ] 4.3 Build succeeds
+- [x] 4.1 Type check passes
+- [x] 4.2 Lint passes
+- [x] 4.3 Build succeeds
 
 #### Manual
 

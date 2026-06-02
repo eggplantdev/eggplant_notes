@@ -3,8 +3,21 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
 
+// Auth pages live outside the gated tree; `/api/auth/*` carries the email-link callback.
+const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password', '/update-password']
+
+// Redirect while preserving the cookies refreshed on `response`, so the session
+// survives the redirect (a bare NextResponse.redirect would drop them).
+function redirectTo(pathname: string, request: NextRequest, response: NextResponse) {
+  const url = request.nextUrl.clone()
+  url.pathname = pathname
+  const redirect = NextResponse.redirect(url)
+  response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie))
+  return redirect
+}
+
 // Next.js 16 renamed `middleware` -> `proxy`; runtime is nodejs (not configurable here).
-// Refreshes the Supabase session cookie on every matched request. Gating is added in Phase 4.
+// Refreshes the Supabase session cookie on every matched request and gates protected paths.
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
@@ -25,9 +38,19 @@ export async function proxy(request: NextRequest) {
 
   // IMPORTANT: do not run code between client creation and getUser() —
   // reordering breaks silent session refresh and causes random logouts.
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Phase 4 inserts gating redirect logic before this return.
+  const { pathname } = request.nextUrl
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route))
+  const isPublic = isAuthRoute || pathname.startsWith('/api/auth/')
+
+  // Optimistic gate (the (protected) layout is the authoritative backstop):
+  // signed-out on a protected path -> sign-in; signed-in on an auth page -> dashboard.
+  if (!user && !isPublic) return redirectTo('/sign-in', request, response)
+  if (user && isAuthRoute) return redirectTo('/dashboard', request, response)
+
   return response
 }
 
