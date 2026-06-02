@@ -7,7 +7,7 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { resetRequestSchema } from '@/features/auth/schema'
+import { emailSchema } from '@/features/auth/schema'
 
 import { resetPassword } from '@/features/auth/actions/reset-password'
 
@@ -17,7 +17,6 @@ export default function ResetPasswordPage() {
 
   const form = useAppForm({
     defaultValues: { email: '' },
-    validators: { onSubmit: resetRequestSchema },
     onSubmit: async ({ value }) => {
       const result = await resetPassword(value)
       if (result.success) setSent(true)
@@ -45,7 +44,7 @@ export default function ResetPasswordPage() {
               form.handleSubmit()
             }}
           >
-            <form.AppField name="email">
+            <form.AppField name="email" validators={{ onChange: emailSchema }}>
               {(field) => <field.Input label="Email" type="email" autoComplete="email" />}
             </form.AppField>
             <FormError message={formError} />
