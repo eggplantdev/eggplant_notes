@@ -194,19 +194,19 @@ Add TanStack Form, build the `useAppForm` infra mirrored from wykonczymy, and im
 
 #### 4. Server Actions
 
-**File**: `src/app/(auth)/actions.ts`
+**File**: `src/features/auth/actions/{sign-up,sign-in,sign-out,reset-password,update-password}.ts` (one file per action; domain code lives under `features/`, not `app/` or `lib/`). Validation schemas in `src/features/auth/schemas.ts`; shared result type in `src/types/action.ts`.
 
 **Intent**: Server-side handlers for sign-up, sign-in, sign-out, reset-request, update-password using the server client.
 
-**Contract**: `'use server'` functions returning a typed result `{ success: boolean; error?: string }` (mirror wykonczymy's `ActionResultT` shape) so forms render inline errors; on success they `redirect()`. `signUp`/`signIn` → `supabase.auth.signUp`/`signInWithPassword`; `signOut` → `supabase.auth.signOut`; `resetPassword` → `resetPasswordForEmail(email, { redirectTo: <site>/auth/confirm?... })`; `updatePassword` → `supabase.auth.updateUser({ password })`.
+**Contract**: `'use server'` functions returning a typed result `{ success: boolean; error?: string }` (the `ActionResultT` in `src/types/action.ts`, mirroring wykonczymy's shape) so forms render inline errors; on success they `redirect()`. `signUp`/`signIn` → `supabase.auth.signUp`/`signInWithPassword`; `signOut` → `supabase.auth.signOut`; `resetPassword` → `resetPasswordForEmail(email, { redirectTo: <site>/auth/confirm?... })`; `updatePassword` → `supabase.auth.updateUser({ password })`.
 
 #### 5. Auth pages (route group)
 
-**File**: `src/app/(auth)/sign-in/page.tsx`, `sign-up/page.tsx`, `reset-password/page.tsx`, `update-password/page.tsx`
+**File**: `src/app/(auth-pages)/sign-in/page.tsx`, `sign-up/page.tsx`, `reset-password/page.tsx`, `update-password/page.tsx`
 
 **Intent**: Client-component forms built on `useAppForm`, submitting to the matching Server Action.
 
-**Contract**: Each page renders a `useAppForm` form with the fields it needs and an `onSubmit` that calls its Server Action; displays returned error. shadcn `Card` wrapper, minimal styling. `(auth)` route group keeps them outside the gated tree.
+**Contract**: Each page renders a `useAppForm` form with the fields it needs and an `onSubmit` that calls its Server Action; displays returned error. shadcn `Card` wrapper, minimal styling. `(auth-pages)` route group keeps them outside the gated tree.
 
 ### Success Criteria:
 
@@ -371,22 +371,22 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Automated
 
-- [x] 2.1 Type check passes
-- [x] 2.2 Lint passes
-- [x] 2.3 Build compiles `proxy.ts`
+- [x] 2.1 Type check passes — 66ca8c0
+- [x] 2.2 Lint passes — 66ca8c0
+- [x] 2.3 Build compiles `proxy.ts` — 66ca8c0
 
 #### Manual
 
-- [x] 2.4 Session cookie refreshes on page load without error
+- [x] 2.4 Session cookie refreshes on page load without error — 66ca8c0
 
 ### Phase 3: TanStack Form infra + auth pages + Server Actions
 
 #### Automated
 
-- [ ] 3.1 Type check passes
-- [ ] 3.2 Lint passes
-- [ ] 3.3 Build succeeds
-- [ ] 3.4 Server Action helper unit test passes
+- [x] 3.1 Type check passes
+- [x] 3.2 Lint passes
+- [x] 3.3 Build succeeds
+- [x] 3.4 Server Action helper unit test passes
 
 #### Manual
 
