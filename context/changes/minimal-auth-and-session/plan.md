@@ -407,7 +407,7 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 - [x] 4.4 `/dashboard` signed out → redirect to `/sign-in`
 - [x] 4.5 `/sign-in` signed in → redirect to `/dashboard`
-- [ ] 4.6 Protected layout blocks even if proxy bypassed
+- [x] 4.6 Protected layout blocks even if proxy bypassed
 
 ### Phase 5: Playwright E2E
 
