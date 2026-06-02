@@ -359,13 +359,13 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Automated
 
-- [ ] 1.1 Stack reports healthy: `supabase status`
-- [ ] 1.2 `.env.local` exists with both `NEXT_PUBLIC_SUPABASE_*` vars
+- [x] 1.1 Stack reports healthy: `supabase status`
+- [x] 1.2 `.env.local` exists with both `NEXT_PUBLIC_SUPABASE_*` vars
 
 #### Manual
 
-- [ ] 1.3 Studio loads
-- [ ] 1.4 Inbucket/mailpit loads
+- [x] 1.3 Studio loads
+- [x] 1.4 Inbucket/mailpit loads
 
 ### Phase 2: SSR clients + proxy session refresh
 

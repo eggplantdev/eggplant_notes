@@ -1,7 +1,7 @@
 ---
 change_id: minimal-auth-and-session
 title: Minimal auth and session
-status: planned
+status: implementing
 created: 2026-06-02
 updated: 2026-06-02
 archived_at: null
