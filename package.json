@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.33.4",
+  "packageManager": "pnpm@11.5.1",
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
@@ -56,25 +56,5 @@
     "*.{json,css,md}": [
       "prettier --write"
     ]
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "unrs-resolver"
-    ],
-    "overrides": {
-      "postcss@<8.5.10": ">=8.5.10"
-    },
-    "supportedArchitectures": {
-      "os": [
-        "darwin",
-        "linux"
-      ],
-      "cpu": [
-        "arm64",
-        "x64"
-      ]
-    }
   }
 }

@@ -1,2 +1,4 @@
 [tools]
 node = "24"
+# Match package.json's packageManager pin (pnpm self-manages the exact 11.x patch).
+pnpm = "11"

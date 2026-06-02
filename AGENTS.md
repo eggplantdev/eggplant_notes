@@ -12,7 +12,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Hard rules (read first)
 
-- **Use `pnpm`, never `npm`/`npx`.** Lockfile is `pnpm-lock.yaml`; there is no `package-lock.json`, so `npm audit`/`npm ci` fail with `ENOLOCK`. Audit with `pnpm audit --json`; override transitive deps via `pnpm.overrides` in `@package.json`.
+- **Use `pnpm`, never `npm`/`npx`.** Lockfile is `pnpm-lock.yaml`; there is no `package-lock.json`, so `npm audit`/`npm ci` fail with `ENOLOCK`. Audit with `pnpm audit --json`; override transitive deps via `overrides` in `@pnpm-workspace.yaml` (pnpm 11 — **not** the old `pnpm.overrides` in `package.json`, which it silently ignores).
 - **Next.js 16 ≠ your training data** (see the sentinel above) — verify against `node_modules/next/dist/docs/` before writing routing/rendering code.
 - **App Router only.** Server Components by default; add `'use client'` only when needed; fetch data in Server Components; `loading.tsx`/`error.tsx` for streaming/boundaries; route groups `(group)` for organization.
 - **Never hand-edit auto-managed sentinel blocks.** `<!-- BEGIN:nextjs-agent-rules -->` here (Next.js) and `<!-- BEGIN @przeprogramowani/10x-cli -->` in `CLAUDE.md` (10x-cli) are rewritten by their tools — edits there are lost on the next run.
@@ -48,7 +48,11 @@ Vitest 4; specs live under `src/__tests__/**/*.test.ts`. Commands in `@package.j
 ## pnpm specifics
 
 - `package_manager` is `pnpm` despite the `tech-stack.md` hand-off reading `npm` — it was overridden at bootstrap.
-- `pnpm.supportedArchitectures` is set (`os: [darwin, linux]`, `cpu: [arm64, x64]`). Without it, pnpm pulled a wrong-arch Supabase CLI binary (`@supabase/cli-darwin-x64` on an arm64 Mac → `No matching Supabase CLI binary found for darwin-arm64`). Keep it when adding other CLIs that ship platform-specific binaries.
+- **pnpm version is pinned to `11.5.1` via `packageManager` in `@package.json`** (pnpm self-manages that exact patch via Corepack-style download — it wins over mise, which is aligned to `pnpm = "11"` in `@mise.toml` for cosmetic consistency). The mise/`packageManager` pins must not drift apart.
+- **pnpm 11 reads settings from `@pnpm-workspace.yaml`, not `package.json`'s `"pnpm"` field** (that field is silently ignored). Three settings live there:
+  - `supportedArchitectures` (`os: [darwin, linux]`, `cpu: [arm64, x64]`). Without it, pnpm pulled a wrong-arch Supabase CLI binary (`@supabase/cli-darwin-x64` on an arm64 Mac → `No matching Supabase CLI binary found for darwin-arm64`). Keep it when adding other CLIs that ship platform-specific binaries.
+  - `overrides` — the postcss security floor (`postcss@<8.5.10 → >=8.5.10`).
+  - `allowBuilds` — build-script allowlist that **replaces** v10's `onlyBuiltDependencies`/`ignoredBuiltDependencies` (a map: `esbuild: true`, `sharp: false`, `unrs-resolver: false`).
 
 ## Tooling tripwires
 

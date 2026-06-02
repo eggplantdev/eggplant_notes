@@ -1,3 +1,21 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+# pnpm 11 reads these settings here (no longer from package.json's "pnpm" field).
+# Force the postcss security floor across the transitive graph.
+overrides:
+  "postcss@<8.5.10": ">=8.5.10"
+
+# Build-script allowlist (replaces v10's onlyBuiltDependencies/ignoredBuiltDependencies).
+# sharp/unrs-resolver ship prebuilt binaries — skip their build scripts.
+allowBuilds:
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
+
+# Pull optional deps for both macOS (local arm64/x64) and Linux (Vercel) —
+# keeps the Supabase CLI from resolving a wrong-arch binary.
+supportedArchitectures:
+  os:
+    - darwin
+    - linux
+  cpu:
+    - arm64
+    - x64
