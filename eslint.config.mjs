@@ -9,6 +9,24 @@ const eslintConfig = defineConfig([
   // Disable ESLint rules that conflict with Prettier formatting.
   // Must come last so it overrides earlier configs.
   prettier,
+  // Enforce the @/ path alias over parent-relative imports (../, ../../).
+  // Same-directory imports (./) are allowed. Mirrors the global agent rule.
+  {
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["../*"],
+              message:
+                "Use the @/ path alias instead of parent-relative imports (../). See tsconfig.json `paths`.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
