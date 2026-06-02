@@ -3,8 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/supabase/env'
 
-// Auth pages live outside the gated tree; `/api/auth/*` carries the email-link callback.
-const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password', '/update-password']
+// Auth pages a signed-in user has no business on -> bounce them to the dashboard.
+// `/update-password` is deliberately NOT here: the recovery flow lands there WITH a
+// session, so bouncing it would trap the user off the page they need.
+const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password']
 
 // Redirect while preserving the cookies refreshed on `response`, so the session
 // survives the redirect (a bare NextResponse.redirect would drop them).
@@ -44,7 +46,10 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route))
-  const isPublic = isAuthRoute || pathname.startsWith('/api/auth/')
+  // Public = auth pages + the email-link callback + update-password (reached via a
+  // recovery session, so it must not redirect to /sign-in either).
+  const isPublic =
+    isAuthRoute || pathname.startsWith('/api/auth/') || pathname.startsWith('/update-password')
 
   // Optimistic gate (the (protected) layout is the authoritative backstop):
   // signed-out on a protected path -> sign-in; signed-in on an auth page -> dashboard.

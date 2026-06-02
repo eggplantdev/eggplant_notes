@@ -390,10 +390,10 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Manual
 
-- [ ] 3.5 Sign-up creates a user + session
-- [ ] 3.6 Sign-in / sign-out work
-- [ ] 3.7 Reset email in Inbucket → link → update-password → new password works
-- [ ] 3.8 Inline validation errors render
+- [x] 3.5 Sign-up creates a user + session
+- [x] 3.6 Sign-in / sign-out work
+- [x] 3.7 Reset email in Inbucket → link → update-password → new password works
+- [x] 3.8 Inline validation errors render
 
 ### Phase 4: Route gating + protected shell
 
@@ -405,17 +405,17 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Manual
 
-- [ ] 4.4 `/dashboard` signed out → redirect to `/sign-in`
-- [ ] 4.5 `/sign-in` signed in → redirect to `/dashboard`
+- [x] 4.4 `/dashboard` signed out → redirect to `/sign-in`
+- [x] 4.5 `/sign-in` signed in → redirect to `/dashboard`
 - [ ] 4.6 Protected layout blocks even if proxy bypassed
 
 ### Phase 5: Playwright E2E
 
 #### Automated
 
-- [ ] 5.1 E2E suite passes: `pnpm test:e2e`
-- [ ] 5.2 Lint passes
+- [x] 5.1 E2E suite passes: `pnpm test:e2e`
+- [x] 5.2 Lint passes
 
 #### Manual
 
-- [ ] 5.3 E2E stable across two consecutive runs
+- [x] 5.3 E2E stable across two consecutive runs

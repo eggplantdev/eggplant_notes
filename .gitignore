@@ -42,6 +42,10 @@ yarn-error.log*
 # playwright mcp scratch output (snapshots, console logs, ad-hoc screenshots)
 .playwright-mcp/
 
+# playwright e2e artifacts
+/test-results/
+/playwright-report/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
