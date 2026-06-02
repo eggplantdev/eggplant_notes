@@ -21,7 +21,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Project structure
 
-- `src/app/` — routes (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`); API routes under `src/app/api/`.
+- `src/app/` — App Router routes; API routes under `src/app/api/`.
 - `src/components/ui/` — shadcn components. `src/hooks/`, `src/stores/` (Zustand), `src/lib/`, `src/types/` (shared `*T` types).
 - `src/__tests__/**/*.test.ts` — Vitest specs.
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
@@ -29,19 +29,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Commands
 
-Scripts live in `@package.json`. Most-used: `pnpm dev` (Turbopack), `pnpm build`, `pnpm lint`, `pnpm typecheck` (`tsc --noEmit`), `pnpm test` / `pnpm test:watch`, `pnpm format:fix`. Run `mise install` once (Node 24, pinned in `mise.toml`). Add UI with `pnpm dlx shadcn@latest add <component>`.
+Scripts: `@package.json`. Run `mise install` once (Node 24, pinned in `mise.toml`). Add UI with `pnpm dlx shadcn@latest add <component>`.
 
 ## Style & conventions
 
-- TypeScript strict. Prefer `type` over `interface`; suffix shared types with `T` (`UserT`); avoid `any` and `enum` (use `as const` maps); prefer `undefined` over `null` with `?.`/`??`.
-- Naming: files `kebab-case`, components `PascalCase`, functions/vars `camelCase`, env vars `UPPERCASE`, booleans with `is`/`has`.
-- Functional/declarative; avoid classes; early returns; functions under ~20 lines. Named exports, one component per file, `function` keyword for components.
-- State via Zustand selectors (`useStore((s) => s.x)`, not destructuring). Forms: TanStack Form + Zod. Avoid `useEffect`.
-- Prettier 3 (`prettier-plugin-tailwindcss` sorts classes) + ESLint 9 flat config (`@eslint.config.mjs`) enforce formatting/lint; husky + lint-staged run them pre-commit.
+- Functions under ~20 lines.
+- husky + lint-staged auto-run Prettier (`prettier-plugin-tailwindcss` sorts classes) + ESLint (`@eslint.config.mjs`) on staged files pre-commit — formatting/lint is enforced at commit, not just CI.
 
 ## Testing
 
-Vitest 4. Specs under `src/__tests__/**/*.test.ts`. All: `pnpm test`; single file: `pnpm test <path>`; coverage: `pnpm test:coverage`.
+Vitest 4; specs live under `src/__tests__/**/*.test.ts`. Commands in `@package.json`.
 
 ## Commits & CI
 
@@ -69,3 +66,9 @@ Vercel is the canonical surface for deploys, env, logs, domains, linking. The em
 - **Account state (current, 2026-06-01):** CLI user `eggplantdev` (`admin@eggplantdev.com`, hobby plan). Project lives under the **personal** account scope `eggplants-projects-07c20257` (orgId `team_eTY61jJROGLC3P8x6Tvi1doZ`, projectId `prj_jYwukp9E4Qy8uzDbyPfQliNdTvCt`), git-connected to `github.com/ex-Plant/coding-learning-companion`. Live prod alias: `https://coding-learning-companion-theta.vercel.app`. The link is repo-level (`.vercel/repo.json`, not `project.json`). Confirm anytime: `vercel whoami` (expect `eggplantdev`) + `cat .vercel/repo.json` (orgId `team_eTY6…` = personal scope). **Note:** `vercel whoami` returns `Not authorized` if `.vercel/` is stale-linked to a team you can't access — `rm -rf .vercel && vercel link --yes --project coding-learning-companion` (no `--scope`; personal accounts reject `--scope`) fixes both link and whoami.
 - **Resolved (2026-06-01):** the old accidental project under the `wykonczymys-projects` team was unlinked/removed; the repo is now solely under the personal scope above. Prod function region switched from `iad1` → `fra1` (EU, Supabase co-location).
 - **Config:** prefer typed `vercel.ts` over `vercel.json`. CLI syntax has shifted — use the `vercel-plugin:vercel-cli` skill, not training data.
+
+## Linear (issue tracking)
+
+- MCP connected at project scope (`.mcp.json`, OAuth done); tools are `mcp__linear__*` (load schemas via `ToolSearch` first). Backlog lives in team **`Ex-plant`** (key `EX`), project **`Coding Learning Companion`**. Other workspace projects are personal — leave them alone.
+- **`roadmap.md` is the source of truth; Linear mirrors it.** Keep issue status in sync as you work a change: `save_issue` with an `id` (e.g. `EX-359`) updates in place — `state`, `assignee`, `priority`, `labels`, links; `save_comment` for notes.
+- **No delete/archive tool** — the MCP is create/read/update only. To drop an issue, set `state` to Canceled; true deletion is a Linear-UI action. Don't fall back to guessing Linear's REST API.

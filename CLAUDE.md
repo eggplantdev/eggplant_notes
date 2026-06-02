@@ -2,7 +2,7 @@
 
 **Read @AGENTS.md first — it is the canonical, cross-tool onboarding** (the bare `@AGENTS.md` above is a Claude Code import, so its content is inlined here): hard rules (pnpm-not-npm, Next.js-16-is-different, App Router), structure, commands, style/conventions, testing, commits/CI, pnpm specifics, tooling tripwires, and Vercel state. This file adds only the 10x-workflow-local tracking below, plus the auto-managed 10x-cli lesson block.
 
-> Also active for Claude Code: the user's global rules in `~/.claude/rules/*` (Next.js, React, TypeScript, code-style, styling). Those are invisible to non-Claude agents, so `@AGENTS.md` restates the project-relevant subset for cross-tool parity.
+> Also active in Claude Code: the user's path-scoped global rules in `~/.claude/rules/*` (`typescript`/`react`/`styling` conventions + `general`/`general_persona`/`learning`/`english_refinement`). These are the **single source** — AGENTS.md deliberately does **not** restate them (Cursor imports them via its config-import toggle; mirror to `~/.codex/AGENTS.md` if Codex is adopted).
 
 ## Course & lesson progress (10xDevs 3.0) — as of 2026-06-01
 
