@@ -3,7 +3,7 @@ project: 'Coding Learning Companion'
 version: 1
 status: draft
 created: 2026-06-01
-updated: 2026-06-01
+updated: 2026-06-02
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -29,7 +29,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 
 | ID   | Change ID                 | Outcome (user can …)                                             | Prerequisites | PRD refs                        | Status   |
 | ---- | ------------------------- | ---------------------------------------------------------------- | ------------- | ------------------------------- | -------- |
-| F-01 | minimal-auth-and-session  | (foundation) email/password auth + session; gated product routes | —             | FR-001–005, Access Control      | ready    |
+| F-01 | minimal-auth-and-session  | (foundation) email/password auth + session; gated product routes | —             | FR-001–005, Access Control      | done     |
 | F-02 | persistence-and-isolation | (foundation) core tables + RLS isolation scoped by `auth.uid()`  | —             | NFR (isolation), Access Control | ready    |
 | S-01 | capture-note-with-code    | create, view, edit, delete, and list notes with highlighted code | F-01, F-02    | FR-007–011, US-01, NFR (code)   | proposed |
 | S-02 | attach-topic-checks       | attach, edit, delete, and list topic checks on a note            | S-01          | FR-012–015, US-01               | proposed |
@@ -181,4 +181,4 @@ Deferred to v1.1 (out-of-MVP, not out-of-product — `main_goal: speed` keeps th
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends here when a change matching a roadmap item is archived.)
+- **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
