@@ -152,15 +152,15 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                 | Suggested issue title                             | Ready for `/10x-plan` | Notes                                             |
-| ---------- | ------------------------- | ------------------------------------------------- | --------------------- | ------------------------------------------------- |
-| F-01       | minimal-auth-and-session  | Minimal email/password auth + gated routes        | yes                   | Run `/10x-plan minimal-auth-and-session`          |
-| F-02       | persistence-and-isolation | Core schema + RLS per-user isolation              | yes                   | Run `/10x-plan persistence-and-isolation`; ∥ F-01 |
-| S-01       | capture-note-with-code    | Note CRUD with code-block syntax highlighting     | no                    | After F-01 + F-02                                 |
-| S-02       | attach-topic-checks       | Topic-check CRUD on a note                        | no                    | After S-01                                        |
-| S-03       | close-recall-loop         | Review loop: due → rate → reschedule (north star) | no                    | After S-02 + F-02; pick SRS lib at plan           |
-| S-04       | activity-dashboard        | Dashboard: due count, streak, heatmap             | no                    | After S-03                                        |
-| S-05       | delete-account-and-data   | Account deletion with full owned-data removal     | no                    | After F-01 + F-02; ∥ content stream               |
+| Roadmap ID | Change ID                 | Suggested issue title                             | Ready for `/10x-plan` | Notes                                                                                  |
+| ---------- | ------------------------- | ------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------- |
+| F-01       | minimal-auth-and-session  | Minimal email/password auth + gated routes        | done                  | Shipped + archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/` |
+| F-02       | persistence-and-isolation | Core schema + RLS per-user isolation              | yes                   | Run `/10x-plan persistence-and-isolation`; ∥ F-01                                      |
+| S-01       | capture-note-with-code    | Note CRUD with code-block syntax highlighting     | no                    | After F-01 + F-02                                                                      |
+| S-02       | attach-topic-checks       | Topic-check CRUD on a note                        | no                    | After S-01                                                                             |
+| S-03       | close-recall-loop         | Review loop: due → rate → reschedule (north star) | no                    | After S-02 + F-02; pick SRS lib at plan                                                |
+| S-04       | activity-dashboard        | Dashboard: due count, streak, heatmap             | no                    | After S-03                                                                             |
+| S-05       | delete-account-and-data   | Account deletion with full owned-data removal     | no                    | After F-01 + F-02; ∥ content stream                                                    |
 
 ## Open Roadmap Questions
 
