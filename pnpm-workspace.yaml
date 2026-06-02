@@ -7,15 +7,6 @@ overrides:
 # sharp/unrs-resolver ship prebuilt binaries — skip their build scripts.
 allowBuilds:
   esbuild: true
+  msw: false # transitive via @vitest/mocker; build only needed for browser-mode (service worker), not Node tests
   sharp: false
   unrs-resolver: false
-
-# Pull optional deps for both macOS (local arm64/x64) and Linux (Vercel) —
-# keeps the Supabase CLI from resolving a wrong-arch binary.
-supportedArchitectures:
-  os:
-    - darwin
-    - linux
-  cpu:
-    - arm64
-    - x64

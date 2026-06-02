@@ -16,17 +16,17 @@ A user is redirected to `/sign-in`, signs up, lands on a gated stub page, can si
 
 ## Key Decisions Made
 
-| Decision | Choice | Why | Source |
-| --- | --- | --- | --- |
-| Scope = F-01 only | Auth + session + gating | Highest fan-out foundation; unlocks all slices | Roadmap |
-| Email verification | Not gated | FR-002 defers gate to v1.1 | PRD |
-| Submit path | Server Actions | Official Supabase SSR pattern; cookies set server-side | Plan |
-| Gating | Proxy + layout (defense-in-depth) | Proxy already runs for refresh; layout is authoritative backstop | Plan |
-| Password reset | Full (request + update) | FR-004 only met end-to-end with both halves | Plan |
-| UI fidelity | shadcn forms, minimal | Theme set (neutral/grayscale, light+dark); components not yet generated — add in Phase 3; speed over polish | Plan |
-| Forms | TanStack Form (`useAppForm`) mirrored from wykonczymy, pinned `^1.27.7` | User directive; reference pattern composes with Server Actions | User |
-| Proxy file | `src/proxy.ts` (not `middleware.ts`) | Next.js 16 deprecation, verified via Context7; runtime nodejs | User + Docs |
-| Testing | Playwright E2E harness | User directive (overrode lighter rec) | User |
+| Decision           | Choice                                                                  | Why                                                                                                         | Source      |
+| ------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- |
+| Scope = F-01 only  | Auth + session + gating                                                 | Highest fan-out foundation; unlocks all slices                                                              | Roadmap     |
+| Email verification | Not gated                                                               | FR-002 defers gate to v1.1                                                                                  | PRD         |
+| Submit path        | Server Actions                                                          | Official Supabase SSR pattern; cookies set server-side                                                      | Plan        |
+| Gating             | Proxy + layout (defense-in-depth)                                       | Proxy already runs for refresh; layout is authoritative backstop                                            | Plan        |
+| Password reset     | Full (request + update)                                                 | FR-004 only met end-to-end with both halves                                                                 | Plan        |
+| UI fidelity        | shadcn forms, minimal                                                   | Theme set (neutral/grayscale, light+dark); components not yet generated — add in Phase 3; speed over polish | Plan        |
+| Forms              | TanStack Form (`useAppForm`) mirrored from wykonczymy, pinned `^1.27.7` | User directive; reference pattern composes with Server Actions                                              | User        |
+| Proxy file         | `src/proxy.ts` (not `middleware.ts`)                                    | Next.js 16 deprecation, verified via Context7; runtime nodejs                                               | User + Docs |
+| Testing            | Playwright E2E harness                                                  | User directive (overrode lighter rec)                                                                       | User        |
 
 ## Scope
 
@@ -40,15 +40,15 @@ Browser client (client components) + per-request server client (`await cookies()
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Local stack + env | Running Supabase + `.env.local` | Docker not running |
-| 2. SSR clients + proxy | Clients + `proxy.ts` refresh + confirm route | Next 16 proxy + async cookie ordering |
-| 3. Forms + actions | TanStack Form infra + 4 auth pages + Server Actions | Recovery-link → update-password flow |
-| 4. Gating + shell | Proxy redirect + protected layout + stub | Matcher gaps (mitigated by layout guard) |
-| 5. Playwright E2E | Automated auth-flow regression | Reset/email step flakiness |
+| Phase                  | What it delivers                                    | Key risk                                 |
+| ---------------------- | --------------------------------------------------- | ---------------------------------------- |
+| 1. Local stack + env   | Running Supabase + `.env.local`                     | Docker not running                       |
+| 2. SSR clients + proxy | Clients + `proxy.ts` refresh + confirm route        | Next 16 proxy + async cookie ordering    |
+| 3. Forms + actions     | TanStack Form infra + 4 auth pages + Server Actions | Recovery-link → update-password flow     |
+| 4. Gating + shell      | Proxy redirect + protected layout + stub            | Matcher gaps (mitigated by layout guard) |
+| 5. Playwright E2E      | Automated auth-flow regression                      | Reset/email step flakiness               |
 
-**Prerequisites:** Docker for local Supabase; `node_modules` installed (run `pnpm install` first — the local tree was incomplete).
+**Prerequisites:** Docker for local Supabase; `mise install` (provisions the Supabase CLI — now a mise tool, not an npm dep); `node_modules` installed (`pnpm install` — the local tree was incomplete).
 **Estimated effort:** ~3–4 after-hours sessions across 5 phases.
 
 ## Open Risks & Assumptions

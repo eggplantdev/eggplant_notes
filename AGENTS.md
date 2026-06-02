@@ -29,7 +29,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Commands
 
-Scripts: `@package.json`. Run `mise install` once (Node 24, pinned in `mise.toml`). Add UI with `pnpm dlx shadcn@latest add <component>`.
+Scripts: `@package.json`. Run `mise install` once (Node 24 + pnpm + the Supabase CLI, pinned in `@mise.toml`). Add UI with `pnpm dlx shadcn@latest add <component>`. The Supabase CLI (`supabase start`, migrations) runs on the **host**, not in the devcontainer — it is **not** an npm dependency; `mise install` provisions it.
 
 ## Style & conventions
 
@@ -49,10 +49,10 @@ Vitest 4; specs live under `src/__tests__/**/*.test.ts`. Commands in `@package.j
 
 - `package_manager` is `pnpm` despite the `tech-stack.md` hand-off reading `npm` — it was overridden at bootstrap.
 - **pnpm version is pinned to `11.5.1` via `packageManager` in `@package.json`** (pnpm self-manages that exact patch via Corepack-style download — it wins over mise, which is aligned to `pnpm = "11"` in `@mise.toml` for cosmetic consistency). The mise/`packageManager` pins must not drift apart.
-- **pnpm 11 reads settings from `@pnpm-workspace.yaml`, not `package.json`'s `"pnpm"` field** (that field is silently ignored). Three settings live there:
-  - `supportedArchitectures` (`os: [darwin, linux]`, `cpu: [arm64, x64]`). Without it, pnpm pulled a wrong-arch Supabase CLI binary (`@supabase/cli-darwin-x64` on an arm64 Mac → `No matching Supabase CLI binary found for darwin-arm64`). Keep it when adding other CLIs that ship platform-specific binaries.
+- **pnpm 11 reads settings from `@pnpm-workspace.yaml`, not `package.json`'s `"pnpm"` field** (that field is silently ignored). Two settings live there:
   - `overrides` — the postcss security floor (`postcss@<8.5.10 → >=8.5.10`).
-  - `allowBuilds` — build-script allowlist that **replaces** v10's `onlyBuiltDependencies`/`ignoredBuiltDependencies` (a map: `esbuild: true`, `sharp: false`, `unrs-resolver: false`).
+  - `allowBuilds` — build-script allowlist that **replaces** v10's `onlyBuiltDependencies`/`ignoredBuiltDependencies` (a map: `esbuild: true`, `msw: false`, `sharp: false`, `unrs-resolver: false`). New deps with build scripts (e.g. a transitive `msw` via `@vitest/mocker`) surface as `ERR_PNPM_IGNORED_BUILDS` until added here with an explicit boolean.
+- **No `supportedArchitectures`.** It was once set to force a correct-arch Supabase CLI binary, but the CLI is no longer an npm dep — it's a host-only tool managed by mise (`supabase = "2.101.0"` in `@mise.toml`). Plain pnpm resolves the current platform for `next-swc`/`esbuild`/`sharp`, and Vercel resolves Linux natively at build, so the setting is unnecessary. If you ever add another npm-distributed CLI that ships per-platform binaries and mis-resolves, reintroduce it then — don't add it preemptively.
 
 ## Tooling tripwires
 

@@ -2,3 +2,7 @@
 node = "24"
 # Match package.json's packageManager pin (pnpm self-manages the exact 11.x patch).
 pnpm = "11"
+# Supabase CLI (host-only dev tool; the devcontainer reaches the host stack via
+# host.docker.internal). Managed here, not as an npm dep — avoids dragging the
+# platform-specific binary matrix through pnpm. `mise install` provisions it.
+supabase = "2.101.0"

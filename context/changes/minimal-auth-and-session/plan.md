@@ -39,7 +39,7 @@ Follow the official Supabase Next.js App Router SSR pattern, adapted for Next.js
 
 ## Critical Implementation Details
 
-- **Timing & lifecycle (proxy):** In `proxy.ts`, you must create the response, create the server client wired to read request cookies and write to *both* request and response, then call `supabase.auth.getUser()` (or `getClaims()`) — **do not run any code between client creation and the `getUser()` call**, and always return the response object whose cookies were mutated. Reordering breaks silent session refresh and causes random logouts. This is the one non-obvious snippet below.
+- **Timing & lifecycle (proxy):** In `proxy.ts`, you must create the response, create the server client wired to read request cookies and write to _both_ request and response, then call `supabase.auth.getUser()` (or `getClaims()`) — **do not run any code between client creation and the `getUser()` call**, and always return the response object whose cookies were mutated. Reordering breaks silent session refresh and causes random logouts. This is the one non-obvious snippet below.
 - **State sequencing (auth callback):** the password-reset email link hits `/auth/confirm?token_hash=…&type=recovery`; the route must `verifyOtp` first (which establishes the session) before redirecting to `/update-password`. The update-password page then calls `updateUser({ password })` against the now-active session.
 
 ## Phase 1: Local Supabase stack + env
@@ -52,7 +52,7 @@ Bring the local Supabase stack online and write `.env.local` so the app can talk
 
 #### 1. Start the local stack
 
-**File**: (no file) — run `pnpm supabase start` (Docker required).
+**File**: (no file) — run `supabase start` (Docker required; the CLI is provisioned by `mise install`, not pnpm).
 
 **Intent**: Boot local Postgres + Auth (GoTrue) + Studio + Inbucket so auth flows run without hosted creds.
 
@@ -70,7 +70,7 @@ Bring the local Supabase stack online and write `.env.local` so the app can talk
 
 #### Automated Verification:
 
-- Stack reports healthy: `pnpm supabase status` lists running services.
+- Stack reports healthy: `supabase status` lists running services.
 - `.env.local` exists and contains both `NEXT_PUBLIC_SUPABASE_*` vars.
 
 #### Manual Verification:
@@ -125,7 +125,8 @@ export async function proxy(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
         response = NextResponse.next({ request })
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options))
+          response.cookies.set(name, value, options),
+        )
       },
     },
   })
@@ -358,7 +359,7 @@ No data migration. The proxy replaces the (nonexistent) middleware; no rollback 
 
 #### Automated
 
-- [ ] 1.1 Stack reports healthy: `pnpm supabase status`
+- [ ] 1.1 Stack reports healthy: `supabase status`
 - [ ] 1.2 `.env.local` exists with both `NEXT_PUBLIC_SUPABASE_*` vars
 
 #### Manual
