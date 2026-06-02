@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 
-import { FormError } from '@/shared/components/forms/form-components/form-error'
-import { useAppForm } from '@/shared/components/forms/hooks/form-hooks'
+import { FormError } from '@/components/forms/form-components/form-error'
+import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { updatePasswordSchema } from '@/features/auth/schema'

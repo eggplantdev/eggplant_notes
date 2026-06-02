@@ -1,6 +1,6 @@
 import { createFormHook, createFormHookContexts, useStore } from '@tanstack/react-form'
 
-import { FormInput } from '@/shared/components/forms/form-components/form-input'
+import { FormInput } from '@/components/forms/form-components/form-input'
 
 const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts()
 

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { validateInput } from '@/features/auth/validate'
 import { credentialsSchema } from '@/features/auth/schema'
 import { createClient } from '@/lib/supabase/server'
-import type { ActionResultT } from '@/features/auth/types'
+import type { ActionResultT } from '@/types/action'
 
 export async function signUp(input: unknown): Promise<ActionResultT> {
   const parsed = validateInput(credentialsSchema, input)

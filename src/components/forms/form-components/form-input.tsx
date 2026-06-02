@@ -1,9 +1,9 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { FormError } from '@/shared/components/forms/form-components/form-error'
-import { useFieldContext } from '@/shared/components/forms/hooks/form-hooks'
-import type { FormControlPropsT } from '@/shared/components/forms/types/form-types'
-import { getFieldErrorText } from '@/shared/components/forms/utils'
+import { FormError } from '@/components/forms/form-components/form-error'
+import { useFieldContext } from '@/components/forms/hooks/form-hooks'
+import type { FormControlPropsT } from '@/components/forms/types/form-types'
+import { getFieldErrorText } from '@/components/forms/utils'
 
 // Field-context-aware input over the shadcn Input + Label, rendering validation errors.
 export function FormInput(props: FormControlPropsT) {
