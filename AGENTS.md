@@ -19,10 +19,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Env vars on Vercel:** the **Supabase Marketplace integration** is installed and auto-provisioned its keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_*`, …) — scoped to **production + preview only, not development**. Add future services the same way (`vercel env add`), never hand-edit. **Local dev uses a local Supabase stack** (`supabase start`) with its own local keys in `.env.local`, _not_ the hosted prod/preview creds — keeps production secrets off your machine and matches the devcontainer wiring (`host.docker.internal`). So `vercel env pull` (development target) intentionally won't fetch the hosted Supabase vars.
 - **Never write to `context/archive/`** — archived changes are immutable.
 
-## Project structure
+## Project structure — feature-first, tiered
 
-- `src/app/` — App Router routes; API routes under `src/app/api/`.
-- `src/components/ui/` — shadcn components. `src/hooks/`, `src/stores/` (Zustand), `src/lib/`, `src/types/` (shared `*T` types).
+Organize by **domain**, not by technical type. Tiers, and the one-directional promotion rule between them:
+
+- `src/features/<domain>/` — **domain code lives here; this is the default home.** Each feature owns its `components/`, `actions/`, `schemas.ts`, `types.ts`, hooks. New code is **born here**, inside its feature (e.g. `src/features/auth/`).
+- `src/components/` — **non-domain primitives**: `ui/` (shadcn), `forms/` (TanStack `useAppForm` layer). These have **zero domain knowledge** — never put feature logic here, and don't move a feature-only helper here just because it's a component.
+- `src/lib/` — **infra/util only, no domain knowledge**: `supabase/` clients, `utils/`. Auth/notes/etc. do **not** belong here (that was the old layout; `lib/auth` → `features/auth`).
+- `src/types/` — cross-feature shared `*T` types (e.g. `action.ts`). Co-locate feature-only types in their feature; promote here on the **2nd** consumer.
+- `src/hooks/`, `src/stores/` (Zustand) — only genuinely cross-feature ones; feature-scoped hooks/stores stay in the feature.
+- **Promotion rule:** keep code in its feature until a **second** feature needs it, _then_ lift it to the shared tier (`src/types/`, `src/components/`, `src/lib/`). Never promote on the first use.
+- `src/app/` — App Router routes **only** (Next forces routing here); route files stay thin and import from `features/`. Route groups mirror features (`(auth-pages)` ↔ `features/auth`). API routes under `src/app/api/`.
 - `src/__tests__/**/*.test.ts` — Vitest specs.
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
 - `context/foundation/` — `@context/foundation/prd.md` (the contract), `@context/foundation/tech-stack.md`; sprint plan at `@context/changes/v1-sprint-plan/plan.md`.
