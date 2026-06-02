@@ -30,13 +30,13 @@ A user is redirected to `/sign-in`, signs up, lands on a gated stub page, can si
 
 ## Scope
 
-**In scope:** SSR clients, `proxy.ts` session refresh + gating, `/auth/confirm` token exchange, 4 auth pages via TanStack Form + Server Actions, `(protected)` layout guard + stub page, local stack + `.env.local`, Playwright auth E2E.
+**In scope:** SSR clients, `proxy.ts` session refresh + gating, `/api/auth/confirm` token exchange, 4 auth pages via TanStack Form + Server Actions, `(protected)` layout guard + stub page, local stack + `.env.local`, Playwright auth E2E.
 
 **Out of scope:** app-table migrations (F-02), account deletion (S-05), email-verification gate, OAuth/MFA/magic-link, external-LLM connect, real dashboard (S-04), full wykonczymy field-component set.
 
 ## Architecture / Approach
 
-Browser client (client components) + per-request server client (`await cookies()`, Next 16 async). `src/proxy.ts` refreshes the session cookie every request and does optimistic gating; the `(protected)` layout re-checks `getUser()` authoritatively. Auth forms are client components on a mirrored `useAppForm`; submit calls a `'use server'` action that sets cookies via the server client and `redirect()`s. Password recovery flows through `/auth/confirm` (`verifyOtp`) → `/update-password`.
+Browser client (client components) + per-request server client (`await cookies()`, Next 16 async). `src/proxy.ts` refreshes the session cookie every request and does optimistic gating; the `(protected)` layout re-checks `getUser()` authoritatively. Auth forms are client components on a mirrored `useAppForm`; submit calls a `'use server'` action that sets cookies via the server client and `redirect()`s. Password recovery flows through `/api/auth/confirm` (`verifyOtp`) → `/update-password`.
 
 ## Phases at a Glance
 

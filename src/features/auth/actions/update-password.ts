@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 
 import { runAuthAction } from '@/features/auth/run-auth-action'
-import { updatePasswordSchema } from '@/features/auth/schema'
+import { updatePasswordSchema } from '@/features/auth/schemas'
 import type { ActionResultT } from '@/types/action'
 
 export async function updatePassword(input: unknown): Promise<ActionResultT> {

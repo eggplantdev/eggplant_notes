@@ -8,7 +8,7 @@ import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { signUp } from '@/features/auth/actions/sign-up'
-import { emailSchema, passwordSchema } from '@/features/auth/schema'
+import { emailSchema, passwordSchema } from '@/features/auth/schemas'
 
 export default function SignUpPage() {
   const [formError, setFormError] = useState<string | undefined>(undefined)

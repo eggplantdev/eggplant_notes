@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 
 import { runAuthAction } from '@/features/auth/run-auth-action'
-import { credentialsSchema } from '@/features/auth/schema'
+import { credentialsSchema } from '@/features/auth/schemas'
 import type { ActionResultT } from '@/types/action'
 
 export async function signUp(input: unknown): Promise<ActionResultT> {

@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 
 import { SITE_URL } from '@/lib/env'
 import { runAuthAction } from '@/features/auth/run-auth-action'
-import { resetRequestSchema } from '@/features/auth/schema'
+import { resetRequestSchema } from '@/features/auth/schemas'
 import type { ActionResultT } from '@/types/action'
 
 export async function resetPassword(input: unknown): Promise<ActionResultT> {

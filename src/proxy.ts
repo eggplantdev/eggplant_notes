@@ -8,6 +8,12 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env'
 // session, so bouncing it would trap the user off the page they need.
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password']
 
+// Exact match or a true subpath — NOT a bare prefix, so `/sign-in-evil` and
+// `/update-password-x` don't slip through the public-route check.
+function matchesPath(pathname: string, route: string) {
+  return pathname === route || pathname.startsWith(route + '/')
+}
+
 // Redirect while preserving the cookies refreshed on `response`, so the session
 // survives the redirect (a bare NextResponse.redirect would drop them).
 function redirectTo(pathname: string, request: NextRequest, response: NextResponse) {
@@ -45,11 +51,11 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route))
+  const isAuthRoute = AUTH_ROUTES.some((route) => matchesPath(pathname, route))
   // Public = auth pages + the email-link callback + update-password (reached via a
   // recovery session, so it must not redirect to /sign-in either).
   const isPublic =
-    isAuthRoute || pathname.startsWith('/api/auth/') || pathname.startsWith('/update-password')
+    isAuthRoute || pathname.startsWith('/api/auth/') || matchesPath(pathname, '/update-password')
 
   // Optimistic gate (the (protected) layout is the authoritative backstop):
   // signed-out on a protected path -> sign-in; signed-in on an auth page -> dashboard.
@@ -67,6 +73,11 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - image assets
+     *
+     * NOTE: /api IS intentionally included — the /api/auth/confirm callback must
+     * run through the proxy to propagate the session cookie it sets. Any future
+     * /api/* route therefore also runs here; add it to `isPublic` if it must be
+     * reachable while signed out.
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

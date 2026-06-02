@@ -1,50 +1,109 @@
-# Implementation Review — minimal-auth-and-session (F-01)
+<!-- IMPL-REVIEW-REPORT -->
 
-> Reviewed 2026-06-02 via `/code-review` (7 finder angles: 3 correctness + 3 cleanup + altitude)
-> over the F-01 diff `9be0a54..HEAD`, plus an end-to-end Playwright verification pass against a
-> production build. `/10x-impl-review` (m2l3) was fetched mid-session; this artifact records the
-> `/code-review` outcome rather than re-running.
+# Implementation Review: Minimal Auth and Session (F-01)
 
-## Verdict
+- **Plan**: context/changes/minimal-auth-and-session/plan.md
+- **Scope**: All 5 phases
+- **Date**: 2026-06-02
+- **Verdict**: APPROVED — both warnings fixed during triage; post-fix `tsc`/`lint`/`test` all green.
+- **Findings**: 0 critical, 2 warnings, 5 observations
+- **Triage**: Fixed F1, F2, F3, F4, F7 · Dismissed F5 · Skipped F6
 
-**Ship.** No correctness bugs survived verification. All five auth flows verified working
-end-to-end on a confirmed-current build (see Evidence). Findings were prod-readiness, efficiency,
-and cleanup — the two acted-on items are resolved; three are recorded follow-ups.
+> Note: this scorecard review (m2l3 `/10x-impl-review`) supersedes the earlier
+> generic `/code-review` output preserved at `reviews/impl-review-code-review.md`.
+> It resolves that review's three deferred items: (a) proxy-matcher-includes-/api
+> → refuted/intentional (F4); (b) startsWith over-match → confirmed (F2);
+> (c) dashboard double getUser → refuted/not-redundant (F5).
 
-## Evidence (Playwright, prod build, verified server PID each run)
+## Verdicts
 
-- **3.5 sign-up** → user created + session → `/dashboard`.
-- **3.6 sign-in / sign-out** → both work; session cleared on sign-out.
-- **3.7 reset round-trip** → request → Mailpit email → `/api/auth/confirm` (PKCE `verifyOtp`) →
-  `/update-password` → new password → sign in with new password → `/dashboard`.
-- **3.8 inline validation** → invalid email/short password render field errors (`aria-invalid=true`).
-- **4.4** `/dashboard` signed-out → `/sign-in`. **4.5** `/sign-in` signed-in → `/dashboard`.
-- **4.6** layout backstop confirmed by isolation test (proxy matcher temporarily excluded
-  `/dashboard`; signed-out hit still redirected — only the `(protected)` layout could do that).
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | WARNING |
+| Architecture        | PASS    |
+| Pattern Consistency | PASS    |
+| Success Criteria    | PASS    |
+
+Automated success criteria re-run at review time: `tsc --noEmit` 0 errors, `pnpm lint` 0, `pnpm test` 3/3 pass. E2E (5.1/5.2) trusted from committed prod-build Playwright config (local stack not up at review time).
 
 ## Findings
 
-| #   | File                                            | Finding                                                                                                             | Disposition                                                                                                                              |
-| --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `features/auth/actions/reset-password.ts`       | Hardcoded `http://127.0.0.1:3000` origin fallback → broken recovery links if `origin` header absent on preview/prod | **Fixed** — falls back to `SITE_URL` from the zod-validated `@/lib/env` (commit `19a9c05`)                                               |
-| 3   | `features/auth/actions/*`                       | 4 actions duplicated the `validate → client → call → normalize` skeleton                                            | **Fixed** — extracted `runAuthAction` (`19a9c05`)                                                                                        |
-| 2   | `proxy.ts` matcher                              | Matcher doesn't exclude `/api`, so `getUser()` (network) runs on every API request                                  | **Deferred** — only `/api/auth/confirm` exists today; revisit when API routes grow (exclude `/api` or use `getClaims()` on the hot path) |
-| 4   | `proxy.ts:48,52`                                | `startsWith` over-matches (`/sign-in` ⊃ `/sign-in-x`, `/update-password` ⊃ `/update-passwordX`)                     | **Deferred** — no sibling routes exist in v1; tighten to exact/`/`-boundary if the route set grows                                       |
-| 5   | `(protected)/layout.tsx` + `dashboard/page.tsx` | Both call `getUser()` → 2 auth calls per dashboard render                                                           | **Deferred** — minor; pass user down from layout if it becomes hot                                                                       |
+### F1 — Unvalidated OTP `type` cast in the confirm route
 
-### Considered and discounted (false positives)
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
+- **Dimension**: Safety & Quality
+- **Location**: src/app/api/auth/confirm/route.ts:11,15
+- **Detail**: `type` is read from the query string and cast straight to `EmailOtpType` (`as EmailOtpType`), then passed to `verifyOtp({ type, token_hash })` with no allow-list. No open redirect (target at :18 is a fixed internal path, not a user-controlled `next`), and Supabase rejects mismatched token/type — blast radius is bounded. But the route trusts unvalidated input at a security boundary.
+- **Fix**: Validate `type` against an explicit set (`['recovery','email']` for F-01) before calling verifyOtp; redirect to `/sign-in?error=…` on a bad type.
+  - Strength: Closes the boundary; matches the "validate at the edge" discipline the Server Actions already use.
+  - Tradeoff: A few lines; must keep the set in sync as email flows expand (F-02+).
+  - Confidence: HIGH — verifyOtp's accepted types are well-defined.
+  - Blind spot: None significant.
+- **Decision**: FIXED — added `ALLOWED_OTP_TYPES` allow-list; bad/absent type falls through to `/sign-in?error=…`.
 
-- "Server Action `redirect()` breaks the `Promise<ActionResultT>` contract / makes the error
-  handler dead code" — **no**: this is the intended Next.js pattern; `redirect()` throws
-  `NEXT_REDIRECT`, the `if (!result.success)` branch runs only on the error return.
-- "`redirectTo` cookie-copy helper in proxy is overengineered" — **no**: copying the refreshed
-  cookies onto the redirect response is required by the Supabase SSR spec, else the session is
-  dropped on redirect.
-- "`src/proxy.ts` not registered (no `middleware.ts`)" — **no**: `src/proxy.ts` is the Next.js 16
-  convention; build emits `ƒ Proxy (Middleware)`.
+### F2 — Proxy public-route check over-matches via startsWith
 
-## Process note
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/proxy.ts:48,52
+- **Detail**: `AUTH_ROUTES.some(r => pathname.startsWith(r))` and `startsWith('/update-password')` treat `/sign-in-evil`, `/update-password-x`, `/reset-password-anything` as public. The only security-relevant edge: a signed-out hit on such a path is classed public and skips the optimistic gate. Contained today — no such routes exist, all real protected routes live under `(protected)` and are backstopped by the layout `getUser()` re-check (src/app/(protected)/layout.tsx:14), and unknown paths 404.
+- **Fix**: Match exactly — `r === pathname || pathname.startsWith(r + '/')`.
+  - Strength: Removes the prefix-bleed class entirely; trivial edit.
+  - Tradeoff: None.
+  - Confidence: HIGH — pure predicate tightening, backstopped by the layout anyway.
+  - Blind spot: None significant.
+- **Decision**: FIXED — added `matchesPath` (exact-or-subpath) helper; replaced both `startsWith` checks.
 
-A stale `next-server` (renamed process, missed by `pkill -f "next start"`) held port 3000, so
-early validation ran against an unchanged build and produced a false diagnosis. Captured as a
-lesson in `context/foundation/lessons.md` (verify against a server you confirmed bound).
+### F3 — confirm route has no try/catch around verifyOtp
+
+- **Severity**: 🔭 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/app/api/auth/confirm/route.ts:8-23
+- **Detail**: Relies on verifyOtp returning `{ error }` rather than throwing. A thrown boundary error (network) 500s instead of hitting the `/sign-in?error=` fallback. Acceptable for MVP.
+- **Fix**: Wrap the verifyOtp call in try/catch; on throw, redirect to `/sign-in?error=…`.
+- **Decision**: FIXED — wrapped only verifyOtp (redirect kept outside try so NEXT_REDIRECT isn't swallowed); thrown error falls through to the error redirect.
+
+### F4 — proxy matcher runs ALL /api/_, not just /api/auth/_
+
+- **Severity**: 🔭 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Architecture
+- **Location**: src/proxy.ts:71
+- **Detail**: Intentional & correct for F-01 (confirm callback needs cookie propagation; `isPublic` whitelists `/api/auth/`). No other API routes exist yet. Worth a one-line comment so a future `/api/*` route author knows it runs through the proxy.
+- **Fix**: Add a comment at the matcher explaining /api is intentionally included.
+- **Decision**: FIXED — added a NOTE comment at the matcher explaining /api inclusion + the isPublic rule for future /api routes.
+
+### F5 — dashboard calls getUser() after the layout already did
+
+- **Severity**: 🔭 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Pattern Consistency
+- **Location**: src/app/(protected)/dashboard/page.tsx:8
+- **Detail**: Refuted as redundant — layout call is the gate, page call reads `user.email` for display; request-scoped, not a second round-trip. Prior `/code-review` flagged this; verified benign.
+- **Fix**: None needed (informational).
+- **Decision**: DISMISSED — verified NOT redundant. The layout's getUser() is the authoritative gate; the page's call reads `user.email` for display. Under @supabase/ssr both are served from the same request-scoped context within one request (not a second auth round-trip), and the page can't assume a user without its own read. Hoisting via context would be over-engineering for a stub page (real dashboard is S-04). Prior /code-review's "redundant double call" was a false positive; recording the dismiss so it isn't re-flagged.
+
+### F6 — TanStack Form ^1.33.0 vs plan's ^1.27.7
+
+- **Severity**: 🔭 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Plan Adherence
+- **Location**: package.json
+- **Detail**: Already reconciled in AGENTS.md/CLAUDE.md as the mirrored version; the plan text is just stale. No action.
+- **Fix**: None needed (plan is the stale artifact).
+- **Decision**: SKIPPED — docs (AGENTS.md/CLAUDE.md) already record ^1.33.0 as the mirrored version; the plan is an immutable historical artifact being re-archived, not worth back-editing.
+
+### F7 — schema file is schema.ts; plan/AGENTS.md say schemas.ts
+
+- **Severity**: 🔭 OBSERVATION
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Pattern Consistency
+- **Location**: src/features/auth/schema.ts
+- **Detail**: Cosmetic doc/code drift; a future agent grepping `schemas.ts` finds nothing. Either rename the file or fix the docs.
+- **Fix**: Rename `schema.ts` → `schemas.ts` to match docs, or correct the docs to `schema.ts`.
+- **Decision**: FIXED — `git mv schema.ts → schemas.ts`; updated all 9 importers (4 pages, 4 actions, 1 test) to `@/features/auth/schemas`. Now matches the AGENTS.md feature-first naming.

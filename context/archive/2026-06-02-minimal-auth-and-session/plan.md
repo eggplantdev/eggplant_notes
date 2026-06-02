@@ -21,7 +21,7 @@ A new user can: open the app → be redirected to `/sign-in` → sign up → lan
 - Next.js 16: `src/proxy.ts` with `export function proxy()` replaces `middleware.ts` (`node_modules/next` docs confirmed via Context7; runtime `nodejs`).
 - `@supabase/ssr` 0.10.x uses the `cookies: { getAll, setAll }` contract with Next 16's **async** `cookies()` — `await cookies()` in the server client.
 - TanStack Form → Server Action composition is the reference-verified shape (`wykonczymy/src/components/forms/hooks/use-form-submit.ts`).
-- Password recovery needs a token-exchange route (`/auth/confirm`) that `verifyOtp`s the `token_hash` and redirects to the update-password page with an active session.
+- Password recovery needs a token-exchange route (`/api/auth/confirm`) that `verifyOtp`s the `token_hash` and redirects to the update-password page with an active session.
 
 ## What We're NOT Doing
 
@@ -40,7 +40,7 @@ Follow the official Supabase Next.js App Router SSR pattern, adapted for Next.js
 ## Critical Implementation Details
 
 - **Timing & lifecycle (proxy):** In `proxy.ts`, you must create the response, create the server client wired to read request cookies and write to _both_ request and response, then call `supabase.auth.getUser()` (or `getClaims()`) — **do not run any code between client creation and the `getUser()` call**, and always return the response object whose cookies were mutated. Reordering breaks silent session refresh and causes random logouts. This is the one non-obvious snippet below.
-- **State sequencing (auth callback):** the password-reset email link hits `/auth/confirm?token_hash=…&type=recovery`; the route must `verifyOtp` first (which establishes the session) before redirecting to `/update-password`. The update-password page then calls `updateUser({ password })` against the now-active session.
+- **State sequencing (auth callback):** the password-reset email link hits `/api/auth/confirm?token_hash=…&type=recovery`; the route must `verifyOtp` first (which establishes the session) before redirecting to `/update-password`. The update-password page then calls `updateUser({ password })` against the now-active session.
 
 ## Phase 1: Local Supabase stack + env
 
@@ -86,7 +86,7 @@ Bring the local Supabase stack online and write `.env.local` so the app can talk
 
 ### Overview
 
-Create the browser and server Supabase clients and the Next.js 16 `proxy.ts` that refreshes the session cookie on every request. Add the `/auth/confirm` token-exchange route used by reset (and future email) links.
+Create the browser and server Supabase clients and the Next.js 16 `proxy.ts` that refreshes the session cookie on every request. Add the `/api/auth/confirm` token-exchange route used by reset (and future email) links.
 
 ### Changes Required:
 
@@ -138,7 +138,7 @@ export async function proxy(request: NextRequest) {
 
 #### 4. Auth confirm route
 
-**File**: `src/app/auth/confirm/route.ts`
+**File**: `src/app/api/auth/confirm/route.ts` (path is `/api/auth/confirm`, not `/auth/confirm` — Route Handlers live under `app/api/` per the `feature-first-structure` convention; aligned post-implementation, see commit `e4f0d82`).
 
 **Intent**: Handle email-link callbacks (password recovery now; email confirm later) by exchanging the token for a session.
 
@@ -198,7 +198,7 @@ Add TanStack Form, build the `useAppForm` infra mirrored from wykonczymy, and im
 
 **Intent**: Server-side handlers for sign-up, sign-in, sign-out, reset-request, update-password using the server client.
 
-**Contract**: `'use server'` functions returning a typed result `{ success: boolean; error?: string }` (the `ActionResultT` in `src/types/action.ts`, mirroring wykonczymy's shape) so forms render inline errors; on success they `redirect()`. `signUp`/`signIn` → `supabase.auth.signUp`/`signInWithPassword`; `signOut` → `supabase.auth.signOut`; `resetPassword` → `resetPasswordForEmail(email, { redirectTo: <site>/auth/confirm?... })`; `updatePassword` → `supabase.auth.updateUser({ password })`.
+**Contract**: `'use server'` functions returning a typed result `{ success: boolean; error?: string }` (the `ActionResultT` in `src/types/action.ts`, mirroring wykonczymy's shape) so forms render inline errors; on success they `redirect()`. `signUp`/`signIn` → `supabase.auth.signUp`/`signInWithPassword`; `signOut` → `supabase.auth.signOut`; `resetPassword` → `resetPasswordForEmail(email, { redirectTo: <site>/api/auth/confirm?... })`; `updatePassword` → `supabase.auth.updateUser({ password })`.
 
 #### 5. Auth pages (route group)
 
