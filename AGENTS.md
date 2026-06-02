@@ -45,7 +45,7 @@ Scripts: `@package.json`. Run `mise install` once (Node 24 + pnpm + the Supabase
 
 ## Testing
 
-Vitest 4; specs live under `src/__tests__/**/*.test.ts`. Commands in `@package.json`.
+Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under `e2e/**/*.spec.ts` (`pnpm test:e2e`) — requires the local Supabase stack (`supabase start`) up; the config auto-runs a **production build** (`pnpm build && pnpm start`, not `next dev` — avoids hydration races) and uses **system Chrome** (`channel: 'chrome'`, no bundled browser). Commands in `@package.json`.
 
 ## Commits & CI
 

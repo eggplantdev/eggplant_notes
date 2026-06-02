@@ -16,10 +16,13 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } }],
+  // Run against a production build, NOT `next dev`: dev-mode on-demand compilation
+  // and Fast Refresh cause hydration races (the form submits natively before React
+  // attaches its handler), which flake the suite. `build && start` is deterministic.
   webServer: {
-    command: 'pnpm dev',
+    command: 'pnpm build && pnpm start',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
   },
 })
