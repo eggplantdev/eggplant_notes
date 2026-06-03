@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { TopicCheckT } from '@/features/topic-checks/types'
+import type { DueCardT, TopicCheckT } from '@/features/topic-checks/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -12,15 +12,17 @@ import type { Database } from '@/lib/supabase/types'
 // As of S-03 the review write path sets a future `due_at` via FSRS; a freshly-created check
 // defaults `due_at` to now() so it is due immediately until its first review reschedules it.
 // Does NOT use runTableQuery: that wrapper returns rows and throws on null data, whereas here
-// we need both the row and the count off the same response — so it's hand-rolled.
+// we need both the row and the count off the same response — so it's hand-rolled. Embeds
+// notes(title) (typed via the topic_checks→notes FK) so the card can link to its source note
+// by title (S-08) without a second round-trip.
 export async function getDueQueue(
   client?: SupabaseClient<Database>,
-): Promise<{ first?: TopicCheckT; count: number }> {
+): Promise<{ first?: DueCardT; count: number }> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
   const { data, count, error } = await supabase
     .from('topic_checks')
-    .select('*', { count: 'exact' })
+    .select('*, notes(title)', { count: 'exact' })
     .lte('due_at', now)
     .order('due_at', { ascending: true })
     .limit(1)

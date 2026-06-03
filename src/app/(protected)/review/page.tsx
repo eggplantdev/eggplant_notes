@@ -52,6 +52,14 @@ export default async function ReviewPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base font-medium">Recall</CardTitle>
+              {card.notes?.title && (
+                <Link
+                  href={`/notes/${card.note_id}`}
+                  className="text-muted-foreground hover:text-foreground text-sm"
+                >
+                  From: {card.notes.title}
+                </Link>
+              )}
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <RenderMarkdown content={card.prompt} />
