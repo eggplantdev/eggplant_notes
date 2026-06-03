@@ -45,6 +45,7 @@ yarn-error.log*
 # playwright e2e artifacts
 /test-results/
 /playwright-report/
+e2e/.auth/
 
 # typescript
 *.tsbuildinfo

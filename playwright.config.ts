@@ -19,14 +19,39 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false, // auth flows share the local Supabase auth.users table
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  // The local-GoTrue sign-up race (lessons.md) is environmental and worsens over a long run.
+  // A retry reruns the whole test from the top — and uniqueEmail() is called inside each test
+  // body, so each retry gets a brand-new account, side-stepping the race instead of gating on
+  // it. trace below captures the first retry, so a real regression still leaves evidence.
+  retries: 2,
   reporter: 'list',
   use: {
     baseURL: BASE_URL,
     channel: 'chrome', // use system Google Chrome, no bundled browser download
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } }],
+  // `dashboard` specs are read-only smoke against dummy data → they reuse one shared session
+  // (the `setup` project signs up once, saves storageState) instead of each signing up afresh.
+  // `setup` only runs as a dependency of `dashboard`, so filtered runs of other specs pay no
+  // extra sign-up. Everything else (mutation / empty-state / isolation) stays on fresh sign-up.
+  projects: [
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'dashboard',
+      testMatch: /dashboard\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        storageState: 'e2e/.auth/dashboard.json',
+      },
+    },
+    {
+      name: 'chromium',
+      testIgnore: /dashboard\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
+  ],
   // Run against a production build, NOT `next dev`: dev-mode on-demand compilation
   // and Fast Refresh cause hydration races (the form submits natively before React
   // attaches its handler), which flake the suite. `build && start` is deterministic.
