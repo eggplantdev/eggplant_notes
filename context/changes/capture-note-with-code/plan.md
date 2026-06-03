@@ -343,30 +343,30 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 
 #### Automated
 
-- [x] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [x] 2.2 Detail route renders server-side (no client error)
+- [x] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass — 1bdd3da
+- [x] 2.2 Detail route renders server-side (no client error) — 1bdd3da
 
 #### Manual
 
-- [x] 2.3 ts/python code blocks render with distinct token colors (NFR)
-- [x] 2.4 Light/dark recolors code blocks correctly
-- [x] 2.5 List newest-first; empty state shows CTA
-- [x] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note
+- [x] 2.3 ts/python code blocks render with distinct token colors (NFR) — 1bdd3da
+- [x] 2.4 Light/dark recolors code blocks correctly — 1bdd3da
+- [x] 2.5 List newest-first; empty state shows CTA — 1bdd3da
+- [x] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note — 1bdd3da
 
 ### Phase 3: Write UI — editor + create/edit
 
 #### Automated
 
-- [ ] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [ ] 3.2 Editor chunk is code-split (not in initial/shared bundle)
+- [x] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
+- [x] 3.2 Editor chunk is code-split (not in initial/shared bundle)
 
 #### Manual
 
-- [ ] 3.3 Editor loads on `/notes/new`; live preview updates while typing
-- [ ] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable
-- [ ] 3.5 Create saves and lands on the new note's highlighted detail
-- [ ] 3.6 Edit pre-fills, saves, reflects on detail
-- [ ] 3.7 Empty/whitespace title blocked; >200 chars blocked
+- [x] 3.3 Editor loads on `/notes/new`; live preview updates while typing
+- [x] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable
+- [x] 3.5 Create saves and lands on the new note's highlighted detail
+- [x] 3.6 Edit pre-fills, saves, reflects on detail
+- [x] 3.7 Empty/whitespace title blocked; >200 chars blocked
 
 ### Phase 4: Delete + end-to-end test
 
