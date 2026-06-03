@@ -135,11 +135,11 @@ The feature: a server action that runs the RPC and tears down the session, a `/s
 
 #### 5. Sign-in `?deleted=1` notice
 
-**File**: `src/app/(auth-pages)/sign-in/page.tsx` (edit)
+**File**: `src/app/(auth-pages)/sign-in/page.tsx` (edit) + a new sibling notice subcomponent
 
 **Intent**: Confirm to the user that deletion succeeded after the redirect.
 
-**Contract**: Read the `deleted` search param; when `=== '1'`, render a one-line notice ("Your account and all data were deleted.") above the form. Use the page's existing notice/error rendering style.
+**Contract**: `sign-in/page.tsx` is a `'use client'` component, so it **cannot** read a server `searchParams` prop — the param must come from `useSearchParams()` (`next/navigation`). In Next 16 an un-suspended `useSearchParams()` on this statically-rendered route fails `next build` ("should be wrapped in a suspense boundary"), and Phase 3's E2E runs a real `pnpm build`, so this must be suspended. Extract a small client subcomponent (e.g. `DeletedNotice`) that calls `useSearchParams()` and renders a one-line notice ("Your account and all data were deleted.") above the form when `get('deleted') === '1'`; render it inside a `<Suspense>` boundary in the page. Reuse the `FormError`/notice markup for visual consistency (there is no existing search-param notice pattern to mirror — the current `FormError` is `useState`-driven from form submission only).
 
 ### Success Criteria:
 
@@ -214,6 +214,7 @@ A Playwright spec proving the full lifecycle: sign up → delete via the real UI
 ## Migration Notes
 
 - Second migration in the repo; additive (new function only, no schema change). Apply locally with `supabase db reset`. Hosted `db push` deferred until a slice deploys.
+- **Hosted-privilege caveat (re-verify on first hosted apply):** Phase 1's privilege check passes locally because the local `postgres` role is effectively superuser, so the definer fn can delete from `auth.users` regardless of grants. On hosted Supabase `postgres` is NOT a superuser and may lack delete on the `supabase_auth_admin`-owned `auth.users` — a green LOCAL check does not prove the hosted case. When this slice first deploys, re-verify the delete works hosted; fallback is to own the function as `supabase_auth_admin` (or add an explicit grant).
 - No data backfill.
 
 ## References

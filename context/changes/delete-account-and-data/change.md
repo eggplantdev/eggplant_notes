@@ -1,7 +1,7 @@
 ---
 change_id: delete-account-and-data
 title: Account self-deletion from settings, with full owned-data teardown
-status: planned
+status: plan_reviewed
 created: 2026-06-03
 updated: 2026-06-03
 archived_at: null
