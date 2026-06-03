@@ -40,10 +40,13 @@ export default function SignInPage() {
             form.handleSubmit()
           }}
         >
-          <form.AppField name="email" validators={{ onChange: emailSchema }}>
+          <form.AppField name="email" validators={{ onBlur: emailSchema, onSubmit: emailSchema }}>
             {(field) => <field.Input label="Email" type="email" autoComplete="email" />}
           </form.AppField>
-          <form.AppField name="password" validators={{ onChange: passwordSchema }}>
+          <form.AppField
+            name="password"
+            validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
+          >
             {(field) => (
               <field.Input label="Password" type="password" autoComplete="current-password" />
             )}

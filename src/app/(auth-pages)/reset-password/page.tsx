@@ -43,7 +43,7 @@ export default function ResetPasswordPage() {
               form.handleSubmit()
             }}
           >
-            <form.AppField name="email" validators={{ onChange: emailSchema }}>
+            <form.AppField name="email" validators={{ onBlur: emailSchema, onSubmit: emailSchema }}>
               {(field) => <field.Input label="Email" type="email" autoComplete="email" />}
             </form.AppField>
             <FormError message={formError} />

@@ -35,7 +35,10 @@ export default function UpdatePasswordPage() {
             form.handleSubmit()
           }}
         >
-          <form.AppField name="password" validators={{ onChange: passwordSchema }}>
+          <form.AppField
+            name="password"
+            validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
+          >
             {(field) => (
               <field.Input label="New password" type="password" autoComplete="new-password" />
             )}
