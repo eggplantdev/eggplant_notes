@@ -1,6 +1,6 @@
 // UTC date helpers for the dashboard. All date math runs in UTC so the `YYYY-MM-DD` keys
 // the heatmap joins on stay stable regardless of the runtime timezone. Feature-local (only
-// the dashboard needs them) — promote to src/lib/ only if a second feature does.
+// the dashboard needs them) — promote to src/lib/utils only if a second feature does.
 
 // Midnight-UTC epoch ms for a date, dropping any time-of-day.
 export function utcMidnight(d: Date): number {

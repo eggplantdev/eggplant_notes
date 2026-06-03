@@ -1,5 +1,5 @@
 import { MONTHS, MS_PER_DAY } from '@/features/dashboard/constants'
-import { toISODate, utcMidnight } from '@/features/dashboard/date-utils'
+import { toISODate, utcMidnight } from '@/features/dashboard/utils'
 import type {
   ActivityDayT,
   HeatmapCellT,

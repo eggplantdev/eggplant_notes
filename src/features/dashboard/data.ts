@@ -1,5 +1,5 @@
 import { MS_PER_DAY } from '@/features/dashboard/constants'
-import { toISODate } from '@/features/dashboard/date-utils'
+import { toISODate } from '@/features/dashboard/utils'
 import type { ActivityDayT, DashboardDataT } from '@/features/dashboard/types'
 
 // ⚠️ UI-SHELL SPIKE (S-04 ahead of S-03). This returns DUMMY data so the dashboard UI can
