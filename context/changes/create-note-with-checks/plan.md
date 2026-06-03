@@ -351,8 +351,8 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Automated
 
-- [x] 2.1 Type checking passes (`pnpm typecheck`)
-- [x] 2.2 Linting passes (`pnpm lint`)
+- [x] 2.1 Type checking passes (`pnpm typecheck`) — 20b6c01
+- [x] 2.2 Linting passes (`pnpm lint`) — 20b6c01
 
 #### Manual
 
@@ -362,9 +362,9 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Automated
 
-- [ ] 3.1 Type checking passes (`pnpm typecheck`)
-- [ ] 3.2 Linting passes (`pnpm lint`)
-- [ ] 3.3 Production build passes (`pnpm build`)
+- [x] 3.1 Type checking passes (`pnpm typecheck`)
+- [x] 3.2 Linting passes (`pnpm lint`)
+- [x] 3.3 Production build passes (`pnpm build`)
 
 #### Manual
 
