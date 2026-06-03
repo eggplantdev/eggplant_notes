@@ -246,24 +246,24 @@ A Playwright spec proving the full lifecycle: sign up → delete via the real UI
 
 #### Automated
 
-- [x] 2.1 `pnpm typecheck` passes
-- [x] 2.2 `pnpm lint` passes
-- [x] 2.3 `pnpm test` passes
+- [x] 2.1 `pnpm typecheck` passes — fecbf0a
+- [x] 2.2 `pnpm lint` passes — fecbf0a
+- [x] 2.3 `pnpm test` passes — fecbf0a
 
 #### Manual
 
-- [x] 2.4 `/settings` Danger zone renders; destructive button disabled until `DELETE` typed
-- [x] 2.5 Confirming deletes the account and lands on `/sign-in?deleted=1` with the notice
-- [x] 2.6 Deleted account cannot sign in again; fresh sign-up still works
-- [x] 2.7 Simulated RPC error surfaces inline and does NOT sign the user out
+- [x] 2.4 `/settings` Danger zone renders; destructive button disabled until `DELETE` typed — fecbf0a
+- [x] 2.5 Confirming deletes the account and lands on `/sign-in?deleted=1` with the notice — fecbf0a
+- [x] 2.6 Deleted account cannot sign in again; fresh sign-up still works — fecbf0a
+- [x] 2.7 Simulated RPC error surfaces inline and does NOT sign the user out — fecbf0a
 
 ### Phase 3: E2E account-lifecycle test
 
 #### Automated
 
-- [ ] 3.1 `pnpm test:e2e` passes including `delete-account.spec.ts`
-- [ ] 3.2 Existing `auth.spec.ts` and `isolation.spec.ts` still green
+- [x] 3.1 `pnpm test:e2e` passes including `delete-account.spec.ts`
+- [x] 3.2 Existing `auth.spec.ts` and `isolation.spec.ts` still green
 
 #### Manual
 
-- [ ] 3.3 Server confirmed bound by PID/port before trusting the run
+- [x] 3.3 Server confirmed bound by PID/port before trusting the run
