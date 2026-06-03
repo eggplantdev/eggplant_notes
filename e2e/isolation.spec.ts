@@ -37,11 +37,61 @@ async function clientFor(email: string): Promise<SupabaseClient> {
   return supabase
 }
 
-test('account B cannot read account A rows, and vice versa', async ({ browser }) => {
+type SeedT = {
+  noteId: string
+  topicCheckId: string
+  reviewEventId: string
+  title: string
+  prompt: string
+}
+
+// Seed the full cascade chain (note → topic_check → review_event) for one account. Every
+// row's user_id defaults to auth.uid() (NOT NULL + RLS `with check`), so no client can
+// forge ownership. Returns the row ids so the other account can attempt to read them.
+async function seedChain(supabase: SupabaseClient, tag: string): Promise<SeedT> {
+  const title = `note-${tag}-${Date.now()}`
+  const prompt = `prompt-${tag}-${Date.now()}`
+
+  const note = await supabase.from('notes').insert({ title }).select('id').single()
+  expect(note.error, `${tag} note insert failed`).toBeNull()
+  const noteId = note.data!.id
+
+  const tc = await supabase
+    .from('topic_checks')
+    .insert({ note_id: noteId, prompt })
+    .select('id')
+    .single()
+  expect(tc.error, `${tag} topic_check insert failed`).toBeNull()
+  const topicCheckId = tc.data!.id
+
+  const re = await supabase
+    .from('review_events')
+    .insert({ topic_check_id: topicCheckId, rating: 5 })
+    .select('id')
+    .single()
+  expect(re.error, `${tag} review_event insert failed`).toBeNull()
+  const reviewEventId = re.data!.id
+
+  return { noteId, topicCheckId, reviewEventId, title, prompt }
+}
+
+// Assert `client` sees its own row in `table` but NOT the other account's row.
+async function assertIsolated(
+  client: SupabaseClient,
+  table: 'notes' | 'topic_checks' | 'review_events',
+  ownId: string,
+  foreignId: string,
+) {
+  const { data, error } = await client.from(table).select('id')
+  expect(error, `select ${table} failed`).toBeNull()
+  const ids = (data ?? []).map((r) => r.id as string)
+  expect(ids, `expected own ${table} row visible`).toContain(ownId)
+  expect(ids, `LEAK: foreign ${table} row visible`).not.toContain(foreignId)
+}
+
+test('accounts are isolated across notes, topic_checks, and review_events', async ({ browser }) => {
   const emailA = uniqueEmail('a')
   const emailB = uniqueEmail('b')
-  const titleA = `note-A-${Date.now()}`
-  const titleB = `note-B-${Date.now()}`
 
   // Sign up both accounts through the real UI in isolated browser contexts.
   const ctxA = await browser.newContext()
@@ -54,24 +104,16 @@ test('account B cannot read account A rows, and vice versa', async ({ browser })
   const supaA = await clientFor(emailA)
   const supaB = await clientFor(emailB)
 
-  // Each account inserts its own note. user_id defaults to auth.uid() (NOT NULL + RLS
-  // `with check`), so neither client can forge ownership.
-  const insA = await supaA.from('notes').insert({ title: titleA }).select('id')
-  const insB = await supaB.from('notes').insert({ title: titleB }).select('id')
-  expect(insA.error, 'A insert failed').toBeNull()
-  expect(insB.error, 'B insert failed').toBeNull()
+  // Each account seeds its own full chain.
+  const a = await seedChain(supaA, 'A')
+  const b = await seedChain(supaB, 'B')
 
-  // A sees only its own note; B's row is invisible.
-  const seenByA = await supaA.from('notes').select('title')
-  expect(seenByA.error).toBeNull()
-  const titlesA = (seenByA.data ?? []).map((r) => r.title)
-  expect(titlesA).toContain(titleA)
-  expect(titlesA).not.toContain(titleB)
-
-  // B sees only its own note; A's row is invisible.
-  const seenByB = await supaB.from('notes').select('title')
-  expect(seenByB.error).toBeNull()
-  const titlesB = (seenByB.data ?? []).map((r) => r.title)
-  expect(titlesB).toContain(titleB)
-  expect(titlesB).not.toContain(titleA)
+  // Every table's RLS scopes rows to the owner — each account sees only its own row and
+  // never the other's, in both directions, at all three levels of the cascade.
+  await assertIsolated(supaA, 'notes', a.noteId, b.noteId)
+  await assertIsolated(supaB, 'notes', b.noteId, a.noteId)
+  await assertIsolated(supaA, 'topic_checks', a.topicCheckId, b.topicCheckId)
+  await assertIsolated(supaB, 'topic_checks', b.topicCheckId, a.topicCheckId)
+  await assertIsolated(supaA, 'review_events', a.reviewEventId, b.reviewEventId)
+  await assertIsolated(supaB, 'review_events', b.reviewEventId, a.reviewEventId)
 })

@@ -15,7 +15,13 @@ export async function runTableQuery<T>(
   ) => PromiseLike<{ data: T | null; error: PostgrestError | null }>,
 ): Promise<T> {
   const { data, error } = await query(client)
-  if (error) throw new Error(error.message)
+  // Log the full PostgrestError (code/details/hint) to the server logs, then throw.
+  // Surface error.message (parity with runAuthAction) but keep the original error on
+  // `cause` so a caller can branch on code/details/hint (e.g. RLS denial vs. constraint).
+  if (error) {
+    console.error('[runTableQuery] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
   if (data === null) throw new Error('Supabase query returned no data')
   return data
 }
