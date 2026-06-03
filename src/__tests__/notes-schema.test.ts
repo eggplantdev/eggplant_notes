@@ -35,6 +35,28 @@ describe('validateInput + noteInputSchema', () => {
       error: 'Title must be 200 characters or fewer',
     })
   })
+
+  it('accepts an optional subject_id (uuid, null, or omitted)', () => {
+    const withSubject = validateInput(noteInputSchema, {
+      title: 'T',
+      content: '',
+      subject_id: '00000000-0000-0000-0000-000000000000',
+    })
+    const unassigned = validateInput(noteInputSchema, { title: 'T', content: '', subject_id: null })
+    const omitted = validateInput(noteInputSchema, { title: 'T', content: '' })
+    expect(withSubject.success).toBe(true)
+    expect(unassigned.success).toBe(true)
+    expect(omitted.success).toBe(true)
+  })
+
+  it('rejects a non-uuid subject_id', () => {
+    const result = validateInput(noteInputSchema, {
+      title: 'T',
+      content: '',
+      subject_id: 'not-a-uuid',
+    })
+    expect(result).toEqual({ success: false, error: 'Invalid subject id' })
+  })
 })
 
 describe('validateInput + noteIdSchema', () => {

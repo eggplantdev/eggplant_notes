@@ -12,9 +12,15 @@ export const titleSchema = z
 
 export const contentSchema = z.string()
 
+// `subject_id` is optional: omitted by callers that don't touch assignment, `null` when
+// the form's subject picker selects "None", or a uuid when assigned. The note's
+// `position` is derived from this in the actions, never sent by the client.
+export const noteSubjectIdSchema = z.uuid('Invalid subject id').nullable().optional()
+
 export const noteInputSchema = z.object({
   title: titleSchema,
   content: contentSchema,
+  subject_id: noteSubjectIdSchema,
 })
 
 // Validates the `id` route param / form value for update + delete actions.

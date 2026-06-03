@@ -543,23 +543,23 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `supabase db reset`
-- [x] 1.2 Types regenerate and compile: `pnpm db:types` then `pnpm typecheck`
-- [x] 1.3 RLS enabled on `subjects` (verify via `pg_catalog.pg_tables`)
-- [x] 1.4 Lint passes: `pnpm lint`
+- [x] 1.1 Migration applies cleanly: `supabase db reset` — aff162e
+- [x] 1.2 Types regenerate and compile: `pnpm db:types` then `pnpm typecheck` — aff162e
+- [x] 1.3 RLS enabled on `subjects` (verify via `pg_catalog.pg_tables`) — aff162e
+- [x] 1.4 Lint passes: `pnpm lint` — aff162e
 
 #### Manual
 
-- [x] 1.5 `subjects` table + new `notes` columns present in Studio
-- [x] 1.6 Cross-user select of a subject returns nothing
+- [x] 1.5 `subjects` table + new `notes` columns present in Studio — aff162e
+- [x] 1.6 Cross-user select of a subject returns nothing — aff162e
 
 ### Phase 2: Subjects Data Layer + Note Assignment
 
 #### Automated
 
-- [ ] 2.1 Typecheck passes: `pnpm typecheck`
-- [ ] 2.2 Lint passes: `pnpm lint`
-- [ ] 2.3 Unit specs pass: `pnpm test`
+- [x] 2.1 Typecheck passes: `pnpm typecheck`
+- [x] 2.2 Lint passes: `pnpm lint`
+- [x] 2.3 Unit specs pass: `pnpm test`
 
 #### Manual
 
