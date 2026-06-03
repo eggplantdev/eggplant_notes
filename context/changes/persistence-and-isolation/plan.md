@@ -246,26 +246,26 @@ A Playwright spec proving the PRD's #1 guardrail: no user reads another's rows. 
 
 #### Automated
 
-- [x] 1.1 `supabase db reset` applies the migration with no errors
-- [x] 1.2 RLS enabled on all three tables, four policies each (Studio/psql)
-- [x] 1.3 `pnpm typecheck` passes
+- [x] 1.1 `supabase db reset` applies the migration with no errors — 79abbb0
+- [x] 1.2 RLS enabled on all three tables, four policies each (Studio/psql) — 79abbb0
+- [x] 1.3 `pnpm typecheck` passes — 79abbb0
 
 #### Manual
 
-- [x] 1.4 FK cascade chain + scheduling-column defaults confirmed in Studio
-- [x] 1.5 Policies use `(select auth.uid())`, not bare `auth.uid()`
+- [x] 1.4 FK cascade chain + scheduling-column defaults confirmed in Studio — 79abbb0
+- [x] 1.5 Policies use `(select auth.uid())`, not bare `auth.uid()` — 79abbb0
 
 ### Phase 2: Typegen + typed clients
 
 #### Automated
 
-- [ ] 2.1 `src/lib/supabase/types.ts` exists and exports `Database`
-- [ ] 2.2 `pnpm typecheck` passes with `<Database>` wired into both factories
-- [ ] 2.3 `pnpm lint` passes
+- [x] 2.1 `src/lib/supabase/types.ts` exists and exports `Database`
+- [x] 2.2 `pnpm typecheck` passes with `<Database>` wired into both factories
+- [x] 2.3 `pnpm lint` passes
 
 #### Manual
 
-- [ ] 2.4 `.from('notes').select()` shows typed columns in editor
+- [x] 2.4 `.from('notes').select()` shows typed columns in editor
 
 ### Phase 3: Typed read-access layer
 
