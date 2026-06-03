@@ -1,40 +1,20 @@
-import type { ActivityDay } from '@/features/dashboard/types'
+import { MONTHS, MS_PER_DAY } from '@/features/dashboard/constants'
+import { toISODate, utcMidnight } from '@/features/dashboard/date-utils'
+import type {
+  ActivityDayT,
+  HeatmapCellT,
+  HeatmapColumnT,
+  HeatmapLevelT,
+} from '@/features/dashboard/types'
 
 // GitHub-style contribution grid layout. Columns = weeks (oldest left → newest right),
 // each column has 7 cells indexed by weekday (0 = Sunday … 6 = Saturday). Days outside
 // the trailing window or after `today` are padding (`date: null`). This pure layout is
 // reused unchanged when real `review_events` aggregates replace the dummy data.
 
-export type HeatmapLevel = 0 | 1 | 2 | 3 | 4
-
-export type HeatmapCell = {
-  date: string | null // YYYY-MM-DD, or null for padding (outside range / future)
-  count: number
-  level: HeatmapLevel
-}
-
-export type HeatmapColumn = {
-  cells: HeatmapCell[] // length 7, index = weekday (0=Sun … 6=Sat)
-  // Month abbreviation ("Jun"), set on the first column whose representative day starts a
-  // new month; null otherwise. Drives the labels rendered above the grid.
-  monthLabel: string | null
-}
-
-const MS_PER_DAY = 86_400_000
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-// All date math is in UTC to keep `YYYY-MM-DD` keys stable regardless of the runtime TZ.
-function utcMidnight(d: Date): number {
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
-}
-
-function toISODate(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 10)
-}
-
 // Counts map to levels by fixed thresholds. First-pass buckets — re-tune against the real
 // review-count distribution when the data layer lands (noted in the design spec).
-export function countToLevel(count: number): HeatmapLevel {
+export function countToLevel(count: number): HeatmapLevelT {
   if (count <= 0) return 0
   if (count <= 2) return 1
   if (count <= 5) return 2
@@ -43,9 +23,9 @@ export function countToLevel(count: number): HeatmapLevel {
 }
 
 export function buildHeatmapMatrix(
-  activity: ActivityDay[],
+  activity: ActivityDayT[],
   opts: { today: Date; weeks?: number },
-): HeatmapColumn[] {
+): HeatmapColumnT[] {
   const weeks = opts.weeks ?? 53
   const counts = new Map(activity.map((a) => [a.date, a.count]))
 
@@ -55,12 +35,12 @@ export function buildHeatmapMatrix(
   const lastColumnSunday = todayMs - todayWeekday * MS_PER_DAY
   const firstColumnSunday = lastColumnSunday - (weeks - 1) * 7 * MS_PER_DAY
 
-  const columns: HeatmapColumn[] = []
+  const columns: HeatmapColumnT[] = []
   let prevMonth = -1
 
   for (let c = 0; c < weeks; c++) {
     const columnSunday = firstColumnSunday + c * 7 * MS_PER_DAY
-    const cells: HeatmapCell[] = []
+    const cells: HeatmapCellT[] = []
 
     for (let weekday = 0; weekday < 7; weekday++) {
       const cellMs = columnSunday + weekday * MS_PER_DAY
