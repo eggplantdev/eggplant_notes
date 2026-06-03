@@ -31,6 +31,9 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // Playwright runs a separate production build into .next-e2e (distDir override) so it
+    // never clobbers the dev .next — same generated output, never lint it.
+    ".next-e2e/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
