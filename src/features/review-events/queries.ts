@@ -4,7 +4,7 @@ import type { ReviewEventT } from '@/features/review-events/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY, toISODate, todayInZone } from '@/lib/utils'
+import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
 
 // Review history for one topic check, newest first. RLS scopes rows to the owner, so a
@@ -44,18 +44,4 @@ export async function getReviewActivity(
     counts.set(day, (counts.get(day) ?? 0) + 1)
   }
   return [...counts].map(([date, count]) => ({ date, count }))
-}
-
-// Consecutive days ending today (in APP_TIME_ZONE) with ≥1 review. Pure + synchronous —
-// derived from the already-fetched getReviewActivity() series, so the dashboard composes
-// both stats from a single activity read (no second DB query).
-export function getCurrentStreak(activity: ActivityDayT[]): number {
-  const active = new Set(activity.filter((a) => a.count > 0).map((a) => a.date))
-  let streak = 0
-  let cursorMs = todayInZone(APP_TIME_ZONE).getTime()
-  while (active.has(toISODate(cursorMs))) {
-    streak += 1
-    cursorMs -= MS_PER_DAY
-  }
-  return streak
 }

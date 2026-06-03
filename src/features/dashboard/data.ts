@@ -1,5 +1,6 @@
 import type { DashboardDataT } from '@/features/dashboard/types'
-import { getCurrentStreak, getReviewActivity } from '@/features/review-events/queries'
+import { getReviewActivity } from '@/features/review-events/queries'
+import { getCurrentStreak } from '@/features/review-events/streak'
 import { getDueCount } from '@/features/topic-checks/queries'
 
 // Composes the dashboard's per-user reads (S-03 data wiring). The two DB reads are independent,
