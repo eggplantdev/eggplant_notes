@@ -108,8 +108,12 @@ list from Phase 3 becomes draggable), E2E fifth.
   Read order is `order by position asc nulls last, created_at asc` (tie-break stable). No
   `UNIQUE(subject_id, position)` constraint — midpoints are distinct in practice and a unique
   constraint would make a future rebalance harder; ties (should not occur) fall back to
-  `created_at`. **`position` is null exactly when `subject_id` is null** — keep them
-  consistent in every write path.
+  `created_at`. **`position` is meaningful only while `subject_id` is set.** The app write
+  paths (create/update) keep them in lockstep (assign → both set, unassign → both null). The
+  ONE exception is subject delete: the FK `on delete set null` nulls `subject_id` but leaves
+  `position` stale. This is benign and intentional — a stale position is never read
+  (`getNotesForSubject` filters by `subject_id`; the notes list orders by `created_at`), and
+  reassigning the note overwrites it via `Date.now()`. Not worth a trigger.
 - **Reorder is one row.** The `reorderNote` action receives `(noteId, newPosition)` computed
   **client-side** from the visible neighbors (the island already holds the ordered list); the
   server validates ownership via RLS and writes only that row's `position`. Do not recompute
@@ -587,10 +591,10 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Automated
 
-- [x] 4.1 Build with the client island succeeds: `pnpm build`
-- [x] 4.2 Typecheck passes: `pnpm typecheck`
-- [x] 4.3 Lint passes: `pnpm lint`
-- [x] 4.4 No `ERR_PNPM_IGNORED_BUILDS` on install
+- [x] 4.1 Build with the client island succeeds: `pnpm build` — c1fdff3
+- [x] 4.2 Typecheck passes: `pnpm typecheck` — c1fdff3
+- [x] 4.3 Lint passes: `pnpm lint` — c1fdff3
+- [x] 4.4 No `ERR_PNPM_IGNORED_BUILDS` on install — c1fdff3
 
 #### Manual
 

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { subjectTitleSchema } from '@/features/subjects/schemas'
 import type { SubjectInputT } from '@/features/subjects/schemas'
-import type { SubjectT } from '@/features/subjects/types'
+import type { SubjectT } from '@/types/subject'
 import type { ActionResultT } from '@/types/action'
 
 // `subject` present → edit (action needs the id); absent → create. Mirrors NoteForm's

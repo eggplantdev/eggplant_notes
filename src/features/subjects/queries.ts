@@ -1,10 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { NoteT } from '@/features/notes/types'
-import type { SubjectT } from '@/features/subjects/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import type { NoteT } from '@/types/note'
+import type { SubjectT } from '@/types/subject'
 
 // Read helpers mirror the notes feature: RLS scopes every row to the owner, and the
 // optional client is injectable so the isolation E2E can drive the same path with a
@@ -47,13 +47,5 @@ export async function getNotesForSubject(
       .eq('subject_id', subjectId)
       .order('position', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true }),
-  )
-}
-
-// Notes not assigned to any subject — the discoverable home for detached notes.
-export async function getUnassignedNotes(client?: SupabaseClient<Database>): Promise<NoteT[]> {
-  const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) =>
-    c.from('notes').select('*').is('subject_id', null).order('created_at', { ascending: false }),
   )
 }

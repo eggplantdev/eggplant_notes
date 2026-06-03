@@ -17,8 +17,8 @@ import {
 } from '@/components/ui/select'
 import { titleSchema } from '@/features/notes/schemas'
 import type { NoteInputT } from '@/features/notes/schemas'
-import type { NoteT } from '@/features/notes/types'
-import type { SubjectT } from '@/features/subjects/types'
+import type { NoteT } from '@/types/note'
+import type { SubjectT } from '@/types/subject'
 import { cn } from '@/lib/utils'
 import type { ActionResultT } from '@/types/action'
 
