@@ -3,10 +3,10 @@ change_id: activity-dashboard
 roadmap_id: S-04
 linear: EX-364
 title: Activity dashboard — due-today count, current streak, review heatmap
-status: new
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T17:08:39Z
 ---
 
 ## Notes
