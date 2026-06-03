@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { signOut } from '@/features/auth/actions/sign-out'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
-import { APP_TIME_ZONE } from '@/features/dashboard/constants'
 import { getDashboardData } from '@/features/dashboard/data'
 import { StatCard } from '@/features/dashboard/stat-card'
-import { todayInZone } from '@/features/dashboard/utils'
 import { createClient } from '@/lib/supabase/server'
+import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
 // S-04 activity dashboard, wired to real per-user data by S-03 (features/dashboard/data.ts).
 export default async function DashboardPage() {

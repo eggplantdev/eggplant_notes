@@ -14,7 +14,10 @@ import type { ActionResultT } from '@/types/action'
 // compute the next FSRS state HERE — never trust a client-supplied schedule — and persist
 // atomically via the record_review RPC (one transaction: update topic_checks + insert
 // review_events; its update-first ownership guard self-enforces the card<->caller link).
-// `user_id` is never sent (DB defaults auth.uid()).
+// `user_id` is never sent (DB defaults auth.uid()). Deliberately does NOT use runTableAction:
+// that wrapper is single-schema → single PostgREST write → .select().single(); this has two
+// inputs (id + rating), an intermediate server-side read + FSRS compute, and an RPC that
+// returns void — so the {success}/error envelope is mirrored by hand here instead.
 export async function rateTopicCheck(
   topicCheckId: string,
   rating: unknown,

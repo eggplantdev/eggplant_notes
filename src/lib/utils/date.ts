@@ -1,6 +1,15 @@
-// UTC date helpers for the dashboard. All date math runs in UTC so the `YYYY-MM-DD` keys
-// the heatmap joins on stay stable regardless of the runtime timezone. Feature-local (only
-// the dashboard needs them) — promote to src/lib/utils only if a second feature does.
+// Shared date/time utilities. Promoted from features/dashboard/utils on the 2nd consumer
+// (features/review-events now buckets review activity by the same zone), per the feature-first
+// rule. All day math runs in UTC so the `YYYY-MM-DD` keys the heatmap + streak join on stay
+// stable regardless of the runtime timezone (Vercel functions run in UTC).
+
+export const MS_PER_DAY = 86_400_000
+
+// The single calendar zone the app buckets review activity / streak / heatmap "today" by.
+// This is a solo personal tool, so one fixed zone is correct and simplest. Vercel functions
+// run in UTC, so a naive `::date` / `new Date()` would bucket a late-night (local) review into
+// the next UTC day — bucketing in this zone keeps "today" matching the user's clock.
+export const APP_TIME_ZONE = 'Europe/Warsaw'
 
 // Midnight-UTC epoch ms for a date, dropping any time-of-day.
 export function utcMidnight(d: Date): number {

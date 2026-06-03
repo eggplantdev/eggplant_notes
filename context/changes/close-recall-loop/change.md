@@ -3,7 +3,7 @@ change_id: close-recall-loop
 roadmap_id: S-03
 linear: EX-363
 title: Close the recall loop — review a due topic check, self-rate, reschedule
-status: implemented
+status: impl_reviewed
 created: 2026-06-03
 updated: 2026-06-03
 prerequisites: [S-02 attach-topic-checks, F-02 persistence-and-isolation]

@@ -21,7 +21,9 @@ export async function getTopicChecksDue(client?: SupabaseClient<Database>): Prom
 
 // Count of the owner's topic checks that are due now — the dashboard "Due today" stat. Uses a
 // head + exact-count select so no row payload is fetched, with the same `due_at <= now()`
-// filter as getTopicChecksDue. Injectable client per the isolation rule.
+// filter as getTopicChecksDue. Injectable client per the isolation rule. Deliberately does NOT
+// use runTableQuery: a head+count response has `data: null` on success, which runTableQuery
+// treats as an error and throws — so the error envelope is hand-rolled here instead.
 export async function getDueCount(client?: SupabaseClient<Database>): Promise<number> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()

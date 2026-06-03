@@ -6,12 +6,10 @@
 // to real per-user queries over `topic_checks` / `review_events` without changing this shape.
 
 import { HEAT_LEVELS } from '@/features/dashboard/constants'
+import type { ActivityDayT } from '@/types/activity'
 
 // Level type derived from the HEAT_LEVELS const in constants.ts (its single source).
 export type HeatmapLevelT = (typeof HEAT_LEVELS)[number]
-
-// One calendar day of review activity. `date` is an ISO `YYYY-MM-DD` string (UTC).
-export type ActivityDayT = { date: string; count: number }
 
 export type DashboardDataT = {
   dueToday: number

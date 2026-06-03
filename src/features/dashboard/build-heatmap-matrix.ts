@@ -1,11 +1,7 @@
-import { MONTHS, MS_PER_DAY } from '@/features/dashboard/constants'
-import { toISODate, utcMidnight } from '@/features/dashboard/utils'
-import type {
-  ActivityDayT,
-  HeatmapCellT,
-  HeatmapColumnT,
-  HeatmapLevelT,
-} from '@/features/dashboard/types'
+import { MONTHS } from '@/features/dashboard/constants'
+import type { HeatmapCellT, HeatmapColumnT, HeatmapLevelT } from '@/features/dashboard/types'
+import { MS_PER_DAY, toISODate, utcMidnight } from '@/lib/utils'
+import type { ActivityDayT } from '@/types/activity'
 
 // GitHub-style contribution grid layout. Columns = weeks (oldest left → newest right),
 // each column has 7 cells indexed by weekday (0 = Sunday … 6 = Saturday). Days outside

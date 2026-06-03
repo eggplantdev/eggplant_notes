@@ -10,13 +10,7 @@ export const HEAT_LEVELS = [0, 1, 2, 3, 4] as const
 // Index = HeatmapLevelT.
 export const HEAT_BG = ['bg-heat-0', 'bg-heat-1', 'bg-heat-2', 'bg-heat-3', 'bg-heat-4'] as const
 
-export const MS_PER_DAY = 86_400_000
-
-// The single calendar zone the app buckets review activity / streak / heatmap "today" by.
-// This is a solo personal tool, so one fixed zone is correct and simplest. Vercel functions
-// run in UTC, so a naive `::date` / `new Date()` would bucket a late-night (local) review
-// into the next UTC day — bucketing in this zone keeps "today" matching the user's clock.
-export const APP_TIME_ZONE = 'Europe/Warsaw'
+// MS_PER_DAY + APP_TIME_ZONE moved to src/lib/utils/date.ts (shared on review-events' 2nd use).
 
 export const MONTHS = [
   'Jan',
