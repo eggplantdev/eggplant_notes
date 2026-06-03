@@ -1,0 +1,22 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+import { noteIdSchema } from '@/features/notes/schemas'
+import { runNoteAction } from '@/features/notes/run-note-action'
+import type { ActionResultT } from '@/types/action'
+
+// Delete a note. Attached topic_checks (and their review_events) are removed by the DB
+// FK `on delete cascade` — no app-side cascade needed (FR-010). RLS scopes the delete to
+// the owner. `.select().single()` returns the deleted row so runNoteAction confirms a
+// row was actually removed. On success, revalidate the list and return to it.
+export async function deleteNote(id: string): Promise<ActionResultT> {
+  const result = await runNoteAction(noteIdSchema, id, (supabase, validId) =>
+    supabase.from('notes').delete().eq('id', validId).select('id').single(),
+  )
+  if (!result.success) return result
+
+  revalidatePath('/notes')
+  redirect('/notes')
+}

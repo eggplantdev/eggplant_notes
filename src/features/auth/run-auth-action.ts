@@ -1,6 +1,6 @@
 import type { ZodType } from 'zod'
 
-import { validateInput } from '@/features/auth/validate'
+import { validateInput } from '@/lib/validate'
 import { createClient } from '@/lib/supabase/server'
 import type { ActionResultT } from '@/types/action'
 

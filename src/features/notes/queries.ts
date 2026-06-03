@@ -15,3 +15,20 @@ export async function getNotes(client?: SupabaseClient<Database>): Promise<NoteT
     c.from('notes').select('*').order('created_at', { ascending: false }),
   )
 }
+
+// Fetch a single note by id. RLS already scopes to the owner, so a missing OR
+// not-owned id both resolve to `undefined` (caller decides 404). Uses `maybeSingle`
+// (no-match → `{ data: null, error: null }`), so it does NOT go through runTableQuery,
+// which throws on null data.
+export async function getNote(
+  id: string,
+  client?: SupabaseClient<Database>,
+): Promise<NoteT | undefined> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase.from('notes').select('*').eq('id', id).maybeSingle()
+  if (error) {
+    console.error('[getNote] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return data ?? undefined
+}

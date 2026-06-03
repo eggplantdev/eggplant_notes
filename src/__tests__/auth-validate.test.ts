@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { validateInput } from '@/features/auth/validate'
 import { credentialsSchema } from '@/features/auth/schemas'
+import { validateInput } from '@/lib/validate'
 
 describe('validateInput + credentialsSchema', () => {
   it('accepts a valid email and password', () => {
