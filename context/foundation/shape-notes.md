@@ -1,258 +1,140 @@
 ---
-project: "Coding Learning Companion"
-context_type: greenfield
-created: 2026-05-20
-updated: 2026-05-20
+project: 'Coding Learning Companion'
+context_type: brownfield
+created: 2026-06-03
+updated: 2026-06-03
 product_type: web-app
 target_scale:
   users: small
 timeline_budget:
-  mvp_weeks: 3
+  delivery_weeks: 1
   hard_deadline: 2026-06-10
   after_hours_only: true
 checkpoint:
-  current_phase: 8
-  phases_completed: [1, 2, 3, 4, 5, 6, 7]
-  gray_areas_resolved:
-    - topic: "persona scope"
-      decision: "any developer (regardless of solo vs team context) managing their own personal learning — covers both agent-native and non-agent subtypes in v1"
-    - topic: "pain category"
-      decision: "all four dimensions apply — workflow friction, missing capability, data trapped, forgetting/decay — each maps to a v1 feature"
-    - topic: "core insight"
-      decision: "AI agents are a first-class interface (terminal write/query/reminders + in-app code verification), not a bolt-on"
-    - topic: "tenancy"
-      decision: "multi-user (other people can sign up). Auth model is real, not single-tenant."
-    - topic: "BYOK / LLM cost model"
-      decision: "BYOK via OpenRouter PKCE OAuth — user clicks 'Connect with OpenRouter', authorizes a scoped key billed to their account. $0 LLM cost for the operator. Trust mitigated by OpenRouter-side scoping + user-visible audit + revocability. Server-side LLM calls are fine because the key is scoped at the provider."
-    - topic: "app auth method"
-      decision: "Email + password only for v1. No third-party auth dependency. Implemented via the backend's built-in auth layer (Supabase Auth is the strong lean). Other methods (GitHub OAuth, magic link) can be added later — multiple methods coexist cleanly via the same auth layer."
-    - topic: "role model"
-      decision: "Flat — one user type. Each user owns their own notes/prompts/data, no admin UI in v1. Operator-level ops (kill switch, bulk debug) handled via direct DB access until/unless a real need for an admin role emerges."
-    - topic: "MVP scope"
-      decision: "Spine = sign-up + create note (markdown + code highlighting) + attach recall prompt + return-for-review loop + heatmap + streak counter. Deferred to v1.1: AI code-check, OpenRouter OAuth, companion CLI, REST API for external writes, daily/monthly goals, tags, many-to-many note↔prompt, email/push reminders. Timeline: 3 weeks of after-hours work (estimate ~1.5-2 weeks of actual work + buffer)."
-    - topic: "reminder mechanism v1"
-      decision: "Pull-based — user opens the app and dashboard shows 'X due'. No email digest, no push, no CLI reminders. Those land in v1.1 once the loop is proven."
-    - topic: "email verification v1"
-      decision: "Supabase auto-sends verification email at sign-up (default); app does NOT gate access on email_verified status in v1. Zero implementation cost; password reset works for users who verify; verification gate can be flipped on in v1.1 without rework."
-    - topic: "product framing"
-      decision: "product_type: web-app (CLI is v1.1, doesn't change primary product type). target_scale.users: small (single-digit to handful). timeline_budget: 3 weeks MVP target + soft deadline 2026-06-10 tied to the wager, after-hours work only."
-    - topic: "non-goals"
-      decision: "v1 explicitly does NOT do: (1) Anki import/export, (2) team workspaces / shared decks / collaboration, (3) local-first / offline support, (4) native mobile app. Beyond the v1.1/v2 deferred queue, these four are 'never sneak back in' lock-outs for v1 scope."
-  frs_drafted: 22
+  current_phase: 7
+  phases_completed: [1, 2, 3, 4, 5, 6]
+  frs_drafted: 10
   quality_check_status: accepted
+  notes: 'v2 brownfield re-shape. v1 greenfield shape archived to context/foundation/archive/shape-notes-2026-06-03-1520.md. v1 locked decisions carried forward as preserved context: BYOK via OpenRouter PKCE, email+password auth (Supabase), flat single role, multi-user.'
 ---
 
-# Shape Notes — Coding Learning Companion
+# Shape Notes — Coding Learning Companion (v2 brownfield re-shape)
 
-> Working title only. Final name TBD.
-> Seed input: `docs/brainstorm-2026-05-20-coding-learning-companion.md`
+## Current System
 
-## Vision & Problem Statement
+A live Next.js 16 (App Router) + React 19 + TypeScript web app on Vercel, with Supabase (Postgres + Auth + RLS). Shipped and archived: F-01 auth (email+password), F-02 per-user persistence + RLS, S-01 note capture with code highlighting, S-05 account+data deletion. S-03 recall loop (SM-2 spaced repetition) near done. Tables: `notes`, `topic_checks` (SM-2 columns present), `review_events`. BYOK via OpenRouter PKCE (v1 decision, carried forward).
 
-Developers accumulate coding notes across many projects, languages, and environments — scattered, write-once, rarely revisited. Notes live in random repo READMEs, Obsidian vaults, scratch files. There's no reminder to come back, no signal for what's retained vs forgotten, and no way to actively verify a concept by writing code that something will grade. Existing tools force a trade: Obsidian/Notion give a knowledge base but no recall layer; Anki gives recall but renders code terribly and has no notes layer; RemNote combines them but treats AI as a bolt-on generator. Knowledge decays silently while the developer rewrites notes they already had.
+**State of the data:** no real users, no real notes/cards entered in the app yet — only the operator dogfooding. **There is nothing to preserve data-wise.** The v2 schema change can therefore be clean and destructive (drop/recreate, no migration, no backward-compat burden).
 
-AI agents already live where many developers spend their day — terminal, Claude Code, Codex, Cursor. The insight: instead of bolting AI onto a notes app, make agent integration a first-class interface that runs alongside a conventional web UI. Notes and recall prompts can be created from the terminal (for agent-native users) or via in-app forms (for everyone else). Code answers inside notes get verified by an AI agent in-app. Reminders and queries can also be issued from the terminal so the recall loop runs in the workflow the user already uses. The cost model is BYOK via OpenRouter PKCE OAuth — each user connects their OpenRouter account once; LLM calls are billed to them, scoped to the app, and revocable. The operator carries no LLM cost and the trust problem dissolves into a standard OAuth scope.
+## Vision & Problem Statement (the v2 delta)
+
+The v1 product treats a note as a flat, standalone, ungrouped record. Real usage (dogfooding against the operator's actual `/workspace/learning` repo) shows the true shape: knowledge is organized as **subjects** (e.g. "React/Next"), each subject is a long document split into **note** sections, each note spawns recall **cards** (today generated by a skill, in Polish) and references code **examples**. Today these live in 4 disconnected places/formats with no link from a card back to its source note.
+
+**The v2 change:** introduce a `Subject` grouping layer above notes, and bind cards (and later examples) to their source note so they are linked views of the same knowledge rather than disconnected artifacts. The **card → note path** is the core differentiator the filesystem cannot provide.
+
+- Pain 1 — scattered: one subject lives across 4 locations / 3 formats.
+- Pain 2 — disconnected (corrected): card _generation_ is skill-assisted, not manual; the pain is that generated cards leave the note's context with no link back, and leave the app entirely (into Anki).
+- Pain 3 — no card→note navigation.
 
 ## User & Persona
 
-### Primary persona — developer managing personal coding-learning notes
+Unchanged from v1: solo developers managing their own coding-learning notes; flat single role; multi-user (others can sign up) but each owns only their own data. Operator is user zero.
 
-Audience: developers — any language, any stack, employed or independent — who write coding notes across many projects and want a centralized personal knowledge base with active recall and AI code verification. This is a *personal* tool: even a team-employed developer uses it for their own learning, not to share decks with teammates. Two subtypes are both in v1 scope:
+## Access Control
 
-- **Agent-native subtype** — lives in the terminal with Claude Code / Codex / Cursor. Prefers a CLI for note creation, querying, and receiving SRS reminders.
-- **Non-agent subtype** — prefers the in-app web UI for everything: manual note creation, manual review, visual dashboard.
-
-The reach moment: developer spent hours learning a concept, wrote notes somewhere, about to forget it because nothing reminds them. They want the system to handle recall scheduling, surface reminders in the surface they already use (terminal or web), and actively verify code answers via AI.
-
-**Pain dimensions (all four confirmed):**
-- Workflow friction — gathering + revisiting notes scattered across tools
-- Missing capability — no existing tool combines notes + SRS + AI code-check
-- Data trapped — notes locked in repos, Obsidian, scratch files; no central query
-- Forgetting / decay — no retention signal; knowledge lost without warning
+No change planned — v1 model preserved: email + password via Supabase Auth, flat single role, per-user RLS by `auth.uid()`. BYOK via OpenRouter PKCE carried forward.
 
 ## Success Criteria
 
 ### Primary
 
-- A new user can complete the end-to-end recall loop in two sessions without errors: sign up → sign in → create a note with code rendered with syntax highlighting → attach a recall prompt → return after the scheduled interval → complete the review with a self-rating → see the next interval reschedule.
-- After the first review, the user's dashboard reflects their activity: heatmap shows the day, streak counter reads 1.
+The operator (user zero) stops opening `/workspace/learning` markdown files and uses the app instead for at least one real subject. Concretely, end-to-end: create a **subject** → add notes to it as ordered sections → read the subject as one continuous document → cards (`topic_checks`) generated/attached to a note surface in the due-review loop → after reviewing a card, jump directly to its source note. Adoption-by-dogfooding is the bar, not feature count.
 
 ### Secondary
 
-- A user sustains use for ≥ 7 days, with a non-trivial streak (5+ review sessions). Indicates the loop is actually engaging, not just functional.
-- A second user (someone other than the operator) signs up and uses the product without intervention.
+Inline check creation and the small authoring nits (deferred eager-validation, language select) land as fast-follow after 06-10 and make daily authoring smooth enough to sustain use.
 
 ### Guardrails
 
-- Per-user data isolation enforced at the database layer (RLS): no user ever sees another user's data, even with an application-layer bug.
-- Notes and recall prompts persist reliably; nothing silently dropped.
-- Due reviews always surface on the dashboard at the scheduled time — the reminder loop never misses a prompt.
-- Auth flows (sign-up, sign-in, password reset) all functional. Broken auth blocks all value.
-- Markdown code-block rendering preserves syntax highlighting on the languages most relevant to the audience (JS/TS at minimum; Python, Go, Rust as bonus). A note that renders code as plain text fails the product premise.
+- Per-user RLS isolation must not regress (the F-02 guarantee).
+- The recall-loop scheduling (FSRS) must keep surfacing due cards correctly — finishing S-03 must not break it.
+- Schema change may be clean/destructive (no real data to preserve), but must not leave the recall loop or RLS in a broken state.
 
-## User Stories
+## v1-usable scope (must ship by 2026-06-10)
 
-### US-01: User creates and reviews a recall prompt
+1. **Subjects** — new `subjects` table; `notes.subject_id` (nullable, FK); subject detail page renders member notes as one continuous document, ordered; reorder notes. (was roadmap S-06)
+2. **Finish recall loop** — complete S-03 (FSRS), near done.
+3. **Card→note jump (UI only)** — `topic_checks.note_id` already exists; add a "view source note" action on the review card / card lists that routes to the note detail page.
 
-- **Given** a signed-in user with no existing notes
-- **When** they create a note with a markdown body containing a code block, attach a recall prompt with a question, and return after the prompt's scheduled due date
-- **Then** the dashboard shows "1 prompt due", they can complete the review with a self-rating, and the prompt is rescheduled based on the SRS algorithm
+## Fast-follow (after 06-10, before broader v2)
 
-#### Acceptance Criteria
-- Note's code block renders with syntax highlighting (not plain text)
-- Recall prompt persists across sessions
-- Due prompts surface on the dashboard exactly when scheduled
-- Rating the prompt updates the SRS schedule and records a review event
-- Heatmap reflects the review day with appropriate intensity color
-- Streak counter increments to 1 after the first review
+- Inline topic-check creation during note create/edit, no redirect-first. (was roadmap S-07)
+- Defer eager title validation (no error while typing).
+- Language select when creating a note.
+
+## v2 (after the deadline subset)
+
+- Section-level (heading-anchor) card→note linkage; note→cards reverse view.
+- AI-verifiable code examples (deeper than the existing `example`/`code_context` columns).
+- In-app Anki export so generated cards leave the app as one optional output rather than the home.
+- Full Subject / Note / Card / Example consolidation as linked views.
 
 ## Functional Requirements
 
-### Authentication
-- FR-001: User can sign up with email + password. Priority: must-have
-- FR-002: System sends a verification email at sign-up; the user is NOT required to verify before accessing the app in v1. Priority: must-have
-  > Socrates: Counter-argument considered: "gated verification adds onboarding friction without clear v1 benefit for a personal-tool product." Resolution: keep the email send (Supabase default, zero extra cost) but defer the verification gate to v1.1. Saves the "unverified state" UX and confirmation-link redirect handling in v1.
-- FR-003: User can sign in with email + password. Priority: must-have
-- FR-004: User can reset their password via email link. Priority: must-have
-- FR-005: User can sign out. Priority: must-have
-- FR-006: User can delete their account from settings; deletion cascades to all owned data. Priority: must-have
-  > Socrates: Counter-argument considered: "self-service deletion is meaningful overhead; deletion requests could be handled manually via email until you have real users." Resolution: kept; self-service deletion is a baseline trust requirement, and the cascading delete logic is forced by RLS + foreign-key constraints anyway — only the UI overhead is saved by deferring.
+### v1-usable (must-have, by 2026-06-10)
 
-### Notes
-- FR-007: User can create a note with a title and markdown body. Priority: must-have
-- FR-008: User can view a note rendered with markdown formatting and code-block syntax highlighting. Priority: must-have
-- FR-009: User can edit a note's title and body. Priority: must-have
-- FR-010: User can delete a note; deletion cascades to attached recall prompts. Priority: must-have
-- FR-011: User can see a list of all their notes. Priority: must-have
+- FR-001: User can create a subject with a title. Priority: must-have. Change: new
+- FR-002: User can assign a note to a subject, and leave a note unassigned. Priority: must-have. Change: new
+- FR-003: User can order and reorder notes within a subject. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "created-order would be enough for v1, deferring the ordering-strategy decision." Resolution: kept — reading a subject as one document only works if note order is user-controlled, mirroring the operator's markdown heading structure. Ordering strategy (position int vs fractional index) deferred to /10x-plan.
+- FR-004: User can read a subject as one continuous document (member notes rendered in order). Priority: must-have. Change: new
+- FR-005: User can complete a due card review and have it rescheduled by FSRS. Priority: must-have. Change: modified
+- FR-006: User can jump from a card to its source note. Priority: must-have. Change: new (UI only — `topic_checks.note_id` FK already exists)
+- FR-007: Per-user data isolation (RLS by `auth.uid()`) holds across the new `subjects` table. Priority: must-have. Change: preserved
 
-### Recall prompts
-- FR-012: User can attach a recall prompt to a note (question + optional example + optional code-block context). Priority: must-have
-- FR-013: User can edit a recall prompt. Priority: must-have
-- FR-014: User can delete a recall prompt. Priority: must-have
-- FR-015: User can see all prompts attached to a given note. Priority: must-have
+### Fast-follow (nice-to-have, post-06-10)
 
-### Review loop
-- FR-016: System surfaces prompts due for review on the user's dashboard. Priority: must-have
-- FR-017: User can review a due prompt and self-rate Again / Hard / Good / Easy. Priority: must-have
-- FR-018: System reschedules the prompt using the FSRS algorithm (via `ts-fsrs` npm package) based on the user's rating; new due date persisted. Priority: must-have
-  > Socrates: Counter-argument considered: "real SRS adds complexity vs hardcoded intervals (Again→1d, Hard→3d, Good→1w, Easy→1m)." Resolution: use ts-fsrs — Anki's current default since 2023, ~30 min integration, no meaningful complexity over hardcoded intervals. SM-2 was also considered as a middle path but ts-fsrs is the modern choice.
-- FR-019: User can see when each prompt is next due. Priority: must-have
+- FR-008: User can attach topic checks inline while creating/editing a note. Priority: nice-to-have. Change: new
+- FR-009: Title validation does not show errors while typing (defer to blur/submit). Priority: nice-to-have. Change: modified
+- FR-010: User can select a code language when creating a note. Priority: nice-to-have. Change: new
 
-### Dashboard / activity
-- FR-020: User can see their current streak (consecutive days with at least one review). Priority: must-have
-  > Socrates: Counter-argument considered: "streak + heatmap are motivation visualizations; the recall loop works without them." Resolution (applies to FR-020 + FR-021): kept. The user explicitly pulled these into MVP because the loop without visualization doesn't "feel real." Combined cost ~1-1.5 days; offsets v1.1 release pressure on the "show the user it's working" dimension.
-- FR-021: User can see a calendar heatmap of their review activity (last 30-90 days). Priority: must-have
-  > Socrates: See resolution under FR-020 — challenge was combined for FR-020 + FR-021.
-- FR-022: User can see how many prompts are due today. Priority: must-have
+## User Stories
 
-## Non-Functional Requirements
+### US-01 (primary path)
 
-- Code blocks in notes render with syntax highlighting that preserves token meaning — keywords, strings, comments, and types are visually distinguishable. A note rendering code as flat-colored text fails the product premise.
-- A user cannot see another user's data under any circumstance — isolation is enforced at the persistence layer (so an application-layer bug cannot leak data), not solely in application code.
-- A prompt scheduled to be due on date `D` appears in the due-list on date `D` — never silently dropped, never appears earlier than scheduled.
-- The dashboard renders usably on viewport widths down to ~360px (mobile). The heatmap may compress; everything else stays usable. Mobile review (checking due-count on the train) is a real use case.
-- The review flow (open prompt → see question → rate → see next state) feels responsive — the user perceives the rating action as instant; no multi-second wait between submitting a rating and seeing the next prompt or the "no more due" state.
-- Auth flows (sign-up, sign-in, password reset) complete within human-perception timing — no multi-second delays under normal load.
-- The user's recall data (notes, prompts, review events, and connected OpenRouter token where applicable) survives normal browser closures, app restarts, and deployments without loss.
+- Given the operator has signed in and has notes,
+- When they create a subject, assign notes to it, order them, and open the subject,
+- Then they see all member notes as one continuous ordered document; and from any due card in the review loop they can jump to its source note.
 
 ## Business Logic
 
-The system schedules each recall prompt's next review date by adapting to the user's self-rated recall performance — making review intervals longer after successful recalls and shorter after failures.
+Existing domain rule (unchanged): the app decides **when** a piece of knowledge should resurface for review, using **FSRS** spaced-repetition scheduling over `topic_checks` and `review_events`. This is the product's domain decision and it is not changing.
 
-Inputs the rule consumes (as user-facing inputs): the user's self-rating (Again / Hard / Good / Easy) after each review, plus the prompt's review history (timestamps and prior ratings). Output: the date the prompt next appears in the user's due-list. The user encounters this every time the dashboard shows "X prompts due" — that count is entirely driven by the algorithm's scheduling decisions. A failed review reschedules the prompt sooner; a successful one reschedules it later. The system effectively learns each user's pacing per prompt.
+The v2 change adds an **organizational layer** (Subject grouping notes; ordered reading; card→note navigation). This is structure, not a new domain rule — no new scoring/recommendation/classification rule is introduced in the v1-usable subset.
 
-This is the domain decision that makes the app non-trivial. Without it, the app degenerates into a tagged-notes list (a worse Obsidian). The rule is the product.
+## Non-Functional Requirements
 
-## Access Control
+- Per-user isolation: no user can read or write another user's subjects, notes, cards, or review events — enforced at the persistence layer, observable as zero cross-account leakage.
+- Recall reliability: due cards always surface at their scheduled time; the FSRS reschedule after a review is never silently dropped.
+- Reading a subject document remains responsive as notes accumulate (user-perceived render without noticeable stall for a realistic subject, ~dozens of notes).
 
-Multi-user. Every user owns their own notes, recall prompts, review history, and connected OpenRouter token; no data is shared between users. One role (regular user) — flat model.
+## Constraints & Preserved Behavior
 
-**Sign-up / sign-in (v1):** email + password. The chosen auth layer (Supabase Auth is the strong lean) handles password hashing, password reset, and emails. A verification email is sent at sign-up by default, but app access is NOT gated on verification status in v1 (see FR-002 resolution); the verification gate is deferred to v1.1.
-
-**Connected services (separate from app auth):** OpenRouter PKCE OAuth happens *after* sign-in, as a one-click "Connect with OpenRouter" step in settings. Two states: connected (in-app AI features work — when those features ship in v1.1) or disconnected (in-app AI features are gated behind a "Connect OpenRouter to use" prompt; everything else — notes, recall prompts, manual review, stats — works without it).
-
-**External harness writes (REST API, v1.1):** authenticated per-user via a token the user generates in settings. Used by Claude Code / Codex skills and the companion CLI. Scope: same data as the user's web session; no cross-user access. Not in v1 MVP; design intent captured here so RLS policies don't need refactoring when the API ships.
-
-**Unauthenticated request handling:** any gated route (notes, prompts, dashboard, settings) returns 401 / redirects to sign-in. Public surface: sign-in, sign-up, password reset, marketing landing (if any).
-
-**Per-user data isolation:** enforced at the database layer via row-level security (RLS) — `auth.uid()` policies on every user-owned table, so even an application-layer bug can't expose another user's data. Application code does not become the boundary.
-
-**Account deletion:** user can delete their account from settings; deletion cascades to all their notes, prompts, review events, and the connected OpenRouter token (if any).
+- No data migration burden: no real users/notes exist yet, so the subjects schema change may be clean/destructive.
+- Must not regress: F-02 RLS isolation, and the FSRS recall-loop scheduling (S-03).
+- Stack unchanged: Next.js 16 App Router + Supabase + Vercel; email+password auth; BYOK via OpenRouter PKCE.
 
 ## Non-Goals
 
-v1 explicitly does NOT include the following. These are *scope* avoids that block sneaking-back-in; technology avoids (specific frameworks, deployment platforms) belong with `/10x-tech-stack-selector` and are captured in the Forward: tech-stack block.
+- Section-level (heading-anchor) card→note linkage — v1 jumps to the note, not the heading. Deferred to v2.
+- AI verification of code examples — deferred to v2 (the `example`/`code_context` columns stay as plain content for now).
+- In-app Anki export — deferred to v2; cards stay in-app for the deadline subset.
+- Auth / role model changes — none; flat single role preserved.
+- Team/shared/admin features — out of scope (single-tenant personal tool).
 
-- **Anki import / export.** Adopting Anki's data model creates a maintenance burden against an external format that doesn't fit this product's note-first three-layer design. May reconsider in v2 if there's real user pull.
-- **Team workspaces / shared decks / collaborative notes.** Explicit personal-tool lock for all versions. Each user's data is fully theirs; there is no concept of teams, sharing, or collaboration in any planned version of the product.
-- **Local-first / offline support.** v1 is online-only. Offline review (subway, plane) is a real use case that's deferred to maybe v2 if user demand justifies the complexity (PowerSync / ElectricSQL / Dexie.js + manual sync are the typical implementation paths).
-- **Native mobile app (iOS / Android).** Web-only product. The web app must be mobile-responsive (per NFR), but no React Native, Expo, native binary, or app-store distribution work in any planned version.
+## Forward: technical-roadmap
 
-Items already deferred to v1.1 (AI code-check, OpenRouter integration, companion CLI, REST API for external writes, email/push reminders, tag organization, email verification gate) are tracked in the `Forward: v1.1 / v2 deferred scope` block below — they are out-of-MVP rather than out-of-product, so they're not duplicated here.
-
-## Forward: v1.1 / v2 deferred scope (informational — not part of PRD)
-
-Everything below is explicitly out of v1 MVP scope but tracked here so the next iteration has a clear queue:
-
-- **v1.1 — close the gap to "real product":**
-  - AI code-check inside notes (requires OpenRouter PKCE OAuth + server-side LLM calls)
-  - Companion CLI (write, query, terminal reminders)
-  - REST API for external harness writes (per-user bearer tokens)
-  - Email daily-digest reminders OR web push notifications
-  - Tag organization (flat tags first)
-  - Email verification gate (Supabase already sends the email; just flip the gate on)
-- **v2 — advanced:**
-  - In-app AI generation of notes/prompts (paste lesson → notes + prompts produced)
-  - Many-to-many note↔prompt
-  - Daily / monthly / weekly goals with user-configured targets
-  - Time-spent tracking
-  - Anki import/export
-  - Local-first / offline support
-
-## Forward: forecast / the wager (informational — not part of PRD)
-
-At the user's request, the LLM records its honest single-number estimate for MVP completion alongside the user's. On the actual ship date we measure who was closer.
-
-**The wager (recorded 2026-05-20):**
-
-| Predictor | Single-number forecast (after-hours, calendar weeks) | Distribution brackets |
-|-----------|------------------------------------------------------|-----------------------|
-| User      | **3 weeks**                                          | (single number; no brackets recorded) |
-| LLM       | **5 weeks**                                          | p10: 3 wk · p50: 5 wk · p90: 9 wk |
-
-**LLM's reasoning (recorded for accountability):**
-
-- Line-item hour estimates assume ts-fsrs / Supabase familiarity the user hasn't explicitly confirmed. First-time Supabase RLS adds ~20-30% to data-layer line items.
-- "1 hour for Auth" is true on the happy path; first-time issues (env vars, redirect URLs, RLS policies for `auth.uid()`, cookie-vs-token confusion) typically add 2-3h.
-- UI polish is systematically underestimated. The dashboard alone has multiple edge cases — empty state, single-review state, broken-streak state, sparse-heatmap state — each takes time to render correctly.
-- After-hours work is lower productivity than dedicated work (interruptions, mental fatigue, life events).
-- Hofstadter's law: software projects exceed their estimates 60-70% of the time, even after the maker corrects for it.
-
-**Hour breakdown used to derive the LLM's p50:**
-
-| Area | Hours |
-|---|---|
-| Base setup (Supabase project, Next.js app, Auth, routing/middleware) | 4-6 |
-| Data layer (schema + RLS on 3 user-owned tables) | 2-4 |
-| Notes CRUD (create form, list, view with highlighting, edit, delete) | 8-10 |
-| Recall prompts CRUD (form, list, edit, delete) | 5-7 |
-| Review loop (due query, review UI, ts-fsrs reschedule, review_events log) | 7-10 |
-| Dashboard (due count, streak counter, heatmap) | 6-8 |
-| Account delete + sign-out | 2-3 |
-| Polish: error / loading / empty states, mobile responsive, bug-fixing | 12-20 |
-| Deployment (Vercel + env vars) | 1 |
-| **Total focused-work hours** | **47-69** |
-
-At 10-15 hours/week of after-hours capacity → 3.1-6.9 calendar weeks. p50 ≈ 5 weeks.
-
-**Resolution date:** the day the MVP ships (sign-up → create note → review prompt → streak + heatmap visible, all functional in production). Update this table with actual elapsed time on that date.
-
-## Forward: tech-stack (informational — not part of PRD)
-
-Decisions captured here are for the downstream `/10x-tech-stack-selector` step, not for `/10x-prd`. They get folded into `tech-stack.md`, not into PRD frontmatter or sections.
-
-- Multi-user web app + companion CLI tool (CLI deferred to v1.1). Two surfaces, one backend.
-- BYOK provider: OpenRouter (via PKCE OAuth). OpenRouter itself is a meta-provider so users can route to OpenAI / Anthropic / Gemini / open-source models using their existing accounts. (Required by v1.1 AI code-check; v1 ships without OpenRouter integration.)
-- LLM calls server-side using the user's scoped OpenRouter token. Token storage is encrypted at rest; revocation is handled at OpenRouter's side.
-- Backend lean: **Supabase** (Postgres + Auth + RLS). Supabase Auth covers email+password out of the box; RLS gives per-user data isolation at the DB layer.
-- Verify OpenRouter PKCE OAuth docs at implementation time — API surface shifts occasionally.
+- Ordering strategy for FR-003 (position int vs fractional/LexoRank) — decide at /10x-plan.
+- `notes.subject_id` nullability vs default "Inbox" subject — decide at /10x-plan.
+- `subjects` cascade vs set-null on delete — decide at /10x-plan.
+- CLAUDE.md/roadmap say SM-2 but the implementation is FSRS (migration `20260603131542_fsrs_review_loop.sql`) — the v2 PRD must say FSRS; fix the stale docs separately.
