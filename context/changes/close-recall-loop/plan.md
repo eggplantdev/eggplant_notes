@@ -546,8 +546,8 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [x] 4.1 `pnpm build`/`pnpm typecheck`/`pnpm lint` pass
-- [x] 4.2 `getDashboardData` no longer imports the dummy generator (grep clean)
+- [x] 4.1 `pnpm build`/`pnpm typecheck`/`pnpm lint` pass — 4828dbc
+- [x] 4.2 `getDashboardData` no longer imports the dummy generator (grep clean) — 4828dbc
 
 #### Manual
 
@@ -558,8 +558,8 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [ ] 5.1 `pnpm test:e2e` passes for `review.spec.ts`
-- [ ] 5.2 Existing specs still pass (no regression)
+- [x] 5.1 `pnpm test:e2e` passes for `review.spec.ts`
+- [x] 5.2 Existing specs still pass (no regression)
 
 #### Manual
 

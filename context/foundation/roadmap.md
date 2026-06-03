@@ -13,7 +13,7 @@ top_blocker: time
 
 > Derived from `context/foundation/prd-v2.md` (v2, brownfield re-shape) + the live codebase baseline.
 > v1 roadmap archived → `context/foundation/archive/2026-06-03-roadmap.md`.
-> Slices below are listed in dependency order. The "At a glance" table is the index.
+> Rows are ordered by execution: done block first, then the v1-usable subset in dependency order, then fast-follow.
 > **Band** marks the deadline split: `v1-usable` must ship by 2026-06-10; `fast-follow` lands right after; `v2` is post-deadline.
 
 ## Vision recap
@@ -36,11 +36,11 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                   | S-01          | FR-012–015 (v1), US-01            | —           | done     |
 | S-05 | delete-account-and-data      | delete their account and all owned data from settings                   | F-01, F-02    | FR-006 (v1), Access Control       | —           | done     |
 | S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | planned  |
+| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | proposed |
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document | S-01          | US-01, Scope:[new] subjects       | v1-usable   | ready    |
 | S-08 | card-to-note-navigation      | jump from a recall card to its source note                              | S-02          | US-01, Scope:[new] card→note      | v1-usable   | ready    |
 | S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)       | S-01, S-02    | Scope:[new] inline cards (FR-008) | fast-follow | proposed |
 | S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating     | S-01          | Scope (FR-009, FR-010)            | fast-follow | proposed |
-| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | post        | proposed |
 
 ## Streams
 
@@ -48,7 +48,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 
 | Stream | Theme             | Chain                                               | Note                                                                                                                                    |
 | ------ | ----------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| A      | Recall loop       | `F-01` / `F-02` → `S-01` → `S-02` → `S-03` → `S-04` | Critical path to the north star. `S-03` is v1-usable; `S-04` (dashboard) is post-deadline.                                              |
+| A      | Recall loop       | `F-01` / `F-02` → `S-01` → `S-02` → `S-03` → `S-04` | Critical path to the north star. Both `S-03` and `S-04` are v1-usable; `S-04` rides directly on `S-03` (its `data.ts` seam).            |
 | B      | Knowledge linking | `S-06` / `S-08`                                     | The v2 differentiator: subject grouping (builds on `S-01`) + card→note jump (builds on `S-02`). Both v1-usable, parallel with Stream A. |
 | C      | Authoring polish  | `S-07` / `S-09`                                     | Fast-follow UX refinements; build on `S-01`/`S-02`, no schema change. Land right after the 06-10 subset.                                |
 | D      | Account lifecycle | `S-05`                                              | Done. Depended only on `F-01`+`F-02`.                                                                                                   |
@@ -58,7 +58,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 What's already in place in the codebase as of `2026-06-03` (current build state — every core layer is shipped).
 Foundations below assume these are present and do NOT re-scaffold them.
 
-- **Frontend:** present — Next.js 16 + React 19 + Tailwind v4 + shadcn; product UI shipped (notes list/detail/forms, settings, auth pages).
+- **Frontend:** present — Next.js 16 + React 19 + Tailwind v4 + shadcn; product UI shipped (notes list/detail/forms, settings, auth pages, dashboard shell).
 - **Backend / API:** present — Server Actions per feature (`src/features/*/actions`), route handlers under `src/app/api` (auth confirm), injectable table-query helpers (`src/lib/supabase/run-table-query.ts`).
 - **Data:** present — 4 migrations: `notes`/`topic_checks`/`review_events` + RLS, account-delete RPC, topic-check content columns, FSRS review-loop migration. Typed `Database` clients.
 - **Auth:** present — email/password via Supabase Auth, `proxy.ts` gating, `(protected)` layout (F-01, archived).
@@ -120,6 +120,18 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Topic checks are the unit the recall loop schedules; without them there is nothing to review. `topic_checks.note_id` is `not null` (FK→`notes`) — this is the association S-08 navigates.
 - **Status:** done
 
+### S-05: delete account and data
+
+- **Outcome:** user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.
+- **Change ID:** delete-account-and-data
+- **PRD refs:** FR-006 (v1), Access Control (account deletion)
+- **Prerequisites:** F-01, F-02
+- **Parallel with:** S-01, S-02
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** A baseline trust requirement. Independent of the content flow.
+- **Status:** done
+
 ### S-03: close the recall loop (NORTH STAR)
 
 - **Outcome:** the dashboard surfaces topic checks due for review; the user reviews one, self-rates Again/Hard/Good/Easy, the system reschedules its next due date via FSRS, records a review event, and shows when it is next due.
@@ -133,13 +145,25 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** This slice IS the product hypothesis. Sequenced as early as prerequisites allow. Near done — finishing must not break scheduling (Guardrail).
 - **Status:** planned (`/10x-plan` done 2026-06-03 → `context/changes/close-recall-loop/`)
 
+### S-04: activity dashboard
+
+- **Outcome:** user can see how many topic checks are due today, their current streak (consecutive days with ≥1 review), and a calendar heatmap of review activity over the last 30–90 days.
+- **Change ID:** activity-dashboard
+- **PRD refs:** FR-020–022 (v1), NFR (usable down to ~360px mobile)
+- **Prerequisites:** S-03
+- **Parallel with:** S-06, S-08
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** v1-usable: the dashboard shell is already merged to `main` (`587d95b`) and the S-03 plan fills its `features/dashboard/data.ts` seam, so it rides directly on the north star and is cheap to finish. The loop "doesn't feel real" without the due-count/streak/heatmap visualization (original MVP rationale). Sequenced immediately after S-03; must stay usable on mobile.
+- **Status:** proposed
+
 ### S-06: organize notes into subjects
 
 - **Outcome:** user can create a **subject** (e.g. "Python — functional programming"), assign notes to it, reorder those notes, and read every note in a subject as one continuous top-to-bottom document — while each note remains individually addressable and editable (its own route, its own topic checks). A note may belong to one subject or to none.
 - **Change ID:** organize-notes-into-subjects
 - **PRD refs:** US-01, PRD v2 Scope:[new] subjects + subject-as-document reading (shape FR-001–004)
 - **Prerequisites:** S-01 (notes must exist to group)
-- **Parallel with:** S-03, S-08, S-05 (independent of the recall loop)
+- **Parallel with:** S-03, S-04, S-08, S-05 (independent of the recall loop)
 - **Blockers:** —
 - **Unknowns:**
   - **Ordering strategy** — naive `position int` (renumbers siblings on mid-list insert) vs **fractional indexing / LexoRank** (orderable text/float; insert-between = one row update). Owner: `/10x-plan`. Block: no (fractional indexing is the defensible default).
@@ -147,7 +171,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - **Subject-delete behavior** — on subject delete, detach member notes (set-null) vs cascade-delete them. Owner: `/10x-plan`. Block: no.
 - **Naming lock:** the parent entity is **`subject`** (table `subjects`, `notes.subject_id`). Deliberately NOT "topic" — "topic check" already means the recall prompt.
 - **Clean-change note:** no real data exists yet (PRD v2 Constraints), so the schema change can be made cleanly — no migration/backfill burden.
-- **Risk:** A model change inside the deadline window (`main_goal: speed`). Additive and low-coupling; the risk is schedule, not architecture. Promoted to v1-usable because reading-as-one-document is the structural reason the operator would switch off `/workspace/learning`.
+- **Risk:** A model change inside the deadline window (`main_goal: speed`). Additive and low-coupling; the risk is schedule, not architecture. v1-usable because reading-as-one-document is the structural reason the operator would switch off `/workspace/learning`.
 - **Status:** ready
 
 ### S-08: jump from a card to its source note
@@ -156,7 +180,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Change ID:** card-to-note-navigation
 - **PRD refs:** US-01, PRD v2 Scope:[new] card→note navigation
 - **Prerequisites:** S-02 (the `topic_checks.note_id` association already exists)
-- **Parallel with:** S-03, S-06
+- **Parallel with:** S-03, S-04, S-06
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Very low — UI only. The data link (`topic_checks.note_id`, `not null`, indexed) already exists; this slice adds a navigation affordance and a route, no schema change. The card→note path is the v2 differentiator, so it's v1-usable despite being small.
@@ -190,30 +214,6 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Trivial. Two small dogfooding nits bundled into one slice; fast-follow.
 - **Status:** proposed
 
-### S-04: activity dashboard
-
-- **Outcome:** user can see how many topic checks are due today, their current streak (consecutive days with ≥1 review), and a calendar heatmap of review activity over the last 30–90 days.
-- **Change ID:** activity-dashboard
-- **PRD refs:** FR-020–022 (v1), NFR (usable down to ~360px mobile)
-- **Prerequisites:** S-03
-- **Parallel with:** S-05, S-06
-- **Blockers:** —
-- **Unknowns:** —
-- **Risk:** Carried over from v1. Not in the v2 must-ship subset — the v2 primary success criterion is dogfooding adoption (subjects + recall + card→note), not the dashboard. Sequenced post-deadline.
-- **Status:** proposed
-
-### S-05: delete account and data
-
-- **Outcome:** user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.
-- **Change ID:** delete-account-and-data
-- **PRD refs:** FR-006 (v1), Access Control (account deletion)
-- **Prerequisites:** F-01, F-02
-- **Parallel with:** S-01, S-02, S-04
-- **Blockers:** —
-- **Unknowns:** —
-- **Risk:** A baseline trust requirement. Independent of the content flow.
-- **Status:** done
-
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                    | Suggested issue title                             | Ready for `/10x-plan` | Notes                                                                                                           |
@@ -224,11 +224,11 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                         |
 | S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                     |
 | S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | planned               | **v1-usable.** Planned → `context/changes/close-recall-loop/`. Next: finish `/10x-implement`                    |
+| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | **v1-usable.** Shell merged (`587d95b`); S-03 fills its `data.ts` seam. Finish right after S-03                 |
 | S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | yes                   | **v1-usable.** `/10x-plan organize-notes-into-subjects` — model change: `subjects` table + `subject_id` + order |
 | S-08       | card-to-note-navigation      | Jump from a recall card to its source note        | yes                   | **v1-usable.** `/10x-plan card-to-note-navigation` — UI only, FK exists                                         |
 | S-07       | create-note-with-checks      | Attach topic checks inline during note creation   | yes                   | Fast-follow. Trap: `note_id` FK forces two ordered writes — decide atomicity at `/10x-plan`                     |
 | S-09       | authoring-refinements        | Defer validation error + code-language select     | yes                   | Fast-follow. Two small UX nits bundled                                                                          |
-| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | Post-deadline. After S-03                                                                                       |
 
 ## Open Roadmap Questions
 

@@ -37,7 +37,7 @@ async function seedChain(supabase: SupabaseClient, tag: string): Promise<SeedT> 
 
   const re = await supabase
     .from('review_events')
-    .insert({ topic_check_id: topicCheckId, rating: 5 })
+    .insert({ topic_check_id: topicCheckId, rating: 4 })
     .select('id')
     .single()
   expect(re.error, `${tag} review_event insert failed`).toBeNull()
