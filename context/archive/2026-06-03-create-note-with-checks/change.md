@@ -1,10 +1,10 @@
 ---
 change_id: create-note-with-checks
 title: Attach topic checks inline while creating a note
-status: implemented
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T19:01:20Z
 ---
 
 ## Notes
