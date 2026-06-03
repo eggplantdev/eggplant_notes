@@ -12,6 +12,20 @@ export const HEAT_BG = ['bg-heat-0', 'bg-heat-1', 'bg-heat-2', 'bg-heat-3', 'bg-
 
 // MS_PER_DAY + APP_TIME_ZONE moved to src/lib/utils/date.ts (shared on review-events' 2nd use).
 
+// FSRS card states (ts-fsrs State enum). Index = topic_checks.state integer.
+// 0 New · 1 Learning · 2 Review · 3 Relearning. Drives the state-breakdown stat.
+export const FSRS_STATE_LABELS = ['New', 'Learning', 'Review', 'Relearning'] as const
+
+// A card is "mature" once FSRS stability (≈ days until recall drops to 90%) crosses this.
+// 21d is the conventional Anki maturity line — first-pass bucket, re-tune against real data.
+export const MATURE_STABILITY_DAYS = 21
+
+// Rolling window (days) for retention / lapse-rate / review-volume stats.
+export const STATS_WINDOW_DAYS = 30
+
+// Forecast horizon (days, inclusive of today) for the upcoming-due bar chart.
+export const FORECAST_DAYS = 7
+
 export const MONTHS = [
   'Jan',
   'Feb',

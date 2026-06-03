@@ -33,23 +33,16 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
-// Count of the owner's topic checks that are due now — the dashboard "Due today" stat. Uses a
-// head + exact-count select so no row payload is fetched, with the same `due_at <= now()`
-// filter as getDueQueue. Injectable client per the isolation rule. Deliberately does NOT
-// use runTableQuery: a head+count response has `data: null` on success, which runTableQuery
-// treats as an error and throws — so the error envelope is hand-rolled here instead.
-export async function getDueCount(client?: SupabaseClient<Database>): Promise<number> {
+// Lean read backing the dashboard stats: every owned check, but only the columns the
+// aggregation needs. RLS scopes rows to the owner. Returns the full set so counts/buckets are
+// computed in TS — PostgREST can't group by the APP_TIME_ZONE-shifted due date in a plain
+// select (same constraint as getReviewActivity). Personal-scale data, so fetching all rows is
+// fine. Injectable client per the isolation rule.
+export async function getChecksForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
-  const now = new Date().toISOString()
-  const { count, error } = await supabase
-    .from('topic_checks')
-    .select('*', { head: true, count: 'exact' })
-    .lte('due_at', now)
-  if (error) {
-    console.error('[getDueCount] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return count ?? 0
+  return runTableQuery(supabase, (c) =>
+    c.from('topic_checks').select('id, prompt, note_id, state, due_at, stability, lapses'),
+  )
 }
 
 // Returns all topic checks attached to one note, oldest first (FR-015). RLS scopes rows to the

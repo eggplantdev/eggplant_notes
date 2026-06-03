@@ -45,3 +45,16 @@ export async function getReviewActivity(
   }
   return [...counts].map(([date, count]) => ({ date, count }))
 }
+
+// Rating + timestamp of every review in the trailing `windowDays`, backing the dashboard's
+// retention / lapse-rate / review-volume stats (the heatmap's getReviewActivity drops the
+// rating, so this is a separate read). The window is the caller's policy (the dashboard owns
+// it) — kept a required arg so this feature doesn't import dashboard constants. Aggregation
+// happens in TS. RLS scopes rows to the owner; injectable client per the rule.
+export async function getRecentRatings(windowDays: number, client?: SupabaseClient<Database>) {
+  const supabase = client ?? (await createClient())
+  const since = new Date(Date.now() - windowDays * MS_PER_DAY).toISOString()
+  return runTableQuery(supabase, (c) =>
+    c.from('review_events').select('rating, reviewed_at').gte('reviewed_at', since),
+  )
+}
