@@ -28,14 +28,16 @@ export const noteInputSchema = z.object({
 // Validates the `id` route param / form value for update + delete actions.
 export const noteIdSchema = z.uuid('Invalid note id')
 
-// S-07: combined payload for creating a note together with its staged topic checks in one
-// atomic write. Composes topic-check's own schema (cross-feature import at the 1st consumer —
-// kept here rather than promoting topicCheckInputSchema to a shared tier, which the project's
-// promotion rule reserves for the 2nd consumer; flagged for the review gate to confirm).
+// S-07: note + its staged checks in one atomic write. Reuses topic-check's own input schema
+// (topic-checks owns that contract — same feature→feature edge as review/dashboard, not a
+// promotion candidate). `checks` is capped to bound the RPC's bulk insert.
 export const createNoteWithChecksSchema = z.object({
   note: noteInputSchema,
-  checks: z.array(topicCheckInputSchema),
+  checks: z.array(topicCheckInputSchema).max(50, 'At most 50 topic checks per note'),
 })
 
 export type NoteInputT = z.infer<typeof noteInputSchema>
 export type CreateNoteWithChecksT = z.infer<typeof createNoteWithChecksSchema>
+// The pre-transform (form-side) shape of one staged check — all strings, before `optionalText`
+// coerces blanks to null. Derived from the schema so it can never drift from the write-contract.
+export type StagedCheckInputT = z.input<typeof topicCheckInputSchema>

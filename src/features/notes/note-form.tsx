@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { titleSchema } from '@/features/notes/schemas'
-import type { CreateNoteWithChecksT, NoteInputT } from '@/features/notes/schemas'
+import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
 import { promptSchema } from '@/features/topic-checks/schemas'
 import type { NoteT } from '@/types/note'
 import type { SubjectT } from '@/types/subject'
@@ -28,10 +28,10 @@ import type { ActionResultT } from '@/types/action'
 // this constant and back to null on the way out.
 const NO_SUBJECT = 'none'
 
-// A topic check staged client-side before the note exists (S-07). Fields mirror
-// topicCheckInputSchema; blanks are coerced to null server-side by its `optionalText`.
-type StagedCheckT = { prompt: string; example: string; code_context: string }
-const EMPTY_CHECK: StagedCheckT = { prompt: '', example: '', code_context: '' }
+// A topic check staged client-side before the note exists (S-07). Shape is derived from
+// topicCheckInputSchema's input type (StagedCheckInputT) so it can't drift; blanks are coerced
+// to null server-side by its `optionalText` transform.
+const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: '' }
 
 // `note` present → edit (action needs the id); absent → create. The union lets TS narrow
 // the action signature off `note`'s truthiness. Create now sends a note + its staged checks
@@ -67,7 +67,7 @@ export function NoteForm(props: NoteFormPropsT) {
       title: note?.title ?? '',
       content: note?.content ?? '',
       subject_id: note?.subject_id ?? null,
-      checks: [] as StagedCheckT[],
+      checks: [] as StagedCheckInputT[],
     },
     onSubmit: async ({ value }) => {
       const noteInput: NoteInputT = {
