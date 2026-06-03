@@ -15,7 +15,6 @@ export default async function NotesPage() {
     <PageShell
       title="Notes"
       width="prose"
-      hideTitleOnMobile
       actions={
         <Button asChild>
           <Link href="/notes/new">New note</Link>

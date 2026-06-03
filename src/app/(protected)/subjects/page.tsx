@@ -15,7 +15,6 @@ export default async function SubjectsPage() {
     <PageShell
       title="Subjects"
       width="prose"
-      hideTitleOnMobile
       actions={
         <Button asChild>
           <Link href="/subjects/new">New subject</Link>

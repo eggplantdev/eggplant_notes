@@ -5,7 +5,7 @@ import { DeleteAccountDialog } from '@/features/account/components/delete-accoun
 // Gated by (protected)/layout.tsx. Other slices (e.g. S-04) can extend it.
 export default function SettingsPage() {
   return (
-    <PageShell title="Settings" width="prose" hideTitleOnMobile>
+    <PageShell title="Settings" width="prose">
       <section className="border-destructive/30 grid w-full gap-3 rounded-lg border p-4">
         <div className="grid gap-1">
           <h2 className="text-destructive text-lg font-medium">Danger zone</h2>

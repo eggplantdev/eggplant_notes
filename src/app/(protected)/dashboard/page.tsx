@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   })
 
   return (
-    <PageShell title="Dashboard" hideTitleOnMobile subtitle={`Signed in as ${user?.email}`}>
+    <PageShell title="Dashboard" subtitle={`Signed in as ${user?.email}`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href="/review"

@@ -31,7 +31,6 @@ export default async function ReviewPage() {
     <PageShell
       title="Review"
       width="prose"
-      hideTitleOnMobile
       actions={<p className="text-muted-foreground text-sm">{count} due</p>}
     >
       {!card ? (

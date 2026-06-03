@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
+import { ALL_NAV_ITEMS } from '@/components/app-nav/nav-items'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -21,10 +23,6 @@ type PropsT = {
   // Inner content width. 'full' = edge-to-edge (default; dashboard); 'prose' = max-w-2xl
   // (read-heavy pages); 'wide' = max-w-4xl (the note editor).
   width?: WidthT
-  // Hide the <h1> on mobile. Only set on top-level nav pages, where CurrentPageLabel already
-  // shows the section name — leave it off on detail/new/edit pages whose title is unique
-  // content (e.g. a note's own title) that nothing else surfaces on mobile.
-  hideTitleOnMobile?: boolean
   children: ReactNode
 }
 
@@ -47,10 +45,16 @@ export function PageShell({
   backHref,
   backLabel,
   width = 'full',
-  hideTitleOnMobile = false,
   children,
 }: PropsT) {
   const shouldReduceMotion = useReducedMotion()
+  const pathname = usePathname()
+  // Hide the <h1> on mobile only on the top-level nav routes, where CurrentPageLabel already
+  // pins the section name. Derived from the nav registry (exact href match) rather than a
+  // per-page prop, so it stays in lockstep with CurrentPageLabel and can't drift. Exact match
+  // (not isNavActive) is deliberate: detail/new/edit pages live *under* a nav route but their
+  // title is unique content (a note's own name), so they must keep the <h1> on mobile.
+  const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (
     <main className="p-4 sm:p-6">
@@ -70,7 +74,7 @@ export function PageShell({
 
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h1 className={cn('text-2xl font-semibold', hideTitleOnMobile && 'hidden md:block')}>
+            <h1 className={cn('text-2xl font-semibold', isNavRoot && 'hidden md:block')}>
               {title}
             </h1>
             {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
