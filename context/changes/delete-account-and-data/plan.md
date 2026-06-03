@@ -233,14 +233,14 @@ A Playwright spec proving the full lifecycle: sign up → delete via the real UI
 
 #### Automated
 
-- [ ] 1.1 `supabase db reset` applies the migration with no errors
-- [ ] 1.2 `src/lib/supabase/types.ts` `public.Functions` includes `delete_account`
-- [ ] 1.3 `pnpm typecheck` passes
+- [x] 1.1 `supabase db reset` applies the migration with no errors
+- [x] 1.2 `src/lib/supabase/types.ts` `public.Functions` includes `delete_account`
+- [x] 1.3 `pnpm typecheck` passes
 
 #### Manual
 
-- [ ] 1.4 `select public.delete_account()` as an authenticated role deletes the user + cascades; privilege to delete from `auth.users` confirmed
-- [ ] 1.5 Function shows `security definer` and `search_path = ''`
+- [x] 1.4 `select public.delete_account()` as an authenticated role deletes the user + cascades; privilege to delete from `auth.users` confirmed
+- [x] 1.5 Function shows `security definer` and `search_path = ''`
 
 ### Phase 2: Server action + settings Danger zone + sign-in notice
 
