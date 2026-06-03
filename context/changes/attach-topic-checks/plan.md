@@ -416,9 +416,9 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [x] 2.1 Type checking passes (`pnpm typecheck`)
-- [x] 2.2 Linting passes (`pnpm lint`)
-- [x] 2.3 Build passes (`pnpm build`)
+- [x] 2.1 Type checking passes (`pnpm typecheck`) — c125a02
+- [x] 2.2 Linting passes (`pnpm lint`) — c125a02
+- [x] 2.3 Build passes (`pnpm build`) — c125a02
 
 #### Manual
 
@@ -428,9 +428,9 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [ ] 3.1 Type checking passes (`pnpm typecheck`)
-- [ ] 3.2 Linting passes (`pnpm lint`)
-- [ ] 3.3 Production build passes (`pnpm build`)
+- [x] 3.1 Type checking passes (`pnpm typecheck`)
+- [x] 3.2 Linting passes (`pnpm lint`)
+- [x] 3.3 Production build passes (`pnpm build`)
 
 #### Manual
 

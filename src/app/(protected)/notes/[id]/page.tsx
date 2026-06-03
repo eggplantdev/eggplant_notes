@@ -5,14 +5,25 @@ import { Button } from '@/components/ui/button'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { getNote } from '@/features/notes/queries'
 import { RenderMarkdown } from '@/features/notes/render-markdown'
+import { getTopicChecksForNote } from '@/features/topic-checks/queries'
+import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
 
-// Note detail. Server Component — first dynamic route in the repo (Next 16 `params` is a
-// Promise). getNote() is RLS-scoped, so a missing OR not-owned id both 404. The delete
-// control lands in Phase 4.
-export default async function NotePage({ params }: { params: Promise<{ id: string }> }) {
+// Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
+// `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
+// 404. `?edit=<checkId>` drives the topic-check edit form (server-rendered, no client state).
+export default async function NotePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ edit?: string }>
+}) {
   const { id } = await params
+  const { edit } = await searchParams
   const note = await getNote(id)
   if (!note) notFound()
+
+  const topicChecks = await getTopicChecksForNote(id)
 
   return (
     <main className="mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-4">
@@ -36,6 +47,8 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
       </header>
 
       <RenderMarkdown content={note.content} />
+
+      <TopicChecksSection noteId={note.id} checks={topicChecks} editId={edit} />
     </main>
   )
 }

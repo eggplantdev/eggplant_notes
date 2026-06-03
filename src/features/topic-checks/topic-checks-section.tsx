@@ -1,0 +1,58 @@
+import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
+import { RenderMarkdown } from '@/features/notes/render-markdown'
+import { DeleteTopicCheckButton } from '@/features/topic-checks/delete-topic-check-button'
+import { TopicCheckForm } from '@/features/topic-checks/topic-check-form'
+import type { TopicCheckT } from '@/features/topic-checks/types'
+
+type TopicChecksSectionPropsT = {
+  noteId: string
+  checks: TopicCheckT[]
+  editId?: string
+}
+
+// Server Component (async — renders the server-only Shiki RenderMarkdown). Owns the "all
+// checks on a note" view (FR-015) plus the single add/edit form. Edit state is the URL
+// `?edit=<id>` param (editId), so there's no client list state: an Edit link re-renders this
+// on the server with the form seeded for that check. `key` forces the client form to remount
+// when the edit target changes. Optional example/code_context render only when present.
+export async function TopicChecksSection({ noteId, checks, editId }: TopicChecksSectionPropsT) {
+  const editingCheck = editId ? checks.find((c) => c.id === editId) : undefined
+
+  return (
+    <section className="flex flex-col gap-4">
+      <h2 className="text-lg font-semibold">Topic checks</h2>
+
+      {checks.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          No topic checks yet. Add one below to start building your recall set.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {checks.map((check) => (
+            <li key={check.id} className="flex flex-col gap-2 rounded-lg border p-4">
+              <div className="flex items-start justify-between gap-4">
+                <p className="font-medium">{check.prompt}</p>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/notes/${noteId}?edit=${check.id}#topic-check-form`}>Edit</Link>
+                  </Button>
+                  <DeleteTopicCheckButton noteId={noteId} id={check.id} />
+                </div>
+              </div>
+              {check.example && (
+                <div className="text-sm">
+                  <RenderMarkdown content={check.example} />
+                </div>
+              )}
+              {check.code_context && <RenderMarkdown content={check.code_context} />}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <TopicCheckForm key={editId ?? 'new'} noteId={noteId} check={editingCheck} />
+    </section>
+  )
+}
