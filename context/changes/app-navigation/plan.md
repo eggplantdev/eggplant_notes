@@ -281,10 +281,10 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build succeeds: `pnpm build`
-- [x] 1.4 Unit tests pass: `pnpm test`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 199944b
+- [x] 1.2 Linting passes: `pnpm lint` — 199944b
+- [x] 1.3 Production build succeeds: `pnpm build` — 199944b
+- [x] 1.4 Unit tests pass: `pnpm test` — 199944b
 
 #### Manual
 
