@@ -31,11 +31,13 @@ const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: 
 // `note` present → edit (action needs the id); absent → create. The union lets TS narrow
 // the action signature off `note`'s truthiness. Create now sends a note + its staged checks
 // together (CreateNoteWithChecksT); edit keeps the note-only NoteInputT contract.
-// `subjects` feeds the assignment picker.
+// `subjects` feeds the assignment picker. `defaultSubjectId` (create only) pre-selects a
+// subject — set when arriving from a subject's "New note" entry point (?subject=<id>).
 type NoteFormPropsT =
   | {
       action: (input: CreateNoteWithChecksT) => Promise<ActionResultT>
       subjects: SubjectT[]
+      defaultSubjectId?: string
       note?: undefined
     }
   | {
@@ -67,11 +69,14 @@ export function NoteForm(props: NoteFormPropsT) {
     [props.subjects],
   )
 
+  // Edit mode takes the saved subject; create mode honors a pre-selected one from the URL.
+  const defaultSubjectId = props.note ? null : (props.defaultSubjectId ?? null)
+
   const form = useAppForm({
     defaultValues: {
       title: note?.title ?? '',
       content: note?.content ?? '',
-      subject_id: note?.subject_id ?? null,
+      subject_id: note?.subject_id ?? defaultSubjectId,
       checks: [] as StagedCheckInputT[],
     },
     onSubmit: async ({ value }) => {

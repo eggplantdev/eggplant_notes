@@ -15,6 +15,10 @@ type PropsT<T> = {
   // Optional secondary line, rendered as-is under the title (the caller owns its markup so
   // each list can style it differently, e.g. a date vs a line-clamped description).
   renderSubtitle?: (item: T) => ReactNode
+  // Optional top-right action, rendered as a sibling of the title inside the card. The whole
+  // card is a <Link>, so an interactive action here must preventDefault/stopPropagation on its
+  // own click (see SubjectCardNewNoteButton). Omitted → the card DOM is unchanged (notes list).
+  renderAction?: (item: T) => ReactNode
 }
 
 // The shared animated list-of-linked-cards scaffold. Owns the drift-prone chrome —
@@ -29,6 +33,7 @@ export function AnimatedCardList<T>({
   getHref,
   renderTitle,
   renderSubtitle,
+  renderAction,
 }: PropsT<T>) {
   return (
     // TODO(e2e): list views changed shape — rows are now <div>/motion.div, no <ul>/<li>.
@@ -43,8 +48,20 @@ export function AnimatedCardList<T>({
               <Link href={getHref(item)}>
                 <Card className="hover:border-ring transition-colors">
                   <CardHeader>
-                    <CardTitle>{renderTitle(item)}</CardTitle>
-                    {renderSubtitle?.(item)}
+                    {renderAction ? (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="grid gap-1.5">
+                          <CardTitle>{renderTitle(item)}</CardTitle>
+                          {renderSubtitle?.(item)}
+                        </div>
+                        {renderAction(item)}
+                      </div>
+                    ) : (
+                      <>
+                        <CardTitle>{renderTitle(item)}</CardTitle>
+                        {renderSubtitle?.(item)}
+                      </>
+                    )}
                   </CardHeader>
                 </Card>
               </Link>

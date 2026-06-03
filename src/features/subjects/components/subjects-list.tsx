@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
+import { SubjectCardNewNoteButton } from '@/features/subjects/components/subject-card-new-note-button'
 import type { SubjectT } from '@/types/subject'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the subjects-specific href,
@@ -18,6 +19,7 @@ export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
           <p className="text-muted-foreground line-clamp-2 text-sm">{subject.description}</p>
         ) : null
       }
+      renderAction={(subject) => <SubjectCardNewNoteButton subjectId={subject.id} />}
     />
   )
 }

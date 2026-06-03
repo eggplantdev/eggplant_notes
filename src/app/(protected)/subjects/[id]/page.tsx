@@ -27,6 +27,9 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
       backLabel="Subjects"
       actions={
         <>
+          <Button asChild size="sm">
+            <Link href={`/notes/new?subject=${subject.id}`}>New note</Link>
+          </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={`/subjects/${subject.id}/edit`}>Edit</Link>
           </Button>
@@ -36,9 +39,9 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
     >
       {notes.length === 0 ? (
         <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-lg border border-dashed p-8">
-          <p>No notes in this subject yet. Assign one from its note page.</p>
-          <Button asChild variant="outline">
-            <Link href="/notes">Go to notes</Link>
+          <p>No notes in this subject yet.</p>
+          <Button asChild>
+            <Link href={`/notes/new?subject=${subject.id}`}>New note</Link>
           </Button>
         </div>
       ) : (

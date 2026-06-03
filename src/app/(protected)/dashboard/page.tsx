@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { PageShell } from '@/components/layout/page-shell'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
@@ -49,7 +50,15 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <PageShell title="Dashboard" subtitle={`Signed in as ${user?.email}`}>
+    <PageShell
+      title="Dashboard"
+      subtitle={`Signed in as ${user?.email}`}
+      actions={
+        <Button asChild>
+          <Link href="/notes/new">New note</Link>
+        </Button>
+      }
+    >
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Review activity — last 12 months</CardTitle>
