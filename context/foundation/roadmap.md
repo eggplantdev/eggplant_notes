@@ -234,7 +234,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - ~~Recall-scheduling library (ts-fsrs vs SM-2).~~ **Resolved 2026-06-03: ts-fsrs (FSRS).**
 - ~~S-06 sits outside the PRD.~~ **Resolved 2026-06-03: folded into PRD v2 (`prd-v2.md`) as a first-class Scope-of-Change item.**
-- **Documentation drift (FSRS vs SM-2):** CLAUDE.md, this roadmap's history, and `lessons.md` still describe the algorithm as SM-2 in places; the implementation is FSRS. Owner: operator. Block: no (reconcile docs separately).
+- ~~**Documentation drift (FSRS vs SM-2):** docs still describe the algorithm as SM-2.~~ **Resolved 2026-06-03:** reconciled to FSRS. `tech-stack.md` + `shape-notes.md` updated; `lessons.md` had no SM-2 refs; CLAUDE.md's SM-2 mentions are accurate transition history (SM-2 locked in F-02, reversed by S-03 → FSRS), left as-is. Live archived changes keep SM-2 as a correct point-in-time record.
 - **Subjects design decisions** (per-slice unknowns tracked in S-06): ordering representation, `subject_id` nullability, subject-delete behavior. Owner: `/10x-plan`. Block: no.
 
 ## Parked

@@ -22,7 +22,7 @@ checkpoint:
 
 ## Current System
 
-A live Next.js 16 (App Router) + React 19 + TypeScript web app on Vercel, with Supabase (Postgres + Auth + RLS). Shipped and archived: F-01 auth (email+password), F-02 per-user persistence + RLS, S-01 note capture with code highlighting, S-05 account+data deletion. S-03 recall loop (SM-2 spaced repetition) near done. Tables: `notes`, `topic_checks` (SM-2 columns present), `review_events`. BYOK via OpenRouter PKCE (v1 decision, carried forward).
+A live Next.js 16 (App Router) + React 19 + TypeScript web app on Vercel, with Supabase (Postgres + Auth + RLS). Shipped and archived: F-01 auth (email+password), F-02 per-user persistence + RLS, S-01 note capture with code highlighting, S-05 account+data deletion. S-03 recall loop (FSRS spaced repetition, ts-fsrs) shipped + archived. Tables: `notes`, `topic_checks` (FSRS state columns), `review_events`. BYOK via OpenRouter PKCE (v1 decision, carried forward).
 
 **State of the data:** no real users, no real notes/cards entered in the app yet — only the operator dogfooding. **There is nothing to preserve data-wise.** The v2 schema change can therefore be clean and destructive (drop/recreate, no migration, no backward-compat burden).
 
@@ -137,4 +137,4 @@ The v2 change adds an **organizational layer** (Subject grouping notes; ordered 
 - Ordering strategy for FR-003 (position int vs fractional/LexoRank) — decide at /10x-plan.
 - `notes.subject_id` nullability vs default "Inbox" subject — decide at /10x-plan.
 - `subjects` cascade vs set-null on delete — decide at /10x-plan.
-- CLAUDE.md/roadmap say SM-2 but the implementation is FSRS (migration `20260603131542_fsrs_review_loop.sql`) — the v2 PRD must say FSRS; fix the stale docs separately.
+- ~~CLAUDE.md/roadmap say SM-2 but the implementation is FSRS~~ — reconciled 2026-06-03: docs updated to FSRS (migration `20260603131542_fsrs_review_loop.sql`).

@@ -115,4 +115,4 @@ No access control changes — current model preserved. Email+password sign-in, f
 1. **How should note order within a subject be represented so that reordering and inserting between two notes stay cheap?** — Owner: implementation planning. Block: no.
 2. **When a note has no subject, does it remain a free-floating unassigned note, or is it auto-placed into a default catch-all subject?** — Owner: implementation planning. Block: no.
 3. **When a subject is deleted, what happens to its member notes — do they detach and survive, or are they removed with it?** — Owner: implementation planning. Block: no.
-4. **Documentation drift:** project docs (CLAUDE.md, roadmap, lessons) describe the recall algorithm as SM-2, but the implemented scheduling is FSRS. Reconcile the docs to FSRS. — Owner: operator. Block: no.
+4. ~~**Documentation drift:** project docs describe the recall algorithm as SM-2, but the implemented scheduling is FSRS.~~ **Resolved 2026-06-03:** reconciled to FSRS — `tech-stack.md` + `shape-notes.md` updated; `lessons.md` had no SM-2 refs; CLAUDE.md's SM-2 mentions are accurate transition history (left as-is).
