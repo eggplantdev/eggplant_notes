@@ -445,8 +445,8 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [x] 4.1 E2E suite passes (`pnpm test:e2e`)
-- [x] 4.2 Isolation assertion negative-control verified, then passes
+- [x] 4.1 E2E suite passes (`pnpm test:e2e`) — 9c76c78
+- [x] 4.2 Isolation assertion negative-control verified, then passes — 9c76c78
 
 #### Manual
 

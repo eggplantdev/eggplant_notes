@@ -2,7 +2,7 @@
 change_id: attach-topic-checks
 roadmap_id: S-02
 linear: EX-362
-status: implementing
+status: implemented
 created: 2026-06-03
 updated: 2026-06-03
 prerequisites: [S-01]
