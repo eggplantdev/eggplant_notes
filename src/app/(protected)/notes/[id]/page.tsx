@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { getNote } from '@/features/notes/queries'
 import { RenderMarkdown } from '@/features/notes/render-markdown'
 
@@ -19,9 +20,12 @@ export default async function NotePage({ params }: { params: Promise<{ id: strin
         <Button asChild variant="ghost" size="sm">
           <Link href="/notes">← Notes</Link>
         </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/notes/${note.id}/edit`}>Edit</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/notes/${note.id}/edit`}>Edit</Link>
+          </Button>
+          <DeleteNoteButton id={note.id} />
+        </div>
       </div>
 
       <header className="flex flex-col gap-1">

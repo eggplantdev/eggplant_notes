@@ -34,6 +34,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Throwaway per-change git worktrees (already gitignored) carry their own source
+    // copies + generated .next builds — never lint them.
+    ".claude/**",
   ]),
 ]);
 

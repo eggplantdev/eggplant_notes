@@ -337,7 +337,7 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 #### Manual
 
 - [x] 1.5 `pnpm build` succeeds (no SSR import of the editor) — d84c369
-- [ ] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (deferred to Phase 3/4 when wired)
+- [x] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (alert-dialog wired in P4 delete flow + verified; textarea installed, unused this slice — queued for S-02 topic-checks)
 
 ### Phase 2: Read UI — list + highlighted detail
 
@@ -357,27 +357,27 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 
 #### Automated
 
-- [x] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [x] 3.2 Editor chunk is code-split (not in initial/shared bundle)
+- [x] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass — 17aac20
+- [x] 3.2 Editor chunk is code-split (not in initial/shared bundle) — 17aac20
 
 #### Manual
 
-- [x] 3.3 Editor loads on `/notes/new`; live preview updates while typing
-- [x] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable
-- [x] 3.5 Create saves and lands on the new note's highlighted detail
-- [x] 3.6 Edit pre-fills, saves, reflects on detail
-- [x] 3.7 Empty/whitespace title blocked; >200 chars blocked
+- [x] 3.3 Editor loads on `/notes/new`; live preview updates while typing — 17aac20
+- [x] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable — 17aac20
+- [x] 3.5 Create saves and lands on the new note's highlighted detail — 17aac20
+- [x] 3.6 Edit pre-fills, saves, reflects on detail — 17aac20
+- [x] 3.7 Empty/whitespace title blocked; >200 chars blocked — 17aac20
 
 ### Phase 4: Delete + end-to-end test
 
 #### Automated
 
-- [ ] 4.1 `pnpm test:e2e` passes including `notes.spec.ts`
-- [ ] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green
-- [ ] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass
+- [x] 4.1 `pnpm test:e2e` passes including `notes.spec.ts`
+- [x] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green
+- [x] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass
 
 #### Manual
 
-- [ ] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list
-- [ ] 4.5 Deleting a note with topic checks removes them too (DB cascade)
-- [ ] 4.6 Server confirmed bound by PID/port before trusting the E2E run
+- [x] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list
+- [x] 4.5 Deleting a note with topic checks removes them too (DB cascade)
+- [x] 4.6 Server confirmed bound by PID/port before trusting the E2E run

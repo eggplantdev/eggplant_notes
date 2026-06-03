@@ -51,7 +51,7 @@ export function NoteForm(props: NoteFormPropsT) {
         form.handleSubmit()
       }}
     >
-      <form.AppField name="title" validators={{ onChange: titleSchema }}>
+      <form.AppField name="title" validators={{ onBlur: titleSchema, onSubmit: titleSchema }}>
         {(field) => <field.Input label="Title" placeholder="Note title" />}
       </form.AppField>
 
