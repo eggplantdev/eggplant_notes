@@ -2,9 +2,8 @@
 // matrix builder, the page, and the heatmap component — kept out of the component files per
 // the "components export only the component / shared types live in their own file" rule.
 //
-// The DashboardDataT shape matches what the real queries will return post-S-03 (the recall
-// loop writes `review_events`); the UI shell fills it with dummy data, so wiring is a body
-// swap in data.ts, not a type or component change.
+// DashboardDataT is the contract between the data layer (data.ts) and the UI; S-03 wired it
+// to real per-user queries over `topic_checks` / `review_events` without changing this shape.
 
 import { HEAT_LEVELS } from '@/features/dashboard/constants'
 

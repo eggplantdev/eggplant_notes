@@ -7,18 +7,33 @@ import type { Database } from '@/lib/supabase/types'
 
 // Returns the owner's topic checks that are due (RLS scopes rows to the owner).
 //
-// NOTE (F3): `due_at` defaults to now() at insert and NOTHING writes the SM-2
-// scheduling columns until S-03 (close-recall-loop). So every row's `due_at` is its
-// creation time — already in the past relative to this query — and this helper returns
-// ALL of the user's topic checks by design until the SM-2 write path lands. That is
-// expected, not a bug. The `due_at <= now()` filter + the `(user_id, due_at)` index are
-// in place now so the query is correct the moment scheduling starts writing future dates.
+// As of S-03 (close-recall-loop) the review write path sets a future `due_at` via FSRS, so
+// this returns only the genuinely-due checks (`due_at <= now()`). A freshly-created check
+// has `due_at` defaulting to now(), so it is due immediately until its first review reschedules
+// it. The `(user_id, due_at)` btree index backs this filter.
 export async function getTopicChecksDue(client?: SupabaseClient<Database>): Promise<TopicCheckT[]> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
   return runTableQuery(supabase, (c) =>
     c.from('topic_checks').select('*').lte('due_at', now).order('due_at', { ascending: true }),
   )
+}
+
+// Count of the owner's topic checks that are due now — the dashboard "Due today" stat. Uses a
+// head + exact-count select so no row payload is fetched, with the same `due_at <= now()`
+// filter as getTopicChecksDue. Injectable client per the isolation rule.
+export async function getDueCount(client?: SupabaseClient<Database>): Promise<number> {
+  const supabase = client ?? (await createClient())
+  const now = new Date().toISOString()
+  const { count, error } = await supabase
+    .from('topic_checks')
+    .select('*', { head: true, count: 'exact' })
+    .lte('due_at', now)
+  if (error) {
+    console.error('[getDueCount] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return count ?? 0
 }
 
 // Returns all topic checks attached to one note, oldest first (FR-015). RLS scopes rows to the

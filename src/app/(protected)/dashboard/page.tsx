@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { signOut } from '@/features/auth/actions/sign-out'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
+import { APP_TIME_ZONE } from '@/features/dashboard/constants'
 import { getDashboardData } from '@/features/dashboard/data'
 import { StatCard } from '@/features/dashboard/stat-card'
+import { todayInZone } from '@/features/dashboard/utils'
 import { createClient } from '@/lib/supabase/server'
 
-// S-04 activity dashboard. NOTE: data is a UI-shell spike (dummy) until the recall loop
-// (S-03) lands — see features/dashboard/data.ts.
+// S-04 activity dashboard, wired to real per-user data by S-03 (features/dashboard/data.ts).
 export default async function DashboardPage() {
   const supabase = await createClient()
   // Independent reads — auth check and dashboard data don't depend on each other. Runs them
@@ -21,7 +22,10 @@ export default async function DashboardPage() {
     },
     data,
   ] = await Promise.all([supabase.auth.getUser(), getDashboardData()])
-  const columns = buildHeatmapMatrix(data.activity, { today: new Date(), weeks: 53 })
+  const columns = buildHeatmapMatrix(data.activity, {
+    today: todayInZone(APP_TIME_ZONE),
+    weeks: 53,
+  })
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">

@@ -531,8 +531,8 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [x] 3.1 `pnpm build` succeeds (route + client/server boundary)
-- [x] 3.2 `pnpm typecheck`/`pnpm lint` pass
+- [x] 3.1 `pnpm build` succeeds (route + client/server boundary) — 1e76ebc
+- [x] 3.2 `pnpm typecheck`/`pnpm lint` pass — 1e76ebc
 
 #### Manual
 
@@ -546,8 +546,8 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [ ] 4.1 `pnpm build`/`pnpm typecheck`/`pnpm lint` pass
-- [ ] 4.2 `getDashboardData` no longer imports the dummy generator (grep clean)
+- [x] 4.1 `pnpm build`/`pnpm typecheck`/`pnpm lint` pass
+- [x] 4.2 `getDashboardData` no longer imports the dummy generator (grep clean)
 
 #### Manual
 
