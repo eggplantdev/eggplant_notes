@@ -1,10 +1,10 @@
 ---
 change_id: persistence-and-isolation
 title: Persistence and per-user isolation for notes, topic checks, and review events
-status: impl_reviewed
+status: archived
 created: 2026-06-02
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T08:29:50Z
 ---
 
 ## Notes

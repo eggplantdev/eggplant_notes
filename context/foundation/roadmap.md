@@ -3,7 +3,7 @@ project: 'Coding Learning Companion'
 version: 1
 status: draft
 created: 2026-06-01
-updated: 2026-06-02
+updated: 2026-06-03
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -30,7 +30,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 | ID   | Change ID                 | Outcome (user can …)                                             | Prerequisites | PRD refs                        | Status   |
 | ---- | ------------------------- | ---------------------------------------------------------------- | ------------- | ------------------------------- | -------- |
 | F-01 | minimal-auth-and-session  | (foundation) email/password auth + session; gated product routes | —             | FR-001–005, Access Control      | done     |
-| F-02 | persistence-and-isolation | (foundation) core tables + RLS isolation scoped by `auth.uid()`  | —             | NFR (isolation), Access Control | ready    |
+| F-02 | persistence-and-isolation | (foundation) core tables + RLS isolation scoped by `auth.uid()`  | —             | NFR (isolation), Access Control | done     |
 | S-01 | capture-note-with-code    | create, view, edit, delete, and list notes with highlighted code | F-01, F-02    | FR-007–011, US-01, NFR (code)   | proposed |
 | S-02 | attach-topic-checks       | attach, edit, delete, and list topic checks on a note            | S-01          | FR-012–015, US-01               | proposed |
 | S-03 | close-recall-loop         | review a due topic check, self-rate, and see it reschedule       | S-02, F-02    | FR-016–019, US-01, Bus. Logic   | proposed |
@@ -84,7 +84,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Persistence-layer isolation is the #1 PRD guardrail ("no user sees another's data even with an app-layer bug") — enforcing it at the DB via RLS, not app code, is the investment area. Minimal enabler: the three core tables the recall loop needs, not the full v1.1 entity model. Full isolation verification needs F-01's sign-up working (two real accounts).
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -182,3 +182,4 @@ Deferred to v1.1 (out-of-MVP, not out-of-product — `main_goal: speed` keeps th
 ## Done
 
 - **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
+- **F-02: (foundation) first migration creates `notes`, `topic_checks`, `review_events` with Row-Level Security policies scoping every row by `auth.uid()`, plus minimal typed client query helpers; verified by a two-account isolation test.** — Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`. Lesson: —.
