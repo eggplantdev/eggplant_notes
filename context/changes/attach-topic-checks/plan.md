@@ -422,7 +422,7 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Manual
 
-- [ ] 2.4 Notes CRUD still works after the runNoteAction → runTableAction promotion (no regression)
+- [x] 2.4 Notes CRUD still works after the runNoteAction → runTableAction promotion (no regression) — e2e notes.spec c125a02
 
 ### Phase 3: Inline UI on note detail
 
@@ -434,10 +434,10 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Manual
 
-- [ ] 3.4 Empty state shows, then a check lists after adding
-- [ ] 3.5 code_context with a fenced block renders syntax-highlighted
-- [ ] 3.6 Edit swaps the single form into edit mode (one editor), saves, row updates
-- [ ] 3.7 Delete shows AlertDialog, confirms, row disappears
+- [x] 3.4 Empty state shows, then a check lists after adding — e2e topic-checks.spec 9c76c78
+- [x] 3.5 code_context with a fenced block renders syntax-highlighted — e2e topic-checks.spec 9c76c78
+- [x] 3.6 Edit swaps the single form into edit mode (one editor), saves, row updates — e2e topic-checks.spec 9c76c78
+- [x] 3.7 Delete shows AlertDialog, confirms, row disappears — e2e topic-checks.spec 9c76c78
 - [ ] 3.8 Blank optionals persist as null and render cleanly
 - [ ] 3.9 Layout usable down to ~360px
 
@@ -450,4 +450,4 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Manual
 
-- [ ] 4.3 CRUD spec exercises the user flow with no console errors
+- [x] 4.3 CRUD spec exercises the user flow with no console errors — e2e topic-checks.spec 9c76c78
