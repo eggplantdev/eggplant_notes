@@ -6,6 +6,11 @@ import { config as loadEnv } from 'dotenv'
 // cannot read NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY to build its supabase-js clients.
 loadEnv({ path: '.env.local' })
 
+// Port is overridable (PORT env) so an isolated worktree can run E2E without colliding with
+// another server on the default 3000. `next start` honours PORT for the webServer too.
+const PORT = process.env.PORT ?? '3000'
+const BASE_URL = `http://127.0.0.1:${PORT}`
+
 // E2E runs against the LOCAL Supabase stack (supabase start) + the dev server.
 // Vercel never runs these; they are a local pre-push gate. If a GitHub Actions
 // E2E job is ever added, drop `channel: 'chrome'` (CI runners have no Chrome)
@@ -17,7 +22,7 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:3000',
+    baseURL: BASE_URL,
     channel: 'chrome', // use system Google Chrome, no bundled browser download
     trace: 'on-first-retry',
   },
@@ -27,7 +32,7 @@ export default defineConfig({
   // attaches its handler), which flake the suite. `build && start` is deterministic.
   webServer: {
     command: 'pnpm build && pnpm start',
-    url: 'http://127.0.0.1:3000',
+    url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
