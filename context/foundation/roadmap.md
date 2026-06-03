@@ -41,8 +41,10 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document             | S-01             | US-01, Scope:[new] subjects                | v1-usable   | done     |
 | S-08 | card-to-note-navigation      | jump from a recall card to its source note                                          | S-02             | US-01, Scope:[new] card→note               | v1-usable   | done     |
 | S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)                   | S-01, S-02       | Scope:[new] inline cards (FR-008)          | fast-follow | proposed |
-| S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating                 | S-01             | Scope (FR-009, FR-010)                     | fast-follow | proposed |
+| S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating                 | S-01             | Scope (FR-009, FR-010)                     | fast-follow | done\*   |
 | S-11 | data-fetching-efficiency     | navigate between routes without refetching unchanged data; lists stop over-fetching | S-01, S-02, S-06 | NFR (responsiveness); S-01/S-02 follow-ups | v2          | proposed |
+
+> \* **S-09 `done*`** — feature-complete and committed, but unlike every other `done` slice it was **not** archived: built ad-hoc (no `/10x-new` change folder), tests skipped per direction, and committed on `dashboard-stats-expansion` (merges to `main` with that branch; the auth-validation half `c4657d3` is already on `main`). See the S-09 detail section.
 
 ## Streams
 
@@ -227,10 +229,10 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Prerequisites:** S-01
 - **Parallel with:** S-07, S-06, S-08
 - **Blockers:** —
-- **Unknowns:**
-  - **Language-select scope** — does the selected language set the default highlight language for the note's code blocks, or is it metadata only? Owner: `/10x-plan`. Block: no.
+- **Unknowns (resolved):**
+  - **Language-select scope** — resolved to **neither metadata nor default-highlight**: the picker is an action that appends a fenced ` ```lang ` code block to the body (the fence already drives Shiki per-block highlighting). No `notes.language` column, no schema change.
 - **Risk:** Trivial. Two small dogfooding nits bundled into one slice; fast-follow.
-- **Status:** proposed
+- **Status:** done (implemented + committed, **not** archived — built ad-hoc without a `/10x-new` change folder). FR-009 = auth-form validators flipped `onChange`→`onBlur`+`onSubmit` (the eager errors were on the auth pages, not the note title, which was already deferred in S-01). FR-010 = code-language picker that appends a fenced block. En route, the searchable select was promoted to a reusable `src/components/ui/combobox.tsx` primitive (cmdk + Popover) and the note's **subject** picker was migrated onto it too. Slice-review gate ran (4-check fan-out + `/simplify`); **tests skipped per direction**. Commits `6d0a1a7` (combobox primitive) + `18fcf94` (note-form wiring) on branch `dashboard-stats-expansion` (rides to `main` with that branch); auth validation fix `c4657d3` is already on `main`.
 
 ### S-11: data-fetching efficiency (performance — cross-cutting)
 
