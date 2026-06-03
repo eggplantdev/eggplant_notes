@@ -338,21 +338,21 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly (`supabase db reset` succeeds)
-- [x] 1.2 RPC exists with SECURITY INVOKER + correct grants (verify via pg_catalog)
-- [x] 1.3 Type checking passes (`pnpm typecheck`)
-- [x] 1.4 Linting passes (`pnpm lint`)
+- [x] 1.1 Migration applies cleanly (`supabase db reset` succeeds) — d35b9f5
+- [x] 1.2 RPC exists with SECURITY INVOKER + correct grants (verify via pg_catalog) — d35b9f5
+- [x] 1.3 Type checking passes (`pnpm typecheck`) — d35b9f5
+- [x] 1.4 Linting passes (`pnpm lint`) — d35b9f5
 
 #### Manual
 
-- [x] 1.5 RPC inserts note + checks scoped to caller; forged subject_id rejected by RLS
+- [x] 1.5 RPC inserts note + checks scoped to caller; forged subject_id rejected by RLS — d35b9f5
 
 ### Phase 2: Server Action (RPC always)
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`pnpm typecheck`)
-- [ ] 2.2 Linting passes (`pnpm lint`)
+- [x] 2.1 Type checking passes (`pnpm typecheck`)
+- [x] 2.2 Linting passes (`pnpm lint`)
 
 #### Manual
 
