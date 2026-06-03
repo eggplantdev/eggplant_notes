@@ -356,7 +356,7 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Manual
 
-- [ ] 2.3 0-check and N-check creates redirect correctly; RPC error surfaces inline
+- [x] 2.3 0-check and N-check creates redirect correctly; RPC error surfaces inline
 
 ### Phase 3: Inline Staging UI
 
@@ -368,19 +368,19 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Manual
 
-- [ ] 3.4 Add/fill 2 rows → detail shows both checks
-- [ ] 3.5 Remove a row → not persisted
-- [ ] 3.6 Empty question → inline error, save blocked
-- [ ] 3.7 Zero rows → plain note created
-- [ ] 3.8 code_context highlight/preview works per row
+- [x] 3.4 Add/fill 2 rows → detail shows both checks
+- [x] 3.5 Remove a row → not persisted
+- [x] 3.6 Empty question → inline error, save blocked
+- [x] 3.7 Zero rows → plain note created
+- [x] 3.8 code_context highlight/preview works per row
 
 ### Phase 4: E2E (after review→simplify gate)
 
 #### Automated
 
-- [ ] 4.1 New spec passes (`pnpm test:e2e`)
-- [ ] 4.2 Full suite green (typecheck, lint, test, test:e2e, build)
+- [x] 4.1 New spec passes (`pnpm test:e2e`)
+- [x] 4.2 Full suite green (typecheck, lint, test, test:e2e, build)
 
 #### Manual
 
-- [ ] 4.3 Negative control: non-atomic RPC leaves no orphan / test catches it
+- [x] 4.3 Negative control: non-atomic RPC leaves no orphan / test catches it
