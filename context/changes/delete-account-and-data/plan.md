@@ -233,29 +233,29 @@ A Playwright spec proving the full lifecycle: sign up → delete via the real UI
 
 #### Automated
 
-- [x] 1.1 `supabase db reset` applies the migration with no errors
-- [x] 1.2 `src/lib/supabase/types.ts` `public.Functions` includes `delete_account`
-- [x] 1.3 `pnpm typecheck` passes
+- [x] 1.1 `supabase db reset` applies the migration with no errors — d1d08c7
+- [x] 1.2 `src/lib/supabase/types.ts` `public.Functions` includes `delete_account` — d1d08c7
+- [x] 1.3 `pnpm typecheck` passes — d1d08c7
 
 #### Manual
 
-- [x] 1.4 `select public.delete_account()` as an authenticated role deletes the user + cascades; privilege to delete from `auth.users` confirmed
-- [x] 1.5 Function shows `security definer` and `search_path = ''`
+- [x] 1.4 `select public.delete_account()` as an authenticated role deletes the user + cascades; privilege to delete from `auth.users` confirmed — d1d08c7
+- [x] 1.5 Function shows `security definer` and `search_path = ''` — d1d08c7
 
 ### Phase 2: Server action + settings Danger zone + sign-in notice
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck` passes
-- [ ] 2.2 `pnpm lint` passes
-- [ ] 2.3 `pnpm test` passes
+- [x] 2.1 `pnpm typecheck` passes
+- [x] 2.2 `pnpm lint` passes
+- [x] 2.3 `pnpm test` passes
 
 #### Manual
 
-- [ ] 2.4 `/settings` Danger zone renders; destructive button disabled until `DELETE` typed
-- [ ] 2.5 Confirming deletes the account and lands on `/sign-in?deleted=1` with the notice
-- [ ] 2.6 Deleted account cannot sign in again; fresh sign-up still works
-- [ ] 2.7 Simulated RPC error surfaces inline and does NOT sign the user out
+- [x] 2.4 `/settings` Danger zone renders; destructive button disabled until `DELETE` typed
+- [x] 2.5 Confirming deletes the account and lands on `/sign-in?deleted=1` with the notice
+- [x] 2.6 Deleted account cannot sign in again; fresh sign-up still works
+- [x] 2.7 Simulated RPC error surfaces inline and does NOT sign the user out
 
 ### Phase 3: E2E account-lifecycle test
 

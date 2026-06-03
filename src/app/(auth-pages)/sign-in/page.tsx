@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { signIn } from '@/features/auth/actions/sign-in'
+import { DeletedNotice } from '@/features/auth/components/deleted-notice'
 import { emailSchema, passwordSchema } from '@/features/auth/schemas'
 
 export default function SignInPage() {
@@ -28,6 +29,9 @@ export default function SignInPage() {
         <CardDescription>Welcome back.</CardDescription>
       </CardHeader>
       <CardContent>
+        <Suspense fallback={null}>
+          <DeletedNotice />
+        </Suspense>
         <form
           className="grid gap-4"
           onSubmit={(e) => {
