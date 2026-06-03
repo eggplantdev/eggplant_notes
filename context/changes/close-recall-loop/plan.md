@@ -508,12 +508,12 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly (`supabase db reset`)
-- [x] 1.2 `record_review` exists and is SECURITY INVOKER (verify via `pg_proc`)
-- [x] 1.3 `topic_checks` has FSRS columns, lacks SM-2 columns (verify via `pg_attribute`)
-- [x] 1.4 `review_events` rating check is `1..4` (verify via `pg_constraint`)
-- [x] 1.5 Typegen regenerated; `pnpm typecheck`/`pnpm build` pass
-- [x] 1.6 `pnpm lint` passes
+- [x] 1.1 Migration applies cleanly (`supabase db reset`) — ad5dd18
+- [x] 1.2 `record_review` exists and is SECURITY INVOKER (verify via `pg_proc`) — ad5dd18
+- [x] 1.3 `topic_checks` has FSRS columns, lacks SM-2 columns (verify via `pg_attribute`) — ad5dd18
+- [x] 1.4 `review_events` rating check is `1..4` (verify via `pg_constraint`) — ad5dd18
+- [x] 1.5 Typegen regenerated; `pnpm typecheck`/`pnpm build` pass — ad5dd18
+- [x] 1.6 `pnpm lint` passes — ad5dd18
 
 #### Manual
 
@@ -523,9 +523,9 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [ ] 2.1 Unit test: New card Good → future due/reps++/state advances; Again sooner than Good
-- [ ] 2.2 Unit test: `previewIntervals` returns four distinct ordered future dates
-- [ ] 2.3 `pnpm test`/`pnpm typecheck`/`pnpm lint` pass
+- [x] 2.1 Unit test: New card Good → future due/reps++/state advances; Again sooner than Good
+- [x] 2.2 Unit test: `previewIntervals` returns four distinct ordered future dates
+- [x] 2.3 `pnpm test`/`pnpm typecheck`/`pnpm lint` pass
 
 ### Phase 3: /review session UI
 
