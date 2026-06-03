@@ -1,41 +1,12 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { test, expect, type Page } from '@playwright/test'
+import { type SupabaseClient } from '@supabase/supabase-js'
+import { test, expect } from '@playwright/test'
+
+import { clientFor, signUp, uniqueEmail } from './helpers'
 
 // The PRD's #1 guardrail as an executable test: no user can read another user's rows.
 // Sign-up goes through the real UI (exercising F-01's auth + cookie + proxy path); the
 // data ops run through a per-account supabase-js client authenticated with
-// signInWithPassword — NOT browser-cookie reuse (@supabase/ssr stores HttpOnly chunked
-// cookies with no JS-accessible token). URL + anon key come from .env.local, loaded by
-// playwright.config.ts into process.env — a raw spec process loads no env on its own.
-const PASSWORD = 'password123'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-// Unique per-run email so reruns don't collide on the shared local auth.users table.
-function uniqueEmail(tag: string) {
-  return `e2e-iso-${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
-}
-
-async function signUp(page: Page, email: string) {
-  await page.goto('/sign-up')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page).toHaveURL('/dashboard')
-}
-
-// Build an API client authenticated as the given account. signInWithPassword returns the
-// access_token directly, so the client carries a real session and RLS applies as that user.
-async function clientFor(email: string): Promise<SupabaseClient> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY — is .env.local loaded?')
-  }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  const { error } = await supabase.auth.signInWithPassword({ email, password: PASSWORD })
-  expect(error, `sign-in failed for ${email}`).toBeNull()
-  return supabase
-}
+// signInWithPassword — NOT browser-cookie reuse. Shared helpers live in ./helpers.
 
 type SeedT = {
   noteId: string
@@ -90,8 +61,8 @@ async function assertIsolated(
 }
 
 test('accounts are isolated across notes, topic_checks, and review_events', async ({ browser }) => {
-  const emailA = uniqueEmail('a')
-  const emailB = uniqueEmail('b')
+  const emailA = uniqueEmail('iso-a')
+  const emailB = uniqueEmail('iso-b')
 
   // Sign up both accounts through the real UI in isolated browser contexts.
   const ctxA = await browser.newContext()

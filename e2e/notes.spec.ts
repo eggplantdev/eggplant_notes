@@ -1,30 +1,10 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+
+import { fillEditor, signUp, uniqueEmail } from './helpers'
 
 // S-01 acceptance path as an executable test: create → list → highlighted detail → edit →
-// delete. Auth goes through the real UI (per lessons.md: drive sign-up via the UI). The
-// markdown body is inserted with execCommand insertText rather than keystrokes — CodeMirror's
-// closeBrackets would auto-close the ``` fence and the `{`, corrupting the code block.
-const PASSWORD = 'password123'
-
-function uniqueEmail() {
-  return `e2e-notes-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
-}
-
-async function signUp(page: Page, email: string) {
-  await page.goto('/sign-up')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page).toHaveURL('/dashboard')
-}
-
-// Insert text into the CodeMirror contenteditable without firing key handlers.
-async function fillEditor(page: Page, value: string) {
-  const editor = page.locator('.cm-content')
-  await editor.click()
-  await editor.evaluate((_el, text) => document.execCommand('insertText', false, text), value)
-}
-
+// delete. Shared auth/editor helpers live in ./helpers; the markdown body is inserted with
+// execCommand insertText (CodeMirror's closeBrackets would corrupt the ``` fence on keystrokes).
 const CODE_BODY = [
   '# Heading',
   '',
@@ -36,7 +16,7 @@ const CODE_BODY = [
 ].join('\n')
 
 test('full CRUD: create a note with code, see it highlighted, edit, delete', async ({ page }) => {
-  await signUp(page, uniqueEmail())
+  await signUp(page, uniqueEmail('notes'))
   const title = `E2E note ${Date.now()}`
 
   // Create
@@ -79,7 +59,7 @@ test('full CRUD: create a note with code, see it highlighted, edit, delete', asy
 // If anyone adds rehype-raw for "richer notes" later, this turns red instead of silently
 // shipping stored XSS.
 test('note body raw HTML is rendered inert, not executed (no stored XSS)', async ({ page }) => {
-  await signUp(page, uniqueEmail())
+  await signUp(page, uniqueEmail('notes'))
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(`XSS guard ${Date.now()}`)
   await fillEditor(

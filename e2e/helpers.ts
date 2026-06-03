@@ -1,0 +1,49 @@
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { expect, type Page } from '@playwright/test'
+
+// Shared E2E harness. Every spec drives sign-up through the real UI (exercising the F-01
+// auth + cookie + proxy path) and, when it needs an authenticated API client, builds one via
+// signInWithPassword rather than reusing browser cookies (see lessons.md). Not a spec file
+// (no test() calls), so Playwright's *.spec.ts testMatch never collects it.
+export const PASSWORD = 'password123'
+
+// URL + anon key come from .env.local, which playwright.config.ts loads into process.env — a
+// raw worker process otherwise loads no env (see lessons.md).
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+// Unique per-run email so reruns don't collide on the shared local auth.users table. `tag`
+// namespaces the address per spec/account (e.g. 'notes', 'iso-a') for log readability.
+export function uniqueEmail(tag = '') {
+  const prefix = tag ? `${tag}-` : ''
+  return `e2e-${prefix}${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
+}
+
+// Sign up through the real UI and land on the dashboard.
+export async function signUp(page: Page, email: string) {
+  await page.goto('/sign-up')
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password').fill(PASSWORD)
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await expect(page).toHaveURL('/dashboard')
+}
+
+// Insert text into the CodeMirror contenteditable without firing key handlers — closeBrackets
+// would auto-close the ``` fence and the `{`, corrupting a pasted code block.
+export async function fillEditor(page: Page, value: string) {
+  const editor = page.locator('.cm-content')
+  await editor.click()
+  await editor.evaluate((_el, text) => document.execCommand('insertText', false, text), value)
+}
+
+// Build a supabase-js client authenticated as the given account. signInWithPassword returns the
+// access_token directly, so the client carries a real session and RLS applies as that user.
+export async function clientFor(email: string): Promise<SupabaseClient> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY — is .env.local loaded?')
+  }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const { error } = await supabase.auth.signInWithPassword({ email, password: PASSWORD })
+  expect(error, `sign-in failed for ${email}`).toBeNull()
+  return supabase
+}

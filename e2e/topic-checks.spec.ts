@@ -1,50 +1,14 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+
+import { clientFor, fillEditor, signUp, uniqueEmail } from './helpers'
 
 // S-02 acceptance path: on a note, add a topic check (question + example + highlighted code
 // context) → see it listed → edit → delete (FR-012–015). Plus a two-account isolation check on
-// the new write/read path. Auth + the markdown body insert follow the same patterns as
-// notes.spec.ts / isolation.spec.ts (sign-up via UI; execCommand insertText so CodeMirror's
-// closeBrackets doesn't corrupt the ``` fence; supabase-js clients via signInWithPassword).
-const PASSWORD = 'password123'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-function uniqueEmail(tag: string) {
-  return `e2e-tc-${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
-}
-
-async function signUp(page: Page, email: string) {
-  await page.goto('/sign-up')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page).toHaveURL('/dashboard')
-}
-
-// Insert text into the (single) CodeMirror contenteditable — the code_context editor — without
-// firing key handlers that would auto-close the fence.
-async function fillEditor(page: Page, value: string) {
-  const editor = page.locator('.cm-content')
-  await editor.click()
-  await editor.evaluate((_el, text) => document.execCommand('insertText', false, text), value)
-}
-
-async function clientFor(email: string): Promise<SupabaseClient> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY — is .env.local loaded?')
-  }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  const { error } = await supabase.auth.signInWithPassword({ email, password: PASSWORD })
-  expect(error, `sign-in failed for ${email}`).toBeNull()
-  return supabase
-}
-
+// the new write/read path. Shared auth/editor/client helpers live in ./helpers.
 const CODE_CONTEXT = ['```ts', 'const sum = (a: number, b: number) => a + b', '```'].join('\n')
 
 test('full CRUD: add a topic check with highlighted code, list, edit, delete', async ({ page }) => {
-  await signUp(page, uniqueEmail('crud'))
+  await signUp(page, uniqueEmail('tc-crud'))
 
   // A note to attach checks to (title only — keeps the only code block on the page the check's).
   await page.goto('/notes/new')
@@ -87,8 +51,8 @@ test('full CRUD: add a topic check with highlighted code, list, edit, delete', a
 // next/headers deps don't resolve outside the Next runtime — see lessons.md). The new
 // example/code_context columns round-trip for the owner.
 test('topic checks are isolated by account on the per-note read path', async ({ browser }) => {
-  const emailA = uniqueEmail('iso-a')
-  const emailB = uniqueEmail('iso-b')
+  const emailA = uniqueEmail('tc-iso-a')
+  const emailB = uniqueEmail('tc-iso-b')
 
   const ctxA = await browser.newContext()
   const ctxB = await browser.newContext()

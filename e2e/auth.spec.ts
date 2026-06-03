@@ -1,21 +1,10 @@
 import { test, expect, type Page } from '@playwright/test'
 
+import { PASSWORD, signUp, uniqueEmail } from './helpers'
+
 // Mailpit is the local SMTP catcher exposed by `supabase start` (see `supabase status`).
 const MAILPIT = 'http://127.0.0.1:54324'
-const PASSWORD = 'password123'
 const NEW_PASSWORD = 'newpassword456'
-
-// Unique per-run email so reruns don't collide on the shared local auth.users table.
-function uniqueEmail() {
-  return `e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
-}
-
-async function signUp(page: Page, email: string, password = PASSWORD) {
-  await page.goto('/sign-up')
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password').fill(password)
-  await page.getByRole('button', { name: 'Create account' }).click()
-}
 
 async function signIn(page: Page, email: string, password = PASSWORD) {
   await page.goto('/sign-in')
