@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,14 +13,29 @@ import { getDueQueue } from '@/features/topic-checks/queries'
 // soonest-due card + the total count), render that FIRST card with its four interval previews,
 // and rely on the rate action's revalidatePath('/review') to advance — the just-rated card
 // gets a future due_at and drops out, so this re-renders with the next card and no client-side
-// queue state.
+// queue state. Both states share PageShell, so the title and "N due" persist even when empty.
 export default async function ReviewPage() {
   const { first: card, count } = await getDueQueue()
 
-  if (!card) {
-    return (
-      <main className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 p-4 sm:p-6">
-        <Card className="w-full text-center">
+  const now = new Date()
+  const previews: Record<number, string> = card
+    ? Object.fromEntries(
+        Object.entries(previewIntervals(card, now)).map(([grade, due]) => [
+          grade,
+          formatInterval(now, due),
+        ]),
+      )
+    : {}
+
+  return (
+    <PageShell
+      title="Review"
+      width="prose"
+      hideTitleOnMobile
+      actions={<p className="text-muted-foreground text-sm">{count} due</p>}
+    >
+      {!card ? (
+        <Card className="text-center">
           <CardHeader>
             <CardTitle>All caught up 🎉</CardTitle>
           </CardHeader>
@@ -32,44 +48,31 @@ export default async function ReviewPage() {
             </Button>
           </CardContent>
         </Card>
-      </main>
-    )
-  }
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-medium">Recall</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <RenderMarkdown content={card.prompt} />
+              {(card.example || card.code_context) && (
+                <details className="border-t pt-3">
+                  <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
+                    Show answer
+                  </summary>
+                  <div className="mt-3 flex flex-col gap-3">
+                    {card.example && <RenderMarkdown content={card.example} />}
+                    {card.code_context && <RenderMarkdown content={card.code_context} />}
+                  </div>
+                </details>
+              )}
+            </CardContent>
+          </Card>
 
-  const now = new Date()
-  const intervals = previewIntervals(card, now)
-  const previews: Record<number, string> = Object.fromEntries(
-    Object.entries(intervals).map(([grade, due]) => [grade, formatInterval(now, due)]),
-  )
-
-  return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4 sm:p-6">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Review</h1>
-        <p className="text-muted-foreground text-sm">{count} due</p>
-      </header>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-medium">Recall</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <RenderMarkdown content={card.prompt} />
-          {(card.example || card.code_context) && (
-            <details className="border-t pt-3">
-              <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
-                Show answer
-              </summary>
-              <div className="mt-3 flex flex-col gap-3">
-                {card.example && <RenderMarkdown content={card.example} />}
-                {card.code_context && <RenderMarkdown content={card.code_context} />}
-              </div>
-            </details>
-          )}
-        </CardContent>
-      </Card>
-
-      <RatingButtons topicCheckId={card.id} previews={previews} />
-    </main>
+          <RatingButtons topicCheckId={card.id} previews={previews} />
+        </>
+      )}
+    </PageShell>
   )
 }

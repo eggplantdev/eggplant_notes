@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
@@ -26,29 +27,24 @@ export default async function NotePage({
   if (!note) notFound()
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-4">
-      <div className="flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/notes">← Notes</Link>
-        </Button>
-        <div className="flex items-center gap-2">
+    <PageShell
+      title={note.title ?? 'Untitled'}
+      subtitle={`Updated ${new Date(note.updated_at).toLocaleString()}`}
+      width="prose"
+      backHref="/notes"
+      backLabel="Notes"
+      actions={
+        <>
           <Button asChild variant="outline" size="sm">
             <Link href={`/notes/${note.id}/edit`}>Edit</Link>
           </Button>
           <DeleteNoteButton id={note.id} />
-        </div>
-      </div>
-
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{note.title ?? 'Untitled'}</h1>
-        <p className="text-muted-foreground text-sm">
-          Updated {new Date(note.updated_at).toLocaleString()}
-        </p>
-      </header>
-
+        </>
+      }
+    >
       <RenderMarkdown content={note.content} />
 
       <TopicChecksSection noteId={note.id} checks={topicChecks} editId={edit} />
-    </main>
+    </PageShell>
   )
 }

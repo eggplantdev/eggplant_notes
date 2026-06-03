@@ -1,6 +1,4 @@
-import Link from 'next/link'
-
-import { Button } from '@/components/ui/button'
+import { PageShell } from '@/components/layout/page-shell'
 import { createSubject } from '@/features/subjects/actions/create-subject'
 import { SubjectForm } from '@/features/subjects/subject-form'
 
@@ -8,14 +6,8 @@ import { SubjectForm } from '@/features/subjects/subject-form'
 // down as a prop. Inherits the (protected) auth gate.
 export default function NewSubjectPage() {
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 p-4">
-      <div className="flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/subjects">← Subjects</Link>
-        </Button>
-      </div>
-      <h1 className="text-2xl font-semibold">New subject</h1>
+    <PageShell title="New subject" width="prose" backHref="/subjects" backLabel="Subjects">
       <SubjectForm action={createSubject} />
-    </main>
+    </PageShell>
   )
 }

@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
+import { PageShell } from '@/components/layout/page-shell'
 import { updateNote } from '@/features/notes/actions/update-note'
 import { NoteForm } from '@/features/notes/note-form'
 import { getNote } from '@/features/notes/queries'
@@ -16,14 +15,8 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
   if (!note) notFound()
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-4xl flex-col gap-6 p-4">
-      <div className="flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/notes/${note.id}`}>← Note</Link>
-        </Button>
-      </div>
-      <h1 className="text-2xl font-semibold">Edit note</h1>
+    <PageShell title="Edit note" width="wide" backHref={`/notes/${note.id}`} backLabel="Note">
       <NoteForm action={updateNote} note={note} subjects={subjects} />
-    </main>
+    </PageShell>
   )
 }

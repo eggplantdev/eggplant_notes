@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { PageShell } from '@/components/layout/page-shell'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
@@ -25,14 +26,7 @@ export default async function DashboardPage() {
   })
 
   return (
-    <main className="mx-auto flex w-full flex-col gap-4 p-4 sm:p-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Signed in as {user?.email}</p>
-        </div>
-      </header>
-
+    <PageShell title="Dashboard" hideTitleOnMobile subtitle={`Signed in as ${user?.email}`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href="/review"
@@ -60,6 +54,6 @@ export default async function DashboardPage() {
           <ActivityHeatmap columns={columns} />
         </CardContent>
       </Card>
-    </main>
+    </PageShell>
   )
 }

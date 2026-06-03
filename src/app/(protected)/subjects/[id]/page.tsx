@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
@@ -18,26 +19,21 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
   if (!subject) notFound()
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-4">
-      <div className="flex items-center justify-between gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/subjects">← Subjects</Link>
-        </Button>
-        <div className="flex items-center gap-2">
+    <PageShell
+      title={subject.title}
+      subtitle={subject.description ?? undefined}
+      width="prose"
+      backHref="/subjects"
+      backLabel="Subjects"
+      actions={
+        <>
           <Button asChild variant="outline" size="sm">
             <Link href={`/subjects/${subject.id}/edit`}>Edit</Link>
           </Button>
           <DeleteSubjectButton id={subject.id} />
-        </div>
-      </div>
-
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{subject.title}</h1>
-        {subject.description && (
-          <p className="text-muted-foreground text-sm">{subject.description}</p>
-        )}
-      </header>
-
+        </>
+      }
+    >
       {notes.length === 0 ? (
         <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-lg border border-dashed p-8">
           <p>No notes in this subject yet. Assign one from its note page.</p>
@@ -66,6 +62,6 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
           ))}
         </div>
       )}
-    </main>
+    </PageShell>
   )
 }
