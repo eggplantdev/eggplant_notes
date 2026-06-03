@@ -126,18 +126,21 @@ additive + drop, not a data backfill.
   (FSRS `due`) and its `(user_id, due_at)` index.
 - On `review_events`: drop the `rating between 0 and 5` check, add `rating between 1 and 4`.
 - Add function `record_review(p_topic_check_id uuid, p_rating smallint, p_card jsonb)`,
-  `language plpgsql`, `security invoker`. Body: `insert into review_events (topic_check_id,
-rating) values (p_topic_check_id, p_rating)` (user_id defaults `auth.uid()`); then
-  `update topic_checks set stability=…, difficulty=…, elapsed_days=…, scheduled_days=…,
-learning_steps=…, reps=…, lapses=…, state=…, due_at=…, last_review=…, updated_at=now()
-where id = p_topic_check_id` reading each value from `p_card` (jsonb `->>` casts). RLS on both
-  tables guarantees the caller can only touch their own rows; a row that isn't theirs updates 0
-  rows. Return `void`.
+  `language plpgsql`, `security invoker`, `set search_path = ''` (see F4 below). **Order matters
+  — UPDATE first, then guard, then INSERT** (F1, self-defending): `update public.topic_checks set
+…fields from p_card… where id = p_topic_check_id`; immediately `if not found then raise
+exception 'topic check not found or not owned'; end if;` then `insert into public.review_events
+(topic_check_id, rating) values (p_topic_check_id, p_rating)` (user_id defaults `auth.uid()`).
+  Return `void`. RLS scopes the UPDATE to the owner, so a foreign/forged id updates 0 rows → the
+  `if not found` aborts the whole transaction **before** any review_event is written. This makes
+  the RPC enforce the card↔caller link itself, not merely rely on the Server Action's prior
+  re-fetch — which is the integrity guarantee the atomic RPC exists for.
 
-  > Snippet justified — the jsonb→column unpack is the non-obvious part:
+  > Snippet justified — the update-first ownership guard + the jsonb→column unpack are the
+  > non-obvious parts:
   >
   > ```sql
-  > update topic_checks set
+  > update public.topic_checks set
   >   stability      = (p_card->>'stability')::real,
   >   difficulty     = (p_card->>'difficulty')::real,
   >   elapsed_days   = (p_card->>'elapsed_days')::integer,
@@ -150,6 +153,11 @@ where id = p_topic_check_id` reading each value from `p_card` (jsonb `->>` casts
   >   last_review    = (p_card->>'last_review')::timestamptz,
   >   updated_at     = now()
   > where id = p_topic_check_id;
+  > if not found then
+  >   raise exception 'topic check not found or not owned';
+  > end if;
+  > insert into public.review_events (topic_check_id, rating)
+  > values (p_topic_check_id, p_rating);
   > ```
 
 #### 2. Install ts-fsrs
@@ -169,9 +177,13 @@ and `pnpm build` still passes.
 `record_review` function in the typed `Database` so the read helpers, the RPC call, and
 `TopicCheckT` stay correct.
 
-**Contract**: Run the project's typegen command (the one used in F-02/S-05) against the local DB
-after the migration applies. `Database['public']['Functions']['record_review']` must appear;
-`topic_checks.Row` must lose the SM-2 fields and gain the FSRS ones.
+**Contract**: After the migration applies to the local DB, regenerate with the established
+command (F-02/S-05, Supabase CLI 2.101.0):
+`supabase gen types typescript --local > src/lib/supabase/types.ts`. Also add a
+`"db:types": "supabase gen types typescript --local > src/lib/supabase/types.ts"` script to
+`package.json` for repeatability (net-new; the archives flagged this as a wanted convenience).
+`Database['public']['Functions']['record_review']` must appear; `topic_checks.Row` must lose the
+SM-2 fields and gain the FSRS ones.
 
 ### Success Criteria:
 
@@ -346,10 +358,16 @@ streak, and per-day review activity.
 feature (not the dashboard feature). Injectable client per the lessons.md isolation rule.
 
 **Contract**: Add `getReviewActivity(client?): Promise<ActivityDayT[]>` — group `review_events`
-by `reviewed_at::date`, count per day (a small SQL view/RPC, or fetch rows and aggregate in TS
-for MVP volumes); shape matches `ActivityDayT` (`{ date: 'YYYY-MM-DD', count }`). Add
-`getCurrentStreak(client?): Promise<number>` — consecutive days ending today with ≥1 review
-(derive from the activity series in TS to avoid a second query). Reuse `ActivityDayT` from
+**by a single app timezone, not UTC** (F5): bucket on `(reviewed_at at time zone APP_TIME_ZONE)::date`,
+count per day; shape matches `ActivityDayT` (`{ date: 'YYYY-MM-DD', count }`). `APP_TIME_ZONE` is a
+new IANA-string constant (e.g. `'Europe/Warsaw'`) co-located in `src/features/dashboard/constants.ts`
+beside the existing `MS_PER_DAY`/`HEAT_LEVELS` (single-user personal tool — one zone is correct and
+simplest; Vercel functions run in UTC, so naive `::date` / `new Date()` would bucket late-night reviews
+into the next day). Add
+`getCurrentStreak(activity: ActivityDayT[]): number` — **pure and synchronous**: consecutive days
+ending today with ≥1 review, derived from the already-fetched `getReviewActivity()` series (no
+second DB query, no client param). "Today" here is the current date **in `APP_TIME_ZONE`** (same
+zone the activity is bucketed by), not the server's UTC date. Reuse `ActivityDayT` from
 `features/dashboard/types.ts` (cross-feature type already shared there).
 
 #### 2. Due count helper
@@ -368,10 +386,14 @@ comment block in this file that says nothing writes `due_at` — S-03 does now.)
 
 **Intent**: Replace the dummy body (and its `TODO(S-03 data wiring)`) with real composition.
 
-**Contract**: `getDashboardData` returns `{ dueToday: await getDueCount(), currentStreak:
-getCurrentStreak(activity), activity: await getReviewActivity() }`. Keep `DashboardDataT`
-unchanged (S-04 contract). Remove the dummy generator. Parallelize independent reads
-(`Promise.all`).
+**Contract**: `getDashboardData` fetches the two independent reads in parallel
+(`const [dueToday, activity] = await Promise.all([getDueCount(), getReviewActivity()])`), then
+derives `const currentStreak = getCurrentStreak(activity)` from the already-fetched series, and
+returns `{ dueToday, currentStreak, activity }`. Keep `DashboardDataT` unchanged (S-04 contract).
+Remove the dummy generator. **Align the heatmap's `today`** (F5): the dashboard page currently
+passes `buildHeatmapMatrix(data.activity, { today: new Date(), … })` — change that `today` to the
+current date computed in `APP_TIME_ZONE` so the grid's "today" column matches the zone the activity
+and streak use. Smallest possible edit to S-04's page; no heatmap-component change.
 
 ### Success Criteria:
 

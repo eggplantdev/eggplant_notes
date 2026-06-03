@@ -6,7 +6,13 @@
 
 ## Per-slice review gate
 
-After `/10x-impl-review` + `/simplify`, before `/10x-archive`, run `/tailwind-v4-audit` and `/module-cohesion-audit` on the change.
+For every slice/foundation, run this gate on the change between implementation and archive, in order:
+
+1. `/10x-impl-review` — correctness/drift/pattern check (does NOT clean up).
+2. **`/simplify`** — separate reuse/simplification/efficiency/altitude pass on the whole change (quality only, no bug-hunt).
+3. `/tailwind-v4-audit` and `/module-cohesion-audit`.
+
+Only then `/10x-archive`. `/simplify` is not optional — `/10x-impl-review` does not simplify, so skipping it ships un-cleaned code into the immutable archive.
 
 ## Course & lesson progress (10xDevs 3.0) — as of 2026-06-03
 
