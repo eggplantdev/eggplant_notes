@@ -1,8 +1,6 @@
 import Link from 'next/link'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { signOut } from '@/features/auth/actions/sign-out'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { getDashboardData } from '@/features/dashboard/data'
@@ -27,27 +25,11 @@ export default async function DashboardPage() {
   })
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
+    <main className="mx-auto flex w-full flex-col gap-4 p-4 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
           <p className="text-muted-foreground text-sm">Signed in as {user?.email}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button asChild>
-            <Link href="/notes">Notes</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/subjects">Subjects</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/settings">Settings</Link>
-          </Button>
-          <form action={signOut}>
-            <Button variant="outline" type="submit">
-              Sign out
-            </Button>
-          </form>
         </div>
       </header>
 
@@ -70,7 +52,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card>
+      <Card className={`mx-auto w-fit`}>
         <CardHeader>
           <CardTitle>Review activity — last 12 months</CardTitle>
         </CardHeader>
