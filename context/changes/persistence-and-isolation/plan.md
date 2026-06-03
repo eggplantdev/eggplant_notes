@@ -259,26 +259,26 @@ A Playwright spec proving the PRD's #1 guardrail: no user reads another's rows. 
 
 #### Automated
 
-- [x] 2.1 `src/lib/supabase/types.ts` exists and exports `Database`
-- [x] 2.2 `pnpm typecheck` passes with `<Database>` wired into both factories
-- [x] 2.3 `pnpm lint` passes
+- [x] 2.1 `src/lib/supabase/types.ts` exists and exports `Database` — 93cc63a
+- [x] 2.2 `pnpm typecheck` passes with `<Database>` wired into both factories — 93cc63a
+- [x] 2.3 `pnpm lint` passes — 93cc63a
 
 #### Manual
 
-- [x] 2.4 `.from('notes').select()` shows typed columns in editor
+- [x] 2.4 `.from('notes').select()` shows typed columns in editor — 93cc63a
 
 ### Phase 3: Typed read-access layer
 
 #### Automated
 
-- [ ] 3.1 `pnpm typecheck` passes — helpers typed against `Database`
-- [ ] 3.2 `pnpm lint` passes
-- [ ] 3.3 `pnpm test` passes
+- [x] 3.1 `pnpm typecheck` passes — helpers typed against `Database`
+- [x] 3.2 `pnpm lint` passes
+- [x] 3.3 `pnpm test` passes
 
 #### Manual
 
-- [ ] 3.4 Read helpers accept an injected client; signatures clean
-- [ ] 3.5 Feature-first deletion test holds (no orphan imports)
+- [x] 3.4 Read helpers accept an injected client; signatures clean
+- [x] 3.5 Feature-first deletion test holds (no orphan imports)
 
 ### Phase 4: Two-account isolation E2E
 
