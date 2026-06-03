@@ -271,23 +271,23 @@ A Playwright spec proving the PRD's #1 guardrail: no user reads another's rows. 
 
 #### Automated
 
-- [x] 3.1 `pnpm typecheck` passes — helpers typed against `Database`
-- [x] 3.2 `pnpm lint` passes
-- [x] 3.3 `pnpm test` passes
+- [x] 3.1 `pnpm typecheck` passes — helpers typed against `Database` — d4ad12e
+- [x] 3.2 `pnpm lint` passes — d4ad12e
+- [x] 3.3 `pnpm test` passes — d4ad12e
 
 #### Manual
 
-- [x] 3.4 Read helpers accept an injected client; signatures clean
-- [x] 3.5 Feature-first deletion test holds (no orphan imports)
+- [x] 3.4 Read helpers accept an injected client; signatures clean — d4ad12e
+- [x] 3.5 Feature-first deletion test holds (no orphan imports) — d4ad12e
 
 ### Phase 4: Two-account isolation E2E
 
 #### Automated
 
-- [ ] 4.1 `pnpm test:e2e` passes including `isolation.spec.ts`
-- [ ] 4.2 Existing `auth.spec.ts` still green
+- [x] 4.1 `pnpm test:e2e` passes including `isolation.spec.ts`
+- [x] 4.2 Existing `auth.spec.ts` still green
 
 #### Manual
 
-- [ ] 4.3 Relaxing a policy makes the test fail (negative control), then reverted
-- [ ] 4.4 Server confirmed bound by PID/port before trusting the run
+- [x] 4.3 Relaxing a policy makes the test fail (negative control), then reverted
+- [x] 4.4 Server confirmed bound by PID/port before trusting the run

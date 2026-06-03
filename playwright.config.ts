@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
+import { config as loadEnv } from 'dotenv'
+
+// Load `.env.local` into process.env for the spec processes. Next loads it natively for
+// the webServer, but a raw Playwright spec does not — so without this, the isolation spec
+// cannot read NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY to build its supabase-js clients.
+loadEnv({ path: '.env.local' })
 
 // E2E runs against the LOCAL Supabase stack (supabase start) + the dev server.
 // Vercel never runs these; they are a local pre-push gate. If a GitHub Actions
