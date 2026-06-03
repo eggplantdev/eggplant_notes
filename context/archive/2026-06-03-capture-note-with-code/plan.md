@@ -329,55 +329,55 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 
 #### Automated
 
-- [x] 1.1 `pnpm typecheck` passes with new schema/actions/helper
-- [x] 1.2 `pnpm lint` passes
-- [x] 1.3 `pnpm test` passes (schema/wrapper coverage)
-- [x] 1.4 `pnpm install` clean — no `ERR_PNPM_IGNORED_BUILDS`
+- [x] 1.1 `pnpm typecheck` passes with new schema/actions/helper — d84c369
+- [x] 1.2 `pnpm lint` passes — d84c369
+- [x] 1.3 `pnpm test` passes (schema/wrapper coverage) — d84c369
+- [x] 1.4 `pnpm install` clean — no `ERR_PNPM_IGNORED_BUILDS` — d84c369
 
 #### Manual
 
-- [ ] 1.5 `pnpm build` succeeds (no SSR import of the editor)
-- [ ] 1.6 shadcn `textarea` + `alert-dialog` render in isolation
+- [x] 1.5 `pnpm build` succeeds (no SSR import of the editor) — d84c369
+- [x] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (alert-dialog wired in P4 delete flow + verified; textarea installed, unused this slice — queued for S-02 topic-checks) — 619aa24
 
 ### Phase 2: Read UI — list + highlighted detail
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [ ] 2.2 Detail route renders server-side (no client error)
+- [x] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass — 1bdd3da
+- [x] 2.2 Detail route renders server-side (no client error) — 1bdd3da
 
 #### Manual
 
-- [ ] 2.3 ts/python code blocks render with distinct token colors (NFR)
-- [ ] 2.4 Light/dark recolors code blocks correctly
-- [ ] 2.5 List newest-first; empty state shows CTA
-- [ ] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note
+- [x] 2.3 ts/python code blocks render with distinct token colors (NFR) — 1bdd3da
+- [x] 2.4 Light/dark recolors code blocks correctly — 1bdd3da
+- [x] 2.5 List newest-first; empty state shows CTA — 1bdd3da
+- [x] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note — 1bdd3da
 
 ### Phase 3: Write UI — editor + create/edit
 
 #### Automated
 
-- [ ] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [ ] 3.2 Editor chunk is code-split (not in initial/shared bundle)
+- [x] 3.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass — 17aac20
+- [x] 3.2 Editor chunk is code-split (not in initial/shared bundle) — 17aac20
 
 #### Manual
 
-- [ ] 3.3 Editor loads on `/notes/new`; live preview updates while typing
-- [ ] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable
-- [ ] 3.5 Create saves and lands on the new note's highlighted detail
-- [ ] 3.6 Edit pre-fills, saves, reflects on detail
-- [ ] 3.7 Empty/whitespace title blocked; >200 chars blocked
+- [x] 3.3 Editor loads on `/notes/new`; live preview updates while typing — 17aac20
+- [x] 3.4 Side-by-side ≥md; Write/Preview tabs at ~360px, both usable — 17aac20
+- [x] 3.5 Create saves and lands on the new note's highlighted detail — 17aac20
+- [x] 3.6 Edit pre-fills, saves, reflects on detail — 17aac20
+- [x] 3.7 Empty/whitespace title blocked; >200 chars blocked — 17aac20
 
 ### Phase 4: Delete + end-to-end test
 
 #### Automated
 
-- [ ] 4.1 `pnpm test:e2e` passes including `notes.spec.ts`
-- [ ] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green
-- [ ] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass
+- [x] 4.1 `pnpm test:e2e` passes including `notes.spec.ts` — 619aa24
+- [x] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green — 619aa24
+- [x] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass — 619aa24
 
 #### Manual
 
-- [ ] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list
-- [ ] 4.5 Deleting a note with topic checks removes them too (DB cascade)
-- [ ] 4.6 Server confirmed bound by PID/port before trusting the E2E run
+- [x] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list — 619aa24
+- [x] 4.5 Deleting a note with topic checks removes them too (DB cascade) — 619aa24
+- [x] 4.6 Server confirmed bound by PID/port before trusting the E2E run — 619aa24

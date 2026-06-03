@@ -59,3 +59,6 @@ next-env.d.ts
 
 # 10xDevs course lesson sources — copyrighted course material, re-fetched per-project by `10x get`, not committed
 /lessons/
+
+# Git worktrees (isolated per-change workspaces, e.g. via EnterWorktree); never committed
+/.claude/worktrees/

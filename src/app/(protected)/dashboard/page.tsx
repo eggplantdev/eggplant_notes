@@ -16,6 +16,9 @@ export default async function DashboardPage() {
       <h1 className="text-2xl font-semibold">Dashboard</h1>
       <p className="text-muted-foreground">Signed in as {user?.email}</p>
       <div className="flex items-center gap-2">
+        <Button asChild>
+          <Link href="/notes">Notes</Link>
+        </Button>
         <Button variant="outline" asChild>
           <Link href="/settings">Settings</Link>
         </Button>

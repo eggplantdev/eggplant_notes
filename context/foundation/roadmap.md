@@ -31,7 +31,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 | ---- | ------------------------- | ---------------------------------------------------------------- | ------------- | ------------------------------- | -------- |
 | F-01 | minimal-auth-and-session  | (foundation) email/password auth + session; gated product routes | —             | FR-001–005, Access Control      | done     |
 | F-02 | persistence-and-isolation | (foundation) core tables + RLS isolation scoped by `auth.uid()`  | —             | NFR (isolation), Access Control | done     |
-| S-01 | capture-note-with-code    | create, view, edit, delete, and list notes with highlighted code | F-01, F-02    | FR-007–011, US-01, NFR (code)   | proposed |
+| S-01 | capture-note-with-code    | create, view, edit, delete, and list notes with highlighted code | F-01, F-02    | FR-007–011, US-01, NFR (code)   | done     |
 | S-02 | attach-topic-checks       | attach, edit, delete, and list topic checks on a note            | S-01          | FR-012–015, US-01               | proposed |
 | S-03 | close-recall-loop         | review a due topic check, self-rate, and see it reschedule       | S-02, F-02    | FR-016–019, US-01, Bus. Logic   | proposed |
 | S-04 | activity-dashboard        | see due-today count, current streak, and a review heatmap        | S-03          | FR-020–022                      | proposed |
@@ -99,7 +99,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Editor/render libraries (CodeMirror 6 + react-markdown/rehype-highlight) are named in `tech-stack.md` but unwired — Owner: `/10x-plan`. Block: no.
 - **Risk:** A note that renders code as plain text fails the product premise (NFR). The content-creation layer the entire recall loop sits on; if note CRUD + highlighting isn't solid, nothing downstream is verifiable.
-- **Status:** proposed
+- **Follow-ups (deferred):** list-query pagination + stop over-fetching `content` (impl-review F1) — `getNotes()` is currently unbounded; fold proper `.range()` pagination into a later stage. See `context/archive/2026-06-03-capture-note-with-code/follow-ups/review-fixes.md`.
+- **Status:** done
 
 ### S-02: attach topic checks
 
@@ -183,4 +184,5 @@ Deferred to v1.1 (out-of-MVP, not out-of-product — `main_goal: speed` keeps th
 
 - **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
 - **F-02: (foundation) first migration creates `notes`, `topic_checks`, `review_events` with Row-Level Security policies scoping every row by `auth.uid()`, plus minimal typed client query helpers; verified by a two-account isolation test.** — Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`. Lesson: —.
+- **S-01: create, view, edit, delete, and list notes with highlighted code** — Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`. Lesson: deferred list pagination (F1) → `follow-ups/review-fixes.md`.
 - **S-05: user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.** — Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`. Lesson: verify Postgres constraints via pg_catalog, not information_schema.
