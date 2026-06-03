@@ -33,6 +33,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          position: number | null
+          subject_id: string | null
           title: string | null
           updated_at: string
           user_id: string
@@ -41,6 +43,8 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          position?: number | null
+          subject_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
@@ -49,11 +53,21 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          position?: number | null
+          subject_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'notes_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subjects'
+            referencedColumns: ['id']
+          },
+        ]
       }
       review_events: {
         Row: {
@@ -86,6 +100,33 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      subjects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       topic_checks: {
         Row: {

@@ -1,7 +1,7 @@
 ---
 change_id: organize-notes-into-subjects
 title: Organize notes into subjects
-status: plan_reviewed
+status: implementing
 created: 2026-06-03
 updated: 2026-06-03
 archived_at: null

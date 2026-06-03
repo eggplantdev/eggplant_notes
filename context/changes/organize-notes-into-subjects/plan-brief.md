@@ -51,8 +51,8 @@ batch "add notes" picker; subject color/icon; section-level (heading-anchor) nav
 
 Mirror the `notes` vertical for `subjects` (schema → typed layer → queries/actions → routes/UI),
 then thread the nullable `subject_id` + `position` between them. Assignment reuses
-`createNote`/`updateNote` (extended Zod schema, sets `position = max+1` on assign / `null` on
-unassign). Drag-reorder is isolated to a **client island rendering note titles only** (a
+`createNote`/`updateNote` (extended Zod schema, sets `position = Date.now()` on assign — no
+`max()` read, no race — / `null` on unassign). Drag-reorder is isolated to a **client island rendering note titles only** (a
 reorderable table of contents) so the heavy Shiki document body stays a server component; the
 island calls a dedicated `reorderNote` action that writes a single fractional `position =
 midpoint(prev, next)`.
