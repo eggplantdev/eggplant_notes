@@ -558,8 +558,8 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [x] 5.1 `pnpm test:e2e` passes for `review.spec.ts`
-- [x] 5.2 Existing specs still pass (no regression)
+- [x] 5.1 `pnpm test:e2e` passes for `review.spec.ts` — 3c0889c
+- [x] 5.2 Existing specs still pass (no regression) — 3c0889c
 
 #### Manual
 
