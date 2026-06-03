@@ -28,19 +28,19 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 
 ## At a glance
 
-| ID   | Change ID                    | Outcome (user can …)                                                    | Prerequisites | PRD refs                          | Band        | Status   |
-| ---- | ---------------------------- | ----------------------------------------------------------------------- | ------------- | --------------------------------- | ----------- | -------- |
-| F-01 | minimal-auth-and-session     | (foundation) email/password auth + session; gated product routes        | —             | FR-001–005 (v1), Access Control   | —           | done     |
-| F-02 | persistence-and-isolation    | (foundation) core tables + RLS isolation scoped by `auth.uid()`         | —             | NFR (isolation), Access Control   | —           | done     |
-| S-01 | capture-note-with-code       | create, view, edit, delete, and list notes with highlighted code        | F-01, F-02    | FR-007–011 (v1), US-01            | —           | done     |
-| S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                   | S-01          | FR-012–015 (v1), US-01            | —           | done     |
-| S-05 | delete-account-and-data      | delete their account and all owned data from settings                   | F-01, F-02    | FR-006 (v1), Access Control       | —           | done     |
-| S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | done     |
-| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | proposed |
-| S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document | S-01          | US-01, Scope:[new] subjects       | v1-usable   | ready    |
-| S-08 | card-to-note-navigation      | jump from a recall card to its source note                              | S-02          | US-01, Scope:[new] card→note      | v1-usable   | ready    |
-| S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)       | S-01, S-02    | Scope:[new] inline cards (FR-008) | fast-follow | proposed |
-| S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating     | S-01          | Scope (FR-009, FR-010)            | fast-follow | proposed |
+| ID   | Change ID                    | Outcome (user can …)                                                    | Prerequisites | PRD refs                          | Band        | Status        |
+| ---- | ---------------------------- | ----------------------------------------------------------------------- | ------------- | --------------------------------- | ----------- | ------------- |
+| F-01 | minimal-auth-and-session     | (foundation) email/password auth + session; gated product routes        | —             | FR-001–005 (v1), Access Control   | —           | done          |
+| F-02 | persistence-and-isolation    | (foundation) core tables + RLS isolation scoped by `auth.uid()`         | —             | NFR (isolation), Access Control   | —           | done          |
+| S-01 | capture-note-with-code       | create, view, edit, delete, and list notes with highlighted code        | F-01, F-02    | FR-007–011 (v1), US-01            | —           | done          |
+| S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                   | S-01          | FR-012–015 (v1), US-01            | —           | done          |
+| S-05 | delete-account-and-data      | delete their account and all owned data from settings                   | F-01, F-02    | FR-006 (v1), Access Control       | —           | done          |
+| S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | done          |
+| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | in_progress   |
+| S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document | S-01          | US-01, Scope:[new] subjects       | v1-usable   | plan_reviewed |
+| S-08 | card-to-note-navigation      | jump from a recall card to its source note                              | S-02          | US-01, Scope:[new] card→note      | v1-usable   | ready         |
+| S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)       | S-01, S-02    | Scope:[new] inline cards (FR-008) | fast-follow | proposed      |
+| S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating     | S-01          | Scope (FR-009, FR-010)            | fast-follow | proposed      |
 
 ## Streams
 
@@ -142,7 +142,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:**
   - ~~Recall-scheduling algorithm — ts-fsrs vs SM-2.~~ **Resolved (2026-06-03, `/10x-plan`): ts-fsrs (FSRS).** Migration drops SM-2 columns, adds FSRS state, changes `review_events.rating` 0–5 → 1–4. Plan: `context/changes/close-recall-loop/`.
-- **Risk:** This slice IS the product hypothesis. Sequenced as early as prerequisites allow. Near done — finishing must not break scheduling (Guardrail).
+- **Risk:** This slice IS the product hypothesis. Sequenced as early as prerequisites allow. Shipped without breaking scheduling (Guardrail held).
 - **Status:** done (archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`)
 
 ### S-04: activity dashboard
@@ -154,8 +154,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** S-06, S-08
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** v1-usable: the dashboard shell is already merged to `main` (`587d95b`) and the S-03 plan fills its `features/dashboard/data.ts` seam, so it rides directly on the north star and is cheap to finish. The loop "doesn't feel real" without the due-count/streak/heatmap visualization (original MVP rationale). Sequenced immediately after S-03; must stay usable on mobile.
-- **Status:** proposed
+- **Risk:** v1-usable: the dashboard shell is merged to `main` (`587d95b`) and S-03 wired its `features/dashboard/data.ts` seam to real reviews (`4828dbc`), so it rode directly on the north star. Finishing touches in progress (streak extracted to a unit-testable `streak.ts` with a grace-day rule, see `src/features/review-events/streak.ts`). The loop "doesn't feel real" without the due-count/streak/heatmap visualization (original MVP rationale). Must stay usable on mobile.
+- **Status:** in_progress (shell + data wired; streak refinement + unit test uncommitted as of 2026-06-03)
 
 ### S-06: organize notes into subjects
 
@@ -172,7 +172,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Naming lock:** the parent entity is **`subject`** (table `subjects`, `notes.subject_id`). Deliberately NOT "topic" — "topic check" already means the recall prompt.
 - **Clean-change note:** no real data exists yet (PRD v2 Constraints), so the schema change can be made cleanly — no migration/backfill burden.
 - **Risk:** A model change inside the deadline window (`main_goal: speed`). Additive and low-coupling; the risk is schedule, not architecture. v1-usable because reading-as-one-document is the structural reason the operator would switch off `/workspace/learning`.
-- **Status:** ready
+- **Status:** plan_reviewed (`/10x-plan` + `/10x-plan-review` run; `context/changes/organize-notes-into-subjects/` — ready for `/10x-implement`)
 
 ### S-08: jump from a card to its source note
 
@@ -216,19 +216,19 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                    | Suggested issue title                             | Ready for `/10x-plan` | Notes                                                                                                           |
-| ---------- | ---------------------------- | ------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------- |
-| F-01       | minimal-auth-and-session     | Minimal email/password auth + gated routes        | done                  | Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`                                    |
-| F-02       | persistence-and-isolation    | Core schema + RLS per-user isolation              | done                  | Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`                                   |
-| S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                      |
-| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                         |
-| S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                     |
-| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | done                  | **v1-usable.** Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`.                           |
-| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | **v1-usable.** Shell merged (`587d95b`); S-03 fills its `data.ts` seam. Finish right after S-03                 |
-| S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | yes                   | **v1-usable.** `/10x-plan organize-notes-into-subjects` — model change: `subjects` table + `subject_id` + order |
-| S-08       | card-to-note-navigation      | Jump from a recall card to its source note        | yes                   | **v1-usable.** `/10x-plan card-to-note-navigation` — UI only, FK exists                                         |
-| S-07       | create-note-with-checks      | Attach topic checks inline during note creation   | yes                   | Fast-follow. Trap: `note_id` FK forces two ordered writes — decide atomicity at `/10x-plan`                     |
-| S-09       | authoring-refinements        | Defer validation error + code-language select     | yes                   | Fast-follow. Two small UX nits bundled                                                                          |
+| Roadmap ID | Change ID                    | Suggested issue title                             | Ready for `/10x-plan`   | Notes                                                                                                                                    |
+| ---------- | ---------------------------- | ------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| F-01       | minimal-auth-and-session     | Minimal email/password auth + gated routes        | done                    | Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`                                                             |
+| F-02       | persistence-and-isolation    | Core schema + RLS per-user isolation              | done                    | Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`                                                            |
+| S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                    | Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                                               |
+| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                    | Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                                                  |
+| S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                    | Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                                              |
+| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | done                    | **v1-usable.** Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`.                                                    |
+| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | n/a (in progress)       | **v1-usable.** Shell merged (`587d95b`); S-03 wired its `data.ts` seam (`4828dbc`). Streak refinement + unit test uncommitted            |
+| S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | planned (plan_reviewed) | **v1-usable.** Plan + review done → `/10x-implement organize-notes-into-subjects`. Model change: `subjects` table + `subject_id` + order |
+| S-08       | card-to-note-navigation      | Jump from a recall card to its source note        | yes                     | **v1-usable.** `/10x-plan card-to-note-navigation` — UI only, FK exists                                                                  |
+| S-07       | create-note-with-checks      | Attach topic checks inline during note creation   | yes                     | Fast-follow. Trap: `note_id` FK forces two ordered writes — decide atomicity at `/10x-plan`                                              |
+| S-09       | authoring-refinements        | Defer validation error + code-language select     | yes                     | Fast-follow. Two small UX nits bundled                                                                                                   |
 
 ## Open Roadmap Questions
 
