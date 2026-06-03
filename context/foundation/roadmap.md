@@ -35,7 +35,7 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-01 | capture-note-with-code       | create, view, edit, delete, and list notes with highlighted code        | F-01, F-02    | FR-007–011 (v1), US-01            | —           | done     |
 | S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                   | S-01          | FR-012–015 (v1), US-01            | —           | done     |
 | S-05 | delete-account-and-data      | delete their account and all owned data from settings                   | F-01, F-02    | FR-006 (v1), Access Control       | —           | done     |
-| S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | planned  |
+| S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | done     |
 | S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | proposed |
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document | S-01          | US-01, Scope:[new] subjects       | v1-usable   | ready    |
 | S-08 | card-to-note-navigation      | jump from a recall card to its source note                              | S-02          | US-01, Scope:[new] card→note      | v1-usable   | ready    |
@@ -143,7 +143,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - ~~Recall-scheduling algorithm — ts-fsrs vs SM-2.~~ **Resolved (2026-06-03, `/10x-plan`): ts-fsrs (FSRS).** Migration drops SM-2 columns, adds FSRS state, changes `review_events.rating` 0–5 → 1–4. Plan: `context/changes/close-recall-loop/`.
 - **Risk:** This slice IS the product hypothesis. Sequenced as early as prerequisites allow. Near done — finishing must not break scheduling (Guardrail).
-- **Status:** planned (`/10x-plan` done 2026-06-03 → `context/changes/close-recall-loop/`)
+- **Status:** done (archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`)
 
 ### S-04: activity dashboard
 
@@ -223,7 +223,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                      |
 | S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                         |
 | S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                     |
-| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | planned               | **v1-usable.** Planned → `context/changes/close-recall-loop/`. Next: finish `/10x-implement`                    |
+| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | done                  | **v1-usable.** Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`.                           |
 | S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | **v1-usable.** Shell merged (`587d95b`); S-03 fills its `data.ts` seam. Finish right after S-03                 |
 | S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | yes                   | **v1-usable.** `/10x-plan organize-notes-into-subjects` — model change: `subjects` table + `subject_id` + order |
 | S-08       | card-to-note-navigation      | Jump from a recall card to its source note        | yes                   | **v1-usable.** `/10x-plan card-to-note-navigation` — UI only, FK exists                                         |
@@ -262,3 +262,4 @@ Carried from v1 (out-of-MVP):
 - **S-01: create, view, edit, delete, and list notes with highlighted code** — Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`. Lesson: deferred list pagination (F1) → `follow-ups/review-fixes.md`.
 - **S-05: user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.** — Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`. Lesson: verify Postgres constraints via pg_catalog, not information_schema.
 - **S-02: user can attach a topic check (question + optional example + optional code context) to a note, edit it, delete it, and see all topic checks on a given note.** — Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`. Lesson: local-GoTrue E2E sign-up flake (don't gate on it).
+- **S-03: the dashboard surfaces topic checks due for review; the user reviews one, self-rates Again/Hard/Good/Easy, the system reschedules its next due date via FSRS, records a review event, and shows when it is next due.** — Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`. Lesson: promote shared tier on the 2nd consumer (cross-feature import); keep ts-fsrs out of the client bundle.
