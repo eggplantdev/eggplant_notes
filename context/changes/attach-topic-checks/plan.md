@@ -428,9 +428,9 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [x] 3.1 Type checking passes (`pnpm typecheck`)
-- [x] 3.2 Linting passes (`pnpm lint`)
-- [x] 3.3 Production build passes (`pnpm build`)
+- [x] 3.1 Type checking passes (`pnpm typecheck`) — 424528b
+- [x] 3.2 Linting passes (`pnpm lint`) — 424528b
+- [x] 3.3 Production build passes (`pnpm build`) — 424528b
 
 #### Manual
 
@@ -445,8 +445,8 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [ ] 4.1 E2E suite passes (`pnpm test:e2e`)
-- [ ] 4.2 Isolation assertion negative-control verified, then passes
+- [x] 4.1 E2E suite passes (`pnpm test:e2e`)
+- [x] 4.2 Isolation assertion negative-control verified, then passes
 
 #### Manual
 
