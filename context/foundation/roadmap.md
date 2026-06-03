@@ -36,7 +36,7 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                   | S-01          | FR-012–015 (v1), US-01            | —           | done          |
 | S-05 | delete-account-and-data      | delete their account and all owned data from settings                   | F-01, F-02    | FR-006 (v1), Access Control       | —           | done          |
 | S-03 | close-recall-loop            | review a due card, self-rate, and see it reschedule (FSRS)              | S-02, F-02    | US-01, Scope:[modified] recall    | v1-usable   | done          |
-| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | in_progress   |
+| S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap               | S-03          | FR-020–022 (v1)                   | v1-usable   | done          |
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document | S-01          | US-01, Scope:[new] subjects       | v1-usable   | plan_reviewed |
 | S-08 | card-to-note-navigation      | jump from a recall card to its source note                              | S-02          | US-01, Scope:[new] card→note      | v1-usable   | ready         |
 | S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)       | S-01, S-02    | Scope:[new] inline cards (FR-008) | fast-follow | proposed      |
@@ -155,7 +155,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** v1-usable: the dashboard shell is merged to `main` (`587d95b`) and S-03 wired its `features/dashboard/data.ts` seam to real reviews (`4828dbc`), so it rode directly on the north star. Finishing touches in progress (streak extracted to a unit-testable `streak.ts` with a grace-day rule, see `src/features/review-events/streak.ts`). The loop "doesn't feel real" without the due-count/streak/heatmap visualization (original MVP rationale). Must stay usable on mobile.
-- **Status:** in_progress (shell + data wired; streak refinement + unit test uncommitted as of 2026-06-03)
+- **Status:** done
 
 ### S-06: organize notes into subjects
 
@@ -196,7 +196,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Why it's not trivial (the FK constraint):** `topic_checks.note_id` is `not null` — a check cannot exist before its note. Flow: stage checks client-side → insert the note → insert staged checks with the new `note_id`. Two ordered writes.
 - **Unknowns:**
-  - **Atomicity** — note inserts but checks fail → note with no checks. Best-effort sequential vs all-or-nothing RPC. Owner: `/10x-plan`. Block: no.
+  - **Atomicity** — note inserts but checks fail
+    → note with no checks. Best-effort sequential vs all-or-nothing RPC. Owner: `/10x-plan`. Block: no.
   - **PRG interaction** — preserve Post/Redirect/Get (no duplicate-submit on refresh).
 - **Risk:** Low — additive UX, no schema change. Fast-follow: it makes daily authoring smoother but isn't required to cross the adoption line.
 - **Status:** proposed
@@ -263,3 +264,4 @@ Carried from v1 (out-of-MVP):
 - **S-05: user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.** — Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`. Lesson: verify Postgres constraints via pg_catalog, not information_schema.
 - **S-02: user can attach a topic check (question + optional example + optional code context) to a note, edit it, delete it, and see all topic checks on a given note.** — Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`. Lesson: local-GoTrue E2E sign-up flake (don't gate on it).
 - **S-03: the dashboard surfaces topic checks due for review; the user reviews one, self-rates Again/Hard/Good/Easy, the system reschedules its next due date via FSRS, records a review event, and shows when it is next due.** — Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`. Lesson: promote shared tier on the 2nd consumer (cross-feature import); keep ts-fsrs out of the client bundle.
+- **S-04: user can see how many topic checks are due today, their current streak (consecutive days with ≥1 review), and a calendar heatmap of review activity over the last 30–90 days.** — Archived 2026-06-03 → `context/archive/2026-06-03-activity-dashboard/`. Lesson: E2E must build a fresh isolated server — `reuseExistingServer:true` silently hijacks a running `next dev`.

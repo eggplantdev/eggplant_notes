@@ -47,6 +47,14 @@ Scripts: `@package.json`. Run `mise install` once (Node 24 + pnpm + the Supabase
 
 Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under `e2e/**/*.spec.ts` (`pnpm test:e2e`) — requires the local Supabase stack (`supabase start`) up; the config auto-runs a **production build** (`pnpm build && pnpm start`, not `next dev` — avoids hydration races) and uses **system Chrome** (`channel: 'chrome'`, no bundled browser). Commands in `@package.json`.
 
+**E2E always builds a fresh server, never reuses one** — `reuseExistingServer: false`, isolated port (3100) + build dir (`NEXT_DIST_DIR=.next-e2e`) so it can't hijack a running `next dev`. Don't set it `true` for speed. Why this is load-bearing → `@context/foundation/lessons.md`.
+
+### Local data: two orthogonal lanes
+
+- **E2E specs do NOT wipe or reset the DB** — there is no `globalSetup`/`db reset` in the test flow. Each spec self-seeds via real UI sign-up with a per-run `uniqueEmail` (`@e2e/helpers.ts`) and leaves its rows behind. They accumulate cruft, never wipe. If the local DB looks empty after testing, it's because **you** ran `supabase db reset` (e.g. to apply a new migration), not the specs.
+- **Dev/manual data comes from `@supabase/seed.sql`** — wired via `[db.seed]` in `@supabase/config.toml`, so it runs automatically after migrations on every `supabase db reset`. It direct-inserts a confirmed auth user (both `auth.users` + `auth.identities`, bcrypt password) — login **`dev@example.com` / `password123`** — plus a note and `topic_checks` spanning the FSRS state/due spectrum (overdue, New, Learning, due-now, future), so `/review` and the dashboard are exercisable by hand without click-through setup. DEV-ONLY: Vercel never runs `db reset`, so it never reaches preview/prod.
+- **`supabase db reset` is the canonical refresh** — it clears E2E cruft AND rebuilds the dev account deterministically. Two traps: (1) it wipes **all** local data including any other hand-made accounts — confirm before running; (2) re-running `seed.sql` against a live DB (without a reset) **double-inserts `topic_checks`** — they have no `on conflict` guard, unlike the user/note. Refresh via `db reset`, not by re-applying the seed.
+
 ## Commits & CI
 
 - Commit style (from `git log`): lowercase imperative subject, no Conventional-Commits prefix — e.g. `add supabase cli dev-dep + fix arm64 binary resolution`.
