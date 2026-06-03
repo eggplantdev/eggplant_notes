@@ -567,9 +567,9 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Manual
 
-- [ ] 2.4 Subject insert owned by dev user
-- [ ] 2.5 Assign sets `subject_id` + numeric `position`; unassign nulls both
-- [ ] 2.6 `getNotesForSubject` returns position-ordered notes
+- [x] 2.4 Subject insert owned by dev user — 21564d4 (e2e F1 seeds subjects as owner)
+- [x] 2.5 Assign sets `subject_id` + numeric `position`; unassign nulls both — 21564d4 (e2e assigns via form)
+- [x] 2.6 `getNotesForSubject` returns position-ordered notes — 21564d4 (e2e document order asserted)
 
 ### Phase 3: Subject UI + Note-Form Picker
 
@@ -598,19 +598,19 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Manual
 
-- [ ] 4.5 Drag to new slot → order persists after reload
-- [ ] 4.6 Top/bottom drops position correctly
-- [ ] 4.7 Reorder writes a single row (other positions unchanged)
+- [x] 4.5 Drag to new slot → order persists after reload — 21564d4 (e2e reorder + reload)
+- [x] 4.6 Top/bottom drops position correctly — 21564d4 (e2e drags to bottom)
+- [x] 4.7 Reorder writes a single row (other positions unchanged) — 21564d4 (single-row action; impl-review verified)
 
 ### Phase 5: E2E
 
 #### Automated
 
-- [ ] 5.1 Full E2E suite passes: `pnpm test:e2e`
-- [ ] 5.2 Typecheck/lint/build all green
-- [ ] 5.3 Unit specs pass: `pnpm test`
+- [x] 5.1 Full E2E suite passes: `pnpm test:e2e` — 21564d4 (subjects 2/2; auth flake fixed in 97cbf57)
+- [x] 5.2 Typecheck/lint/build all green — 21564d4
+- [x] 5.3 Unit specs pass: `pnpm test` — 21564d4 (28 pass)
 
 #### Manual
 
-- [ ] 5.4 Recall loop (`/review`) unaffected post-migration
-- [ ] 5.5 Existing notes + topic-checks flows unaffected
+- [x] 5.4 Recall loop (`/review`) unaffected post-migration — 21564d4 (review e2e green)
+- [x] 5.5 Existing notes + topic-checks flows unaffected — 21564d4 (notes + topic-checks e2e green)
