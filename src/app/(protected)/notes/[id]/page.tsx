@@ -5,7 +5,9 @@ import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
+import { NoteSubjectPicker } from '@/features/notes/components/note-subject-picker'
 import { getNote } from '@/features/notes/queries'
+import { getSubjects } from '@/features/subjects/queries'
 import { getTopicChecksForNote } from '@/features/topic-checks/queries'
 import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
 
@@ -23,7 +25,11 @@ export default async function NotePage({
   const { edit } = await searchParams
   // Independent RLS-scoped reads — run them concurrently rather than paying two
   // round-trips in series (the wasted checks query on a 404 is one rare extra query).
-  const [note, topicChecks] = await Promise.all([getNote(id), getTopicChecksForNote(id)])
+  const [note, topicChecks, subjects] = await Promise.all([
+    getNote(id),
+    getTopicChecksForNote(id),
+    getSubjects(),
+  ])
   if (!note) notFound()
 
   return (
@@ -42,6 +48,8 @@ export default async function NotePage({
         </>
       }
     >
+      <NoteSubjectPicker noteId={note.id} currentSubjectId={note.subject_id} subjects={subjects} />
+
       <RenderMarkdown content={note.content} />
 
       <TopicChecksSection noteId={note.id} checks={topicChecks} editId={edit} />

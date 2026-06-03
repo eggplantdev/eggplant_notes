@@ -30,6 +30,7 @@ type ComboboxPropsT = {
   searchPlaceholder?: string
   emptyMessage?: string
   className?: string
+  disabled?: boolean
 }
 
 // Generic searchable select built on Command (cmdk) inside a Popover. Pure primitive — no
@@ -44,6 +45,7 @@ export function Combobox({
   searchPlaceholder = 'Search…',
   emptyMessage = 'No results.',
   className,
+  disabled,
 }: ComboboxPropsT) {
   const [open, setOpen] = useState(false)
   const selectedLabel = options.find((option) => option.value === value)?.label
@@ -54,6 +56,7 @@ export function Combobox({
         <Button
           type="button"
           id={id}
+          disabled={disabled}
           variant="outline"
           size="sm"
           role="combobox"
