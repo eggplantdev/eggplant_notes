@@ -4,6 +4,10 @@
 
 > Also active in Claude Code: the user's path-scoped global rules in `~/.claude/rules/*` (`typescript`/`react`/`styling` conventions + `general`/`general_persona`/`learning`/`english_refinement`). These are the **single source** — AGENTS.md deliberately does **not** restate them (Cursor imports them via its config-import toggle; mirror to `~/.codex/AGENTS.md` if Codex is adopted).
 
+## Per-slice review gate
+
+After `/10x-impl-review` + `/simplify`, before `/10x-archive`, run `/tailwind-v4-audit` and `/module-cohesion-audit` on the change.
+
 ## Course & lesson progress (10xDevs 3.0) — as of 2026-06-03
 
 The `@przeprogramowani/10x-cli` sentinel at the **bottom** of this file is the currently-fetched lesson bundle (now **m2l4**, which added `/10x-frame` + `/10x-research`; m2l5 markdown also fetched but not yet worked), auto-managed by `10x get` and rewritten on every fetch. Never hand-edit inside its BEGIN/END markers.
