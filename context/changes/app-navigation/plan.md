@@ -288,11 +288,11 @@ None — no schema or data changes.
 
 #### Manual
 
-- [ ] 1.5 Bar appears on all protected routes, absent on auth pages
-- [ ] 1.6 Each nav item navigates; active item highlighted incl. child routes
-- [ ] 1.7 Hamburger sheet opens/navigates/closes at ~360px
-- [ ] 1.8 Sign-out (desktop + sheet) ends session → `/sign-in`
-- [ ] 1.9 Dashboard no longer shows duplicate header nav
+- [x] 1.5 Bar appears on all protected routes, absent on auth pages
+- [x] 1.6 Each nav item navigates; active item highlighted incl. child routes
+- [x] 1.7 Hamburger sheet opens/navigates/closes at ~360px
+- [x] 1.8 Sign-out (desktop + sheet) ends session → `/sign-in`
+- [x] 1.9 Dashboard no longer shows duplicate header nav
 
 ### Phase 2: E2E coverage + final verification
 
