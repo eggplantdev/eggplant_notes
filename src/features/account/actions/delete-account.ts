@@ -20,6 +20,8 @@ export async function deleteAccount(): Promise<ActionResultT> {
 
   // Supabase JWTs are stateless: the access token lives until expiry, so clear
   // the auth cookie now or the user appears signed in against a deleted account.
-  await supabase.auth.signOut()
+  // scope: 'local' only clears the cookie — deleting the user already cascaded
+  // away every server-side session, so a global revocation round-trip is moot.
+  await supabase.auth.signOut({ scope: 'local' })
   redirect('/sign-in?deleted=1')
 }
