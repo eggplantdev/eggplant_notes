@@ -422,22 +422,22 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Manual
 
-- [ ] 2.4 Notes CRUD still works after the runNoteAction → runTableAction promotion (no regression)
+- [x] 2.4 Notes CRUD still works after the runNoteAction → runTableAction promotion (no regression) — e2e notes.spec c125a02
 
 ### Phase 3: Inline UI on note detail
 
 #### Automated
 
-- [x] 3.1 Type checking passes (`pnpm typecheck`)
-- [x] 3.2 Linting passes (`pnpm lint`)
-- [x] 3.3 Production build passes (`pnpm build`)
+- [x] 3.1 Type checking passes (`pnpm typecheck`) — 424528b
+- [x] 3.2 Linting passes (`pnpm lint`) — 424528b
+- [x] 3.3 Production build passes (`pnpm build`) — 424528b
 
 #### Manual
 
-- [ ] 3.4 Empty state shows, then a check lists after adding
-- [ ] 3.5 code_context with a fenced block renders syntax-highlighted
-- [ ] 3.6 Edit swaps the single form into edit mode (one editor), saves, row updates
-- [ ] 3.7 Delete shows AlertDialog, confirms, row disappears
+- [x] 3.4 Empty state shows, then a check lists after adding — e2e topic-checks.spec 9c76c78
+- [x] 3.5 code_context with a fenced block renders syntax-highlighted — e2e topic-checks.spec 9c76c78
+- [x] 3.6 Edit swaps the single form into edit mode (one editor), saves, row updates — e2e topic-checks.spec 9c76c78
+- [x] 3.7 Delete shows AlertDialog, confirms, row disappears — e2e topic-checks.spec 9c76c78
 - [ ] 3.8 Blank optionals persist as null and render cleanly
 - [ ] 3.9 Layout usable down to ~360px
 
@@ -445,9 +445,9 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [ ] 4.1 E2E suite passes (`pnpm test:e2e`)
-- [ ] 4.2 Isolation assertion negative-control verified, then passes
+- [x] 4.1 E2E suite passes (`pnpm test:e2e`) — 9c76c78
+- [x] 4.2 Isolation assertion negative-control verified, then passes — 9c76c78
 
 #### Manual
 
-- [ ] 4.3 CRUD spec exercises the user flow with no console errors
+- [x] 4.3 CRUD spec exercises the user flow with no console errors — e2e topic-checks.spec 9c76c78

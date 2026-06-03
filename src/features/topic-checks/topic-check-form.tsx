@@ -6,6 +6,8 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { MarkdownEditor } from '@/components/markdown/markdown-editor'
+import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,10 +15,6 @@ import { createTopicCheck } from '@/features/topic-checks/actions/create-topic-c
 import { updateTopicCheck } from '@/features/topic-checks/actions/update-topic-check'
 import { promptSchema } from '@/features/topic-checks/schemas'
 import type { TopicCheckT } from '@/features/topic-checks/types'
-// Reused from the notes feature (S-01). These are markdown-editing primitives, not
-// note-specific — cross-feature use here makes them promotion candidates to a shared tier.
-import { MarkdownPreview } from '@/features/notes/markdown-preview'
-import { NoteEditor } from '@/features/notes/note-editor'
 
 // `check` present → edit (seeds defaults, calls updateTopicCheck); absent → create. Edit
 // state is carried in the URL (`?edit=<id>`), so on a successful edit we navigate back to the
@@ -83,7 +81,7 @@ export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
         {(field) => (
           <div className="flex flex-col gap-2">
             <Label>Code context (optional)</Label>
-            <NoteEditor value={field.state.value} onChange={field.handleChange} />
+            <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
             {field.state.value.trim().length > 0 && (
               <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">
                 <MarkdownPreview content={field.state.value} />

@@ -4,9 +4,9 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { MarkdownEditor } from '@/components/markdown/markdown-editor'
+import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
-import { MarkdownPreview } from '@/features/notes/markdown-preview'
-import { NoteEditor } from '@/features/notes/note-editor'
 import { titleSchema } from '@/features/notes/schemas'
 import type { NoteInputT } from '@/features/notes/schemas'
 import type { NoteT } from '@/features/notes/types'
@@ -80,7 +80,7 @@ export function NoteForm(props: NoteFormPropsT) {
               <div
                 className={cn('min-w-0', mobileTab === 'write' ? 'block' : 'hidden', 'md:block')}
               >
-                <NoteEditor value={field.state.value} onChange={field.handleChange} />
+                <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
               </div>
               <div
                 className={cn(

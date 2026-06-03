@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { getNote } from '@/features/notes/queries'
-import { RenderMarkdown } from '@/features/notes/render-markdown'
 import { getTopicChecksForNote } from '@/features/topic-checks/queries'
 import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
 
@@ -20,10 +20,10 @@ export default async function NotePage({
 }) {
   const { id } = await params
   const { edit } = await searchParams
-  const note = await getNote(id)
+  // Independent RLS-scoped reads — run them concurrently rather than paying two
+  // round-trips in series (the wasted checks query on a 404 is one rare extra query).
+  const [note, topicChecks] = await Promise.all([getNote(id), getTopicChecksForNote(id)])
   if (!note) notFound()
-
-  const topicChecks = await getTopicChecksForNote(id)
 
   return (
     <main className="mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-4">
