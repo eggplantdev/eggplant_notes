@@ -2,9 +2,10 @@
 change_id: attach-topic-checks
 roadmap_id: S-02
 linear: EX-362
-status: impl_reviewed
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
+archived_at: 2026-06-03T12:24:03Z
 prerequisites: [S-01]
 prd_refs: [FR-012, FR-013, FR-014, FR-015, US-01]
 ---

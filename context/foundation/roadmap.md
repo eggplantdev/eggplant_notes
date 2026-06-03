@@ -32,7 +32,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 | F-01 | minimal-auth-and-session     | (foundation) email/password auth + session; gated product routes               | —             | FR-001–005, Access Control                  | done     |
 | F-02 | persistence-and-isolation    | (foundation) core tables + RLS isolation scoped by `auth.uid()`                | —             | NFR (isolation), Access Control             | done     |
 | S-01 | capture-note-with-code       | create, view, edit, delete, and list notes with highlighted code               | F-01, F-02    | FR-007–011, US-01, NFR (code)               | done     |
-| S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                          | S-01          | FR-012–015, US-01                           | planned  |
+| S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                          | S-01          | FR-012–015, US-01                           | done     |
 | S-03 | close-recall-loop            | review a due topic check, self-rate, and see it reschedule                     | S-02, F-02    | FR-016–019, US-01, Bus. Logic               | proposed |
 | S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap                      | S-03          | FR-020–022                                  | proposed |
 | S-05 | delete-account-and-data      | delete their account and all owned data from settings                          | F-01, F-02    | FR-006, Access Control                      | done     |
@@ -116,7 +116,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Topic checks are the unit the recall loop schedules; without them there is nothing to review. Tightly coupled to S-01 (a check belongs to a note) but kept separate so note CRUD ships and is verifiable on its own.
-- **Status:** planned
+- **Status:** done
 
 ### S-03: close the recall loop (NORTH STAR)
 
@@ -195,7 +195,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | F-01       | minimal-auth-and-session     | Minimal email/password auth + gated routes        | done                  | Shipped + archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`                                         |
 | F-02       | persistence-and-isolation    | Core schema + RLS per-user isolation              | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`                                        |
 | S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                           |
-| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | planned               | Plan written (EX-362); run `/10x-implement attach-topic-checks`                                                                |
+| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Shipped + reviewed + archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                   |
 | S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | no                    | After S-02; pick SRS lib at plan                                                                                               |
 | S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | After S-03                                                                                                                     |
 | S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                          |
@@ -226,3 +226,4 @@ Deferred to v1.1 (out-of-MVP, not out-of-product — `main_goal: speed` keeps th
 - **F-02: (foundation) first migration creates `notes`, `topic_checks`, `review_events` with Row-Level Security policies scoping every row by `auth.uid()`, plus minimal typed client query helpers; verified by a two-account isolation test.** — Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`. Lesson: —.
 - **S-01: create, view, edit, delete, and list notes with highlighted code** — Archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`. Lesson: deferred list pagination (F1) → `follow-ups/review-fixes.md`.
 - **S-05: user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.** — Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`. Lesson: verify Postgres constraints via pg_catalog, not information_schema.
+- **S-02: user can attach a topic check (question + optional example + optional code context) to a note, edit it, delete it, and see all topic checks on a given note.** — Archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`. Lesson: local-GoTrue E2E sign-up flake (don't gate on it).
