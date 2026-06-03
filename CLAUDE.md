@@ -6,7 +6,7 @@
 
 ## Per-slice review gate
 
-For every slice/foundation, between implementation and archive:
+For every slice/foundation, the order is: **implement the feature code → review → `/simplify` → _then_ author and run the test layer → archive.** Review and clean up BEFORE the tests exist, so the E2E/unit specs lock in the post-`/simplify` code — don't write tests against code a review is about to reshape. (So the test phase is the last step before archive, not the final implementation phase before the gate.)
 
 1. **Parallel review fan-out** — dispatch agents to run all four read-only checks _at once_ (none mutate, so no conflict), then triage every report in the main thread:
    - `/10x-impl-review` — correctness, drift, pattern compliance (this is the bug hunt too; does NOT clean up).
@@ -14,11 +14,9 @@ For every slice/foundation, between implementation and archive:
    - `feature-first-structure` — _inter-module_: the **deletion test** (a feature must be `rm -rf`-able with no orphans) + **no cross-feature deep imports / leaked internals** (`features/x` must not import `features/y/...`; cross-feature code goes through a promoted shared tier, on the 2nd consumer, never the 1st).
    - `/module-cohesion-audit` — _intra-module_: flags grab-bag/god files (types + constants + helpers + domain + component in one), catch-all `utils.ts`, component files exporting more than the component. Complementary to `feature-first-structure`, not redundant — boundaries-between-files vs does-one-file-do-too-much.
 2. **`/simplify`** — run after the fan-out, **serial**. It _mutates_ (reuse/simplification/efficiency/altitude), so it can't be in the parallel batch; it cleans up against the triaged findings.
-3. **Verify green** — **last**, after the cleanup edits: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e`, `pnpm build` (scripts in `@package.json`; e2e needs the local Supabase stack up — see AGENTS.md Testing). Archive a verified-green state, not one the cleanup pass left untested.
+3. **Author & verify green** — only now write the test layer (Playwright E2E, any unit specs) against the cleaned-up code, then run the full suite **last**: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e`, `pnpm build` (scripts in `@package.json`; e2e needs the local Supabase stack up — see AGENTS.md Testing). Archive a verified-green state.
 
-Then `/10x-archive`. `/simplify` is not optional — the reviews don't clean up, so skipping it ships un-simplified code into the immutable archive.
-
-Only then `/10x-archive`. `/simplify` is not optional — `/10x-impl-review` does not simplify, so skipping it ships un-cleaned code into the immutable archive.
+Then `/10x-archive`. `/simplify` is not optional — the reviews flag but don't clean up, so skipping it ships un-simplified code into the immutable archive.
 
 ## Course & lesson progress (10xDevs 3.0) — as of 2026-06-03
 
