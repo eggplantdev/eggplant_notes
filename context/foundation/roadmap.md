@@ -62,7 +62,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **Frontend:** present — Next.js 16 + React 19 + Tailwind v4 + shadcn + **framer-motion** (`d6ef642`); product UI shipped (notes list/detail/forms, settings, auth pages, dashboard shell) behind a persistent app-nav shell (S-10). An off-roadmap page-shell + motion consistency pass is in progress — spec at `docs/superpowers/specs/2026-06-03-page-shell-and-motion-design.md` (declared not a `/10x` change).
 - **Backend / API:** present — Server Actions per feature (`src/features/*/actions`), route handlers under `src/app/api` (auth confirm), injectable table-query helpers (`src/lib/supabase/run-table-query.ts`).
-- **Data:** present — 5 migrations: `notes`/`topic_checks`/`review_events` + RLS, account-delete RPC, topic-check content columns, FSRS review-loop migration, subjects + note-ordering (S-06: `subjects` table + `notes.subject_id`/`position` + F1 subject-ownership RLS). Typed `Database` clients.
+- **Data:** present — 6 migrations: `notes`/`topic_checks`/`review_events` + RLS, account-delete RPC, topic-check content columns, FSRS review-loop migration, subjects + note-ordering (S-06: `subjects` table + `notes.subject_id`/`position` + F1 subject-ownership RLS), `create_note_with_checks` RPC (S-07: atomic note+checks write, `SECURITY INVOKER`). Typed `Database` clients.
 - **Auth:** present — email/password via Supabase Auth, `proxy.ts` gating, `(protected)` layout (F-01, archived).
 - **Deploy / infra:** present — Vercel, git-connected, prod region `fra1`; local Supabase stack for dev.
 - **Observability:** absent — no logging/error-tracking library wired. Not gating any v1-usable slice; left out deliberately.
