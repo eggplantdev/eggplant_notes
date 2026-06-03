@@ -356,7 +356,7 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Manual
 
-- [x] 2.3 0-check and N-check creates redirect correctly; RPC error surfaces inline
+- [x] 2.3 0-check and N-check creates redirect correctly; RPC error surfaces inline — a6fa262
 
 ### Phase 3: Inline Staging UI
 
@@ -368,19 +368,19 @@ Applying it locally needs `supabase db reset` (re-runs `seed.sql` — expected).
 
 #### Manual
 
-- [x] 3.4 Add/fill 2 rows → detail shows both checks
-- [x] 3.5 Remove a row → not persisted
-- [x] 3.6 Empty question → inline error, save blocked
-- [x] 3.7 Zero rows → plain note created
-- [x] 3.8 code_context highlight/preview works per row
+- [x] 3.4 Add/fill 2 rows → detail shows both checks — a6fa262
+- [x] 3.5 Remove a row → not persisted — a6fa262
+- [x] 3.6 Empty question → inline error, save blocked — a6fa262
+- [x] 3.7 Zero rows → plain note created — a6fa262
+- [x] 3.8 code_context highlight/preview works per row — a6fa262 (reuses MarkdownEditor/MarkdownPreview verified in notes.spec.ts; not directly E2E-driven per row — multi-editor locator)
 
 ### Phase 4: E2E (after review→simplify gate)
 
 #### Automated
 
-- [x] 4.1 New spec passes (`pnpm test:e2e`)
-- [x] 4.2 Full suite green (typecheck, lint, test, test:e2e, build)
+- [x] 4.1 New spec passes (`pnpm test:e2e`) — a6fa262
+- [x] 4.2 Full suite green (typecheck, lint, test, test:e2e, build) — a6fa262 (typecheck/lint/test/build green; new spec 3/3 green in isolation; full-run sign-up failures were the documented GoTrue flake — lessons.md, not gated)
 
 #### Manual
 
-- [x] 4.3 Negative control: non-atomic RPC leaves no orphan / test catches it
+- [x] 4.3 Negative control: non-atomic RPC leaves no orphan / test catches it — a6fa262 (verified in Phase 1: forced check-insert/forged-subject failure aborted the txn, 0 orphan notes)
