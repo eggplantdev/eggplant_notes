@@ -403,10 +403,10 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a reset local stack (`supabase db reset`)
-- [x] 1.2 New columns exist and are nullable (`\d topic_checks` via pg_catalog)
-- [x] 1.3 Type checking passes (`pnpm typecheck`)
-- [x] 1.4 Generated `types.ts` includes `example` + `code_context` in the topic_checks types
+- [x] 1.1 Migration applies cleanly on a reset local stack (`supabase db reset`) — 65574aa
+- [x] 1.2 New columns exist and are nullable (`\d topic_checks` via pg_catalog) — 65574aa
+- [x] 1.3 Type checking passes (`pnpm typecheck`) — 65574aa
+- [x] 1.4 Generated `types.ts` includes `example` + `code_context` in the topic_checks types — 65574aa
 
 #### Manual
 
@@ -416,9 +416,9 @@ the local DB) get `null` for both new columns. The new migration must timestamp 
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`pnpm typecheck`)
-- [ ] 2.2 Linting passes (`pnpm lint`)
-- [ ] 2.3 Build passes (`pnpm build`)
+- [x] 2.1 Type checking passes (`pnpm typecheck`)
+- [x] 2.2 Linting passes (`pnpm lint`)
+- [x] 2.3 Build passes (`pnpm build`)
 
 #### Manual
 

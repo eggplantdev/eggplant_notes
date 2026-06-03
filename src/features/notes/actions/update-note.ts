@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { noteIdSchema, noteInputSchema } from '@/features/notes/schemas'
-import { runNoteAction } from '@/features/notes/run-note-action'
+import { runTableAction } from '@/lib/supabase/run-table-action'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
@@ -16,7 +16,7 @@ export async function updateNote(id: string, input: unknown): Promise<ActionResu
   const parsedId = validateInput(noteIdSchema, id)
   if (!parsedId.success) return parsedId
 
-  const result = await runNoteAction(noteInputSchema, input, (supabase, data) =>
+  const result = await runTableAction(noteInputSchema, input, (supabase, data) =>
     supabase
       .from('notes')
       .update({ ...data, updated_at: new Date().toISOString() })

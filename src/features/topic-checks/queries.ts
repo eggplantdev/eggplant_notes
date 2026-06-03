@@ -20,3 +20,20 @@ export async function getTopicChecksDue(client?: SupabaseClient<Database>): Prom
     c.from('topic_checks').select('*').lte('due_at', now).order('due_at', { ascending: true }),
   )
 }
+
+// Returns all topic checks attached to one note, oldest first (FR-015). RLS scopes rows to the
+// owner, so a note the caller doesn't own yields []. Injectable client (defaults to the server
+// client) so Playwright can call it with a signInWithPassword client per the isolation test.
+export async function getTopicChecksForNote(
+  noteId: string,
+  client?: SupabaseClient<Database>,
+): Promise<TopicCheckT[]> {
+  const supabase = client ?? (await createClient())
+  return runTableQuery(supabase, (c) =>
+    c
+      .from('topic_checks')
+      .select('*')
+      .eq('note_id', noteId)
+      .order('created_at', { ascending: true }),
+  )
+}
