@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { getNote } from '@/features/notes/queries'
-import { RenderMarkdown } from '@/features/notes/render-markdown'
 import { getTopicChecksForNote } from '@/features/topic-checks/queries'
 import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
 

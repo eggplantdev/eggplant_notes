@@ -19,7 +19,7 @@ type CodeMirrorEditorPropsT = {
 }
 
 // The actual CodeMirror surface. This whole module is loaded ONLY via the `ssr: false`
-// dynamic import in note-editor.tsx, so none of the CodeMirror/codemirror-view code ever
+// dynamic import in markdown-editor.tsx, so none of the CodeMirror/codemirror-view code ever
 // runs on the server. `theme="dark"` matches the app's (currently always-on) dark shell —
 // the default light theme rendered white-on-white. Default export so `next/dynamic` can
 // import it directly.

@@ -1,7 +1,8 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
+import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
-import { RenderMarkdown } from '@/features/notes/render-markdown'
 import { DeleteTopicCheckButton } from '@/features/topic-checks/delete-topic-check-button'
 import { TopicCheckForm } from '@/features/topic-checks/topic-check-form'
 import type { TopicCheckT } from '@/features/topic-checks/types'
@@ -19,6 +20,9 @@ type TopicChecksSectionPropsT = {
 // when the edit target changes. Optional example/code_context render only when present.
 export async function TopicChecksSection({ noteId, checks, editId }: TopicChecksSectionPropsT) {
   const editingCheck = editId ? checks.find((c) => c.id === editId) : undefined
+  // Stale ?edit (check deleted or never owned): drop the param so the URL matches the
+  // add-mode form it would fall back to, instead of claiming edit of a row that isn't there.
+  if (editId && !editingCheck) redirect(`/notes/${noteId}`)
 
   return (
     <section className="flex flex-col gap-4">
