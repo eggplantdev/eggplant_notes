@@ -31,7 +31,7 @@ export function ActivityHeatmap({ columns }: PropsT) {
   }
 
   return (
-    <div className="w-full overflow-x-auto pb-1">
+    <div className="overflow-x-auto pb-1">
       {/* month labels — aligned to column pitch; text overflows rightward like GitHub */}
       <div className="text-muted-foreground text-3xs mb-1.5 flex uppercase" aria-hidden>
         {columns.map((col, i) => (
