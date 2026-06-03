@@ -557,9 +557,9 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Automated
 
-- [x] 2.1 Typecheck passes: `pnpm typecheck`
-- [x] 2.2 Lint passes: `pnpm lint`
-- [x] 2.3 Unit specs pass: `pnpm test`
+- [x] 2.1 Typecheck passes: `pnpm typecheck` — c874faa
+- [x] 2.2 Lint passes: `pnpm lint` — c874faa
+- [x] 2.3 Unit specs pass: `pnpm test` — c874faa
 
 #### Manual
 
@@ -571,17 +571,17 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Automated
 
-- [ ] 3.1 Typecheck passes: `pnpm typecheck`
-- [ ] 3.2 Lint passes: `pnpm lint`
-- [ ] 3.3 Production build succeeds: `pnpm build`
+- [x] 3.1 Typecheck passes: `pnpm typecheck`
+- [x] 3.2 Lint passes: `pnpm lint`
+- [x] 3.3 Production build succeeds: `pnpm build`
 
 #### Manual
 
-- [ ] 3.4 Create subject → appears in `/subjects`
-- [ ] 3.5 Assign two notes → `/subjects/[id]` shows both as one ordered document
-- [ ] 3.6 Section titles link to each note's editable page
-- [ ] 3.7 Rename works; delete leaves notes intact + unassigned in `/notes`
-- [ ] 3.8 Note form preselects current subject on edit
+- [x] 3.4 Create subject → appears in `/subjects`
+- [x] 3.5 Assign two notes → `/subjects/[id]` shows both as one ordered document
+- [x] 3.6 Section titles link to each note's editable page
+- [x] 3.7 Rename works; delete leaves notes intact + unassigned in `/notes`
+- [x] 3.8 Note form preselects current subject on edit
 
 ### Phase 4: Drag-to-Reorder
 

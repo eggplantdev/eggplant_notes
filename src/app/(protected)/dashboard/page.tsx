@@ -38,6 +38,9 @@ export default async function DashboardPage() {
             <Link href="/notes">Notes</Link>
           </Button>
           <Button variant="outline" asChild>
+            <Link href="/subjects">Subjects</Link>
+          </Button>
+          <Button variant="outline" asChild>
             <Link href="/settings">Settings</Link>
           </Button>
           <form action={signOut}>
