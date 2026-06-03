@@ -66,3 +66,6 @@ next-env.d.ts
 /.claude/worktrees/
 
 .superpowers/
+
+# Personal idea/TODO scratchpad — local only, never committed to the public repo
+/.notes
