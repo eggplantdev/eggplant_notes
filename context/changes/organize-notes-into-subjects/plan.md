@@ -571,26 +571,26 @@ No data backfill — PRD confirms no real data to preserve. The migration is pur
 
 #### Automated
 
-- [x] 3.1 Typecheck passes: `pnpm typecheck`
-- [x] 3.2 Lint passes: `pnpm lint`
-- [x] 3.3 Production build succeeds: `pnpm build`
+- [x] 3.1 Typecheck passes: `pnpm typecheck` — 3dfce15
+- [x] 3.2 Lint passes: `pnpm lint` — 3dfce15
+- [x] 3.3 Production build succeeds: `pnpm build` — 3dfce15
 
 #### Manual
 
-- [x] 3.4 Create subject → appears in `/subjects`
-- [x] 3.5 Assign two notes → `/subjects/[id]` shows both as one ordered document
-- [x] 3.6 Section titles link to each note's editable page
-- [x] 3.7 Rename works; delete leaves notes intact + unassigned in `/notes`
-- [x] 3.8 Note form preselects current subject on edit
+- [x] 3.4 Create subject → appears in `/subjects` — 3dfce15
+- [x] 3.5 Assign two notes → `/subjects/[id]` shows both as one ordered document — 3dfce15
+- [x] 3.6 Section titles link to each note's editable page — 3dfce15
+- [x] 3.7 Rename works; delete leaves notes intact + unassigned in `/notes` — 3dfce15
+- [x] 3.8 Note form preselects current subject on edit — 3dfce15
 
 ### Phase 4: Drag-to-Reorder
 
 #### Automated
 
-- [ ] 4.1 Build with the client island succeeds: `pnpm build`
-- [ ] 4.2 Typecheck passes: `pnpm typecheck`
-- [ ] 4.3 Lint passes: `pnpm lint`
-- [ ] 4.4 No `ERR_PNPM_IGNORED_BUILDS` on install
+- [x] 4.1 Build with the client island succeeds: `pnpm build`
+- [x] 4.2 Typecheck passes: `pnpm typecheck`
+- [x] 4.3 Lint passes: `pnpm lint`
+- [x] 4.4 No `ERR_PNPM_IGNORED_BUILDS` on install
 
 #### Manual
 

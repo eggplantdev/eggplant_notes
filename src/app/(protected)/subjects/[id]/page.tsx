@@ -5,6 +5,7 @@ import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
 import { getNotesForSubject, getSubject } from '@/features/subjects/queries'
+import { ReorderableNoteList } from '@/features/subjects/reorderable-note-list'
 
 // Subject-as-document view. Server Component (Next 16 `params` is a Promise). Renders every
 // member note in user-defined order as one continuous Shiki-highlighted document; each
@@ -46,6 +47,13 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
         </div>
       ) : (
         <div className="flex flex-col gap-8">
+          <ReorderableNoteList
+            notes={notes.map((note) => ({
+              id: note.id,
+              title: note.title ?? 'Untitled',
+              position: note.position ?? 0,
+            }))}
+          />
           {notes.map((note) => (
             <section key={note.id} className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold">
