@@ -1,10 +1,10 @@
 import type { HeatmapCellT } from '@/features/dashboard/types'
 
-// Geometry for the contribution grid. Intentionally in px: this is fixed pixel-art (a dense
-// 7×53 square lattice), where rem/% would let cells reflow and break weekday alignment.
-export const CELL = 11 // px square
+// Geometry for the contribution grid. The grid itself is fluid — columns are `1fr` tracks that
+// grow with the container, and an `aspect-ratio` keeps the 7×N lattice square (see
+// activity-heatmap.tsx). CELL is the fixed px size used only by the static legend swatches.
+export const CELL = 11 // px square (legend swatch only)
 export const GAP = 2 // px between cells
-export const PITCH = CELL + GAP // column/row stride
 
 // Tooltip copy for a cell: "3 reviews · Wed, Jun 3, 2025" (UTC, matching the date keys).
 export function formatCellLabel(cell: HeatmapCellT): string {

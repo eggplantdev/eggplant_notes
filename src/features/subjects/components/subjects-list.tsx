@@ -1,36 +1,23 @@
 'use client'
 
-import Link from 'next/link'
-import { AnimatePresence } from 'framer-motion'
-
-import { AnimatedListItem } from '@/components/motion/animated-list-item'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import type { SubjectT } from '@/types/subject'
 
-// Client island for the subjects list so rows can animate. Mirrors NotesList: server-fetched
-// data passed in, popLayout + per-row layout for future add/remove/reorder transitions,
-// initial={false} so the first render stays quiet under PageShell's page-transition.
+// Thin client wrapper over the shared AnimatedCardList: supplies the subjects-specific href,
+// title, and optional line-clamped description subtitle. Mirrors NotesList; data is fetched
+// on the server (SubjectsPage) and passed in.
 export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
   return (
-    <div className="flex flex-col gap-3">
-      <AnimatePresence mode="popLayout" initial={false}>
-        {subjects.map((subject) => (
-          <AnimatedListItem key={subject.id} layoutId={subject.id} layout>
-            <Link href={`/subjects/${subject.id}`}>
-              <Card className="hover:border-ring transition-colors">
-                <CardHeader>
-                  <CardTitle>{subject.title}</CardTitle>
-                  {subject.description && (
-                    <p className="text-muted-foreground line-clamp-2 text-sm">
-                      {subject.description}
-                    </p>
-                  )}
-                </CardHeader>
-              </Card>
-            </Link>
-          </AnimatedListItem>
-        ))}
-      </AnimatePresence>
-    </div>
+    <AnimatedCardList
+      items={subjects}
+      getKey={(subject) => subject.id}
+      getHref={(subject) => `/subjects/${subject.id}`}
+      renderTitle={(subject) => subject.title}
+      renderSubtitle={(subject) =>
+        subject.description ? (
+          <p className="text-muted-foreground line-clamp-2 text-sm">{subject.description}</p>
+        ) : null
+      }
+    />
   )
 }

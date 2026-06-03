@@ -5,7 +5,7 @@ import { useRef } from 'react'
 import { HEAT_BG, HEAT_LEVELS } from '@/features/dashboard/constants'
 import { HeatmapCell } from '@/features/dashboard/heatmap-cell'
 import { HeatmapTooltip } from '@/features/dashboard/heatmap-tooltip'
-import { CELL, formatCellLabel, GAP, PITCH } from '@/features/dashboard/heatmap-view'
+import { CELL, formatCellLabel, GAP } from '@/features/dashboard/heatmap-view'
 import type { HeatmapCellT, HeatmapColumnT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'
 
@@ -30,16 +30,19 @@ export function ActivityHeatmap({ columns }: PropsT) {
     if (tipRef.current) tipRef.current.style.opacity = '0'
   }
 
+  const cols = columns.length
+
   return (
-    <div className="overflow-x-auto pb-1">
-      {/* month labels — aligned to column pitch; text overflows rightward like GitHub */}
-      <div className="text-muted-foreground text-3xs mb-1.5 flex uppercase" aria-hidden>
+    <div className="w-full pb-1">
+      {/* month labels — share the grid's column tracks so they stay aligned as cells grow; text
+          overflows rightward into following tracks like GitHub */}
+      <div
+        className="text-muted-foreground text-3xs mb-1.5 grid uppercase"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: `${GAP}px` }}
+        aria-hidden
+      >
         {columns.map((col, i) => (
-          <span
-            key={i}
-            className="relative block shrink-0 overflow-visible whitespace-nowrap"
-            style={{ width: PITCH }}
-          >
+          <span key={i} className="relative block overflow-visible whitespace-nowrap">
             {col.monthLabel}
           </span>
         ))}
@@ -50,9 +53,12 @@ export function ActivityHeatmap({ columns }: PropsT) {
         aria-label="Review activity heatmap for the last 12 months"
         className="grid grid-flow-col"
         style={{
-          gridTemplateRows: `repeat(7, ${CELL}px)`,
-          gridAutoColumns: `${CELL}px`,
+          // Fluid lattice: 7 fixed rows, N equal-width columns that grow with the container.
+          // aspect-ratio (cols : 7) drives the height so each cell stays square at any width.
+          gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
+          gridAutoColumns: 'minmax(0, 1fr)',
           gap: `${GAP}px`,
+          aspectRatio: `${cols} / 7`,
         }}
       >
         {columns.map((col, ci) =>

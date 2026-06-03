@@ -46,7 +46,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card className={`mx-auto w-fit`}>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Review activity — last 12 months</CardTitle>
         </CardHeader>
