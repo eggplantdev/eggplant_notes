@@ -2,6 +2,8 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+@plugin '@tailwindcss/typography';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -128,4 +130,16 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
+   app's class-based `.dark`, swap every token (and the code background) to the dark set.
+   See https://shiki.style/guide/dual-themes */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }

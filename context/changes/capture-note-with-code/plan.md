@@ -329,29 +329,29 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 
 #### Automated
 
-- [x] 1.1 `pnpm typecheck` passes with new schema/actions/helper
-- [x] 1.2 `pnpm lint` passes
-- [x] 1.3 `pnpm test` passes (schema/wrapper coverage)
-- [x] 1.4 `pnpm install` clean — no `ERR_PNPM_IGNORED_BUILDS`
+- [x] 1.1 `pnpm typecheck` passes with new schema/actions/helper — d84c369
+- [x] 1.2 `pnpm lint` passes — d84c369
+- [x] 1.3 `pnpm test` passes (schema/wrapper coverage) — d84c369
+- [x] 1.4 `pnpm install` clean — no `ERR_PNPM_IGNORED_BUILDS` — d84c369
 
 #### Manual
 
-- [ ] 1.5 `pnpm build` succeeds (no SSR import of the editor)
-- [ ] 1.6 shadcn `textarea` + `alert-dialog` render in isolation
+- [x] 1.5 `pnpm build` succeeds (no SSR import of the editor) — d84c369
+- [ ] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (deferred to Phase 3/4 when wired)
 
 ### Phase 2: Read UI — list + highlighted detail
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
-- [ ] 2.2 Detail route renders server-side (no client error)
+- [x] 2.1 `pnpm typecheck`, `pnpm lint`, `pnpm build` pass
+- [x] 2.2 Detail route renders server-side (no client error)
 
 #### Manual
 
-- [ ] 2.3 ts/python code blocks render with distinct token colors (NFR)
-- [ ] 2.4 Light/dark recolors code blocks correctly
-- [ ] 2.5 List newest-first; empty state shows CTA
-- [ ] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note
+- [x] 2.3 ts/python code blocks render with distinct token colors (NFR)
+- [x] 2.4 Light/dark recolors code blocks correctly
+- [x] 2.5 List newest-first; empty state shows CTA
+- [x] 2.6 `/notes/<unknown-id>` shows not-found, not another user's note
 
 ### Phase 3: Write UI — editor + create/edit
 
