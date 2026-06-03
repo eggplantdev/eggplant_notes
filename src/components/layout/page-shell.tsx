@@ -20,7 +20,8 @@ type PropsT = {
   // Optional back link rendered above the header, visible on every breakpoint.
   backHref?: string
   backLabel?: string
-  // Inner content width. 'full' = edge-to-edge (default; dashboard); 'prose' = max-w-2xl
+  // Inner content width, within the shared `container-shell` cap (max-w 120rem) the <main>
+  // already applies. 'full' = fill that cap (default; dashboard); 'prose' = max-w-2xl
   // (read-heavy pages); 'wide' = max-w-4xl (the note editor).
   width?: WidthT
   children: ReactNode
