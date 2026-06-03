@@ -57,7 +57,7 @@ export function PageShell({
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (
-    <main className="p-4 sm:p-6">
+    <main className="container-shell py-4 sm:py-6">
       <motion.div
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}

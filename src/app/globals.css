@@ -147,6 +147,15 @@
   }
 }
 
+/* Shared outer-container geometry — max width + horizontal padding + centering. Applied by
+   both the app nav bar and the page shell so they line up on the same left/right edges.
+   Single source: change width or horizontal padding here and both move together. Vertical
+   padding stays per-consumer. */
+@utility container-shell {
+  @apply mx-auto w-full px-4 sm:px-6;
+  max-width: 120rem; /* 1920px */
+}
+
 /* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
    app's class-based `.dark`, swap every token (and the code background) to the dark set.
    See https://shiki.style/guide/dual-themes */

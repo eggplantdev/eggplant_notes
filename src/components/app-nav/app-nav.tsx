@@ -12,7 +12,7 @@ export function AppNav() {
   return (
     <>
       <header className="bg-background sticky top-0 z-40 hidden border-b md:block">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 p-4">
+        <div className="container-shell flex items-center justify-between gap-2 py-4">
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => (
               <NavLink key={item.href} href={item.href} label={item.label} />
