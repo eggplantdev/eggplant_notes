@@ -1,12 +1,13 @@
 'use client'
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
-import type { NoteT } from '@/types/note'
+import type { NoteListItemT } from '@/features/notes/types'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the notes-specific href,
-// title fallback, and created-at subtitle. Data is fetched on the server (NotesPage) and
-// passed in; this stays a client component only so it can hand render functions to the list.
-export function NotesList({ notes }: { notes: NoteT[] }) {
+// title fallback, and a subtitle of the note's subject ("topic") chip + created-at date. Data
+// is fetched on the server (NotesPage) and passed in; this stays a client component only so it
+// can hand render functions to the list.
+export function NotesList({ notes }: { notes: NoteListItemT[] }) {
   return (
     <AnimatedCardList
       items={notes}
@@ -14,9 +15,14 @@ export function NotesList({ notes }: { notes: NoteT[] }) {
       getHref={(note) => `/notes/${note.id}`}
       renderTitle={(note) => note.title ?? 'Untitled'}
       renderSubtitle={(note) => (
-        <p className="text-muted-foreground text-sm">
-          {new Date(note.created_at).toLocaleDateString()}
-        </p>
+        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          {note.subjects?.title && (
+            <span className="bg-muted text-foreground rounded px-1.5 py-0.5 text-xs font-medium">
+              {note.subjects.title}
+            </span>
+          )}
+          <span>{new Date(note.created_at).toLocaleDateString()}</span>
+        </div>
       )}
     />
   )
