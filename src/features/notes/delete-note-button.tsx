@@ -52,8 +52,9 @@ export function DeleteNoteButton({ id }: DeleteNoteButtonPropsT) {
               e.preventDefault()
               setError(undefined)
               startTransition(async () => {
+                // deleteNote redirects on success (throws), so it only ever returns on failure.
                 const result = await deleteNote(id)
-                if (result && !result.success) setError(result.error)
+                if (!result.success) setError(result.error)
               })
             }}
           >

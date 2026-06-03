@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
+import { MarkdownPreview } from '@/features/notes/markdown-preview'
 import { NoteEditor } from '@/features/notes/note-editor'
 import { titleSchema } from '@/features/notes/schemas'
 import type { NoteInputT } from '@/features/notes/schemas'
@@ -90,9 +89,7 @@ export function NoteForm(props: NoteFormPropsT) {
                   'md:block',
                 )}
               >
-                <Markdown remarkPlugins={[remarkGfm]}>
-                  {field.state.value || '*Nothing to preview yet.*'}
-                </Markdown>
+                <MarkdownPreview content={field.state.value} />
               </div>
             </div>
           </div>
