@@ -89,9 +89,11 @@ export type Database = {
       }
       topic_checks: {
         Row: {
+          code_context: string | null
           created_at: string
           due_at: string
           ease_factor: number
+          example: string | null
           id: string
           interval_days: number
           note_id: string
@@ -101,9 +103,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          code_context?: string | null
           created_at?: string
           due_at?: string
           ease_factor?: number
+          example?: string | null
           id?: string
           interval_days?: number
           note_id: string
@@ -113,9 +117,11 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          code_context?: string | null
           created_at?: string
           due_at?: string
           ease_factor?: number
+          example?: string | null
           id?: string
           interval_days?: number
           note_id?: string
