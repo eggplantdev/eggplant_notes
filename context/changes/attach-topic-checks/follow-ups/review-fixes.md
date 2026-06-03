@@ -14,3 +14,7 @@ Deferred items from `/10x-impl-review` (see `reviews/impl-review.md`).
   rather than bounding one read in isolation.
 - **Fix when picked up**: add `.range()`/`.limit()` and select only the columns the list needs
   (defer `code_context` until expanded, or cap), consistent with whatever S-01 F1 settles on.
+- **Compounds with**: `topic-checks-section.tsx` runs server-side Shiki per `example`/`code_context`
+  per check on every render, unmemoized — so the unbounded read scales the highlight cost linearly
+  (≈2N Shiki passes for N checks). Acceptable at MVP scale; if check counts grow, memoize highlighted
+  output keyed on `(check.id, updated_at)` or cache the highlighter. (`/simplify`, 2026-06-03.)
