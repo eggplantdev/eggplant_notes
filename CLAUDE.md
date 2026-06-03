@@ -6,13 +6,17 @@
 
 ## Per-slice review gate
 
-For every slice/foundation, run this gate on the change between implementation and archive, in order:
+For every slice/foundation, between implementation and archive:
 
-1. `/10x-impl-review` — correctness/drift/pattern check (does NOT clean up).
-2. **`/simplify`** — separate reuse/simplification/efficiency/altitude pass on the whole change (quality only, no bug-hunt).
-3. `/tailwind-v4-audit` and `/module-cohesion-audit`.
-4. **Structure & feature-boundary check** — apply the `feature-first-structure` skill's two mechanical checks to the change: the **deletion test** (a feature must be `rm -rf`-able with no orphans) and **no cross-feature deep imports / leaked internals** (`features/x` must not import `features/y/...`; cross-feature code goes through a promoted shared tier, not a reach-across). Promote on the 2nd consumer, never the 1st.
-5. **Verify nothing breaks** — run green before archive: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e`, `pnpm build` (scripts in `@package.json`; e2e needs the local Supabase stack up — see AGENTS.md Testing). Steps 2–4 edit code, so this runs **last**: archive a verified-green state, not one the cleanup passes left untested.
+1. **Parallel review fan-out** — dispatch agents to run all four read-only checks _at once_ (none mutate, so no conflict), then triage every report in the main thread:
+   - `/10x-impl-review` — correctness, drift, pattern compliance (this is the bug hunt too; does NOT clean up).
+   - `/tailwind-v4-audit` — pre-v4 syntax, arbitrary values, inline styles.
+   - `feature-first-structure` — _inter-module_: the **deletion test** (a feature must be `rm -rf`-able with no orphans) + **no cross-feature deep imports / leaked internals** (`features/x` must not import `features/y/...`; cross-feature code goes through a promoted shared tier, on the 2nd consumer, never the 1st).
+   - `/module-cohesion-audit` — _intra-module_: flags grab-bag/god files (types + constants + helpers + domain + component in one), catch-all `utils.ts`, component files exporting more than the component. Complementary to `feature-first-structure`, not redundant — boundaries-between-files vs does-one-file-do-too-much.
+2. **`/simplify`** — run after the fan-out, **serial**. It _mutates_ (reuse/simplification/efficiency/altitude), so it can't be in the parallel batch; it cleans up against the triaged findings.
+3. **Verify green** — **last**, after the cleanup edits: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e`, `pnpm build` (scripts in `@package.json`; e2e needs the local Supabase stack up — see AGENTS.md Testing). Archive a verified-green state, not one the cleanup pass left untested.
+
+Then `/10x-archive`. `/simplify` is not optional — the reviews don't clean up, so skipping it ships un-simplified code into the immutable archive.
 
 Only then `/10x-archive`. `/simplify` is not optional — `/10x-impl-review` does not simplify, so skipping it ships un-cleaned code into the immutable archive.
 
