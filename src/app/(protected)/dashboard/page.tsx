@@ -13,11 +13,14 @@ import { createClient } from '@/lib/supabase/server'
 // (S-03) lands — see features/dashboard/data.ts.
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const data = await getDashboardData()
+  // Independent reads — auth check and dashboard data don't depend on each other. Runs them
+  // in parallel so this stays one round-trip once real Supabase queries replace the dummy seam.
+  const [
+    {
+      data: { user },
+    },
+    data,
+  ] = await Promise.all([supabase.auth.getUser(), getDashboardData()])
   const columns = buildHeatmapMatrix(data.activity, { today: new Date(), weeks: 53 })
 
   return (

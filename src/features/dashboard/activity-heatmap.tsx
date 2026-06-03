@@ -1,28 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
 
-import type { HeatmapCell, HeatmapColumn } from '@/features/dashboard/build-heatmap-matrix'
-import { CELL, formatCellLabel, GAP, PITCH, type TipT } from '@/features/dashboard/heatmap-view'
+import { HEAT_BG, HEAT_LEVELS } from '@/features/dashboard/constants'
+import { HeatmapCell } from '@/features/dashboard/heatmap-cell'
+import { HeatmapTooltip } from '@/features/dashboard/heatmap-tooltip'
+import { CELL, formatCellLabel, GAP, PITCH } from '@/features/dashboard/heatmap-view'
+import type { HeatmapCellT, HeatmapColumnT } from '@/features/dashboard/types'
+import { cn } from '@/lib/utils'
 
-type PropsT = { columns: HeatmapColumn[] }
+type PropsT = { columns: HeatmapColumnT[] }
 
-// Pure presentation: renders a prebuilt matrix (cols = weeks, rows = weekdays) plus month
-// labels and an intensity legend. Owns a single floating tooltip rather than one popover per
-// cell. No data fetching — the server page sources data and passes serializable columns.
+// Composes the contribution grid (HeatmapCell per day), the month labels, the legend, and a
+// single shared HeatmapTooltip. Hover writes text/position to the tooltip imperatively via a
+// ref, so moving across the ~371 cells never re-renders the grid.
 export function ActivityHeatmap({ columns }: PropsT) {
-  const [tip, setTip] = useState<TipT | null>(null)
+  const tipRef = useRef<HTMLDivElement>(null)
 
-  const show = (cell: HeatmapCell, e: React.MouseEvent) => {
-    if (!cell.date) return
+  const showTip = (cell: HeatmapCellT, e: React.MouseEvent) => {
+    const tip = tipRef.current
+    if (!tip || !cell.date) return
     const r = e.currentTarget.getBoundingClientRect()
-    setTip({ text: formatCellLabel(cell), x: r.left + r.width / 2, y: r.top })
+    tip.textContent = formatCellLabel(cell)
+    tip.style.left = `${r.left + r.width / 2}px`
+    tip.style.top = `${r.top - 4}px` // 4px gap above the cell (tooltip is lifted by -translate-y-full)
+    tip.style.opacity = '1'
+  }
+  const hideTip = () => {
+    if (tipRef.current) tipRef.current.style.opacity = '0'
   }
 
   return (
     <div className="w-full overflow-x-auto pb-1">
       {/* month labels — aligned to column pitch; text overflows rightward like GitHub */}
-      <div className="text-muted-foreground mb-1.5 flex text-[0.5625rem] uppercase" aria-hidden>
+      <div className="text-muted-foreground text-3xs mb-1.5 flex uppercase" aria-hidden>
         {columns.map((col, i) => (
           <span
             key={i}
@@ -46,44 +57,24 @@ export function ActivityHeatmap({ columns }: PropsT) {
       >
         {columns.map((col, ci) =>
           col.cells.map((cell, ri) => (
-            <div
-              key={`${ci}-${ri}`}
-              onMouseEnter={(e) => show(cell, e)}
-              onMouseLeave={() => setTip(null)}
-              className={
-                cell.date
-                  ? 'rounded-[0.125rem] outline-offset-1 hover:outline hover:outline-[var(--foreground)]'
-                  : 'rounded-[0.125rem]'
-              }
-              style={{
-                backgroundColor: cell.date ? `var(--heat-${cell.level})` : 'transparent',
-              }}
-            />
+            <HeatmapCell key={`${ci}-${ri}`} cell={cell} onEnter={showTip} onLeave={hideTip} />
           )),
         )}
       </div>
 
-      <div className="text-muted-foreground mt-3 flex items-center gap-1 text-[0.6875rem]">
+      <div className="text-muted-foreground text-2xs mt-3 flex items-center gap-1">
         Less
-        {[0, 1, 2, 3, 4].map((lvl) => (
+        {HEAT_LEVELS.map((lvl) => (
           <span
             key={lvl}
-            className="inline-block rounded-[0.125rem]"
-            style={{ width: CELL, height: CELL, backgroundColor: `var(--heat-${lvl})` }}
+            className={cn('inline-block rounded-xs', HEAT_BG[lvl])}
+            style={{ width: CELL, height: CELL }}
           />
         ))}
         More
       </div>
 
-      {tip && (
-        <div
-          className="bg-popover text-popover-foreground border-border pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[120%] rounded-md border px-2.5 py-1.5 text-xs whitespace-nowrap shadow-lg"
-          style={{ left: tip.x, top: tip.y }}
-          role="status"
-        >
-          {tip.text}
-        </div>
-      )}
+      <HeatmapTooltip ref={tipRef} />
     </div>
   )
 }
