@@ -261,9 +261,9 @@ A Playwright spec proving the full lifecycle: sign up → delete via the real UI
 
 #### Automated
 
-- [x] 3.1 `pnpm test:e2e` passes including `delete-account.spec.ts`
-- [x] 3.2 Existing `auth.spec.ts` and `isolation.spec.ts` still green
+- [x] 3.1 `pnpm test:e2e` passes including `delete-account.spec.ts` — f5947e1
+- [x] 3.2 Existing `auth.spec.ts` and `isolation.spec.ts` still green — f5947e1
 
 #### Manual
 
-- [x] 3.3 Server confirmed bound by PID/port before trusting the run
+- [x] 3.3 Server confirmed bound by PID/port before trusting the run — f5947e1
