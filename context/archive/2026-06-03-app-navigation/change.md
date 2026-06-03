@@ -1,10 +1,10 @@
 ---
 change_id: app-navigation
 title: Persistent top-bar navigation for the protected app shell
-status: implemented
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T17:08:43Z
 ---
 
 ## Notes
