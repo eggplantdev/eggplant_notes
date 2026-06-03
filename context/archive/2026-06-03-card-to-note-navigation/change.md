@@ -1,10 +1,10 @@
 ---
 change_id: card-to-note-navigation
 title: Card to note navigation
-status: implemented
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T18:23:44Z
 ---
 
 ## Notes
