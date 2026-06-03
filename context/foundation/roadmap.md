@@ -35,7 +35,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 | S-02 | attach-topic-checks       | attach, edit, delete, and list topic checks on a note            | S-01          | FR-012–015, US-01               | proposed |
 | S-03 | close-recall-loop         | review a due topic check, self-rate, and see it reschedule       | S-02, F-02    | FR-016–019, US-01, Bus. Logic   | proposed |
 | S-04 | activity-dashboard        | see due-today count, current streak, and a review heatmap        | S-03          | FR-020–022                      | proposed |
-| S-05 | delete-account-and-data   | delete their account and all owned data from settings            | F-01, F-02    | FR-006, Access Control          | proposed |
+| S-05 | delete-account-and-data   | delete their account and all owned data from settings            | F-01, F-02    | FR-006, Access Control          | done     |
 
 ## Streams
 
@@ -148,7 +148,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** A baseline trust requirement and a consequence of the full-ownership-delete behavior the isolation guarantee already implies. Independent of the content flow, so it can be built in parallel with the recall-loop stream; sequenced last on the critical path because it's not required to prove the product.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -183,3 +183,4 @@ Deferred to v1.1 (out-of-MVP, not out-of-product — `main_goal: speed` keeps th
 
 - **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
 - **F-02: (foundation) first migration creates `notes`, `topic_checks`, `review_events` with Row-Level Security policies scoping every row by `auth.uid()`, plus minimal typed client query helpers; verified by a two-account isolation test.** — Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`. Lesson: —.
+- **S-05: user can delete their account from settings; deletion removes all owned data — notes, topic checks, review events, and any connected external-LLM credential.** — Archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`. Lesson: verify Postgres constraints via pg_catalog, not information_schema.
