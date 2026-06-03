@@ -337,7 +337,7 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 #### Manual
 
 - [x] 1.5 `pnpm build` succeeds (no SSR import of the editor) — d84c369
-- [x] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (alert-dialog wired in P4 delete flow + verified; textarea installed, unused this slice — queued for S-02 topic-checks)
+- [x] 1.6 shadcn `textarea` + `alert-dialog` render in isolation (alert-dialog wired in P4 delete flow + verified; textarea installed, unused this slice — queued for S-02 topic-checks) — 619aa24
 
 ### Phase 2: Read UI — list + highlighted detail
 
@@ -372,12 +372,12 @@ AlertDialog-confirmed delete (FR-010) and a Playwright spec covering the full CR
 
 #### Automated
 
-- [x] 4.1 `pnpm test:e2e` passes including `notes.spec.ts`
-- [x] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green
-- [x] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass
+- [x] 4.1 `pnpm test:e2e` passes including `notes.spec.ts` — 619aa24
+- [x] 4.2 `auth.spec.ts` and `isolation.spec.ts` still green — 619aa24
+- [x] 4.3 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` pass — 619aa24
 
 #### Manual
 
-- [x] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list
-- [x] 4.5 Deleting a note with topic checks removes them too (DB cascade)
-- [x] 4.6 Server confirmed bound by PID/port before trusting the E2E run
+- [x] 4.4 AlertDialog: cancel aborts, confirm removes note → returns to list — 619aa24
+- [x] 4.5 Deleting a note with topic checks removes them too (DB cascade) — 619aa24
+- [x] 4.6 Server confirmed bound by PID/port before trusting the E2E run — 619aa24
