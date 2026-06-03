@@ -8,7 +8,13 @@
 -- only ever touches your LOCAL Postgres. E2E specs do NOT depend on it — they self-seed
 -- via the UI — so the two data lanes stay orthogonal.
 --
--- Log in as:  dev@example.com  /  password123
+-- Log in as either:
+--   dev@example.com   / password123   -- minimal FSRS smoke-test bed (sections 1-4)
+--   test@gmail.com    / test@Test      -- rich playground: 24 subjects, 60 notes,
+--                                         cards + pending reviews (sections 5-9)
+--
+-- The test@gmail.com data is generated with deterministic UUIDs + `on conflict do
+-- nothing`, so re-running this file is idempotent (unlike the dev topic_checks block).
 
 -- ----------------------------------------------------------------------------
 -- 1. A confirmed auth user. GoTrue needs BOTH auth.users and a matching
@@ -116,3 +122,135 @@ cross join generate_series(0, 6) as g(d)
 where tc.user_id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'
   and tc.note_id = '11111111-1111-1111-1111-111111111111'
 limit 20;
+
+-- ============================================================================
+-- 5. test@gmail.com — the rich playground account. Same confirmed-user ritual
+--    as section 1 (auth.users + auth.identities, bcrypt password, empty-string
+--    token columns). Fixed UUID so resets reproduce the same owner id.
+-- ============================================================================
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, created_at, updated_at,
+  raw_app_meta_data, raw_user_meta_data,
+  confirmation_token, recovery_token, email_change_token_new, email_change
+)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  'authenticated', 'authenticated',
+  'test@gmail.com',
+  crypt('test@Test', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}', '{}',
+  '', '', '', ''
+)
+on conflict (id) do nothing;
+
+insert into auth.identities (
+  id, user_id, provider_id, identity_data, provider,
+  created_at, updated_at, last_sign_in_at
+)
+values (
+  gen_random_uuid(),
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  '{"sub":"eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee","email":"test@gmail.com"}',
+  'email',
+  now(), now(), now()
+)
+on conflict do nothing;
+
+-- ----------------------------------------------------------------------------
+-- 6. 24 subjects (>= the requested 20). Deterministic id = 5b1ec700…<idx>.
+--    user_id set explicitly (seed runs as postgres; auth.uid() is NULL here).
+-- ----------------------------------------------------------------------------
+insert into subjects (id, user_id, title, description)
+select
+  ('5b1ec700-0000-0000-0000-' || lpad(s.idx::text, 12, '0'))::uuid,
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  s.title,
+  s.title || ' — study subject.'
+from (values
+  (1, 'TypeScript'), (2, 'JavaScript'), (3, 'React'), (4, 'Next.js'),
+  (5, 'Node.js'), (6, 'Python'), (7, 'SQL & Databases'), (8, 'PostgreSQL'),
+  (9, 'Supabase'), (10, 'Tailwind CSS'), (11, 'CSS'), (12, 'HTML'),
+  (13, 'Git & GitHub'), (14, 'Docker'), (15, 'Linux & Shell'), (16, 'Testing'),
+  (17, 'System Design'), (18, 'Algorithms'), (19, 'Data Structures'), (20, 'REST & APIs'),
+  (21, 'Authentication'), (22, 'Performance'), (23, 'Functional Programming'), (24, 'DevOps')
+) as s(idx, title)
+on conflict (id) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- 7. 60 notes. Notes 1-50 are assigned to a subject round-robin (subject_id +
+--    fractional position); notes 51-60 stay unassigned (subject_id/position NULL)
+--    so the "some notes don't attach to a subject" case is exercised.
+--    Deterministic id = 0a7e0000…<n> so topic_checks below can reference them.
+-- ----------------------------------------------------------------------------
+insert into notes (id, user_id, title, content, subject_id, position)
+select
+  ('0a7e0000-0000-0000-0000-' || lpad(n::text, 12, '0'))::uuid,
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  'Study note ' || n,
+  e'# Study note ' || n || e'\n\nNotes and takeaways for item ' || n
+    || e'.\n\n```ts\nconst value = ' || n || e';\nexport function double(x: number) {\n  return x * 2;\n}\n```',
+  case when n <= 50
+    then ('5b1ec700-0000-0000-0000-' || lpad((((n - 1) % 24) + 1)::text, 12, '0'))::uuid
+    else null end,
+  case when n <= 50 then n::numeric else null end
+from generate_series(1, 60) as n
+on conflict (id) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- 8. topic_checks on notes 1-30 (1-2 cards each). Cards on notes 1-20 are due in
+--    the PAST (state=2 Review) -> they populate the /review session as pending;
+--    cards on notes 21-30 are New and due in the FUTURE (hidden from /review).
+--    Deterministic id = c4ec0000…<n*10+c>.
+-- ----------------------------------------------------------------------------
+insert into topic_checks (
+  id, user_id, note_id, prompt, example, code_context,
+  state, stability, difficulty, elapsed_days, scheduled_days,
+  learning_steps, reps, lapses, due_at, last_review
+)
+select
+  ('c4ec0000-0000-0000-0000-' || lpad((n * 10 + c)::text, 12, '0'))::uuid,
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  ('0a7e0000-0000-0000-0000-' || lpad(n::text, 12, '0'))::uuid,
+  'Recall point ' || c || ' from study note ' || n || '?',
+  case when c = 1 then 'A worked example for note ' || n || '.' else null end,
+  null,
+  case when n <= 20 then 2 else 0 end,                                   -- state: Review vs New
+  case when n <= 20 then 5.0 else 0 end,                                 -- stability
+  case when n <= 20 then 5.0 else 0 end,                                 -- difficulty
+  0,
+  case when n <= 20 then 4 else 0 end,                                   -- scheduled_days
+  0,
+  case when n <= 20 then 3 else 0 end,                                   -- reps
+  0,
+  case when n <= 20
+    then now() - (n || ' hours')::interval                               -- DUE now/past -> pending
+    else now() + (n || ' days')::interval end,                           -- future -> hidden
+  case when n <= 20 then now() - interval '3 days' else null end
+from generate_series(1, 30) as n
+cross join generate_series(1, 1 + (n % 2)) as c
+on conflict (id) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- 9. review_events history for the first 10 due cards, one per day over the last
+--    14 days, so the dashboard heatmap/stats render with real history. rating is
+--    FSRS 1..4 (Again..Easy), computed (not random) to stay idempotent.
+-- ----------------------------------------------------------------------------
+insert into review_events (id, user_id, topic_check_id, rating, reviewed_at)
+select
+  ('5e1e0000-0000-0000-0000-' || lpad((tc.rn * 100 + g.d)::text, 12, '0'))::uuid,
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  tc.id,
+  (1 + (g.d % 4))::smallint,                                             -- 1..4
+  now() - (g.d || ' days')::interval
+from (
+  select id, row_number() over (order by id) as rn
+  from topic_checks
+  where user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee' and state = 2
+) as tc
+cross join generate_series(0, 13) as g(d)
+where tc.rn <= 10
+on conflict (id) do nothing;
