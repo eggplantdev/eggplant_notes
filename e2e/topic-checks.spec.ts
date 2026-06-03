@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-import { clientFor, fillEditor, signUp, uniqueEmail } from './helpers'
+import { clientFor, createNote, fillEditor, signUp, uniqueEmail } from './helpers'
 
 // S-02 acceptance path: on a note, add a topic check (question + example + highlighted code
 // context) → see it listed → edit → delete (FR-012–015). Plus a two-account isolation check on
@@ -11,10 +11,7 @@ test('full CRUD: add a topic check with highlighted code, list, edit, delete', a
   await signUp(page, uniqueEmail('tc-crud'))
 
   // A note to attach checks to (title only — keeps the only code block on the page the check's).
-  await page.goto('/notes/new')
-  await page.getByLabel('Title').fill(`TC host note ${Date.now()}`)
-  await page.getByRole('button', { name: 'Create note' }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
+  await createNote(page, `TC host note ${Date.now()}`)
 
   // Empty state, then add a check.
   await expect(page.getByText('No topic checks yet.')).toBeVisible()

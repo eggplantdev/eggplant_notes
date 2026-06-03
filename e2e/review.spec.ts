@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-import { clientFor, signUp, uniqueEmail } from './helpers'
+import { attachCheck, clientFor, createNote, signUp, uniqueEmail } from './helpers'
 
 // S-03 north-star path: the recall loop end-to-end (FR-016–019). Sign up → create a note →
 // attach a topic check → open /review → rate it → assert the check leaves the queue AND that
@@ -19,17 +19,10 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
   const email = uniqueEmail('rev-loop')
   await signUp(page, email)
 
-  // A note to attach the check to (title only).
-  await page.goto('/notes/new')
-  await page.getByLabel('Title').fill(`Review host ${Date.now()}`)
-  await page.getByRole('button', { name: 'Create note' }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
-
-  // Attach a topic check (fresh check → due_at defaults to now → immediately due).
+  // A note + a fresh topic check (due_at defaults to now → immediately due).
+  await createNote(page, `Review host ${Date.now()}`)
   const prompt = `What is a closure? ${Date.now()}`
-  await page.getByLabel('Question').fill(prompt)
-  await page.getByRole('button', { name: 'Add topic check' }).click()
-  await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
+  await attachCheck(page, prompt)
 
   // The review session shows the question + four rating buttons, each with an interval preview.
   await page.goto('/review')

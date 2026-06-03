@@ -1,7 +1,5 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +14,7 @@ import {
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
 import { deleteTopicCheck } from '@/features/topic-checks/actions/delete-topic-check'
+import { useActionTransition } from '@/hooks/use-action-transition'
 
 type DeleteTopicCheckButtonPropsT = { noteId: string; id: string }
 
@@ -25,8 +24,7 @@ type DeleteTopicCheckButtonPropsT = { noteId: string; id: string }
 // failure is surfaced inline and the dialog stays open (`preventDefault` keeps Radix from
 // auto-closing before the transition resolves). The check's review_events cascade at the DB.
 export function DeleteTopicCheckButton({ noteId, id }: DeleteTopicCheckButtonPropsT) {
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isPending, startTransition] = useTransition()
+  const { error, isPending, run } = useActionTransition()
 
   return (
     <AlertDialog>
@@ -51,11 +49,7 @@ export function DeleteTopicCheckButton({ noteId, id }: DeleteTopicCheckButtonPro
             disabled={isPending}
             onClick={(e) => {
               e.preventDefault()
-              setError(undefined)
-              startTransition(async () => {
-                const result = await deleteTopicCheck(noteId, id)
-                if (!result.success) setError(result.error)
-              })
+              run(() => deleteTopicCheck(noteId, id))
             }}
           >
             {isPending ? 'Deleting…' : 'Delete'}

@@ -28,6 +28,23 @@ export async function signUp(page: Page, email: string) {
   await expect(page).toHaveURL('/dashboard')
 }
 
+// Create a note via the UI (title only) and land on its detail page (/notes/<id>). Shared by
+// the specs that need a note to hang topic checks off (notes/topic-checks/review setup).
+export async function createNote(page: Page, title: string) {
+  await page.goto('/notes/new')
+  await page.getByLabel('Title').fill(title)
+  await page.getByRole('button', { name: 'Create note' }).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
+}
+
+// Attach a question-only topic check on the current note detail page and wait for it to list.
+// (Specs exercising the optional example/code_context fields add their checks inline instead.)
+export async function attachCheck(page: Page, prompt: string) {
+  await page.getByLabel('Question').fill(prompt)
+  await page.getByRole('button', { name: 'Add topic check' }).click()
+  await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
+}
+
 // Insert text into the CodeMirror contenteditable without firing key handlers — closeBrackets
 // would auto-close the ``` fence and the `{`, corrupting a pasted code block.
 export async function fillEditor(page: Page, value: string) {

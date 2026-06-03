@@ -6,16 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatInterval } from '@/features/review/format-interval'
 import { RatingButtons } from '@/features/review/rating-buttons'
 import { previewIntervals } from '@/features/review/scheduling'
-import { getTopicChecksDue } from '@/features/topic-checks/queries'
+import { getDueQueue } from '@/features/topic-checks/queries'
 
-// The sequential review session (FR-016–019). Server Component: fetch the due queue, render
-// the FIRST card with its four interval previews, and rely on the rate action's
-// revalidatePath('/review') to advance — the just-rated card gets a future due_at and drops
-// out, so this re-renders with the next card and no client-side queue state.
+// The sequential review session (FR-016–019). Server Component: fetch the due queue (the
+// soonest-due card + the total count), render that FIRST card with its four interval previews,
+// and rely on the rate action's revalidatePath('/review') to advance — the just-rated card
+// gets a future due_at and drops out, so this re-renders with the next card and no client-side
+// queue state.
 export default async function ReviewPage() {
-  const due = await getTopicChecksDue()
+  const { first: card, count } = await getDueQueue()
 
-  if (due.length === 0) {
+  if (!card) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 p-4 sm:p-6">
         <Card className="w-full text-center">
@@ -35,21 +36,17 @@ export default async function ReviewPage() {
     )
   }
 
-  const card = due[0]
   const now = new Date()
   const intervals = previewIntervals(card, now)
-  const previews: Record<number, string> = {
-    1: formatInterval(now, intervals[1]),
-    2: formatInterval(now, intervals[2]),
-    3: formatInterval(now, intervals[3]),
-    4: formatInterval(now, intervals[4]),
-  }
+  const previews: Record<number, string> = Object.fromEntries(
+    Object.entries(intervals).map(([grade, due]) => [grade, formatInterval(now, due)]),
+  )
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Review</h1>
-        <p className="text-muted-foreground text-sm">{due.length} due</p>
+        <p className="text-muted-foreground text-sm">{count} due</p>
       </header>
 
       <Card>

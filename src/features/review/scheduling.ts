@@ -1,15 +1,12 @@
-import { type Card, fsrs, type Grade, Rating, type State } from 'ts-fsrs'
+import { type Card, fsrs, type Grade, type State } from 'ts-fsrs'
 
+import { GRADES } from '@/features/review/grades'
 import type { TopicCheckT } from '@/features/topic-checks/types'
 
 // Single home for all ts-fsrs interaction: the algorithm choice is swappable here and the
 // row<->Card serialization seam (Postgres ISO strings <-> Date) lives in one place, unit-tested.
 // A single shared scheduler instance (default FSRS parameters) avoids re-init per call.
 const scheduler = fsrs()
-
-// The four user-facing grades in ascending order. Rating also has Manual(0), which we never
-// use; these map 1:1 to the rating buttons and the review_events 1..4 check.
-export const GRADES = [Rating.Again, Rating.Hard, Rating.Good, Rating.Easy] as const
 
 // The shape record_review's `p_card` jsonb expects: Dates emitted as ISO strings.
 export type SerializedCardT = {
@@ -27,7 +24,7 @@ export type SerializedCardT = {
 
 // Build a ts-fsrs Card from a topic_checks row. Postgres returns timestamps as ISO strings;
 // ts-fsrs wants Dates — convert on this edge (and back in serializeCard).
-export function toCard(row: TopicCheckT): Card {
+function toCard(row: TopicCheckT): Card {
   return {
     due: new Date(row.due_at),
     stability: row.stability,
@@ -47,12 +44,7 @@ export function toCard(row: TopicCheckT): Card {
 // types out of consumers (the page/island index with plain 1..4).
 export function previewIntervals(row: TopicCheckT, now: Date): Record<number, Date> {
   const preview = scheduler.repeat(toCard(row), now)
-  return {
-    [Rating.Again]: preview[Rating.Again].card.due,
-    [Rating.Hard]: preview[Rating.Hard].card.due,
-    [Rating.Good]: preview[Rating.Good].card.due,
-    [Rating.Easy]: preview[Rating.Easy].card.due,
-  }
+  return Object.fromEntries(GRADES.map(({ grade }) => [grade, preview[grade as Grade].card.due]))
 }
 
 // Apply the chosen grade -> the next Card state to persist. `rating` is the validated 1..4
