@@ -1,7 +1,7 @@
-// Languages offered by the note editor's "insert code block" picker. `value` is the Shiki
-// language id written into the ```fence (so the saved detail view highlights it); `label` is
-// the human name shown in the combobox. Curated, not exhaustive — Shiki supports far more.
-// Ordered alphabetically by label (the combobox preserves source order).
+// Languages offered by the markdown "insert code block" picker. `value` is the Shiki language
+// id written into the ```fence (so the saved detail view highlights it); `label` is the human
+// name shown in the combobox. Curated, not exhaustive — Shiki supports far more. Ordered
+// alphabetically by label (the combobox preserves source order).
 export const CODE_LANGUAGES = [
   { value: 'bash', label: 'Bash' },
   { value: 'c', label: 'C' },

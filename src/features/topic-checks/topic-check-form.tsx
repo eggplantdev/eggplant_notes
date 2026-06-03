@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
@@ -80,7 +81,10 @@ export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
       <form.Field name="code_context">
         {(field) => (
           <div className="flex flex-col gap-2">
-            <Label>Code context (optional)</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label>Code context (optional)</Label>
+              <CodeBlockInserter value={field.state.value} onChange={field.handleChange} />
+            </div>
             <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
             {field.state.value.trim().length > 0 && (
               <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">

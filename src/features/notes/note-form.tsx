@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
@@ -10,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CODE_LANGUAGES } from '@/features/notes/constants'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
 import { promptSchema } from '@/features/topic-checks/schemas'
@@ -22,16 +22,6 @@ import type { ActionResultT } from '@/types/action'
 // "None" sentinel for the subject Combobox: an unassigned note maps to this constant for the
 // picker and back to null on the way out (the Combobox needs a concrete option value).
 const NO_SUBJECT = 'none'
-
-// Appends an empty fenced code block in `lang` to the markdown body, normalizing the gap so
-// the fence always opens on its own blank line. Pure — the result is fed to the content field.
-function appendCodeBlock(content: string, lang: string) {
-  const block = '```' + lang + '\n\n```\n'
-  if (!content) return block
-  // Strip trailing newlines then re-add exactly one blank line, so the fence always opens on
-  // its own blank line regardless of how the body currently ends.
-  return content.replace(/\n+$/, '') + '\n\n' + block
-}
 
 // A topic check staged client-side before the note exists (S-07). Shape is derived from
 // topicCheckInputSchema's input type (StagedCheckInputT) so it can't drift; blanks are coerced
@@ -131,16 +121,7 @@ export function NoteForm(props: NoteFormPropsT) {
         {(field) => (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              {/* Action-style picker: no bound value, so selecting a language re-fires each
-                  time and appends another block to the body — never persisted on the note. */}
-              <Combobox
-                options={CODE_LANGUAGES}
-                onChange={(lang) => field.handleChange(appendCodeBlock(field.state.value, lang))}
-                placeholder="Insert code block…"
-                searchPlaceholder="Search language…"
-                emptyMessage="No language found."
-                className="w-48"
-              />
+              <CodeBlockInserter value={field.state.value} onChange={field.handleChange} />
               <div className="ml-auto flex gap-2 md:hidden" role="tablist">
                 <Button
                   type="button"
@@ -244,7 +225,13 @@ export function NoteForm(props: NoteFormPropsT) {
                   <form.Field name={`checks[${i}].code_context`}>
                     {(field) => (
                       <div className="flex flex-col gap-2">
-                        <Label>Code context (optional)</Label>
+                        <div className="flex items-center justify-between gap-2">
+                          <Label>Code context (optional)</Label>
+                          <CodeBlockInserter
+                            value={field.state.value}
+                            onChange={field.handleChange}
+                          />
+                        </div>
                         <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
                         {field.state.value.trim().length > 0 && (
                           <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">
