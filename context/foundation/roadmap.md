@@ -33,7 +33,7 @@ A personal spaced-repetition tool for developers: write markdown notes with synt
 | F-02 | persistence-and-isolation    | (foundation) core tables + RLS isolation scoped by `auth.uid()`                | —             | NFR (isolation), Access Control             | done     |
 | S-01 | capture-note-with-code       | create, view, edit, delete, and list notes with highlighted code               | F-01, F-02    | FR-007–011, US-01, NFR (code)               | done     |
 | S-02 | attach-topic-checks          | attach, edit, delete, and list topic checks on a note                          | S-01          | FR-012–015, US-01                           | done     |
-| S-03 | close-recall-loop            | review a due topic check, self-rate, and see it reschedule                     | S-02, F-02    | FR-016–019, US-01, Bus. Logic               | proposed |
+| S-03 | close-recall-loop            | review a due topic check, self-rate, and see it reschedule                     | S-02, F-02    | FR-016–019, US-01, Bus. Logic               | planned  |
 | S-04 | activity-dashboard           | see due-today count, current streak, and a review heatmap                      | S-03          | FR-020–022                                  | proposed |
 | S-05 | delete-account-and-data      | delete their account and all owned data from settings                          | F-01, F-02    | FR-006, Access Control                      | done     |
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document        | S-01          | (post-PRD; dogfooding feedback)             | proposed |
@@ -127,9 +127,9 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Recall-scheduling algorithm choice — ts-fsrs (FSRS, Anki default) vs SM-2 (`tech-stack.md` defers this to "when the review-loop slice is started"). Owner: `/10x-plan`. Block: no (FR-018 resolution: established implementations integrate trivially; ts-fsrs is the defensible default).
+  - ~~Recall-scheduling algorithm choice — ts-fsrs vs SM-2.~~ **Resolved (2026-06-03, `/10x-plan`): ts-fsrs (FSRS)** chosen. The migration drops the SM-2 columns (`ease_factor`/`interval_days`/`repetitions`), adds FSRS state (`stability`/`difficulty`/`elapsed_days`/`scheduled_days`/`learning_steps`/`reps`/`lapses`/`state`/`last_review`; reuses `due_at`), and changes `review_events.rating` 0–5 → 1–4. Plan: `context/changes/close-recall-loop/`.
 - **Risk:** This slice IS the product hypothesis — the adaptive rule that distinguishes the app from a tagged-notes list. Sequenced as early as its prerequisites (a note with a due topic check) allow. If the loop doesn't feel right, the rest is gymnastics around something that didn't work.
-- **Status:** proposed
+- **Status:** planned (`/10x-plan` done 2026-06-03 → `context/changes/close-recall-loop/`)
 
 ### S-04: activity dashboard
 
@@ -190,21 +190,21 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                    | Suggested issue title                             | Ready for `/10x-plan` | Notes                                                                                                                          |
-| ---------- | ---------------------------- | ------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| F-01       | minimal-auth-and-session     | Minimal email/password auth + gated routes        | done                  | Shipped + archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`                                         |
-| F-02       | persistence-and-isolation    | Core schema + RLS per-user isolation              | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`                                        |
-| S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                           |
-| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Shipped + reviewed + archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                   |
-| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | no                    | After S-02; pick SRS lib at plan                                                                                               |
-| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | After S-03                                                                                                                     |
-| S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                          |
-| S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | no                    | After S-03. Post-PRD scope add; shape with `/10x-shape` (model change: new `subjects` table + `notes.subject_id` + `position`) |
-| S-07       | create-note-with-checks      | Attach topic checks inline during note creation   | no                    | After S-03. UX polish, no schema change. Trap: `note_id` FK forces two ordered writes — decide atomicity at `/10x-plan`        |
+| Roadmap ID | Change ID                    | Suggested issue title                             | Ready for `/10x-plan` | Notes                                                                                                                                 |
+| ---------- | ---------------------------- | ------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| F-01       | minimal-auth-and-session     | Minimal email/password auth + gated routes        | done                  | Shipped + archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`                                                |
+| F-02       | persistence-and-isolation    | Core schema + RLS per-user isolation              | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`                                               |
+| S-01       | capture-note-with-code       | Note CRUD with code-block syntax highlighting     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-capture-note-with-code/`                                                  |
+| S-02       | attach-topic-checks          | Topic-check CRUD on a note                        | done                  | Shipped + reviewed + archived 2026-06-03 → `context/archive/2026-06-03-attach-topic-checks/`                                          |
+| S-03       | close-recall-loop            | Review loop: due → rate → reschedule (north star) | planned               | Planned 2026-06-03 → `context/changes/close-recall-loop/`. SRS lib resolved: **ts-fsrs**. Next: `/10x-plan-review` → `/10x-implement` |
+| S-04       | activity-dashboard           | Dashboard: due count, streak, heatmap             | no                    | After S-03                                                                                                                            |
+| S-05       | delete-account-and-data      | Account deletion with full owned-data removal     | done                  | Shipped + archived 2026-06-03 → `context/archive/2026-06-03-delete-account-and-data/`                                                 |
+| S-06       | organize-notes-into-subjects | Group notes under an ordered, readable Subject    | no                    | After S-03. Post-PRD scope add; shape with `/10x-shape` (model change: new `subjects` table + `notes.subject_id` + `position`)        |
+| S-07       | create-note-with-checks      | Attach topic checks inline during note creation   | no                    | After S-03. UX polish, no schema change. Trap: `note_id` FK forces two ordered writes — decide atomicity at `/10x-plan`               |
 
 ## Open Roadmap Questions
 
-- The recall-scheduling library (ts-fsrs vs SM-2) — a per-slice unknown tracked inside S-03 (non-blocking; resolved at `/10x-plan` time).
+- ~~The recall-scheduling library (ts-fsrs vs SM-2) — a per-slice unknown tracked inside S-03.~~ **Resolved 2026-06-03 at `/10x-plan`: ts-fsrs (FSRS).** Note: this reverses the F-02 "`review_events.rating` locked to SM-2 0–5" decision (S-03 migrates it to FSRS 1–4).
 - **S-06 sits outside PRD v1.** It was added from dogfooding feedback after the PRD's `## Open Questions` was closed. Decision pending: amend PRD to v1.1 with the Subjects model, or keep it roadmap-only until it proves out. Does not block S-01→S-04.
 
 ## Parked
