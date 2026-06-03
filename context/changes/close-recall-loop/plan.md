@@ -508,12 +508,12 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly (`supabase db reset`)
-- [ ] 1.2 `record_review` exists and is SECURITY INVOKER (verify via `pg_proc`)
-- [ ] 1.3 `topic_checks` has FSRS columns, lacks SM-2 columns (verify via `pg_attribute`)
-- [ ] 1.4 `review_events` rating check is `1..4` (verify via `pg_constraint`)
-- [ ] 1.5 Typegen regenerated; `pnpm typecheck`/`pnpm build` pass
-- [ ] 1.6 `pnpm lint` passes
+- [x] 1.1 Migration applies cleanly (`supabase db reset`)
+- [x] 1.2 `record_review` exists and is SECURITY INVOKER (verify via `pg_proc`)
+- [x] 1.3 `topic_checks` has FSRS columns, lacks SM-2 columns (verify via `pg_attribute`)
+- [x] 1.4 `review_events` rating check is `1..4` (verify via `pg_constraint`)
+- [x] 1.5 Typegen regenerated; `pnpm typecheck`/`pnpm build` pass
+- [x] 1.6 `pnpm lint` passes
 
 #### Manual
 

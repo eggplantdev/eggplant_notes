@@ -91,42 +91,60 @@ export type Database = {
         Row: {
           code_context: string | null
           created_at: string
+          difficulty: number
           due_at: string
-          ease_factor: number
+          elapsed_days: number
           example: string | null
           id: string
-          interval_days: number
+          lapses: number
+          last_review: string | null
+          learning_steps: number
           note_id: string
           prompt: string
-          repetitions: number
+          reps: number
+          scheduled_days: number
+          stability: number
+          state: number
           updated_at: string
           user_id: string
         }
         Insert: {
           code_context?: string | null
           created_at?: string
+          difficulty?: number
           due_at?: string
-          ease_factor?: number
+          elapsed_days?: number
           example?: string | null
           id?: string
-          interval_days?: number
+          lapses?: number
+          last_review?: string | null
+          learning_steps?: number
           note_id: string
           prompt: string
-          repetitions?: number
+          reps?: number
+          scheduled_days?: number
+          stability?: number
+          state?: number
           updated_at?: string
           user_id?: string
         }
         Update: {
           code_context?: string | null
           created_at?: string
+          difficulty?: number
           due_at?: string
-          ease_factor?: number
+          elapsed_days?: number
           example?: string | null
           id?: string
-          interval_days?: number
+          lapses?: number
+          last_review?: string | null
+          learning_steps?: number
           note_id?: string
           prompt?: string
-          repetitions?: number
+          reps?: number
+          scheduled_days?: number
+          stability?: number
+          state?: number
           updated_at?: string
           user_id?: string
         }
@@ -146,6 +164,10 @@ export type Database = {
     }
     Functions: {
       delete_account: { Args: never; Returns: undefined }
+      record_review: {
+        Args: { p_card: Json; p_rating: number; p_topic_check_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
