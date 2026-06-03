@@ -6,20 +6,15 @@ import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { getDashboardData } from '@/features/dashboard/data'
 import { StatCard } from '@/features/dashboard/stat-card'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/server'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
 // S-04 activity dashboard, wired to real per-user data by S-03 (features/dashboard/data.ts).
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  // Independent reads — auth check and dashboard data don't depend on each other. Runs them
-  // in parallel so this stays one round-trip once real Supabase queries replace the dummy seam.
-  const [
-    {
-      data: { user },
-    },
-    data,
-  ] = await Promise.all([supabase.auth.getUser(), getDashboardData()])
+  // getCurrentUser() is request-memoized (React cache()), so this reuses the user the
+  // (protected) layout already validated — no second round-trip to Supabase Auth. The data
+  // read is independent, so the two run in parallel.
+  const [user, data] = await Promise.all([getCurrentUser(), getDashboardData()])
   const columns = buildHeatmapMatrix(data.activity, {
     today: todayInZone(APP_TIME_ZONE),
     weeks: 53,
