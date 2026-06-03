@@ -246,14 +246,14 @@ A Playwright spec proving the PRD's #1 guardrail: no user reads another's rows. 
 
 #### Automated
 
-- [ ] 1.1 `supabase db reset` applies the migration with no errors
-- [ ] 1.2 RLS enabled on all three tables, four policies each (Studio/psql)
-- [ ] 1.3 `pnpm typecheck` passes
+- [x] 1.1 `supabase db reset` applies the migration with no errors
+- [x] 1.2 RLS enabled on all three tables, four policies each (Studio/psql)
+- [x] 1.3 `pnpm typecheck` passes
 
 #### Manual
 
-- [ ] 1.4 FK cascade chain + scheduling-column defaults confirmed in Studio
-- [ ] 1.5 Policies use `(select auth.uid())`, not bare `auth.uid()`
+- [x] 1.4 FK cascade chain + scheduling-column defaults confirmed in Studio
+- [x] 1.5 Policies use `(select auth.uid())`, not bare `auth.uid()`
 
 ### Phase 2: Typegen + typed clients
 

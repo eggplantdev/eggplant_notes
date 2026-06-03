@@ -1,7 +1,7 @@
 ---
 change_id: persistence-and-isolation
 title: Persistence and per-user isolation for notes, topic checks, and review events
-status: plan_reviewed
+status: implementing
 created: 2026-06-02
 updated: 2026-06-03
 archived_at: null
