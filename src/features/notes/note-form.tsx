@@ -1,20 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
 import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CODE_LANGUAGES } from '@/features/notes/constants'
 import { titleSchema } from '@/features/notes/schemas'
 import type { NoteInputT } from '@/features/notes/schemas'
 import type { NoteT } from '@/types/note'
@@ -22,9 +17,19 @@ import type { SubjectT } from '@/types/subject'
 import { cn } from '@/lib/utils'
 import type { ActionResultT } from '@/types/action'
 
-// "None" sentinel: Radix Select forbids an empty-string item value, so unassigned maps to
-// this constant and back to null on the way out.
+// "None" sentinel for the subject Combobox: an unassigned note maps to this constant for the
+// picker and back to null on the way out (the Combobox needs a concrete option value).
 const NO_SUBJECT = 'none'
+
+// Appends an empty fenced code block in `lang` to the markdown body, normalizing the gap so
+// the fence always opens on its own blank line. Pure — the result is fed to the content field.
+function appendCodeBlock(content: string, lang: string) {
+  const block = '```' + lang + '\n\n```\n'
+  if (!content) return block
+  // Strip trailing newlines then re-add exactly one blank line, so the fence always opens on
+  // its own blank line regardless of how the body currently ends.
+  return content.replace(/\n+$/, '') + '\n\n' + block
+}
 
 // `note` present → edit (action needs the id); absent → create. The union lets TS narrow
 // the action signature off `note`'s truthiness. `subjects` feeds the assignment picker.
@@ -51,6 +56,16 @@ export function NoteForm(props: NoteFormPropsT) {
   const { note } = props
   const [formError, setFormError] = useState<string | undefined>(undefined)
   const [mobileTab, setMobileTab] = useState<MobileTabT>('write')
+
+  // "None" + the user's subjects, shaped for the Combobox. Memoized so the form's frequent
+  // re-renders (typing, tab toggles) don't re-allocate the list.
+  const subjectOptions = useMemo(
+    () => [
+      { value: NO_SUBJECT, label: 'None' },
+      ...props.subjects.map((subject) => ({ value: subject.id, label: subject.title })),
+    ],
+    [props.subjects],
+  )
 
   const form = useAppForm({
     defaultValues: {
@@ -83,22 +98,15 @@ export function NoteForm(props: NoteFormPropsT) {
         {(field) => (
           <div className="grid gap-2">
             <Label htmlFor={field.name}>Subject</Label>
-            <Select
+            <Combobox
+              id={field.name}
               value={field.state.value ?? NO_SUBJECT}
-              onValueChange={(v) => field.handleChange(v === NO_SUBJECT ? null : v)}
-            >
-              <SelectTrigger id={field.name} className="w-full sm:w-72">
-                <SelectValue placeholder="None" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NO_SUBJECT}>None</SelectItem>
-                {props.subjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(v) => field.handleChange(v === NO_SUBJECT ? null : v)}
+              options={subjectOptions}
+              searchPlaceholder="Search subject…"
+              emptyMessage="No subject found."
+              className="w-full sm:w-72"
+            />
           </div>
         )}
       </form.Field>
@@ -106,23 +114,35 @@ export function NoteForm(props: NoteFormPropsT) {
       <form.Field name="content">
         {(field) => (
           <div className="flex flex-col gap-2">
-            <div className="flex gap-2 md:hidden" role="tablist">
-              <Button
-                type="button"
-                size="sm"
-                variant={mobileTab === 'write' ? 'default' : 'outline'}
-                onClick={() => setMobileTab('write')}
-              >
-                Write
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={mobileTab === 'preview' ? 'default' : 'outline'}
-                onClick={() => setMobileTab('preview')}
-              >
-                Preview
-              </Button>
+            <div className="flex items-center gap-2">
+              {/* Action-style picker: no bound value, so selecting a language re-fires each
+                  time and appends another block to the body — never persisted on the note. */}
+              <Combobox
+                options={CODE_LANGUAGES}
+                onChange={(lang) => field.handleChange(appendCodeBlock(field.state.value, lang))}
+                placeholder="Insert code block…"
+                searchPlaceholder="Search language…"
+                emptyMessage="No language found."
+                className="w-48"
+              />
+              <div className="ml-auto flex gap-2 md:hidden" role="tablist">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={mobileTab === 'write' ? 'default' : 'outline'}
+                  onClick={() => setMobileTab('write')}
+                >
+                  Write
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={mobileTab === 'preview' ? 'default' : 'outline'}
+                  onClick={() => setMobileTab('preview')}
+                >
+                  Preview
+                </Button>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
