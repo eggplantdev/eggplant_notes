@@ -99,6 +99,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Editor/render libraries (CodeMirror 6 + react-markdown/rehype-highlight) are named in `tech-stack.md` but unwired — Owner: `/10x-plan`. Block: no.
 - **Risk:** A note that renders code as plain text fails the product premise (NFR). The content-creation layer the entire recall loop sits on; if note CRUD + highlighting isn't solid, nothing downstream is verifiable.
+- **Follow-ups (deferred):** list-query pagination + stop over-fetching `content` (impl-review F1) — `getNotes()` is currently unbounded; fold proper `.range()` pagination into a later stage. See `context/changes/capture-note-with-code/follow-ups/review-fixes.md`.
 - **Status:** proposed
 
 ### S-02: attach topic checks

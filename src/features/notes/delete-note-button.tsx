@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
 import { FormError } from '@/components/forms/form-components/form-error'
+import { Button } from '@/components/ui/button'
 import { deleteNote } from '@/features/notes/actions/delete-note'
 
 type DeleteNoteButtonPropsT = { id: string }

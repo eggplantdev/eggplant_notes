@@ -73,3 +73,31 @@ test('full CRUD: create a note with code, see it highlighted, edit, delete', asy
   await expect(page).toHaveURL('/notes', { timeout: 15_000 })
   await expect(page.getByText(editedTitle)).toHaveCount(0)
 })
+
+// Guards the load-bearing safety property of render-markdown.tsx: react-markdown runs
+// WITHOUT rehype-raw, so raw HTML in a note body is escaped to inert text, never executed.
+// If anyone adds rehype-raw for "richer notes" later, this turns red instead of silently
+// shipping stored XSS.
+test('note body raw HTML is rendered inert, not executed (no stored XSS)', async ({ page }) => {
+  await signUp(page, uniqueEmail())
+  await page.goto('/notes/new')
+  await page.getByLabel('Title').fill(`XSS guard ${Date.now()}`)
+  await fillEditor(
+    page,
+    '<script>window.__xssRan = true</script>\n\n<img src=x onerror="window.__xssImg = true">',
+  )
+  await page.getByRole('button', { name: 'Create note' }).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
+
+  // No live <script>/<img> injected into the rendered body, and neither handler ran.
+  await expect(page.locator('.prose script')).toHaveCount(0)
+  await expect(page.locator('.prose img')).toHaveCount(0)
+  expect(
+    await page.evaluate(() => (window as unknown as { __xssRan?: boolean }).__xssRan),
+  ).toBeFalsy()
+  expect(
+    await page.evaluate(() => (window as unknown as { __xssImg?: boolean }).__xssImg),
+  ).toBeFalsy()
+  // The markup survives as visible, escaped text.
+  await expect(page.getByText('window.__xssRan = true')).toBeVisible()
+})
