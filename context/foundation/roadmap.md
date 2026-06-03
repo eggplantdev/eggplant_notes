@@ -40,7 +40,7 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-10 | app-navigation               | move between product routes via a persistent top-bar / mobile sheet                 | F-01             | US-01 (navigability)                       | v1-usable   | done     |
 | S-06 | organize-notes-into-subjects | group notes under a subject, order them, read a subject as one document             | S-01             | US-01, Scope:[new] subjects                | v1-usable   | done     |
 | S-08 | card-to-note-navigation      | jump from a recall card to its source note                                          | S-02             | US-01, Scope:[new] card→note               | v1-usable   | done     |
-| S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)                   | S-01, S-02       | Scope:[new] inline cards (FR-008)          | fast-follow | proposed |
+| S-07 | create-note-with-checks      | add topic checks inline while creating a note (no redirect first)                   | S-01, S-02       | Scope:[new] inline cards (FR-008)          | fast-follow | done     |
 | S-09 | authoring-refinements        | defer title-validation errors; select a code language when creating                 | S-01             | Scope (FR-009, FR-010)                     | fast-follow | done\*   |
 | S-11 | data-fetching-efficiency     | navigate between routes without refetching unchanged data; lists stop over-fetching | S-01, S-02, S-06 | NFR (responsiveness); S-01/S-02 follow-ups | v2          | proposed |
 
@@ -66,7 +66,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **Frontend:** present — Next.js 16 + React 19 + Tailwind v4 + shadcn + **framer-motion** (`d6ef642`); product UI shipped (notes list/detail/forms, settings, auth pages, dashboard shell) behind a persistent app-nav shell (S-10). An off-roadmap page-shell + motion consistency pass is in progress — spec at `docs/superpowers/specs/2026-06-03-page-shell-and-motion-design.md` (declared not a `/10x` change).
 - **Backend / API:** present — Server Actions per feature (`src/features/*/actions`), route handlers under `src/app/api` (auth confirm), injectable table-query helpers (`src/lib/supabase/run-table-query.ts`).
-- **Data:** present — 5 migrations: `notes`/`topic_checks`/`review_events` + RLS, account-delete RPC, topic-check content columns, FSRS review-loop migration, subjects + note-ordering (S-06: `subjects` table + `notes.subject_id`/`position` + F1 subject-ownership RLS). Typed `Database` clients.
+- **Data:** present — 6 migrations: `notes`/`topic_checks`/`review_events` + RLS, account-delete RPC, topic-check content columns, FSRS review-loop migration, subjects + note-ordering (S-06: `subjects` table + `notes.subject_id`/`position` + F1 subject-ownership RLS), `create_note_with_checks` RPC (S-07: atomic note+checks write, `SECURITY INVOKER`). Typed `Database` clients.
 - **Auth:** present — email/password via Supabase Auth, `proxy.ts` gating, `(protected)` layout (F-01, archived).
 - **Deploy / infra:** present — Vercel, git-connected, prod region `fra1`; local Supabase stack for dev.
 - **Observability:** absent — no logging/error-tracking library wired. Not gating any v1-usable slice; left out deliberately.
@@ -219,7 +219,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
     → note with no checks. Best-effort sequential vs all-or-nothing RPC. Owner: `/10x-plan`. Block: no.
   - **PRG interaction** — preserve Post/Redirect/Get (no duplicate-submit on refresh).
 - **Risk:** Low — additive UX, no schema change. Fast-follow: it makes daily authoring smoother but isn't required to cross the adoption line.
-- **Status:** proposed
+- **Status:** done (archived 2026-06-03 → `context/archive/2026-06-03-create-note-with-checks/`)
 
 ### S-09: authoring refinements
 
@@ -307,5 +307,6 @@ Carried from v1 (out-of-MVP):
 - **S-03: the dashboard surfaces topic checks due for review; the user reviews one, self-rates Again/Hard/Good/Easy, the system reschedules its next due date via FSRS, records a review event, and shows when it is next due.** — Archived 2026-06-03 → `context/archive/2026-06-03-close-recall-loop/`. Lesson: promote shared tier on the 2nd consumer (cross-feature import); keep ts-fsrs out of the client bundle.
 - **S-04: user can see how many topic checks are due today, their current streak (consecutive days with ≥1 review), and a calendar heatmap of review activity over the last 30–90 days.** — Archived 2026-06-03 → `context/archive/2026-06-03-activity-dashboard/`. Lesson: E2E must build a fresh isolated server — `reuseExistingServer:true` silently hijacks a running `next dev`.
 - **S-10: user can move between the six product routes via a persistent top-bar nav (mobile: floating hamburger + sheet), with active-route highlighting and sign-out in the shell.** — Archived 2026-06-03 → `context/archive/2026-06-03-app-navigation/`. Off-plan gap-fill (six routes had only ad-hoc per-page links). Lesson: —.
+- **S-07: when creating a note, the user can attach one or more topic checks in the same flow and save them together.** — Archived 2026-06-03 → `context/archive/2026-06-03-create-note-with-checks/`. Atomic `create_note_with_checks` RPC (SECURITY INVOKER, one transaction). Lesson: —.
 - **S-06: create a subject, assign notes to it, drag-reorder them, and read the subject as one continuous document — each note still individually editable; subject-delete detaches notes (set-null).** — Archived 2026-06-03 → `context/archive/2026-06-03-organize-notes-into-subjects/`. Fractional `position` + `@dnd-kit`; DB-level subject-ownership RLS (F1). Lesson: dnd-kit `useSortable` spreads `role="button"` onto the element — `getByRole('listitem')` won't match it in E2E.
 - **S-08: from a recall card — in the due-review loop and in any card list — the user can open the card's source note in one action.** — Archived 2026-06-03 → `context/archive/2026-06-03-card-to-note-navigation/`. UI only, no schema: `getDueQueue` embeds `notes(title)`; muted "From: ‹title›" link on `/review` → `/notes/[id]`. Lesson: —.

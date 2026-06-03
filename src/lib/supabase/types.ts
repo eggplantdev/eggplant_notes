@@ -204,6 +204,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_note_with_checks: {
+        Args: { p_checks: Json; p_note: Json }
+        Returns: string
+      }
       delete_account: { Args: never; Returns: undefined }
       record_review: {
         Args: { p_card: Json; p_rating: number; p_topic_check_id: string }
