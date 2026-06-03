@@ -116,14 +116,14 @@ None — no schema change.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Unit tests pass: `pnpm test`
-- [x] 1.4 E2E passes: `pnpm test:e2e` (S-08 spec green in isolation; full suite blocked by env worker-teardown flake, not this slice)
-- [x] 1.5 Production build succeeds: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 464d711
+- [x] 1.2 Linting passes: `pnpm lint` — 464d711
+- [x] 1.3 Unit tests pass: `pnpm test` — 464d711
+- [x] 1.4 E2E passes: `pnpm test:e2e` (S-08 spec green in isolation; full suite blocked by env worker-teardown flake, not this slice) — 464d711
+- [x] 1.5 Production build succeeds: `pnpm build` — 464d711
 
 #### Manual
 
-- [x] 1.6 Due card shows "From: ‹title›" link that navigates to the source note (proven by `e2e/card-to-note.spec.ts`)
-- [x] 1.7 "All caught up" empty state unchanged (verified by inspection — the `!card` branch is untouched by this slice's diff)
+- [x] 1.6 Due card shows "From: ‹title›" link that navigates to the source note (proven by `e2e/card-to-note.spec.ts`) — 464d711
+- [x] 1.7 "All caught up" empty state unchanged (verified by inspection — the `!card` branch is untouched by this slice's diff) — 464d711
 - [ ] 1.8 Usable at ~360px (link doesn't overflow) — not formally verified; `text-sm` link in a flex-col CardHeader, low overflow risk
