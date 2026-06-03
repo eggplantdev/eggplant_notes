@@ -68,8 +68,10 @@ test('subject lifecycle: create, rename, assign + read as document, reorder, del
   expect(await page.locator('pre.shiki span[style*="--shiki"]').count()).toBeGreaterThan(2)
 
   // Drag note A's ToC row below note B, then reload and confirm the new order persisted.
-  const rowA = page.getByRole('listitem').filter({ hasText: titleA })
-  const rowB = page.getByRole('listitem').filter({ hasText: titleB })
+  // The ToC rows are <li>, but dnd-kit's useSortable spreads role="button" onto them, so
+  // locate by tag (CSS), not getByRole('listitem'). Only the ToC uses <li> on this page.
+  const rowA = page.locator('li').filter({ hasText: titleA })
+  const rowB = page.locator('li').filter({ hasText: titleB })
   const a = await rowA.boundingBox()
   const b = await rowB.boundingBox()
   if (!a || !b) throw new Error('reorder rows not found')
