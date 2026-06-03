@@ -31,7 +31,7 @@ export default async function ReviewPage() {
     <PageShell
       title="Review"
       width="prose"
-      actions={<p className="text-muted-foreground text-sm">{count} due</p>}
+      actions={count > 0 ? <p className="text-muted-foreground text-sm">{count} due</p> : undefined}
     >
       {!card ? (
         <Card className="text-center">
