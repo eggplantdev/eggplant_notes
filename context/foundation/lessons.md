@@ -23,3 +23,10 @@
 - **Rule**: Build the per-account client with `createClient(url, anonKey)` + `signInWithPassword(email, password)` using the test's own known credentials — it returns the `access_token` directly, no cookie extraction. Make the URL + anon key reachable to the spec by loading `.env.local` in `playwright.config.ts` (add `dotenv`, or inline the deterministic local anon key). Drive sign-up through the real UI for the auth-path coverage, but do **data ops** through the programmatic client.
 - **Corollary**: Repo read helpers call `createClient()` (server, `next/headers` cookies) which throws outside a request — so any helper a test must call has to accept an **injectable** `SupabaseClient` (defaulting to `createClient()` in app code).
 - **Applies to**: /10x-plan, /10x-implement, any Playwright E2E needing authenticated API access
+
+## Verify Postgres constraints/schema via pg_catalog, not information_schema
+
+- **Context**: Any time you probe Postgres schema during implement/review/research — confirming a FK's `ON DELETE` action, checking RLS policies, grants, or column definitions (e.g. proving `auth.sessions → auth.users` cascades before relying on it).
+- **Problem**: `information_schema`'s multi-view FK joins give false negatives for cross-schema FKs and only surface objects the current role has column privileges on. A constraint query returned **0 rows** for the real `auth.sessions → auth.users ON DELETE CASCADE` that `pg_constraint` then confirmed — trusting it would have manufactured false certainty ("no cascade exists") and could have reverted a correct decision.
+- **Rule**: When verifying constraints/FKs/schema, query the `pg_*` catalog (`pg_constraint`, `pg_class`, `pg_policy`, `pg_proc`) as the authoritative source — not `information_schema`. Treat an `information_schema` "absence" as unproven, not confirmed. (Same family as the verify-against-reality / pick-the-authoritative-probe rule.)
+- **Applies to**: /10x-implement, /10x-impl-review, /10x-research, /10x-plan-review
