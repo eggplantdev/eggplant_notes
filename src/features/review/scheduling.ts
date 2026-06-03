@@ -1,5 +1,8 @@
 import { type Card, fsrs, type Grade, Rating, type State } from 'ts-fsrs'
 
+// Keyed by the four grade numbers (1=Again .. 4=Easy). `number` rather than the Rating enum
+// keeps ts-fsrs types out of consumers (the page/island index with plain 1..4).
+
 import type { TopicCheckT } from '@/features/topic-checks/types'
 
 // Single home for all ts-fsrs interaction: the algorithm choice is swappable here and the
@@ -43,7 +46,7 @@ export function toCard(row: TopicCheckT): Card {
 }
 
 // The predicted next due date for each grade, for the Anki-style button previews.
-export function previewIntervals(row: TopicCheckT, now: Date): Record<Grade, Date> {
+export function previewIntervals(row: TopicCheckT, now: Date): Record<number, Date> {
   const preview = scheduler.repeat(toCard(row), now)
   return {
     [Rating.Again]: preview[Rating.Again].card.due,

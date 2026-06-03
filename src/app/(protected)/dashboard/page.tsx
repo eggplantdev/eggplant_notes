@@ -46,7 +46,12 @@ export default async function DashboardPage() {
       </header>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Due today" value={data.dueToday} sub="topic checks ready to review" />
+        <Link
+          href="/review"
+          className="focus-visible:ring-ring rounded-xl transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <StatCard label="Due today" value={data.dueToday} sub="topic checks ready to review" />
+        </Link>
         <StatCard
           label="Current streak"
           value={

@@ -523,16 +523,16 @@ new retries outside the shared `signUp` chokepoint.
 
 #### Automated
 
-- [x] 2.1 Unit test: New card Good → future due/reps++/state advances; Again sooner than Good
-- [x] 2.2 Unit test: `previewIntervals` returns four distinct ordered future dates
-- [x] 2.3 `pnpm test`/`pnpm typecheck`/`pnpm lint` pass
+- [x] 2.1 Unit test: New card Good → future due/reps++/state advances; Again sooner than Good — 7bcbaff
+- [x] 2.2 Unit test: `previewIntervals` returns four distinct ordered future dates — 7bcbaff
+- [x] 2.3 `pnpm test`/`pnpm typecheck`/`pnpm lint` pass — 7bcbaff
 
 ### Phase 3: /review session UI
 
 #### Automated
 
-- [ ] 3.1 `pnpm build` succeeds (route + client/server boundary)
-- [ ] 3.2 `pnpm typecheck`/`pnpm lint` pass
+- [x] 3.1 `pnpm build` succeeds (route + client/server boundary)
+- [x] 3.2 `pnpm typecheck`/`pnpm lint` pass
 
 #### Manual
 
