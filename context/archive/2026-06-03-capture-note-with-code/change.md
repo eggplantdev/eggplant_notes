@@ -1,10 +1,10 @@
 ---
 change_id: capture-note-with-code
 title: Capture a note with code
-status: impl_reviewed
+status: archived
 created: 2026-06-03
 updated: 2026-06-03
-archived_at: null
+archived_at: 2026-06-03T10:27:32Z
 ---
 
 ## Notes
