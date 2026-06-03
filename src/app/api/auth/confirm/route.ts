@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (verified) {
-      redirect(type === 'recovery' ? '/update-password' : '/')
+      redirect(type === 'recovery' ? '/update-password' : '/dashboard')
     }
   }
 
