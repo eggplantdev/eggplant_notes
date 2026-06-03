@@ -284,10 +284,10 @@ A Playwright spec proving the PRD's #1 guardrail: no user reads another's rows. 
 
 #### Automated
 
-- [x] 4.1 `pnpm test:e2e` passes including `isolation.spec.ts`
-- [x] 4.2 Existing `auth.spec.ts` still green
+- [x] 4.1 `pnpm test:e2e` passes including `isolation.spec.ts` — 1598348
+- [x] 4.2 Existing `auth.spec.ts` still green — 1598348
 
 #### Manual
 
-- [x] 4.3 Relaxing a policy makes the test fail (negative control), then reverted
-- [x] 4.4 Server confirmed bound by PID/port before trusting the run
+- [x] 4.3 Relaxing a policy makes the test fail (negative control), then reverted — 1598348
+- [x] 4.4 Server confirmed bound by PID/port before trusting the run — 1598348
