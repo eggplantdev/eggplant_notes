@@ -74,6 +74,13 @@
 - **Rule**: Distinguish highlighted from plain via **`pre.shiki span[style*="--shiki"]`** — `>3` for highlighted, `=== 0` for the fallback. Put the bogus-fence block in its **own note** so the count isn't contaminated by a highlighted block on the same page. Same family as verify-against-reality: render the real output and inspect it before asserting on its shape.
 - **Applies to**: /10x-implement, /10x-impl-review, any E2E asserting Shiki highlight vs plain-text fallback
 
+## A page in edit mode can render >1 CodeMirror — the shared `fillEditor` `.cm-content` locator goes ambiguous
+
+- **Context**: E2E driving an inline-edit page that mounts more than one markdown/CodeMirror editor at once — e.g. S-14's `/notes/[id]?edit=note`, where `NoteForm` (the note body editor) renders **above** `TopicChecksSection`'s always-present add/edit form (its `code_context` editor). The shared `e2e/helpers.ts` `fillEditor` targets a bare `.cm-content`.
+- **Problem**: `fillEditor` was written for the single-editor case (`/notes/new` create: body editor only, since the inline-checks array starts empty). On a page with two editors, `page.locator('.cm-content')` resolves to **2 elements** → Playwright strict-mode violation, `locator.click` throws before any text is typed. The failure looks like a harness bug, but it's a true "which editor?" ambiguity the helper can't resolve.
+- **Rule**: On any multi-editor page, don't call the bare shared `fillEditor` — scope to the intended instance: `page.locator('.cm-content').first()` (DOM order is reliable: the form rendered first in JSX is first), then `click()` + `evaluate(document.execCommand('insertText', …))` inline (same execCommand trick `fillEditor` uses, to dodge CodeMirror's closeBrackets corrupting ` ``` ` fences). Reserve the bare helper for genuinely single-editor pages (create/new). If multi-editor specs proliferate, add a `nth`/scoped variant to the helper rather than copy-pasting.
+- **Applies to**: /10x-implement, /10x-impl-review, any Playwright E2E on a page rendering multiple CodeMirror editors
+
 ## App-layer `z.uuid()` is stricter than Postgres `uuid` — validate DB ids with `z.guid()` (shape), not `z.uuid()` (RFC version/variant)
 
 - **Context**: Validating an id (note / topic-check / subject) that originates in the DB and is echoed back through a Server Action — e.g. `/review`'s rating button sends `card.id` to `rateTopicCheck`, which parsed it with `topicCheckIdSchema = z.uuid()`. Surfaced as a red "Invalid topic check id" under the card, with every rating click reverting and no row written.
