@@ -182,9 +182,9 @@ No schema/data changes. Pure route+UI restructure. Rollback = restore the two de
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build passes: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 17f6ef8
+- [x] 1.2 Linting passes: `pnpm lint` — 17f6ef8
+- [x] 1.3 Production build passes: `pnpm build` — 17f6ef8
 - [ ] 1.4 E2E passes incl. note in-place edit, `?edit=note` no-redirect assertion, + `/notes/[id]/edit` 404/redirect: `pnpm test:e2e`
 
 #### Manual
@@ -198,9 +198,9 @@ No schema/data changes. Pure route+UI restructure. Rollback = restore the two de
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Production build passes: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Production build passes: `pnpm build`
 - [ ] 2.4 E2E passes incl. subject in-place edit + `/subjects/[id]/edit` 404/redirect: `pnpm test:e2e`
 
 #### Manual
