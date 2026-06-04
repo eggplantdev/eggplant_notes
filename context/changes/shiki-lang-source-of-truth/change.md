@@ -1,7 +1,7 @@
 ---
 change_id: shiki-lang-source-of-truth
 title: Single source of truth for code-block + Shiki languages, with lazy loading
-status: new
+status: planned
 created: 2026-06-04
 updated: 2026-06-04
 archived_at: null
