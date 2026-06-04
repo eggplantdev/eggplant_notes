@@ -241,30 +241,30 @@ The core win: the note read view no longer downloads/parses/hydrates CodeMirror.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Build succeeds: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — d5e0ff3
+- [x] 1.2 Linting passes: `pnpm lint` — d5e0ff3
+- [x] 1.3 Build succeeds: `pnpm build` — d5e0ff3
 
 #### Manual
 
-- [x] 1.4 Read view requests no code-mirror chunk; "Add check" loads it and shows the form
-- [x] 1.5 Adding a check succeeds, appears in the list, and the form collapses to the button
-- [x] 1.6 Editing an existing check via `?edit=<checkId>` still opens + saves
-- [x] 1.7 Error on add keeps the form open with inline error + toast
+- [x] 1.4 Read view requests no code-mirror chunk; "Add check" loads it and shows the form — d5e0ff3
+- [x] 1.5 Adding a check succeeds, appears in the list, and the form collapses to the button — d5e0ff3
+- [x] 1.6 Editing an existing check via `?edit=<checkId>` still opens + saves — d5e0ff3
+- [x] 1.7 Error on add keeps the form open with inline error + toast — d5e0ff3
 
 ### Phase 2: Subject select → edit view only
 
 #### Automated
 
-- [ ] 2.1 No dangling references (grep `NoteSubjectPicker`/`assignNoteSubject`/`assign-subject`/`note-subject-picker` returns nothing)
-- [ ] 2.2 Type checking passes: `pnpm typecheck`
-- [ ] 2.3 Linting passes: `pnpm lint`
-- [ ] 2.4 Build succeeds: `pnpm build`
+- [x] 2.1 No dangling references (grep `NoteSubjectPicker`/`assignNoteSubject`/`assign-subject`/`note-subject-picker` returns nothing)
+- [x] 2.2 Type checking passes: `pnpm typecheck`
+- [x] 2.3 Linting passes: `pnpm lint`
+- [x] 2.4 Build succeeds: `pnpm build`
 
 #### Manual
 
-- [ ] 2.5 Detail read view shows no Subject control
-- [ ] 2.6 Edit mode shows the subject Combobox; change + save persists
+- [x] 2.5 Detail read view shows no Subject control
+- [x] 2.6 Edit mode shows the subject Combobox; change + save persists
 
 ### Phase 3: List edit/delete shortcuts
 

@@ -6,7 +6,6 @@ import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
 import { updateNote } from '@/features/notes/actions/update-note'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
-import { NoteSubjectPicker } from '@/features/notes/components/note-subject-picker'
 import { NoteForm } from '@/features/notes/note-form'
 import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
@@ -67,15 +66,9 @@ export default async function NotePage({
       {isEditingNote ? (
         <NoteForm action={updateNote} note={note} subjects={subjects} />
       ) : (
-        <>
-          <NoteSubjectPicker
-            noteId={note.id}
-            currentSubjectId={note.subject_id}
-            subjects={subjects}
-          />
-
-          <RenderMarkdown content={note.content} />
-        </>
+        // Read view: subject is shown/changed only in edit mode (NoteForm's Combobox), so the
+        // read branch is just the rendered body — no inline subject picker.
+        <RenderMarkdown content={note.content} />
       )}
 
       {/* `note` is the body-edit sentinel — never a check id. Forwarding it as editId would
