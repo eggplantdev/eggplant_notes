@@ -37,7 +37,7 @@ const cardsFile =
 
 // Owner + deterministic id prefixes (mirror the conventions already in seed.sql).
 const USER_ID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'; // test@gmail.com
-const SUBJECT_ID = '5b1ec700-0000-0000-0000-000000000001';
+const SUBJECT_ID = '5b1ec700-0000-4000-8000-000000000001';
 const SUBJECT_TITLE = 'Python — Functional Programming';
 const SUBJECT_DESC = 'Functional programming in Python: pure functions, higher-order functions, closures, currying, decorators, recursion. Seeded from real learning notes.';
 
@@ -175,9 +175,13 @@ function dq(str) {
   return `$${tag}$${str}$${tag}$`;
 }
 const pad = (n) => String(n).padStart(12, '0');
-const noteId = (i) => `0a7e0000-0000-0000-0000-${pad(i)}`;
-const cardId = (i) => `c4ec0000-0000-0000-0000-${pad(i)}`;
-const eventId = (i) => `5e1e0000-0000-0000-0000-${pad(i)}`;
+// Deterministic but RFC-4122-VALID v4 ids: version nibble `4` (group 3) + variant
+// nibble `8` (group 4). Postgres `uuid` accepts any hex, but Zod's `z.uuid()` (the
+// id schemas the Server Actions validate against) is strict — version-0/variant-0
+// ids like `…-0000-0000-…` parse as "Invalid id" and silently fail every mutation.
+const noteId = (i) => `0a7e0000-0000-4000-8000-${pad(i)}`;
+const cardId = (i) => `c4ec0000-0000-4000-8000-${pad(i)}`;
+const eventId = (i) => `5e1e0000-0000-4000-8000-${pad(i)}`;
 
 // FSRS profiles cycled across cards so /review (due_at <= now()) and the
 // dashboard both light up: a mix of due-now, overdue, and future cards.
