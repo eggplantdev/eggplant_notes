@@ -79,7 +79,7 @@ function SortableNoteRow({
         <GripVertical className="size-5" />
       </button>
       <Link
-        href={`/subjects/${subjectId}/read/${id}`}
+        href={`/subjects/${subjectId}/${id}`}
         aria-current={isActive ? 'page' : undefined}
         onClick={onNavigate}
         onKeyDown={handleNoteLinkKeyNav}
@@ -153,7 +153,7 @@ export function SubjectNoteSidebar({
   const [sheetOpen, setSheetOpen] = useState(false)
   const { error, run } = useActionTransition()
   const pathname = usePathname()
-  const prefix = `/subjects/${subjectId}/read/`
+  const prefix = `/subjects/${subjectId}/`
   const activeNoteId = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : undefined
 
   async function handleDragEnd(event: DragEndEvent) {

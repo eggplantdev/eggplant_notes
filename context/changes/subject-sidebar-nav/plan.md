@@ -189,29 +189,39 @@ Replace the static sidebar list with a client island whose rows are navigation `
 
 ---
 
-## Phase 3: View-Flip Toggles
+## Phase 3: Swap single-pane in as THE subject view (A/B resolved — single-pane won)
+
+> **As-built deviation (operator decision):** Phase 3 was planned as "view-flip toggles" between the continuous and single-pane views. Mid-implementation the operator resolved the A/B in favor of single-pane and directed a **restructure**: move the docs view up to `/subjects/[id]` and delete the continuous view (and its now-orphaned helpers). The flip-toggle plan is obsolete; this records what was actually built.
 
 ### Overview
 
-Make the two views reachable from each other with one additive link each (the agreed relaxation of the `change.md` "untouched" lock).
+Make the single-pane docs view the canonical subject view by moving the `/read` layout + segment up to `/subjects/[id]`, deleting the continuous page and its orphans, and porting the subject-level actions into the docs layout.
 
 ### Changes Required:
 
-#### 1. Flip link on the continuous view
+#### 1. Move the docs view up a level
 
-**File**: `src/app/(protected)/subjects/[id]/page.tsx`
+**Files**: `src/app/(protected)/subjects/[id]/{layout,page}.tsx` + `[noteId]/{page,template}.tsx`
 
-**Intent**: Add a single "Switch to reading view" link in the continuous view's header. This is the ONLY change to this file (lock relaxation recorded in the brief).
+**Intent**: The docs layout + nested `[noteId]` segment now live directly at `/subjects/[id]` (was `/subjects/[id]/read`). The note pane URL is `/subjects/[id]/[noteId]`.
 
-**Contract**: A `<Link href={`/subjects/${id}/read`}>` placed in the `PageShell` header actions (or near the title). No other markup, data, or behavior change.
+**Contract**: `/read` removed. Index `page.tsx` redirects to the first note (or empty prompt) AND handles `?edit` → `SubjectForm` (layouts can't read searchParams). Layout gains the subject header + actions (below).
 
-#### 2. Reverse flip link on the read view
+#### 2. Port subject-level actions into the docs layout
 
-**File**: `src/app/(protected)/subjects/[id]/read/layout.tsx`
+**File**: `src/app/(protected)/subjects/[id]/layout.tsx`
 
-**Intent**: Symmetric "Switch to continuous view" link.
+**Intent**: The deleted continuous page was the only home for New note / Edit subject / Delete subject — port them so nothing regresses.
 
-**Contract**: A `<Link href={`/subjects/${id}`}>` in the read-view header.
+**Contract**: `PageShell` header `actions`: New note (`/notes/new?subject=`), Edit (`/subjects/[id]?edit`), `DeleteSubjectButton`. Subtitle = subject description.
+
+#### 3. Delete the continuous view + orphans
+
+**Files**: removed `subjects/[id]/page.tsx` (continuous), `features/subjects/reorderable-note-list.tsx`, and `getNotesForSubject` from `queries.ts`.
+
+**Intent**: Deletion-test cleanup — these were only used by the continuous view.
+
+**Contract**: sidebar hrefs/prefix → `/subjects/[id]/[noteId]`; `reorderNote` revalidates `/subjects/[id]` (layout); note-pane delete `redirectTo` → `/subjects/[id]`.
 
 ### Success Criteria:
 
@@ -223,8 +233,7 @@ Make the two views reachable from each other with one additive link each (the ag
 
 #### Manual Verification:
 
-- From `/subjects/[id]` the link opens `/subjects/[id]/read` (lands on first note); from `/read` the reverse link returns to the continuous view.
-- The continuous view is otherwise visually/behaviorally identical to before.
+- Opening a subject (`/subjects/[id]`) lands on the docs view (first note); subject actions (New note / Edit / Delete) work from the header; deleting a note returns to the subject. _(Manual run waived by operator.)_
 
 ---
 
@@ -296,28 +305,27 @@ None — no schema change, no data migration. `reorderNote`'s extra `revalidateP
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 `midpoint` unit test passes: `pnpm test`
-- [x] 2.4 Production build passes: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — 678de7d
+- [x] 2.2 Linting passes: `pnpm lint` — 678de7d
+- [x] 2.3 `midpoint` unit test passes: `pnpm test` — 678de7d
+- [x] 2.4 Production build passes: `pnpm build` — 678de7d
 
 #### Manual
 
-- [x] 2.5 Row click navigates + highlights; handle drag reorders; row-body click never drags
-- [x] 2.6 Reorder persists across hard reload (revalidation reaches `/read`)
-- [x] 2.7 Failed reorder reverts optimistic order AND shows error toast
-- [x] 2.8 At 360px sidebar collapses to a sheet and lists notes
-- [x] 2.9 Continuous view reorder still works unchanged
+- [x] 2.5 Row click navigates + highlights; handle drag reorders; row-body click never drags — 678de7d
+- [x] 2.6 Reorder persists across hard reload (revalidation reaches `/read`) — 678de7d
+- [x] 2.7 Failed reorder reverts optimistic order AND shows error toast — 678de7d
+- [x] 2.8 At 360px sidebar collapses to a sheet and lists notes — 678de7d
+- [x] 2.9 Continuous view reorder still works unchanged — 678de7d
 
-### Phase 3: View-Flip Toggles
+### Phase 3: Swap single-pane in as THE subject view (A/B resolved — single-pane won)
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 3.4 Continuous→read and read→continuous links both work
-- [ ] 3.5 Continuous view otherwise identical to before
+- [x] 3.4 Opening `/subjects/[id]` lands on the docs view; subject actions (New note/Edit/Delete) work; note-delete returns to subject _(manual run waived by operator)_

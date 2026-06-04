@@ -21,7 +21,7 @@ type DeleteNoteButtonPropsT = { id: string; redirectTo?: string }
 // Destructive control on the detail page (FR-010). Confirms via AlertDialog, then fires
 // the deleteNote Server Action inside a transition. On success the action redirects (so the
 // callback never returns) — to /notes by default, or `redirectTo` when the caller wants to
-// stay in context (the S-15 read view passes its /subjects/[id]/read). A returned failure is
+// stay in context (the S-15 subject view passes its /subjects/[id]). A returned failure is
 // surfaced inline and the dialog stays open. `preventDefault` on the action stops Radix from
 // auto-closing the dialog before the transition resolves. The note's topic checks cascade at the DB.
 export function DeleteNoteButton({ id, redirectTo }: DeleteNoteButtonPropsT) {

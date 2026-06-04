@@ -28,7 +28,7 @@ export default async function SubjectReadNote({
           <Button asChild variant="outline" size="sm">
             <Link href={`/notes/${note.id}?edit=note`}>Edit</Link>
           </Button>
-          <DeleteNoteButton id={note.id} redirectTo={`/subjects/${id}/read`} />
+          <DeleteNoteButton id={note.id} redirectTo={`/subjects/${id}`} />
         </div>
       </header>
       <RenderMarkdown content={note.content} />

@@ -32,28 +32,11 @@ export async function getSubject(
   return data ?? undefined
 }
 
-// Member notes of a subject, in user-defined order. `position` is the ordering key;
-// nulls sort last and created_at breaks ties (members always have a position, so the
-// nulls-last clause is defensive).
-export async function getNotesForSubject(
-  subjectId: string,
-  client?: SupabaseClient<Database>,
-): Promise<NoteT[]> {
-  const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) =>
-    c
-      .from('notes')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .order('position', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: true }),
-  )
-}
-
 // Lightweight list backing the docs-style sidebar nav (S-15): only id/title/position, never
 // `content` — the sidebar shows titles and the content pane fetches the active note's body
-// via getNote. Same ordering key as getNotesForSubject (mirrors getNotesForStats' lean read).
-// RLS scopes rows to the owner; injectable client per the isolation rule.
+// via getNote. Ordered by `position` (nulls last, created_at tie-break; members always have a
+// position, so nulls-last is defensive); mirrors getNotesForStats' lean read. RLS scopes rows
+// to the owner; injectable client per the isolation rule.
 export async function getSubjectNoteSummaries(
   subjectId: string,
   client?: SupabaseClient<Database>,

@@ -27,9 +27,9 @@ export async function reorderNote(noteId: string, position: number): Promise<Act
   )
   if (!result.success) return result
 
-  revalidatePath('/subjects/[id]', 'page')
-  // Also refresh the S-15 docs-view sidebar, which renders the ordered note list in the
-  // read layout — without this a hard reload of /subjects/[id]/read would show stale order.
-  revalidatePath('/subjects/[id]/read', 'layout')
+  // Revalidate the whole subject subtree (layout): the sidebar's ordered note list lives in the
+  // /subjects/[id] layout, so 'layout' covers both the index and the active [noteId] segment —
+  // without it a hard reload would show stale order.
+  revalidatePath('/subjects/[id]', 'layout')
   return { success: true }
 }
