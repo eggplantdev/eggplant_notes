@@ -4,16 +4,18 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
 import { rateTopicCheck } from '@/features/review/actions/rate-topic-check'
 import { GRADES } from '@/features/review/grades'
+import { useReviewCelebration } from '@/features/review/review-celebration-context'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-type PropsT = { topicCheckId: string; previews: Record<number, string> }
+type PropsT = { topicCheckId: string; previews: Record<number, string>; goal: number }
 
 // Four rating buttons, each showing its predicted next interval (server-formatted). Clicking
 // fires rateTopicCheck via useActionTransition (pending/disabled state + inline error); the
 // action revalidates /review so the next due card streams in with no client queue state (no
 // useEffect). Buttons stack two-up on narrow widths (~360px), four-up from sm.
-export function RatingButtons({ topicCheckId, previews }: PropsT) {
+export function RatingButtons({ topicCheckId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()
+  const { celebrate } = useReviewCelebration()
 
   return (
     <div className="flex flex-col gap-3">
@@ -26,7 +28,11 @@ export function RatingButtons({ topicCheckId, previews }: PropsT) {
             size="lg"
             disabled={isPending}
             onClick={() =>
-              run(() => rateTopicCheck(topicCheckId, grade), { successMessage: 'Review recorded' })
+              run(() => rateTopicCheck(topicCheckId, grade, goal), {
+                successMessage: 'Review recorded',
+              }).then((result) => {
+                if (result.success && result.celebrate) celebrate(result.celebrate)
+              })
             }
             className="h-auto flex-col gap-0.5 py-2"
           >

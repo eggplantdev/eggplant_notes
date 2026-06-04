@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatInterval } from '@/features/review/format-interval'
 import { RatingButtons } from '@/features/review/rating-buttons'
+import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
 import { previewIntervals } from '@/features/review/scheduling'
+import { getDailyGoal } from '@/features/settings/queries'
 import { getDueQueue } from '@/features/topic-checks/queries'
 
 // The sequential review session (FR-016–019). Server Component: fetch the due queue (the
@@ -15,7 +17,7 @@ import { getDueQueue } from '@/features/topic-checks/queries'
 // gets a future due_at and drops out, so this re-renders with the next card and no client-side
 // queue state. Both states share PageShell, so the title and "N due" persist even when empty.
 export default async function ReviewPage() {
-  const { first: card, count } = await getDueQueue()
+  const [{ first: card, count }, goal] = await Promise.all([getDueQueue(), getDailyGoal()])
 
   const now = new Date()
   const previews: Record<number, string> = card
@@ -33,53 +35,55 @@ export default async function ReviewPage() {
       width="prose"
       actions={count > 0 ? <p className="text-muted-foreground text-sm">{count} due</p> : undefined}
     >
-      {!card ? (
-        <Card className="text-center">
-          <CardHeader>
-            <CardTitle>All caught up 🎉</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <p className="text-muted-foreground text-sm">
-              No topic checks are due right now. Come back when more are scheduled.
-            </p>
-            <Button asChild>
-              <Link href="/dashboard">Back to dashboard</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Card>
+      <ReviewCelebrationProvider>
+        {!card ? (
+          <Card className="text-center">
             <CardHeader>
-              <CardTitle className="text-base font-medium">Recall</CardTitle>
-              {card.notes?.title && (
-                <Link
-                  href={`/notes/${card.note_id}`}
-                  className="text-muted-foreground hover:text-foreground text-sm"
-                >
-                  From: {card.notes.title}
-                </Link>
-              )}
+              <CardTitle>All caught up 🎉</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <RenderMarkdown content={card.prompt} />
-              {(card.example || card.code_context) && (
-                <details className="border-t pt-3">
-                  <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
-                    Show answer
-                  </summary>
-                  <div className="mt-3 flex flex-col gap-3">
-                    {card.example && <RenderMarkdown content={card.example} />}
-                    {card.code_context && <RenderMarkdown content={card.code_context} />}
-                  </div>
-                </details>
-              )}
+            <CardContent className="flex flex-col items-center gap-4">
+              <p className="text-muted-foreground text-sm">
+                No topic checks are due right now. Come back when more are scheduled.
+              </p>
+              <Button asChild>
+                <Link href="/dashboard">Back to dashboard</Link>
+              </Button>
             </CardContent>
           </Card>
+        ) : (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium">Recall</CardTitle>
+                {card.notes?.title && (
+                  <Link
+                    href={`/notes/${card.note_id}`}
+                    className="text-muted-foreground hover:text-foreground text-sm"
+                  >
+                    From: {card.notes.title}
+                  </Link>
+                )}
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <RenderMarkdown content={card.prompt} />
+                {(card.example || card.code_context) && (
+                  <details className="border-t pt-3">
+                    <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
+                      Show answer
+                    </summary>
+                    <div className="mt-3 flex flex-col gap-3">
+                      {card.example && <RenderMarkdown content={card.example} />}
+                      {card.code_context && <RenderMarkdown content={card.code_context} />}
+                    </div>
+                  </details>
+                )}
+              </CardContent>
+            </Card>
 
-          <RatingButtons topicCheckId={card.id} previews={previews} />
-        </>
-      )}
+            <RatingButtons topicCheckId={card.id} previews={previews} goal={goal} />
+          </>
+        )}
+      </ReviewCelebrationProvider>
     </PageShell>
   )
 }

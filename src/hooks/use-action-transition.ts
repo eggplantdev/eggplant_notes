@@ -16,12 +16,12 @@ export function useActionTransition() {
   const [error, setError] = useState<string | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
 
-  function run(
-    action: () => Promise<ActionResultT>,
+  function run<T extends ActionResultT>(
+    action: () => Promise<T>,
     opts?: { successMessage?: string },
-  ): Promise<ActionResultT> {
+  ): Promise<T> {
     setError(undefined)
-    return new Promise<ActionResultT>((resolve) => {
+    return new Promise<T>((resolve) => {
       startTransition(async () => {
         const result = await action()
         if (!result.success) setError(result.error)

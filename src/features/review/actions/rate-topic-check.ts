@@ -2,12 +2,14 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { ratingSchema } from '@/features/review/schemas'
+import { detectGoalCrossing } from '@/features/review/detect-goal-crossing'
+import { goalSchema, ratingSchema } from '@/features/review/schemas'
 import { applyRating, serializeCard } from '@/features/review/scheduling'
+import type { RateResultT } from '@/features/review/types'
+import { getReviewedTodayCount, getReviewsThisWeekCount } from '@/features/review-events/queries'
 import { topicCheckIdSchema } from '@/features/topic-checks/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
-import type { ActionResultT } from '@/types/action'
 
 // The one mutation that closes the recall loop (FR-016–018). Server-trusted: the client island
 // sends only { topicCheckId, rating }. We re-fetch the card row (RLS scopes it to the owner),
@@ -21,7 +23,8 @@ import type { ActionResultT } from '@/types/action'
 export async function rateTopicCheck(
   topicCheckId: string,
   rating: unknown,
-): Promise<ActionResultT> {
+  goal: unknown,
+): Promise<RateResultT> {
   const parsedId = validateInput(topicCheckIdSchema, topicCheckId)
   if (!parsedId.success) return parsedId
 
@@ -29,11 +32,16 @@ export async function rateTopicCheck(
   if (!parsedRating.success) return parsedRating
 
   const supabase = await createClient()
-  const { data: row, error: fetchError } = await supabase
-    .from('topic_checks')
-    .select('*')
-    .eq('id', parsedId.data)
-    .maybeSingle()
+  // Goal is cosmetic (gates the congrats dialog), so a bad value must never fail the rating —
+  // fall back to 0, which makes detectGoalCrossing return undefined (no celebration).
+  const goalParsed = goalSchema.safeParse(goal)
+  const dailyGoal = goalParsed.success ? goalParsed.data : 0
+
+  const [{ data: row, error: fetchError }, dailyBefore, weeklyBefore] = await Promise.all([
+    supabase.from('topic_checks').select('*').eq('id', parsedId.data).maybeSingle(),
+    getReviewedTodayCount(supabase),
+    getReviewsThisWeekCount(supabase),
+  ])
   if (fetchError) {
     console.error('[rateTopicCheck] fetch error', fetchError)
     return { success: false, error: fetchError.message }
@@ -51,7 +59,19 @@ export async function rateTopicCheck(
     return { success: false, error: error.message }
   }
 
+  const [dailyAfter, weeklyAfter] = await Promise.all([
+    getReviewedTodayCount(supabase),
+    getReviewsThisWeekCount(supabase),
+  ])
+  const celebrate = detectGoalCrossing({
+    dailyBefore,
+    dailyAfter,
+    weeklyBefore,
+    weeklyAfter,
+    dailyGoal,
+  })
+
   revalidatePath('/review')
   revalidatePath('/dashboard')
-  return { success: true }
+  return { success: true, celebrate }
 }

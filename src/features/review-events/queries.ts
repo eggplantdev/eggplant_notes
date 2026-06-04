@@ -62,6 +62,22 @@ export async function getReviewedTodayCount(client?: SupabaseClient<Database>): 
   return countDistinctReviewedOn(rows, isoDateInZone(new Date(), APP_TIME_ZONE))
 }
 
+// Total review events in the trailing 7 days (today − 6d, zone-bucketed) — the same window the
+// dashboard's weekly goal bar uses (stats.ts reviewsThisWeek). Counts EVENTS, not distinct cards
+// (a card reviewed twice counts twice), matching that bar. Over-fetches an 8-day buffer to dodge
+// the UTC-vs-Warsaw midnight skew, then filters by zone date. Injectable client per the isolation
+// rule. RLS scopes rows to the owner.
+export async function getReviewsThisWeekCount(client?: SupabaseClient<Database>): Promise<number> {
+  const supabase = client ?? (await createClient())
+  const since = new Date(Date.now() - 8 * MS_PER_DAY).toISOString()
+  const rows = await runTableQuery(supabase, (c) =>
+    c.from('review_events').select('reviewed_at').gte('reviewed_at', since),
+  )
+  const weekStart = isoDateInZone(new Date(Date.now() - 6 * MS_PER_DAY), APP_TIME_ZONE)
+  return rows.filter((r) => isoDateInZone(new Date(r.reviewed_at), APP_TIME_ZONE) >= weekStart)
+    .length
+}
+
 // Rating + timestamp of every review in the trailing `windowDays`, backing the dashboard's
 // retention / lapse-rate / review-volume stats (the heatmap's getReviewActivity drops the
 // rating, so this is a separate read). The window is the caller's policy (the dashboard owns
