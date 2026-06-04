@@ -20,7 +20,12 @@ export const topicCheckInputSchema = z.object({
 })
 
 // Validates the note this check is attached to (written as `note_id`) and a check's own id.
-export const noteIdSchema = z.uuid('Invalid note id')
-export const topicCheckIdSchema = z.uuid('Invalid topic check id')
+// These are opaque, server-trusted ids that arrive straight from the DB, so validate SHAPE only
+// (z.guid), NOT RFC-4122 version/variant (z.uuid). Postgres `uuid` accepts any 128-bit value;
+// z.uuid() rejects non-v4 ids (e.g. deterministic seed ids like `…-0000-0000-…`) and silently
+// broke EVERY mutation. Existence/ownership is enforced downstream by RLS + the action re-fetch,
+// not here — keep this as z.guid. (Same reasoning for the note/subject id schemas.)
+export const noteIdSchema = z.guid('Invalid note id')
+export const topicCheckIdSchema = z.guid('Invalid topic check id')
 
 export type TopicCheckInputT = z.infer<typeof topicCheckInputSchema>

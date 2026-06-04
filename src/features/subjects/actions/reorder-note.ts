@@ -7,7 +7,7 @@ import { runTableAction } from '@/lib/supabase/run-table-action'
 import type { ActionResultT } from '@/types/action'
 
 const reorderInputSchema = z.object({
-  noteId: z.uuid('Invalid note id'),
+  noteId: z.guid('Invalid note id'), // shape only; see topic-checks/schemas.ts
   position: z.number(),
 })
 

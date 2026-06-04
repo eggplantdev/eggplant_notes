@@ -175,10 +175,12 @@ function dq(str) {
   return `$${tag}$${str}$${tag}$`;
 }
 const pad = (n) => String(n).padStart(12, '0');
-// Deterministic but RFC-4122-VALID v4 ids: version nibble `4` (group 3) + variant
-// nibble `8` (group 4). Postgres `uuid` accepts any hex, but Zod's `z.uuid()` (the
-// id schemas the Server Actions validate against) is strict — version-0/variant-0
-// ids like `…-0000-0000-…` parse as "Invalid id" and silently fail every mutation.
+// Deterministic v4-shaped ids: version nibble `4` (group 3) + variant nibble `8` (group 4).
+// Historically REQUIRED: the id schemas used Zod `z.uuid()` (strict RFC-4122), which rejects
+// version-0 ids like `…-0000-0000-…` even though Postgres `uuid` stores them fine — so such
+// seed ids silently failed every Server Action mutation. The schemas now validate SHAPE only
+// (`z.guid()`, see src/features/topic-checks/schemas.ts), so version-0 ids would also work; we
+// keep emitting valid v4 anyway for cleanliness and to match `gen_random_uuid()` output.
 const noteId = (i) => `0a7e0000-0000-4000-8000-${pad(i)}`;
 const cardId = (i) => `c4ec0000-0000-4000-8000-${pad(i)}`;
 const eventId = (i) => `5e1e0000-0000-4000-8000-${pad(i)}`;

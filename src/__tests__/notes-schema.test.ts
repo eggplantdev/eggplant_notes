@@ -69,4 +69,14 @@ describe('validateInput + noteIdSchema', () => {
     const result = validateInput(noteIdSchema, 'not-a-uuid')
     expect(result).toEqual({ success: false, error: 'Invalid note id' })
   })
+
+  // Regression: id schemas validate SHAPE (z.guid), not RFC-4122 version/variant (z.uuid).
+  // Deterministic seed ids like `…-0000-0000-…` are version-0 — Postgres stores them, but
+  // z.uuid() rejects them, which silently broke every id-validating mutation. Reverting to
+  // z.uuid() must turn this red. (The all-zeros nil uuid above is a z.uuid special-case and
+  // would NOT catch the regression — this non-nil version-0 id does.)
+  it('accepts a non-v4 (version-0) uuid the DB can legitimately hold', () => {
+    const result = validateInput(noteIdSchema, '0a7e0000-0000-0000-0000-000000000001')
+    expect(result.success).toBe(true)
+  })
 })

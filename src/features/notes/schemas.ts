@@ -17,7 +17,8 @@ export const contentSchema = z.string()
 // `subject_id` is optional: omitted by callers that don't touch assignment, `null` when
 // the form's subject picker selects "None", or a uuid when assigned. The note's
 // `position` is derived from this in the actions, never sent by the client.
-export const noteSubjectIdSchema = z.uuid('Invalid subject id').nullable().optional()
+// z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB ids; see topic-checks/schemas.ts.
+export const noteSubjectIdSchema = z.guid('Invalid subject id').nullable().optional()
 
 export const noteInputSchema = z.object({
   title: titleSchema,
@@ -26,7 +27,7 @@ export const noteInputSchema = z.object({
 })
 
 // Validates the `id` route param / form value for update + delete actions.
-export const noteIdSchema = z.uuid('Invalid note id')
+export const noteIdSchema = z.guid('Invalid note id')
 
 // S-07: note + its staged checks in one atomic write. Reuses topic-check's own input schema
 // (topic-checks owns that contract — same feature→feature edge as review/dashboard, not a
