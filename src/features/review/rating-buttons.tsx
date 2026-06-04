@@ -25,7 +25,9 @@ export function RatingButtons({ topicCheckId, previews }: PropsT) {
             variant={variant}
             size="lg"
             disabled={isPending}
-            onClick={() => run(() => rateTopicCheck(topicCheckId, grade))}
+            onClick={() =>
+              run(() => rateTopicCheck(topicCheckId, grade), { successMessage: 'Review recorded' })
+            }
             className="h-auto flex-col gap-0.5 py-2"
           >
             <span className="font-semibold">{label}</span>

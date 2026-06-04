@@ -49,7 +49,7 @@ export function DeleteTopicCheckButton({ noteId, id }: DeleteTopicCheckButtonPro
             disabled={isPending}
             onClick={(e) => {
               e.preventDefault()
-              run(() => deleteTopicCheck(noteId, id))
+              run(() => deleteTopicCheck(noteId, id), { successMessage: 'Check deleted' })
             }}
           >
             {isPending ? 'Deleting…' : 'Delete'}

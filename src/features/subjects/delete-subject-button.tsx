@@ -1,7 +1,5 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-
 import { FormError } from '@/components/forms/form-components/form-error'
 import {
   AlertDialog,
@@ -16,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { deleteSubject } from '@/features/subjects/actions/delete-subject'
+import { useActionTransition } from '@/hooks/use-action-transition'
 
 type DeleteSubjectButtonPropsT = { id: string }
 
@@ -24,8 +23,7 @@ type DeleteSubjectButtonPropsT = { id: string }
 // fire the action in a transition, `preventDefault` so Radix doesn't close before it
 // resolves. On success the action redirects to /subjects; a failure surfaces inline.
 export function DeleteSubjectButton({ id }: DeleteSubjectButtonPropsT) {
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isPending, startTransition] = useTransition()
+  const { error, isPending, run } = useActionTransition()
 
   return (
     <AlertDialog>
@@ -50,11 +48,9 @@ export function DeleteSubjectButton({ id }: DeleteSubjectButtonPropsT) {
             disabled={isPending}
             onClick={(e) => {
               e.preventDefault()
-              setError(undefined)
-              startTransition(async () => {
-                const result = await deleteSubject(id)
-                if (!result.success) setError(result.error)
-              })
+              // Redirects to /subjects on success → returns only on failure (hook toasts it).
+              // Success confirms via the Phase-4 ?toast flag after the redirect.
+              run(() => deleteSubject(id))
             }}
           >
             {isPending ? 'Deleting…' : 'Delete'}

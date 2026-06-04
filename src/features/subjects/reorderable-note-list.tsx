@@ -17,10 +17,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { reorderNote } from '@/features/subjects/actions/reorder-note'
+import { useActionTransition } from '@/hooks/use-action-transition'
 import { cn } from '@/lib/utils'
 
 export type ReorderableNoteT = { id: string; title: string; position: number }
@@ -63,14 +64,13 @@ function SortableRow({ id, title }: { id: string; title: string }) {
 // a failure reverts and surfaces the error. Renders nothing for <2 notes (nothing to order).
 export function ReorderableNoteList({ notes }: { notes: ReorderableNoteT[] }) {
   const [items, setItems] = useState(notes)
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [, startTransition] = useTransition()
+  const { error, run } = useActionTransition()
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
     const oldIndex = items.findIndex((i) => i.id === active.id)
@@ -83,16 +83,14 @@ export function ReorderableNoteList({ notes }: { notes: ReorderableNoteT[] }) {
     )
     reordered[newIndex] = { ...reordered[newIndex], position }
 
+    // Optimistic: apply locally, then revert if the write fails. The hook owns the error toast +
+    // inline error; only the local-state rollback stays here (it owns `items`, the hook can't).
     const previous = items
     setItems(reordered)
-    setError(undefined)
-    startTransition(async () => {
-      const result = await reorderNote(reordered[newIndex].id, position)
-      if (!result.success) {
-        setItems(previous)
-        setError(result.error)
-      }
+    const result = await run(() => reorderNote(reordered[newIndex].id, position), {
+      successMessage: 'Order saved',
     })
+    if (!result.success) setItems(previous)
   }
 
   if (items.length < 2) return null

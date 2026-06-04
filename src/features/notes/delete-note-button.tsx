@@ -1,7 +1,5 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +14,7 @@ import {
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
 import { deleteNote } from '@/features/notes/actions/delete-note'
+import { useActionTransition } from '@/hooks/use-action-transition'
 
 type DeleteNoteButtonPropsT = { id: string }
 
@@ -25,8 +24,7 @@ type DeleteNoteButtonPropsT = { id: string }
 // dialog stays open. `preventDefault` on the action stops Radix from auto-closing the
 // dialog before the transition resolves. The note's topic checks cascade at the DB.
 export function DeleteNoteButton({ id }: DeleteNoteButtonPropsT) {
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isPending, startTransition] = useTransition()
+  const { error, isPending, run } = useActionTransition()
 
   return (
     <AlertDialog>
@@ -50,12 +48,10 @@ export function DeleteNoteButton({ id }: DeleteNoteButtonPropsT) {
             disabled={isPending}
             onClick={(e) => {
               e.preventDefault()
-              setError(undefined)
-              startTransition(async () => {
-                // deleteNote redirects on success (throws), so it only ever returns on failure.
-                const result = await deleteNote(id)
-                if (!result.success) setError(result.error)
-              })
+              // deleteNote redirects on success, so it only ever returns on failure — the hook
+              // toasts that error inline + as a toast. Success confirms via the Phase-4 ?toast flag
+              // after the redirect lands (no successMessage here).
+              run(() => deleteNote(id))
             }}
           >
             {isPending ? 'Deleting…' : 'Delete'}

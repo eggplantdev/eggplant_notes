@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { assignNoteSubject } from '@/features/notes/actions/assign-subject'
+import { useActionTransition } from '@/hooks/use-action-transition'
 import type { SubjectT } from '@/types/subject'
 
 // "None" sentinel — the Combobox needs a concrete option value, so an unassigned note maps to
@@ -23,8 +24,7 @@ type NoteSubjectPickerPropsT = {
 // the trigger label in sync while the transition runs; a failure rolls it back and shows inline.
 export function NoteSubjectPicker({ noteId, currentSubjectId, subjects }: NoteSubjectPickerPropsT) {
   const [value, setValue] = useState(currentSubjectId ?? NO_SUBJECT)
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isPending, startTransition] = useTransition()
+  const { error, isPending, run } = useActionTransition()
 
   const options = useMemo(
     () => [
@@ -34,17 +34,15 @@ export function NoteSubjectPicker({ noteId, currentSubjectId, subjects }: NoteSu
     [subjects],
   )
 
-  function handleChange(next: string) {
+  async function handleChange(next: string) {
+    // Optimistic: update the label immediately, revert if the write fails. The hook owns the
+    // error toast + inline error; the success toast fires in-hook (return-only action).
     const previous = value
     setValue(next)
-    setError(undefined)
-    startTransition(async () => {
-      const result = await assignNoteSubject(noteId, next === NO_SUBJECT ? null : next)
-      if (!result.success) {
-        setValue(previous)
-        setError(result.error)
-      }
+    const result = await run(() => assignNoteSubject(noteId, next === NO_SUBJECT ? null : next), {
+      successMessage: 'Subject updated',
     })
+    if (!result.success) setValue(previous)
   }
 
   return (

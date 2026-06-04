@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import {
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { deleteAccount } from '@/features/account/actions/delete-account'
+import { useActionTransition } from '@/hooks/use-action-transition'
 
 const CONFIRM_WORD = 'DELETE'
 
@@ -26,17 +27,14 @@ const CONFIRM_WORD = 'DELETE'
 // dialog open and surface the error inline).
 export function DeleteAccountDialog() {
   const [confirmText, setConfirmText] = useState('')
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isPending, startTransition] = useTransition()
+  const { error, isPending, run } = useActionTransition()
 
   const isConfirmed = confirmText === CONFIRM_WORD
 
   function handleDelete() {
-    setError(undefined)
-    startTransition(async () => {
-      const result = await deleteAccount()
-      if (!result.success) setError(result.error)
-    })
+    // Terminal: success redirects + signs out, so no success toast here — the hook only ever
+    // toasts the failure path (keeping the dialog open with the inline error).
+    run(() => deleteAccount())
   }
 
   return (
