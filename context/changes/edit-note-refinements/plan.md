@@ -256,25 +256,25 @@ The core win: the note read view no longer downloads/parses/hydrates CodeMirror.
 
 #### Automated
 
-- [x] 2.1 No dangling references (grep `NoteSubjectPicker`/`assignNoteSubject`/`assign-subject`/`note-subject-picker` returns nothing)
-- [x] 2.2 Type checking passes: `pnpm typecheck`
-- [x] 2.3 Linting passes: `pnpm lint`
-- [x] 2.4 Build succeeds: `pnpm build`
+- [x] 2.1 No dangling references (grep `NoteSubjectPicker`/`assignNoteSubject`/`assign-subject`/`note-subject-picker` returns nothing) — 8b92eb6
+- [x] 2.2 Type checking passes: `pnpm typecheck` — 8b92eb6
+- [x] 2.3 Linting passes: `pnpm lint` — 8b92eb6
+- [x] 2.4 Build succeeds: `pnpm build` — 8b92eb6
 
 #### Manual
 
-- [x] 2.5 Detail read view shows no Subject control
-- [x] 2.6 Edit mode shows the subject Combobox; change + save persists
+- [x] 2.5 Detail read view shows no Subject control — 8b92eb6
+- [x] 2.6 Edit mode shows the subject Combobox; change + save persists — 8b92eb6
 
 ### Phase 3: List edit/delete shortcuts
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Unit tests pass: `pnpm test`
-- [ ] 3.4 E2E pass (list views + new shortcuts): `pnpm test:e2e`
-- [ ] 3.5 Build succeeds: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [ ] 3.3 Unit tests pass: `pnpm test` (deferred to gate test step)
+- [ ] 3.4 E2E pass (list views + new shortcuts): `pnpm test:e2e` (deferred to gate test step)
+- [x] 3.5 Build succeeds: `pnpm build`
 
 #### Manual
 
