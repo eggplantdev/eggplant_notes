@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { noteIdSchema } from '@/features/notes/schemas'
 import { runTableAction } from '@/lib/supabase/run-table-action'
+import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 // Delete a note. Attached topic_checks (and their review_events) are removed by the DB
@@ -18,5 +18,5 @@ export async function deleteNote(id: string): Promise<ActionResultT> {
   if (!result.success) return result
 
   revalidatePath('/notes')
-  redirect('/notes?toast=note-deleted')
+  toastRedirect('/notes', 'note-deleted')
 }

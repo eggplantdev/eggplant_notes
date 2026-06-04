@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { subjectInputSchema } from '@/features/subjects/schemas'
 import { runTableAction } from '@/lib/supabase/run-table-action'
+import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 // Mirrors createNote. `user_id` is NOT sent — the DB defaults it to auth.uid() and RLS
@@ -17,5 +17,5 @@ export async function createSubject(input: unknown): Promise<ActionResultT> {
   if (!result.success) return result
 
   revalidatePath('/subjects')
-  redirect(`/subjects/${result.data.id}?toast=subject-saved`)
+  toastRedirect(`/subjects/${result.data.id}`, 'subject-saved')
 }

@@ -1,11 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { noteIdSchema, noteInputSchema } from '@/features/notes/schemas'
 import { runTableAction } from '@/lib/supabase/run-table-action'
 import type { Database } from '@/lib/supabase/types'
+import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
@@ -45,5 +45,5 @@ export async function updateNote(id: string, input: unknown): Promise<ActionResu
 
   revalidatePath('/notes')
   revalidatePath(`/notes/${parsedId.data}`)
-  redirect(`/notes/${parsedId.data}?toast=note-saved`)
+  toastRedirect(`/notes/${parsedId.data}`, 'note-saved')
 }

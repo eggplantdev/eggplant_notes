@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createNoteWithChecksSchema } from '@/features/notes/schemas'
 import { createClient } from '@/lib/supabase/server'
+import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
@@ -35,5 +35,5 @@ export async function createNote(input: unknown): Promise<ActionResultT> {
   }
 
   revalidatePath('/notes')
-  redirect(`/notes/${newId}?toast=note-saved`)
+  toastRedirect(`/notes/${newId}`, 'note-saved')
 }

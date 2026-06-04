@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { subjectIdSchema, subjectInputSchema } from '@/features/subjects/schemas'
 import { runTableAction } from '@/lib/supabase/run-table-action'
+import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
@@ -26,5 +26,5 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
 
   revalidatePath('/subjects')
   revalidatePath(`/subjects/${parsedId.data}`)
-  redirect(`/subjects/${parsedId.data}?toast=subject-saved`)
+  toastRedirect(`/subjects/${parsedId.data}`, 'subject-saved')
 }

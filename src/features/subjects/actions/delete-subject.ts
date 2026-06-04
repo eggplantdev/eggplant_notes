@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { subjectIdSchema } from '@/features/subjects/schemas'
 import { runTableAction } from '@/lib/supabase/run-table-action'
+import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 // Delete a subject. Member notes are DETACHED, not deleted — the FK `on delete set null`
@@ -19,5 +19,5 @@ export async function deleteSubject(id: string): Promise<ActionResultT> {
 
   revalidatePath('/subjects')
   revalidatePath('/notes')
-  redirect('/subjects?toast=subject-deleted')
+  toastRedirect('/subjects', 'subject-deleted')
 }

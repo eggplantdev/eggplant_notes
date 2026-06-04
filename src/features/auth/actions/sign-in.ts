@@ -1,9 +1,8 @@
 'use server'
 
-import { redirect } from 'next/navigation'
-
 import { runAuthAction } from '@/features/auth/run-auth-action'
 import { credentialsSchema } from '@/features/auth/schemas'
+import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 export async function signIn(input: unknown): Promise<ActionResultT> {
@@ -12,5 +11,5 @@ export async function signIn(input: unknown): Promise<ActionResultT> {
   )
   if (!result.success) return result
 
-  redirect('/dashboard?toast=signed-in')
+  toastRedirect('/dashboard', 'signed-in')
 }

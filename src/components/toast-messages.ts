@@ -5,7 +5,9 @@
 //
 // Split out of `toasts.ts` (the react-toastify wrapper): this copy registry changes when product
 // copy / redirect keys change, which is unrelated to the toastify transition/theme config — two
-// reasons to change, so two files.
+// reasons to change, so two files. The typed WRITER of this convention is `toastRedirect` in
+// `@/lib/toast-redirect` — kept out of this client-imported module so its server-only
+// `next/navigation` import doesn't leak here.
 export const TOAST_MESSAGES = {
   'note-saved': 'Note saved',
   'note-deleted': 'Note deleted',

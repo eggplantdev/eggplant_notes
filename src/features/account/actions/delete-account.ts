@@ -1,8 +1,7 @@
 'use server'
 
-import { redirect } from 'next/navigation'
-
 import { createClient } from '@/lib/supabase/server'
+import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 // Deletes the caller's account via the SECURITY DEFINER `delete_account()` RPC
@@ -23,5 +22,5 @@ export async function deleteAccount(): Promise<ActionResultT> {
   // scope: 'local' only clears the cookie — deleting the user already cascaded
   // away every server-side session, so a global revocation round-trip is moot.
   await supabase.auth.signOut({ scope: 'local' })
-  redirect('/sign-in?toast=account-deleted')
+  toastRedirect('/sign-in', 'account-deleted')
 }
