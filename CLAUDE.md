@@ -18,7 +18,7 @@ For every slice/foundation, the order is: **implement the feature code → revie
 
 Then `/10x-archive`. `/simplify` is not optional — the reviews flag but don't clean up, so skipping it ships un-simplified code into the immutable archive.
 
-4. **Post-archive sync (the slice is NOT done until this lands)** — flip the matching Linear issue to Done, then update every doc the change made stale: `roadmap.md` (auto via `/10x-archive`), this CLAUDE.md tracking blob, and `lessons.md` if a rule emerged. Don't stop at the archive commit.
+4. **Post-archive sync (the slice is NOT done until this lands)** — flip the matching Linear issue to Done, then update every doc the change made stale: `roadmap.md ## Done` (auto via `/10x-archive` — this is the single per-slice record), `lessons.md` if a rule emerged, and the Linear ID map below if a new issue was created. **Do NOT add a per-slice narrative to this file** — slice detail lives once, in `roadmap.md ## Done` + the archive. Don't stop at the archive commit.
 
 ## Course & lesson progress (10xDevs 3.0) — as of 2026-06-03
 
