@@ -1,5 +1,7 @@
 import { Bounce, toast } from 'react-toastify'
 
+import type { ActionResultT } from '@/types/action'
+
 // Thin project wrapper over react-toastify so call sites use one API (not raw `toast.*`).
 // Mirrors the `wykonczymy` reference verbatim (dark theme, Bounce, bottom-center, 2s, no
 // progress bar) — keep its options; don't strip them (see lessons.md). The toastify CSS and
@@ -8,23 +10,6 @@ import { Bounce, toast } from 'react-toastify'
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
 export type ToastPosition = 'bottom-center' | 'top-center'
-
-// Post-redirect success messages, keyed by a short URL-safe token. A redirecting Server Action
-// appends `?toast=<key>` to its destination; <ActionToast> reads it after navigation and toasts
-// the mapped message (an in-closure `toast.success` is unreachable past `redirect()`). Closed
-// `as const` map → URLs carry a key, not raw copy, and the wording stays centralized here.
-export const TOAST_MESSAGES = {
-  'note-saved': 'Note saved',
-  'note-deleted': 'Note deleted',
-  'subject-saved': 'Subject saved',
-  'subject-deleted': 'Subject deleted',
-  'signed-in': 'Welcome back',
-  'signed-up': 'Account created',
-  'password-updated': 'Password updated',
-  'account-deleted': 'Account deleted',
-} as const
-
-export type ToastKey = keyof typeof TOAST_MESSAGES
 
 export function toastMessage(
   message: string,
@@ -43,4 +28,12 @@ export function toastMessage(
     theme: 'dark',
     transition: Bounce,
   })
+}
+
+// Routes an action result to a toast: error on failure, optional confirmation on success. The one
+// place "a result becomes a toast" is decided, so the imperative seam (useActionTransition) and the
+// form seam (toastActionResult) can't drift apart on that branching.
+export function toastResult(result: ActionResultT, successMessage?: string): void {
+  if (!result.success) toastMessage(result.error, 'error')
+  else if (successMessage) toastMessage(successMessage, 'success')
 }

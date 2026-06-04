@@ -4,7 +4,8 @@ import { PASSWORD, signUp, uniqueEmail } from './helpers'
 
 // The account-lifecycle contract as an executable test: a user signs up, deletes
 // their account from /settings behind the type-to-confirm gate, lands on
-// /sign-in?deleted=1 with the notice, and can no longer sign in (account is gone).
+// /sign-in with the "Account deleted" toast (S-16 ?toast flag), and can no longer
+// sign in (account is gone).
 // Sign-up goes through the real UI (F-01 auth/cookie/proxy path); deletion runs
 // the SECURITY DEFINER delete_account() RPC + cascade under the hood. Shared helpers: ./helpers.
 
@@ -21,14 +22,18 @@ test('account self-deletion: sign up -> delete -> cannot sign in again', async (
   await expect(confirm).toBeEnabled()
   await confirm.click()
 
-  // Lands back on sign-in with the deletion notice (session torn down, redirected).
-  await expect(page).toHaveURL('/sign-in?deleted=1')
-  await expect(page.getByText('Your account and all data were deleted.')).toBeVisible()
+  // Lands back on sign-in (session torn down, redirected); the account-deleted toast confirms via
+  // the ?toast=account-deleted flag, which <ActionToast> reads then strips from the URL.
+  await expect(page).toHaveURL(/\/sign-in/)
+  await expect(page.getByText('Account deleted')).toBeVisible()
 
   // The deleted account can no longer authenticate.
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(PASSWORD)
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page.getByText('Invalid login credentials')).toBeVisible()
+  // S-16 surfaces an action error in BOTH channels (inline <FormError> + a toast), so the text
+  // now matches two elements — pin the inline form error (DOM-order first; the toast container
+  // is mounted last in <body>) to dodge the strict-mode violation.
+  await expect(page.getByText('Invalid login credentials').first()).toBeVisible()
   await expect(page).toHaveURL(/\/sign-in/)
 })

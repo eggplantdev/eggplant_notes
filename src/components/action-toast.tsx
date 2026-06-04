@@ -3,7 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { TOAST_MESSAGES, type ToastKey, toastMessage } from '@/components/toasts'
+import { TOAST_MESSAGES, type ToastKey } from '@/components/toast-messages'
+import { toastMessage } from '@/components/toasts'
 
 // Reads `?toast=<key>` after a post-redirect navigation, toasts the mapped message once, then
 // strips ONLY the `toast` param (preserving siblings like the `?subjects=` notes filter — never

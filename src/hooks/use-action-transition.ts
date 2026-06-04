@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 
-import { toastMessage } from '@/components/toasts'
+import { toastResult } from '@/components/toasts'
 import type { ActionResultT } from '@/types/action'
 
 // Shared client-island scaffold for firing a Server Action: run it inside a transition (for the
@@ -24,12 +24,8 @@ export function useActionTransition() {
     return new Promise<ActionResultT>((resolve) => {
       startTransition(async () => {
         const result = await action()
-        if (!result.success) {
-          setError(result.error)
-          toastMessage(result.error, 'error')
-        } else if (opts?.successMessage) {
-          toastMessage(opts.successMessage, 'success')
-        }
+        if (!result.success) setError(result.error)
+        toastResult(result, opts?.successMessage)
         resolve(result)
       })
     })
