@@ -119,10 +119,10 @@ The whole point: boot drops from ~3.3s to ~0.14s and boot heap from ~129MB to ~3
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build passes: `pnpm build`
-- [ ] 1.4 E2E passes incl. the new off-list-fence assertion: `pnpm test:e2e`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 826efaa
+- [x] 1.2 Linting passes: `pnpm lint` — 826efaa
+- [x] 1.3 Production build passes: `pnpm build` — 826efaa
+- [x] 1.4 E2E passes incl. the new off-list-fence assertion: `pnpm test:e2e`
 
 #### Manual
 
