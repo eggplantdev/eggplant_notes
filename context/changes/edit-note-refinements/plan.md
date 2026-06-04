@@ -274,12 +274,12 @@ The core win: the note read view no longer downloads/parses/hydrates CodeMirror.
 
 - [x] 3.1 Type checking passes: `pnpm typecheck` — 88ed981
 - [x] 3.2 Linting passes: `pnpm lint` — 88ed981
-- [x] 3.3 Unit tests pass: `pnpm test` (37/37 green)
-- [x] 3.4 E2E pass (list views + new shortcuts): targeted run green — `notes`+`topic-checks`+`card-to-note` 10/10 (5 clean, 5 flaky-passed on the documented GoTrue sign-up race); full `pnpm test:e2e` not run per user direction (port/Supabase shared with parallel S-15 session)
+- [x] 3.3 Unit tests pass: `pnpm test` (37/37 green) — 8e4d662
+- [x] 3.4 E2E pass (list views + new shortcuts): targeted run green — `notes`+`topic-checks`+`card-to-note` 10/10 (5 clean, 5 flaky-passed on the documented GoTrue sign-up race); full `pnpm test:e2e` not run per user direction (port/Supabase shared with parallel S-15 session) — 8e4d662
 - [x] 3.5 Build succeeds: `pnpm build` — 88ed981
 
 #### Manual
 
-- [x] 3.6 Each card shows Edit + Delete; card body still navigates (covered by e2e: notes list-shortcuts test)
-- [x] 3.7 Edit opens the note in edit mode (`?edit=note`) (covered by e2e)
-- [x] 3.8 Delete confirms (no navigation), removes the row, toasts (covered by e2e)
+- [x] 3.6 Each card shows Edit + Delete; card body still navigates (covered by e2e: notes list-shortcuts test) — 8e4d662
+- [x] 3.7 Edit opens the note in edit mode (`?edit=note`) (covered by e2e) — 8e4d662
+- [x] 3.8 Delete confirms (no navigation), removes the row, toasts (covered by e2e) — 8e4d662
