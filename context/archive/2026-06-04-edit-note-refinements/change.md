@@ -1,10 +1,10 @@
 ---
 change_id: edit-note-refinements
 title: Defer note-edit weight and add list-level edit/delete shortcuts (S-14 follow-up)
-status: implemented
+status: archived
 created: 2026-06-04
 updated: 2026-06-04
-archived_at: null
+archived_at: 2026-06-04T13:12:04Z
 ---
 
 ## Notes
