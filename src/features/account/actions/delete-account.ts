@@ -23,5 +23,5 @@ export async function deleteAccount(): Promise<ActionResultT> {
   // scope: 'local' only clears the cookie — deleting the user already cascaded
   // away every server-side session, so a global revocation round-trip is moot.
   await supabase.auth.signOut({ scope: 'local' })
-  redirect('/sign-in?deleted=1')
+  redirect('/sign-in?toast=account-deleted')
 }

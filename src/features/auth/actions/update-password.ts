@@ -12,5 +12,5 @@ export async function updatePassword(input: unknown): Promise<ActionResultT> {
   )
   if (!result.success) return result
 
-  redirect('/dashboard')
+  redirect('/dashboard?toast=password-updated')
 }

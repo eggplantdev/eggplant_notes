@@ -321,9 +321,9 @@ Negligible — one client container + an effect-driven reader. `<ToastContainer>
 
 #### Automated
 
-- [x] 3.1 `pnpm typecheck` passes
-- [x] 3.2 `pnpm lint` passes
-- [x] 3.3 `pnpm build` succeeds
+- [x] 3.1 `pnpm typecheck` passes — c7ffc2e
+- [x] 3.2 `pnpm lint` passes — c7ffc2e
+- [x] 3.3 `pnpm build` succeeds — c7ffc2e
 
 #### Manual
 
@@ -335,10 +335,10 @@ Negligible — one client container + an effect-driven reader. `<ToastContainer>
 
 #### Automated
 
-- [ ] 4.1 `pnpm typecheck` passes
-- [ ] 4.2 `pnpm lint` passes
-- [ ] 4.3 `pnpm build` succeeds
-- [ ] 4.4 `DeletedNotice` removed, no dangling imports (`grep -r DeletedNotice src` empty)
+- [x] 4.1 `pnpm typecheck` passes
+- [x] 4.2 `pnpm lint` passes
+- [x] 4.3 `pnpm build` succeeds
+- [x] 4.4 `DeletedNotice` removed, no dangling imports (`grep -r DeletedNotice src` empty)
 
 #### Manual
 

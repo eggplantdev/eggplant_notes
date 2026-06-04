@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 
+import { ActionToast } from '@/components/action-toast'
 import { ToastProvider } from '@/components/toast-provider'
 
 const geistSans = Geist({
@@ -31,6 +33,9 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         {children}
+        <Suspense fallback={null}>
+          <ActionToast />
+        </Suspense>
         <ToastProvider />
       </body>
     </html>

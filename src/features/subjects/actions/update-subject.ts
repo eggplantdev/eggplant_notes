@@ -26,5 +26,5 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
 
   revalidatePath('/subjects')
   revalidatePath(`/subjects/${parsedId.data}`)
-  redirect(`/subjects/${parsedId.data}`)
+  redirect(`/subjects/${parsedId.data}?toast=subject-saved`)
 }

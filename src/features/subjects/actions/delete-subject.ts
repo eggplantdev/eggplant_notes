@@ -19,5 +19,5 @@ export async function deleteSubject(id: string): Promise<ActionResultT> {
 
   revalidatePath('/subjects')
   revalidatePath('/notes')
-  redirect('/subjects')
+  redirect('/subjects?toast=subject-deleted')
 }

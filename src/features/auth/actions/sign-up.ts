@@ -12,5 +12,5 @@ export async function signUp(input: unknown): Promise<ActionResultT> {
   )
   if (!result.success) return result
 
-  redirect('/dashboard')
+  redirect('/dashboard?toast=signed-up')
 }

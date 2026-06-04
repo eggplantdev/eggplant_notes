@@ -17,5 +17,5 @@ export async function createSubject(input: unknown): Promise<ActionResultT> {
   if (!result.success) return result
 
   revalidatePath('/subjects')
-  redirect(`/subjects/${result.data.id}`)
+  redirect(`/subjects/${result.data.id}?toast=subject-saved`)
 }

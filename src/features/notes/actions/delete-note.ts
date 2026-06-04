@@ -18,5 +18,5 @@ export async function deleteNote(id: string): Promise<ActionResultT> {
   if (!result.success) return result
 
   revalidatePath('/notes')
-  redirect('/notes')
+  redirect('/notes?toast=note-deleted')
 }

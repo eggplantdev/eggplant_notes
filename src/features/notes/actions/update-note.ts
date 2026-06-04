@@ -45,5 +45,5 @@ export async function updateNote(id: string, input: unknown): Promise<ActionResu
 
   revalidatePath('/notes')
   revalidatePath(`/notes/${parsedId.data}`)
-  redirect(`/notes/${parsedId.data}`)
+  redirect(`/notes/${parsedId.data}?toast=note-saved`)
 }

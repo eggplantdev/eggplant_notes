@@ -35,5 +35,5 @@ export async function createNote(input: unknown): Promise<ActionResultT> {
   }
 
   revalidatePath('/notes')
-  redirect(`/notes/${newId}`)
+  redirect(`/notes/${newId}?toast=note-saved`)
 }
