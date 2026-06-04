@@ -25,10 +25,9 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { reorderNote } from '@/features/subjects/actions/reorder-note'
 import { midpoint } from '@/features/subjects/midpoint'
+import type { SubjectNoteSummaryT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
 import { cn } from '@/lib/utils'
-
-export type NoteSummaryT = { id: string; title: string | null; position: number | null }
 
 // Arrow ↑/↓ moves focus between note links within the same list, so keyboard users browse notes
 // without tabbing through every grip. Scoped to the current <ul> (closest) so the desktop column
@@ -105,7 +104,7 @@ function SortableNoteList({
 }: {
   dndId: string
   subjectId: string
-  items: NoteSummaryT[]
+  items: SubjectNoteSummaryT[]
   activeNoteId: string | undefined
   onDragEnd: (event: DragEndEvent) => void
   onNavigate?: () => void
@@ -147,7 +146,7 @@ export function SubjectNoteSidebar({
   notes,
 }: {
   subjectId: string
-  notes: NoteSummaryT[]
+  notes: SubjectNoteSummaryT[]
 }) {
   const [items, setItems] = useState(notes)
   const [sheetOpen, setSheetOpen] = useState(false)

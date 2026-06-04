@@ -11,7 +11,7 @@ import { SubjectForm } from '@/features/subjects/subject-form'
 // notes, redirect to the first (by position) so the content pane is never empty; with none, an
 // empty prompt. Subject existence is also enforced by the layout (404s). `?toast` is forwarded
 // onto the first-note redirect so a post-delete/-save toast survives this hop; on the empty/edit
-// branches it stays in the URL for <ActionToast>.
+// branches it stays in the URL for the global <ActionToast> mounted in the root layout.
 export default async function SubjectPage({
   params,
   searchParams,

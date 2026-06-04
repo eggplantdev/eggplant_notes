@@ -2,13 +2,21 @@ import { test, expect, type Page } from '@playwright/test'
 
 import { attachCheck, clientFor, fillEditor, signUp, uniqueEmail } from './helpers'
 
-// S-06 acceptance path: create a subject, rename it, assign notes via the note form, read the
-// subject as one ordered document (Shiki-highlighted, per-section note links), drag-reorder the
-// notes (persists across reload), and delete the subject (member notes + their topic checks
-// survive, unassigned). Plus a two-account isolation + F1 (cross-user assignment) negative
-// control. Shared auth/editor/client helpers live in ./helpers.
+// S-15 acceptance path: the subject view is now the docs-style single-pane view at
+// /subjects/[id] (the continuous "subject-as-document" page was replaced). Opening a subject
+// redirects to its first note; a persistent sidebar lists the notes (titles only) where each
+// row navigates (Link) and reorders via a dedicated grip handle; the content pane server-renders
+// one note's read-only body (Shiki-highlighted). Plus subject rename via ?edit, delete-detach,
+// and a two-account isolation + F1 (cross-user assignment) negative control. Helpers in ./helpers.
 
 const CODE_A = ['```ts', 'const a = 1', '```'].join('\n')
+
+// The sidebar renders twice (desktop column + mobile sheet); at the default desktop viewport the
+// desktop one (first in DOM) is visible. Scope all sidebar queries to it to avoid strict-mode
+// duplicate matches.
+function sidebar(page: Page) {
+  return page.locator('nav[aria-label="Notes in this subject"]').first()
+}
 
 // Create a note already assigned to a subject, via the note form's subject picker. Lands on the
 // note detail page. `content` may carry a code fence for the Shiki assertion.
@@ -27,65 +35,66 @@ async function createAssignedNote(
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 }
 
-test('subject lifecycle: create, rename, assign + read as document, reorder, delete-detach', async ({
+test('docs view: open → first note, sidebar nav, handle reorder, delete-detach', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('subj'))
   const stamp = Date.now()
 
-  // Create a subject → lands on its detail page; capture its id from the URL.
+  // Create a subject → lands on it (empty → prompt). Capture its id from the URL.
   await page.goto('/subjects/new')
   await page.getByLabel('Title').fill(`Subject ${stamp}`)
   await page.getByRole('button', { name: 'Create subject' }).click()
   await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
   const subjectUrl = page.url()
 
-  // Rename it.
-  const renamed = `Subject ${stamp} renamed`
-  await page.getByRole('link', { name: 'Edit' }).click()
-  await page.getByLabel('Title').fill(renamed)
-  await page.getByRole('button', { name: 'Save changes' }).click()
-  await expect(page.getByRole('heading', { name: renamed })).toBeVisible({ timeout: 15_000 })
-
-  // Assign two notes to it via the note-form picker (note A carries a code block).
+  // Assign two notes (A carries a code block, assigned first → ordered before B).
   const titleA = `Note A ${stamp}`
   const titleB = `Note B ${stamp}`
-  await createAssignedNote(page, titleA, renamed, CODE_A)
-  // Attach a topic check to note A so we can prove it survives the subject delete.
+  await createAssignedNote(page, titleA, `Subject ${stamp}`, CODE_A)
   const checkPrompt = `Check ${stamp}`
-  await attachCheck(page, checkPrompt)
-  await createAssignedNote(page, titleB, renamed)
+  await attachCheck(page, checkPrompt) // on note A, to prove it survives subject delete
+  await createAssignedNote(page, titleB, `Subject ${stamp}`)
 
-  // Subject-as-document: both notes render in order (A before B — A assigned first), the code
-  // block is Shiki-highlighted, and each section title links to the note's own page.
+  // Open the subject → redirects to the first note's pane; the sidebar lists both in order and
+  // the active (first) note's code is Shiki-highlighted in the pane.
   await page.goto(subjectUrl)
-  const headings = page.locator('main section h2 a')
-  await expect(headings).toHaveCount(2)
-  await expect(headings.nth(0)).toHaveText(titleA)
-  await expect(headings.nth(1)).toHaveText(titleB)
-  await expect(headings.nth(0)).toHaveAttribute('href', /\/notes\/[0-9a-f-]+$/)
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+\/[0-9a-f-]+$/, { timeout: 15_000 })
+  const links = sidebar(page).locator('a[data-note-link]')
+  await expect(links).toHaveCount(2)
+  await expect(links.nth(0)).toHaveText(titleA)
+  await expect(links.nth(1)).toHaveText(titleB)
+  await expect(links.nth(0)).toHaveAttribute('aria-current', 'page') // first note active
   await expect(page.locator('pre.shiki')).toBeVisible()
   expect(await page.locator('pre.shiki span[style*="--shiki"]').count()).toBeGreaterThan(2)
 
-  // Drag note A's ToC row below note B, then reload and confirm the new order persisted.
-  // The ToC rows are <li>, but dnd-kit's useSortable spreads role="button" onto them, so
-  // locate by tag (CSS), not getByRole('listitem'). Only the ToC uses <li> on this page.
-  const rowA = page.locator('li').filter({ hasText: titleA })
-  const rowB = page.locator('li').filter({ hasText: titleB })
-  const a = await rowA.boundingBox()
+  // Sidebar navigation: click note B → pane swaps, URL changes, active highlight moves to B.
+  await links.nth(1).click()
+  await expect(page.getByRole('heading', { name: titleB })).toBeVisible({ timeout: 15_000 })
+  await expect(sidebar(page).locator('a[data-note-link]').nth(1)).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+
+  // Handle reorder: drag note A's grip handle below note B; reload; confirm sidebar order flipped.
+  const rowA = sidebar(page).locator('li').filter({ hasText: titleA })
+  const rowB = sidebar(page).locator('li').filter({ hasText: titleB })
+  const handleA = rowA.getByRole('button', { name: 'Drag to reorder' })
+  const h = await handleA.boundingBox()
   const b = await rowB.boundingBox()
-  if (!a || !b) throw new Error('reorder rows not found')
-  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2)
+  if (!h || !b) throw new Error('reorder handle/row not found')
+  await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2)
   await page.mouse.down()
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 12 })
   await page.mouse.move(b.x + b.width / 2, b.y + b.height + 4, { steps: 6 }) // overshoot past B
   await page.mouse.up()
 
   await page.goto(subjectUrl)
-  await expect(headings.nth(0)).toHaveText(titleB, { timeout: 15_000 })
-  await expect(headings.nth(1)).toHaveText(titleA)
+  const reordered = sidebar(page).locator('a[data-note-link]')
+  await expect(reordered.nth(0)).toHaveText(titleB, { timeout: 15_000 })
+  await expect(reordered.nth(1)).toHaveText(titleA)
 
-  // Delete the subject → redirects to /subjects; member notes survive, now unassigned.
+  // Delete the subject (header action) → redirects to /subjects; member notes survive, unassigned.
   await page.getByRole('button', { name: 'Delete' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
@@ -98,6 +107,36 @@ test('subject lifecycle: create, rename, assign + read as document, reorder, del
   await page.getByText(titleA).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/)
   await expect(page.getByText(checkPrompt)).toBeVisible({ timeout: 15_000 })
+})
+
+test('subject in-place edit: rename + description via ?edit, lands back on the subject', async ({
+  page,
+}) => {
+  await signUp(page, uniqueEmail('subj-edit'))
+  const stamp = Date.now()
+
+  await page.goto('/subjects/new')
+  await page.getByLabel('Title').fill(`Subj ${stamp}`)
+  await page.getByRole('button', { name: 'Create subject' }).click()
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
+
+  // The header Edit link drives ?edit; the index swaps to the SubjectForm in place.
+  await page.getByRole('link', { name: 'Edit' }).click()
+  await expect(page).toHaveURL(/\?edit$/)
+  await expect(page.getByLabel('Title')).toBeVisible()
+  await expect(page.getByLabel('Description (optional)')).toBeVisible()
+
+  const renamed = `Subj ${stamp} renamed`
+  const description = `Described ${stamp}`
+  await page.getByLabel('Title').fill(renamed)
+  await page.getByLabel('Description (optional)').fill(description)
+  await page.getByRole('button', { name: 'Save changes' }).click()
+
+  // Save redirects to the bare subject (no notes → empty prompt); header shows the new
+  // title + description and the ?edit state is gone.
+  await expect(page.getByRole('heading', { name: renamed })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(description)).toBeVisible()
+  await expect(page).not.toHaveURL(/\?edit$/)
 })
 
 test('subjects are isolated by account, and a note cannot be assigned to a foreign subject (F1)', async ({
@@ -148,41 +187,4 @@ test('subjects are isolated by account, and a note cannot be assigned to a forei
     .eq('id', bNoteId)
     .select('id')
   expect(assign.error, 'F1 BREACH: B assigned its note to A subject').not.toBeNull()
-})
-
-// S-14 in-place edit: the subject header (title/description) edit moved off the deleted
-// /subjects/[id]/edit route into a ?edit branch on the detail page. The lifecycle test above
-// already renames via the Edit link; this locks the description round-trip, the ?edit URL state,
-// and the old route 404. (The lifecycle test asserts the note list still renders — "stays in
-// edit mode" — so it's not re-asserted here.)
-test('in-place edit: edits title + description in place and /edit 404s (S-14)', async ({
-  page,
-}) => {
-  await signUp(page, uniqueEmail('subj-edit'))
-  const stamp = Date.now()
-
-  await page.goto('/subjects/new')
-  await page.getByLabel('Title').fill(`Subj ${stamp}`)
-  await page.getByRole('button', { name: 'Create subject' }).click()
-  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
-  const subjectUrl = page.url()
-
-  // The Edit link drives ?edit; the header swaps to the form in place (no navigation away).
-  await page.getByRole('link', { name: 'Edit' }).click()
-  await expect(page).toHaveURL(/\?edit$/)
-  await expect(page.getByLabel('Title')).toBeVisible()
-  await expect(page.getByLabel('Description (optional)')).toBeVisible()
-
-  const renamed = `Subj ${stamp} renamed`
-  const description = `Described ${stamp}`
-  await page.getByLabel('Title').fill(renamed)
-  await page.getByLabel('Description (optional)').fill(description)
-  await page.getByRole('button', { name: 'Save changes' }).click()
-  await expect(page.getByRole('heading', { name: renamed })).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByText(description)).toBeVisible()
-  await expect(page).not.toHaveURL(/\?edit$/)
-
-  // The dedicated edit route is gone.
-  const resp = await page.goto(`${subjectUrl}/edit`)
-  expect(resp?.status()).toBe(404)
 })

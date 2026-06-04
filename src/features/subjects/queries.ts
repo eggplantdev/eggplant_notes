@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import type { NoteT } from '@/types/note'
+import type { SubjectNoteSummaryT } from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'
 
 // Read helpers mirror the notes feature: RLS scopes every row to the owner, and the
@@ -40,7 +40,7 @@ export async function getSubject(
 export async function getSubjectNoteSummaries(
   subjectId: string,
   client?: SupabaseClient<Database>,
-): Promise<Pick<NoteT, 'id' | 'title' | 'position'>[]> {
+): Promise<SubjectNoteSummaryT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
     c
