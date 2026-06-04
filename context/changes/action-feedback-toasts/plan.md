@@ -117,13 +117,15 @@ Make `useActionTransition` the single imperative toast point and migrate every i
 
 **Intent**: After a thunk resolves, toast `result.error` on failure and an optional caller-supplied success message on success — keeping the existing inline `error` state for `<FormError>`.
 
-**Contract**: `run(action: () => Promise<ActionResultT>, opts?: { successMessage?: string })`. On `!success`: `setError(error)` (unchanged) **and** `toastMessage(error, 'error')`. On success: if `opts.successMessage`, `toastMessage(opts.successMessage, 'success')`. Backwards compatible — existing callers keep working.
+**Contract**: `run(action: () => Promise<ActionResultT>, opts?: { successMessage?: string }): Promise<ActionResultT>`. On `!success`: `setError(error)` (unchanged) **and** `toastMessage(error, 'error')`. On success: if `opts.successMessage`, `toastMessage(opts.successMessage, 'success')`. **Returns the resolved `ActionResultT`** so callers that own optimistic state can revert on failure (see #2). Resolve the promise from inside `startTransition` (a deferred/`Promise` captured by the transition callback) so the returned result reflects the action outcome while the pending flag still tracks the transition. Backwards compatible — existing void-callers (`rating-buttons`, `delete-topic-check-button`) ignore the return.
 
 #### 2. Migrate bare-`useTransition` call sites onto the hook
 
 **Files**: `src/features/subjects/reorderable-note-list.tsx`, `src/features/notes/components/note-subject-picker.tsx`, `src/features/notes/delete-note-button.tsx`, `src/features/subjects/delete-subject-button.tsx`, `src/features/account/components/delete-account-dialog.tsx`
 
 **Intent**: Replace each component's hand-rolled `useTransition` + `setError` with `useActionTransition().run(...)`, passing a per-site `successMessage`. Preserve existing behavior (optimistic state + revert in reorder/picker; AlertDialog flow in deletes; inline `<FormError>`).
+
+**Optimistic revert (reorder + picker).** These two own local optimistic state (`setItems`/`setValue`) and snapshot `previous` before the write — the hook cannot own that. They consume `run`'s **returned result** to revert: snapshot `previous`, apply the optimistic update, then `const result = await run(() => action(args), { successMessage }); if (!result.success) setItems(previous)` (resp. `setValue(previous)`). The hook still owns `error`/`isPending`/the error+success toasts; only the state rollback stays caller-side. `note-subject-picker` drops its local `useTransition` and uses the hook's `isPending` to disable the Combobox.
 
 **Contract**: each `run(() => action(args), { successMessage: '…' })`. Success messages (per-call-site, user decision): reorder → `'Order saved'`; assign-subject → `'Subject updated'`; delete-note → `'Note deleted'` (fires before redirect resolves — acceptable; redirect lands on `/notes`); delete-subject → `'Subject deleted'`; delete-account → none (terminal redirect/sign-out). For the redirect-on-success deletes, the success toast is optional here vs. the Phase-4 flag — **decision: use the Phase-4 `?toast=` flag for delete-note/delete-subject** so the toast survives navigation; pass NO `successMessage` for those two, only the error path. Reorder + assign-subject (return-only) toast success in-hook.
 
@@ -222,7 +224,9 @@ Generalize the `?deleted=1` → `<DeletedNotice/>` pattern into a reusable `?toa
 
 **Intent**: On mount, read `?toast=<key>` from the URL, toast the mapped message once, and strip the param (so refresh/back doesn't re-toast). Generalizes `deleted-notice.tsx`.
 
-**Contract**: reads `useSearchParams()`; if `toast` key is in `TOAST_MESSAGES`, `toastMessage(TOAST_MESSAGES[key], 'success')` in an effect, then `router.replace(pathname)` to drop the param. Mount once globally (root layout, beside `<ToastProvider/>`) inside a `<Suspense>` (useSearchParams requirement).
+**Contract**: reads `useSearchParams()`; if `toast` key is in `TOAST_MESSAGES`, `toastMessage(TOAST_MESSAGES[key], 'success')` in an effect, then strip **only** the `toast` param (NOT `router.replace(pathname)`, which would drop sibling params — e.g. the documented `?subjects=` notes filter that a redirect could land beside): `const next = new URLSearchParams(searchParams); next.delete('toast'); router.replace(next.size ? \`${pathname}?${next}\` : pathname)`. Mount once globally (root layout, beside `<ToastProvider/>`) inside a `<Suspense>` (useSearchParams requirement).
+
+> **Note — the effect is intentional.** This is a toast-once-on-mount-from-URL + strip side effect (synchronizing with an external system: the URL), the allowed exception to react.md's "avoid useEffect" — NOT the banned derived-state-in-effect pattern. Add a one-line comment in the component saying so (and the `<Suspense>` requirement above), so the review fan-out / `/simplify` gate doesn't try to remove it. Same exception family as the timer-cleanup effect in `lessons.md`.
 
 #### 3. Append the flag in redirect actions
 
