@@ -294,14 +294,14 @@ Negligible — one client container + an effect-driven reader. `<ToastContainer>
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes: `pnpm lint`
-- [ ] 1.3 Production build succeeds: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.3 Production build succeeds: `pnpm build`
 
 #### Manual
 
-- [ ] 1.4 Temporary `toastMessage` renders a dark bottom-center toast on any route
-- [ ] 1.5 No hydration or console errors on load
+- [x] 1.4 Temporary `toastMessage` renders a dark bottom-center toast on any route
+- [x] 1.5 No hydration or console errors on load
 
 ### Phase 2: Imperative Seam
 

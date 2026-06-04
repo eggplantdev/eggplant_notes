@@ -1,7 +1,7 @@
 ---
 change_id: action-feedback-toasts
 title: Global toast feedback wired through every mutation (errors + success)
-status: plan_reviewed
+status: implementing
 created: 2026-06-04
 updated: 2026-06-04
 archived_at: null
