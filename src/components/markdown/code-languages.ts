@@ -24,3 +24,8 @@ export const CODE_LANGUAGES = [
   { value: 'ts', label: 'TypeScript' },
   { value: 'yaml', label: 'YAML' },
 ] as const
+
+// Single source of truth for the highlighter's preload set: the picker's language ids ARE the
+// grammars Shiki loads on boot (see render-markdown.tsx). Deriving both from one array means the
+// set you can insert and the set that highlights can never drift. `text` is the fallback target.
+export const SHIKI_LANGS: readonly string[] = CODE_LANGUAGES.map((l) => l.value)

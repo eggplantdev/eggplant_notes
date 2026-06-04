@@ -64,7 +64,7 @@ Add the derived language list and wire it into the highlighter with lazy loading
 
 **Intent**: Lock in that an _unknown_ fence language degrades to plain text without throwing. Under `lazy: true` a valid off-list language (e.g. `kotlin`) would lazy-load and highlight — so the `fallbackLanguage` path only fires for a language Shiki has no grammar for. The test must therefore use a bogus token, not a real off-list language. The existing assertion continues to prove on-list highlighting works.
 
-**Contract**: Within (or beside) the existing CRUD spec, create a note whose body contains a fenced block in a **bogus** language token Shiki cannot resolve (e.g. ` ```xyzzy `). Assert the detail view renders without error and that block carries no `--shiki` color tokens (plain), while the existing `pre.shiki` + `span[style*="--shiki"]` assertion on an on-list block (e.g. `python`) still passes. Reuse `e2e/helpers.ts` (`signUp`, `fillEditor`).
+**Contract**: Within (or beside) the existing CRUD spec, create the **bogus**-fence note as its **own separate note** (not mixed with the on-list block) — its body contains a fenced block in a bogus language token Shiki cannot resolve (e.g. ` ```xyzzy `). Isolation matters: a fallback-to-`text` block still renders as `<pre class="shiki">`, just with no `--shiki` token spans, so a global `pre.shiki span[style*="--shiki"]` selector would also match the on-list block's tokens. Scope the assertions per-note: on the bogus note's detail view assert `pre.shiki` is visible (no error/throw) **and** `pre.shiki span[style*="--shiki"]` count is **0** (plain, fallback fired); the existing on-list assertion (`python` block → `pre.shiki` + `span[style*="--shiki"]` count > 3) stays on its own note and continues to prove highlighting works. Two notes, two independent assertions — no cross-contamination. Reuse `e2e/helpers.ts` (`signUp`, `fillEditor`).
 
 ### Success Criteria:
 
@@ -119,9 +119,9 @@ The whole point: boot drops from ~3.3s to ~0.14s and boot heap from ~129MB to ~3
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes: `pnpm lint`
-- [ ] 1.3 Production build passes: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.3 Production build passes: `pnpm build`
 - [ ] 1.4 E2E passes incl. the new off-list-fence assertion: `pnpm test:e2e`
 
 #### Manual
