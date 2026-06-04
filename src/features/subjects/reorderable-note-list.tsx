@@ -100,7 +100,12 @@ export function ReorderableNoteList({ notes }: { notes: ReorderableNoteT[] }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-muted-foreground text-xs">Drag to reorder</p>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        id="subject-note-reorder"
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
           <ul className="flex flex-col gap-1">
             {items.map((i) => (
