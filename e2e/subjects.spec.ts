@@ -149,3 +149,40 @@ test('subjects are isolated by account, and a note cannot be assigned to a forei
     .select('id')
   expect(assign.error, 'F1 BREACH: B assigned its note to A subject').not.toBeNull()
 })
+
+// S-14 in-place edit: the subject header (title/description) edit moved off the deleted
+// /subjects/[id]/edit route into a ?edit branch on the detail page. The lifecycle test above
+// already renames via the Edit link; this locks the description round-trip, the ?edit URL state,
+// and the old route 404. (The lifecycle test asserts the note list still renders — "stays in
+// edit mode" — so it's not re-asserted here.)
+test('in-place edit: edits title + description in place and /edit 404s (S-14)', async ({
+  page,
+}) => {
+  await signUp(page, uniqueEmail('subj-edit'))
+  const stamp = Date.now()
+
+  await page.goto('/subjects/new')
+  await page.getByLabel('Title').fill(`Subj ${stamp}`)
+  await page.getByRole('button', { name: 'Create subject' }).click()
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
+  const subjectUrl = page.url()
+
+  // The Edit link drives ?edit; the header swaps to the form in place (no navigation away).
+  await page.getByRole('link', { name: 'Edit' }).click()
+  await expect(page).toHaveURL(/\?edit$/)
+  await expect(page.getByLabel('Title')).toBeVisible()
+  await expect(page.getByLabel('Description (optional)')).toBeVisible()
+
+  const renamed = `Subj ${stamp} renamed`
+  const description = `Described ${stamp}`
+  await page.getByLabel('Title').fill(renamed)
+  await page.getByLabel('Description (optional)').fill(description)
+  await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(page.getByRole('heading', { name: renamed })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(description)).toBeVisible()
+  await expect(page).not.toHaveURL(/\?edit$/)
+
+  // The dedicated edit route is gone.
+  const resp = await page.goto(`${subjectUrl}/edit`)
+  expect(resp?.status()).toBe(404)
+})
