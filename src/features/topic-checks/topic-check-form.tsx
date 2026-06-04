@@ -21,18 +21,17 @@ import type { TopicCheckT } from '@/features/topic-checks/types'
 // `check` present → edit (seeds defaults, calls updateTopicCheck); absent → create. Edit
 // state is carried in the URL (`?edit=<id>`), so on a successful edit we navigate back to the
 // bare note path to leave edit mode; on a successful create we reset for the next add and call
-// `onAdded` so the add-mode caller (AddTopicCheck) can collapse the form — which unmounts the
-// CodeMirror island. `onCancel` (add mode) lets the caller hide the form without submitting,
-// also unmounting the editor. The server action revalidates the detail path, so the list
-// refreshes either way. Only one CodeMirror island (code_context) ever mounts while the form is open.
+// `onClose` so the add-mode caller (AddTopicCheck) can collapse the form — which unmounts the
+// CodeMirror island. The "Hide" button (add mode) calls the same `onClose` to dismiss without
+// submitting. The server action revalidates the detail path, so the list refreshes either way.
+// Only one CodeMirror island (code_context) ever mounts while the form is open.
 type TopicCheckFormPropsT = {
   noteId: string
   check?: TopicCheckT
-  onAdded?: () => void
-  onCancel?: () => void
+  onClose?: () => void
 }
 
-export function TopicCheckForm({ noteId, check, onAdded, onCancel }: TopicCheckFormPropsT) {
+export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
 
@@ -54,7 +53,7 @@ export function TopicCheckForm({ noteId, check, onAdded, onCancel }: TopicCheckF
         router.push(`/notes/${noteId}`)
       } else {
         form.reset()
-        onAdded?.()
+        onClose?.()
       }
     },
   })
@@ -71,8 +70,8 @@ export function TopicCheckForm({ noteId, check, onAdded, onCancel }: TopicCheckF
     >
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-medium">{check ? 'Edit topic check' : 'Add a topic check'}</h3>
-        {!check && onCancel && (
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+        {!check && onClose && (
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Hide
           </Button>
         )}

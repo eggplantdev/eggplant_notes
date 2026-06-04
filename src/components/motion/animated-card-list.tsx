@@ -36,9 +36,6 @@ export function AnimatedCardList<T>({
   renderAction,
 }: PropsT<T>) {
   return (
-    // TODO(e2e): list views changed shape — rows are now <div>/motion.div, no <ul>/<li>.
-    // Re-run pnpm test:e2e (notes.spec / subjects.spec list views) and fix any stale
-    // getByRole('listitem') / locator('li') locators against this DOM. Check next test run.
     <div className="flex flex-col gap-3">
       <AnimatePresence mode="popLayout" initial={false}>
         {items.map((item) => {

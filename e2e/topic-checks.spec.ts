@@ -13,8 +13,10 @@ test('full CRUD: add a topic check with highlighted code, list, edit, delete', a
   // A note to attach checks to (title only — keeps the only code block on the page the check's).
   await createNote(page, `TC host note ${Date.now()}`)
 
-  // Empty state, then add a check.
+  // Empty state, then reveal the deferred add form (S-17: collapsed behind "Add check") and add.
   await expect(page.getByText('No topic checks yet.')).toBeVisible()
+  await expect(page.getByLabel('Question')).toBeHidden()
+  await page.getByRole('button', { name: 'Add check' }).click()
   const prompt = `What does sum do? ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)
   await page.getByLabel('Example (optional)').fill('sum(2, 3) === 5')
@@ -40,6 +42,42 @@ test('full CRUD: add a topic check with highlighted code, list, edit, delete', a
   await editedRow.getByRole('button', { name: 'Delete' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })
+})
+
+// S-17: the add-check form (and its CodeMirror island) is deferred behind an "Add check" toggle,
+// so a read view mounts no editor. Reveal on click, collapse on "Hide", collapse after a
+// successful add. `.cm-content` count is the observable proxy for the editor being mounted (the
+// CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 1 while the form is open.
+test('add-check form is deferred: no editor on read, reveals, hides, collapses after add', async ({
+  page,
+}) => {
+  await signUp(page, uniqueEmail('tc-defer'))
+  await createNote(page, `Defer host note ${Date.now()}`)
+
+  // Read view: no editor mounted, form collapsed behind the toggle.
+  await expect(page.locator('.cm-content')).toHaveCount(0)
+  await expect(page.getByLabel('Question')).toBeHidden()
+  const addCheck = page.getByRole('button', { name: 'Add check' })
+  await expect(addCheck).toBeVisible()
+
+  // Reveal → form + exactly one CodeMirror island mounts.
+  await addCheck.click()
+  await expect(page.getByLabel('Question')).toBeVisible()
+  await expect(page.locator('.cm-content')).toHaveCount(1)
+
+  // Hide → form collapses, editor unmounts.
+  await page.getByRole('button', { name: 'Hide' }).click()
+  await expect(page.getByLabel('Question')).toBeHidden()
+  await expect(page.locator('.cm-content')).toHaveCount(0)
+
+  // Re-open, add a check → it lists and the form collapses again (editor unmounts).
+  await addCheck.click()
+  const prompt = `Deferred add ${Date.now()}`
+  await page.getByLabel('Question').fill(prompt)
+  await page.getByRole('button', { name: 'Add topic check' }).click()
+  await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByLabel('Question')).toBeHidden()
+  await expect(page.locator('.cm-content')).toHaveCount(0)
 })
 
 // RLS on the new write/read path: account B cannot see account A's topic checks even when

@@ -70,6 +70,8 @@ Stop rendering the add-mode `TopicCheckForm` on read. Gate it behind an on-deman
 
 **Contract**: Add optional prop `onAdded?: () => void` to `TopicCheckFormPropsT`. In `onSubmit`, on a successful **create** (the `else` branch after `form.reset()`), call `onAdded?.()`. Edit-success path (`router.push`) unchanged.
 
+**AS-BUILT ADDITION (review F4 + /simplify):** also added a "Hide" ghost button (in the form header) so an opened add form can be collapsed _without_ submitting — unmounting the CodeMirror island on cancel too. Initially two props (`onAdded`/`onCancel`); `/simplify` merged them into a single `onClose?: () => void` since both were the identical `setOpen(false)` closure (create-success and Hide both call `onClose`). `AddTopicCheck` wires `onClose` to `setOpen(false)`. (User-requested mid-implementation.)
+
 #### 3. Stop rendering the always-on add form in the section
 
 **File**: `src/features/topic-checks/topic-checks-section.tsx`
@@ -147,13 +149,13 @@ Surface Edit and Delete on each note card via the existing `renderAction` slot, 
 
 ### Changes Required:
 
-#### 1. Make `DeleteNoteButton` safe inside a card Link
+#### 1. Make the list actions safe inside a card Link
 
-**File**: `src/features/notes/delete-note-button.tsx`
+**File**: `src/features/notes/components/note-card-actions.tsx` (the wrapper) — **NOT** `delete-note-button.tsx`
 
-**Intent**: When the button lives inside the list card `<Link>`, opening the confirm dialog must not trigger navigation. Add `preventDefault`/`stopPropagation` to the trigger button's click. This is harmless on the detail page (no enclosing Link).
+**Intent**: When the actions live inside the list card `<Link>`, clicking them must not trigger navigation.
 
-**Contract**: Add `onClick={(e) => { e.preventDefault(); e.stopPropagation() }}` to the `<Button>` inside `AlertDialogTrigger` (Radix still opens the dialog via the trigger). Dialog content is portaled, so inner clicks already don't bubble to the card.
+**AS-BUILT CORRECTION (review F1):** the original plan said to add `onClick={(e) => { preventDefault(); stopPropagation() }}` directly to the `<Button>` inside `AlertDialogTrigger`, claiming "Radix still opens the dialog." **That is wrong** — Radix `AlertDialogTrigger asChild` composes its open handler onto the child and skips opening when the child calls `preventDefault` (`checkForDefaultPrevented`), so that fix would suppress the delete dialog. Shipped instead: `DeleteNoteButton` is left **untouched**, and navigation is neutralized on the **wrapper `<div>`** in `note-card-actions.tsx` (`onClick={blockNav}`). Click bubbles innermost→outermost, so each inner button's own handler (Radix dialog open / Edit's imperative `router.push`) fires first; the wrapper's `preventDefault`+`stopPropagation` then kills native anchor nav — too late to suppress the dialog. Dialog content is portaled, so inner clicks don't bubble to the card.
 
 #### 2. A list Edit shortcut
 
@@ -272,12 +274,12 @@ The core win: the note read view no longer downloads/parses/hydrates CodeMirror.
 
 - [x] 3.1 Type checking passes: `pnpm typecheck` — 88ed981
 - [x] 3.2 Linting passes: `pnpm lint` — 88ed981
-- [ ] 3.3 Unit tests pass: `pnpm test` (deferred to gate test step)
-- [ ] 3.4 E2E pass (list views + new shortcuts): `pnpm test:e2e` (deferred to gate test step)
+- [x] 3.3 Unit tests pass: `pnpm test` (37/37 green)
+- [x] 3.4 E2E pass (list views + new shortcuts): targeted run green — `notes`+`topic-checks`+`card-to-note` 10/10 (5 clean, 5 flaky-passed on the documented GoTrue sign-up race); full `pnpm test:e2e` not run per user direction (port/Supabase shared with parallel S-15 session)
 - [x] 3.5 Build succeeds: `pnpm build` — 88ed981
 
 #### Manual
 
-- [ ] 3.6 Each card shows Edit + Delete; card body still navigates
-- [ ] 3.7 Edit opens the note in edit mode (`?edit=note`)
-- [ ] 3.8 Delete confirms (no navigation), removes the row, toasts
+- [x] 3.6 Each card shows Edit + Delete; card body still navigates (covered by e2e: notes list-shortcuts test)
+- [x] 3.7 Edit opens the note in edit mode (`?edit=note`) (covered by e2e)
+- [x] 3.8 Delete confirms (no navigation), removes the row, toasts (covered by e2e)
