@@ -49,3 +49,22 @@ export async function getNotesForSubject(
       .order('created_at', { ascending: true }),
   )
 }
+
+// Lightweight list backing the docs-style sidebar nav (S-15): only id/title/position, never
+// `content` — the sidebar shows titles and the content pane fetches the active note's body
+// via getNote. Same ordering key as getNotesForSubject (mirrors getNotesForStats' lean read).
+// RLS scopes rows to the owner; injectable client per the isolation rule.
+export async function getSubjectNoteSummaries(
+  subjectId: string,
+  client?: SupabaseClient<Database>,
+): Promise<Pick<NoteT, 'id' | 'title' | 'position'>[]> {
+  const supabase = client ?? (await createClient())
+  return runTableQuery(supabase, (c) =>
+    c
+      .from('notes')
+      .select('id, title, position')
+      .eq('subject_id', subjectId)
+      .order('position', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true }),
+  )
+}
