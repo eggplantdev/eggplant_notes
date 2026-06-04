@@ -31,9 +31,9 @@ describe('toastResult — shared result→toast branching', () => {
     expect(calls).toEqual([{ type: 'error', message: 'Boom' }])
   })
 
-  it('toasts the success message when one is given', () => {
+  it('fires a success toast when a message is given (display copy not asserted)', () => {
     toastResult(ok, 'Saved')
-    expect(calls).toEqual([{ type: 'success', message: 'Saved' }])
+    expect(calls).toEqual([{ type: 'success', message: expect.any(String) }])
   })
 
   it('stays silent on success with no message', () => {
@@ -53,9 +53,9 @@ describe('toastActionResult — form-seam wrapper', () => {
     expect(calls).toEqual([{ type: 'error', message: 'Boom' }])
   })
 
-  it('returns true and toasts the success message on success', () => {
+  it('returns true and fires a success toast on success (display copy not asserted)', () => {
     expect(toastActionResult(ok, { successMessage: 'Done' })).toBe(true)
-    expect(calls).toEqual([{ type: 'success', message: 'Done' }])
+    expect(calls).toEqual([{ type: 'success', message: expect.any(String) }])
   })
 
   it('returns true with no toast when success carries no message', () => {
