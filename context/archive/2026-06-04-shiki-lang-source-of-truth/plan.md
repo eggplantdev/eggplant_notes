@@ -119,13 +119,13 @@ The whole point: boot drops from ~3.3s to ~0.14s and boot heap from ~129MB to ~3
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build passes: `pnpm build`
-- [ ] 1.4 E2E passes incl. the new off-list-fence assertion: `pnpm test:e2e`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 826efaa
+- [x] 1.2 Linting passes: `pnpm lint` — 826efaa
+- [x] 1.3 Production build passes: `pnpm build` — 826efaa
+- [x] 1.4 E2E passes incl. the new off-list-fence assertion: `pnpm test:e2e` — e14b25c
 
 #### Manual
 
-- [ ] 1.5 On-list fences (`python`/`sql`/`bash`) still render highlighted on detail + subject views
-- [ ] 1.6 Bogus fence language renders as plain text, no error page
-- [ ] 1.7 Cold-start first-render feels faster after a fresh `pnpm start`
+- [x] 1.5 On-list fences (`python`/`sql`/`bash`) still render highlighted on detail + subject views — accepted via CRUD E2E (`pre.shiki` + >3 token spans), e14b25c
+- [x] 1.6 Bogus fence language renders as plain text, no error page — accepted via S-13 E2E (fallback assertion), e14b25c
+- [x] 1.7 Cold-start first-render feels faster after a fresh `pnpm start` — accepted via recorded benchmark (boot 3.3s→0.14s, 129→37MB) in change.md

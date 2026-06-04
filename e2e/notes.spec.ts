@@ -54,6 +54,30 @@ test('full CRUD: create a note with code, see it highlighted, edit, delete', asy
   await expect(page.getByText(editedTitle)).toHaveCount(0)
 })
 
+// S-13 guard: render-markdown.tsx constrains Shiki to the curated SHIKI_LANGS with
+// `lazy: true` + `fallbackLanguage: 'text'`. A fence in a language Shiki cannot resolve must
+// degrade to plain text WITHOUT throwing — never blow up a render path. Under `text` fallback
+// the `--shiki` CSS vars sit on the <pre> element only; the inner token <span>s carry none, so
+// `pre.shiki span[style*="--shiki"]` is 0 (vs >3 for the highlighted block in the CRUD test
+// above). A valid-but-off-list language would lazy-load and highlight — so this uses a BOGUS
+// token to exercise the fallback path specifically. Own note → no cross-contamination.
+test('unknown fence language falls back to plain text without error (S-13)', async ({ page }) => {
+  await signUp(page, uniqueEmail('shiki-fallback'))
+  const title = `Bogus fence ${Date.now()}`
+
+  await page.goto('/notes/new')
+  await page.getByLabel('Title').fill(title)
+  await fillEditor(page, ['```xyzzy', 'const x = 1', '```'].join('\n'))
+  await page.getByRole('button', { name: 'Create note' }).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
+
+  // Rendered (no error page), wrapped as a Shiki <pre>, but with zero per-token highlighting —
+  // the fallback fired instead of throwing on the unresolvable grammar.
+  await expect(page.locator('pre.shiki')).toBeVisible()
+  await expect(page.locator('pre.shiki span[style*="--shiki"]')).toHaveCount(0)
+  await expect(page.getByText('const x = 1')).toBeVisible()
+})
+
 // Guards the load-bearing safety property of render-markdown.tsx: react-markdown runs
 // WITHOUT rehype-raw, so raw HTML in a note body is escaped to inert text, never executed.
 // If anyone adds rehype-raw for "richer notes" later, this turns red instead of silently

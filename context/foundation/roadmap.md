@@ -45,7 +45,7 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-16 | action-feedback-toasts         | get a toast on every mutation — errors scream (viewport-fixed), successes confirm                                          | F-01, S-01, S-02, S-03, S-05, S-06 | NFR (feedback/usability)                       | fast-follow | in progress |
 | S-11 | data-fetching-efficiency       | navigate between routes without refetching unchanged data; lists stop over-fetching                                        | S-01, S-02, S-06                   | NFR (responsiveness); S-01/S-02 follow-ups     | v2          | proposed    |
 | S-12 | seed-sample-data               | one-click load + clear of the existing seed corpus, re-scoped to the current user, to demo the whole app                   | all slices / schema frozen         | US-01 (first-run); course-eval demo affordance | v2 (final)  | deferred    |
-| S-13 | shiki-lang-source-of-truth     | (perf) code highlighting loads a curated language set with fast cold start; picker + highlighter share one source of truth | S-01, S-06                         | NFR (code rendering, responsiveness)           | v2          | proposed    |
+| S-13 | shiki-lang-source-of-truth     | (perf) code highlighting loads a curated language set with fast cold start; picker + highlighter share one source of truth | S-01, S-06                         | NFR (code rendering, responsiveness)           | v2          | done        |
 | S-14 | inline-edit-notes-and-subjects | edit a note or subject in place (light read-only default); no separate edit page                                           | S-01, S-02, S-06                   | US-01 (authoring ergonomics)                   | v2          | proposed    |
 | S-15 | subject-sidebar-nav            | browse a subject as a docs-style sidebar (one note per pane); reorder notes via a drag handle                              | S-14, S-06                         | US-01 (subject navigation)                     | v2          | proposed    |
 
@@ -291,7 +291,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** any v2 item — independent of S-14/S-15
 - **Design + evidence:** `context/changes/shiki-lang-source-of-truth/change.md` — benchmarked boot **3.3s→0.14s**, **129→37MB**, tokenize flat (a boot/memory fix, not per-render). Config `{ langs: SHIKI_LANGS, lazy: true, fallbackLanguage: 'text' }`.
 - **Risk:** Low — surgical, isolated, evidence-backed.
-- **Status:** proposed (ready for `/10x-plan`)
+- **Status:** done (archived 2026-06-04 → `context/archive/2026-06-04-shiki-lang-source-of-truth/`)
 
 ### S-14: in-place editing for notes and subjects
 
@@ -391,3 +391,4 @@ Carried from v1 (out-of-MVP):
 - **S-07: when creating a note, the user can attach one or more topic checks in the same flow and save them together.** — Archived 2026-06-03 → `context/archive/2026-06-03-create-note-with-checks/`. Atomic `create_note_with_checks` RPC (SECURITY INVOKER, one transaction). Lesson: —.
 - **S-06: create a subject, assign notes to it, drag-reorder them, and read the subject as one continuous document — each note still individually editable; subject-delete detaches notes (set-null).** — Archived 2026-06-03 → `context/archive/2026-06-03-organize-notes-into-subjects/`. Fractional `position` + `@dnd-kit`; DB-level subject-ownership RLS (F1). Lesson: dnd-kit `useSortable` spreads `role="button"` onto the element — `getByRole('listitem')` won't match it in E2E.
 - **S-08: from a recall card — in the due-review loop and in any card list — the user can open the card's source note in one action.** — Archived 2026-06-03 → `context/archive/2026-06-03-card-to-note-navigation/`. UI only, no schema: `getDueQueue` embeds `notes(title)`; muted "From: ‹title›" link on `/review` → `/notes/[id]`. Lesson: —.
+- **S-13: (perf) markdown code highlighting loads a curated language set instead of all ~200 Shiki grammars, with the picker (`CODE_LANGUAGES`) and highlighter `langs` derived from one array; off-list fences degrade to plain text.** — Archived 2026-06-04 → `context/archive/2026-06-04-shiki-lang-source-of-truth/`. `SHIKI_LANGS` + `{lazy:true, fallbackLanguage:'text'}` on `@shikijs/rehype`; boot 3.3s→0.14s, 129→37MB. Lesson: `text`-fallback emits `--shiki` vars on the `<pre>` only, not token spans — scope highlight assertions to `span[style*="--shiki"]`.
