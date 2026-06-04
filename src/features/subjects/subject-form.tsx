@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -29,7 +30,8 @@ export function SubjectForm(props: SubjectFormPropsT) {
       const result = props.subject
         ? await props.action(props.subject.id, value)
         : await props.action(value)
-      if (!result.success) setFormError(result.error)
+      // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
+      if (!toastActionResult(result)) setFormError(result.error)
     },
   })
 

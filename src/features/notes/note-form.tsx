@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { toastActionResult } from '@/components/forms/toast-result'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
 import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
@@ -88,7 +89,8 @@ export function NoteForm(props: NoteFormPropsT) {
       const result = props.note
         ? await props.action(props.note.id, noteInput)
         : await props.action({ note: noteInput, checks: value.checks })
-      if (!result.success) setFormError(result.error)
+      // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
+      if (!toastActionResult(result)) setFormError(result.error)
     },
   })
 

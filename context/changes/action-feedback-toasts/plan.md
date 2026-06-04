@@ -307,23 +307,23 @@ Negligible — one client container + an effect-driven reader. `<ToastContainer>
 
 #### Automated
 
-- [x] 2.1 `pnpm typecheck` passes
-- [x] 2.2 `pnpm lint` passes
-- [x] 2.3 `pnpm build` succeeds
+- [x] 2.1 `pnpm typecheck` passes — badd251
+- [x] 2.2 `pnpm lint` passes — badd251
+- [x] 2.3 `pnpm build` succeeds — badd251
 
 #### Manual
 
-- [x] 2.4 Reorder success toast + failure error toast visible while scrolled
-- [x] 2.5 Assign-subject / rating / topic-check-delete toasts fire
-- [x] 2.6 Optimistic revert + AlertDialog flows unchanged
+- [x] 2.4 Reorder success toast + failure error toast visible while scrolled — badd251
+- [x] 2.5 Assign-subject / rating / topic-check-delete toasts fire — badd251
+- [x] 2.6 Optimistic revert + AlertDialog flows unchanged — badd251
 
 ### Phase 3: Form Seam
 
 #### Automated
 
-- [ ] 3.1 `pnpm typecheck` passes
-- [ ] 3.2 `pnpm lint` passes
-- [ ] 3.3 `pnpm build` succeeds
+- [x] 3.1 `pnpm typecheck` passes
+- [x] 3.2 `pnpm lint` passes
+- [x] 3.3 `pnpm build` succeeds
 
 #### Manual
 

@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { resetPassword } from '@/features/auth/actions/reset-password'
@@ -18,8 +19,12 @@ export default function ResetPasswordPage() {
     defaultValues: { email: '' },
     onSubmit: async ({ value }) => {
       const result = await resetPassword(value)
-      if (result.success) setSent(true)
-      else setFormError(result.error)
+      // Error toasts; success keeps its inline "check your email" confirmation (no success toast).
+      if (!toastActionResult(result)) {
+        setFormError(result.error)
+        return
+      }
+      setSent(true)
     },
   })
 

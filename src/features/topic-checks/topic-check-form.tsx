@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { toastActionResult } from '@/components/forms/toast-result'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
 import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
@@ -38,7 +39,7 @@ export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
       const result = check
         ? await updateTopicCheck(noteId, check.id, value)
         : await createTopicCheck(noteId, value)
-      if (!result.success) {
+      if (!toastActionResult(result, { successMessage: check ? 'Check saved' : 'Check added' })) {
         setFormError(result.error)
         return
       }
