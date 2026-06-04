@@ -109,36 +109,51 @@ Returns `undefined` when nothing crossed (action returns no `celebrate`). Tests 
 daily-only crossing, weekly-only, both-at-once (combined), re-review that doesn't increment
 daily (no crossing), goal already exceeded (no re-fire), `goal <= 0` guard.
 
-## UI component
+## UI component & the unmount race
 
-`features/review/goal-celebration-dialog.tsx` — shadcn `Dialog` (already present), neon
-theme matching the goal bar (`neon-glow-hit`, `text-neon-cyan`). Copy adapts to which goal
-crossed:
+**The race:** rating the _last_ due card revalidates `/review` to the "All caught up"
+empty state, which **unmounts `RatingButtons`**. If `RatingButtons` owned the dialog's open
+state, the congrats would vanish the instant it's most likely earned (finishing your due
+queue often crosses the daily goal). So the celebration state must live _outside_ the card
+conditional.
+
+**The fix (no new dependency):** a small React **Context** provider —
+`ReviewCelebrationProvider` (`features/review/review-celebration-context.tsx`) — rendered by
+the review page **around the whole body, outside the `card ? ... : ...` branch**. It holds
+the celebration state, exposes `celebrate(payload)` / `dismiss()` via a `useReviewCelebration`
+hook, fires `canvas-confetti` inside `celebrate()` (event-driven, no `useEffect`), and
+renders the dialog itself. `RatingButtons` calls `useReviewCelebration().celebrate(...)` in
+the `run()` resolution callback; because the provider stays mounted across the card advance,
+the dialog survives `RatingButtons` unmounting. (Zustand was considered but it isn't
+installed and `src/stores` is empty — Context is the lighter correct tool for this
+session-scoped state.)
+
+`features/review/goal-celebration-dialog.tsx` — presentational shadcn `Dialog` (already
+present), neon theme matching the goal bar (`text-neon-cyan`). Controlled via
+`open={!!celebration}`; copy adapts to which goal crossed:
 
 - both → "Daily + weekly goal hit!" with both counts
-- daily → "Daily goal hit! · {dailyCount}/{dailyGoal}"
-- weekly → "Weekly goal hit! · {weeklyCount}/{weeklyGoal}"
+- daily → "Daily goal hit!" · `{dailyCount}/{dailyGoal}`
+- weekly → "Weekly goal hit!" · `{weeklyCount}/{weeklyGoal}`
 
-Single Close button. `canvas-confetti` fires once on open. `RatingButtons` owns the open
-state; closing clears it. No `useEffect` for the trigger — open state is set in the `run()`
-resolution callback (event-driven, not effect-driven), per the project's no-`useEffect`
-rule. Confetti fire happens in the dialog's open handler.
+Single Close button.
 
 ## Files touched
 
-| File                                          | Change                                               |
-| --------------------------------------------- | ---------------------------------------------------- |
-| `app/(protected)/review/page.tsx`             | read `getDailyGoal()`, pass `goal` prop              |
-| `features/review/rating-buttons.tsx`          | accept `goal` prop, pass to action, own dialog state |
-| `features/review/actions/rate-topic-check.ts` | before/after counts, crossing, return `celebrate`    |
-| `features/review/detect-goal-crossing.ts`     | **new** pure helper                                  |
-| `features/review/goal-celebration-dialog.tsx` | **new** dialog + confetti                            |
-| `features/review/types.ts`                    | `GoalCelebrationT`                                   |
-| `features/review/schemas.ts`                  | small `goalSchema` (positive int)                    |
-| `features/review-events/queries.ts`           | **new** `getReviewsThisWeekCount()`                  |
-| `hooks/use-action-transition.ts`              | make `run` generic                                   |
-| `package.json`                                | add `canvas-confetti` + `@types/canvas-confetti`     |
-| `src/__tests__/...`                           | unit test for `detectGoalCrossing`                   |
+| File                                             | Change                                                         |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `app/(protected)/review/page.tsx`                | read `getDailyGoal()`, wrap body in provider, pass `goal` prop |
+| `features/review/rating-buttons.tsx`             | accept `goal` prop, call `useReviewCelebration().celebrate`    |
+| `features/review/actions/rate-topic-check.ts`    | before/after counts, crossing, return `celebrate`              |
+| `features/review/detect-goal-crossing.ts`        | **new** pure helper                                            |
+| `features/review/review-celebration-context.tsx` | **new** provider + `useReviewCelebration` hook + confetti      |
+| `features/review/goal-celebration-dialog.tsx`    | **new** presentational dialog                                  |
+| `features/review/types.ts`                       | `GoalCelebrationT`, `RateResultT`                              |
+| `features/review/schemas.ts`                     | small `goalSchema` (positive int)                              |
+| `features/review-events/queries.ts`              | **new** `getReviewsThisWeekCount()`                            |
+| `hooks/use-action-transition.ts`                 | make `run` generic                                             |
+| `package.json`                                   | add `canvas-confetti` + `@types/canvas-confetti`               |
+| `src/__tests__/...`                              | unit test for `detectGoalCrossing`                             |
 
 ## Rejected alternatives
 
