@@ -1,11 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { type ReactNode } from 'react'
+import { type MouseEvent, type ReactNode } from 'react'
 import { AnimatePresence } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+
+// The whole card is a <Link>, so a click inside the action slot would navigate. This wrapper
+// neutralizes that ONCE for every consumer: preventDefault kills the native anchor activation,
+// stopPropagation keeps the click off Next's Link onClick. It sits on a PARENT of the action
+// (bubble phase), so each action's own handler (a router.push, a Radix dialog trigger) fires
+// first — and being a parent it dodges the Radix-trigger-child preventDefault trap a per-button
+// handler would hit. Consumers therefore must NOT re-add preventDefault/stopPropagation.
+function blockCardNav(e: MouseEvent<HTMLDivElement>) {
+  e.preventDefault()
+  e.stopPropagation()
+}
 
 type PropsT<T> = {
   items: T[]
@@ -15,9 +26,9 @@ type PropsT<T> = {
   // Optional secondary line, rendered as-is under the title (the caller owns its markup so
   // each list can style it differently, e.g. a date vs a line-clamped description).
   renderSubtitle?: (item: T) => ReactNode
-  // Optional top-right action, rendered as a sibling of the title inside the card. The whole
-  // card is a <Link>, so an interactive action here must preventDefault/stopPropagation on its
-  // own click (see SubjectCardNewNoteButton). Omitted → the card DOM is unchanged (notes list).
+  // Optional top-right action, rendered as a sibling of the title inside the card. The slot
+  // wraps it in a nav-neutralizing container (see blockCardNav), so the action just renders its
+  // controls — no need to preventDefault/stopPropagation itself. Omitted → card DOM unchanged.
   renderAction?: (item: T) => ReactNode
 }
 
@@ -51,7 +62,9 @@ export function AnimatedCardList<T>({
                           <CardTitle>{renderTitle(item)}</CardTitle>
                           {renderSubtitle?.(item)}
                         </div>
-                        {renderAction(item)}
+                        <div className="shrink-0" onClick={blockCardNav}>
+                          {renderAction(item)}
+                        </div>
                       </div>
                     ) : (
                       <>

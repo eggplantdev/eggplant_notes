@@ -1,64 +1,26 @@
 'use client'
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { FormError } from '@/components/forms/form-components/form-error'
+import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
-import { deleteNote } from '@/features/notes/actions/delete-note'
-import { useActionTransition } from '@/hooks/use-action-transition'
+import { DeleteNoteDialog } from '@/features/notes/delete-note-dialog'
 
 type DeleteNoteButtonPropsT = { id: string; redirectTo?: string }
 
-// Destructive control on the detail page (FR-010). Confirms via AlertDialog, then fires
-// the deleteNote Server Action inside a transition. On success the action redirects (so the
-// callback never returns) — to /notes by default, or `redirectTo` when the caller wants to
-// stay in context (the S-15 subject view passes its /subjects/[id]). A returned failure is
-// surfaced inline and the dialog stays open. `preventDefault` on the action stops Radix from
-// auto-closing the dialog before the transition resolves. The note's topic checks cascade at the DB.
+// Destructive control on the detail page (FR-010): a trigger button plus its own
+// DeleteNoteDialog instance (the dialog + deleteNote logic live there, shared with the notes
+// list's single shared dialog). Local open-state maps to the dialog's controlled `noteId`.
+// `redirectTo` forwards to the action — the S-15 subject view passes its /subjects/[id] so the
+// docs context survives the delete.
 export function DeleteNoteButton({ id, redirectTo }: DeleteNoteButtonPropsT) {
-  const { error, isPending, run } = useActionTransition()
+  const [open, setOpen] = useState(false)
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this note?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This permanently deletes the note and its topic checks. This can&apos;t be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <FormError message={error} />
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            disabled={isPending}
-            onClick={(e) => {
-              e.preventDefault()
-              // deleteNote redirects on success, so it only ever returns on failure — the hook
-              // toasts that error inline + as a toast. Success confirms via the Phase-4 ?toast flag
-              // after the redirect lands (no successMessage here).
-              run(() => deleteNote(id, redirectTo))
-            }}
-          >
-            {isPending ? 'Deleting…' : 'Delete'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+        Delete
+      </Button>
+      <DeleteNoteDialog noteId={open ? id : null} onOpenChange={setOpen} redirectTo={redirectTo} />
+    </>
   )
 }

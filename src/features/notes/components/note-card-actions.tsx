@@ -1,31 +1,29 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { type MouseEvent } from 'react'
 
-import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { Button } from '@/components/ui/button'
 
 // Per-card Edit + Delete actions for the notes list (AnimatedCardList's renderAction slot).
-// The whole card is a <Link>, so a click here must not navigate. We neutralize navigation on
-// the WRAPPER, not the buttons: preventDefault kills the native anchor activation and
-// stopPropagation keeps the click off Next's Link onClick. This runs after each inner button's
-// own handler (Edit's router.push, Delete's Radix dialog trigger) — so both still fire, and we
-// avoid the trap where preventDefault on a Radix AlertDialogTrigger child suppresses the open.
-export function NoteCardActions({ noteId }: { noteId: string }) {
+// The slot wraps this in a nav-neutralizing container, so the buttons just act. Delete doesn't
+// own a dialog — it requests deletion via `onRequestDelete`, and NotesList opens its single
+// shared DeleteNoteDialog for the chosen id (one dialog for the whole list, not one per row).
+type NoteCardActionsPropsT = {
+  noteId: string
+  onRequestDelete: (noteId: string) => void
+}
+
+export function NoteCardActions({ noteId, onRequestDelete }: NoteCardActionsPropsT) {
   const router = useRouter()
 
-  function blockNav(e: MouseEvent<HTMLDivElement>) {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
   return (
-    <div className="flex shrink-0 items-center gap-2" onClick={blockNav}>
+    <div className="flex items-center gap-2">
       <Button variant="outline" size="sm" onClick={() => router.push(`/notes/${noteId}?edit=note`)}>
         Edit
       </Button>
-      <DeleteNoteButton id={noteId} />
+      <Button variant="destructive" size="sm" onClick={() => onRequestDelete(noteId)}>
+        Delete
+      </Button>
     </div>
   )
 }
