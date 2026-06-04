@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
@@ -20,6 +20,10 @@ type PropsT = {
   // Optional back link rendered above the header, visible on every breakpoint.
   backHref?: string
   backLabel?: string
+  // When true, the back control navigates browser history (router.back()) instead of linking to
+  // backHref — so it returns to wherever the user came from. Falls back to backHref (or '/') when
+  // there's no history to go back to (e.g. a directly-opened deep link).
+  backHistory?: boolean
   // Inner content width, within the shared `container-shell` cap (max-w 120rem) the <main>
   // already applies. 'full' = fill that cap (default; dashboard); 'prose' = max-w-2xl
   // (read-heavy pages); 'wide' = max-w-4xl (the note editor).
@@ -45,11 +49,13 @@ export function PageShell({
   actions,
   backHref,
   backLabel,
+  backHistory,
   width = 'full',
   children,
 }: PropsT) {
   const shouldReduceMotion = useReducedMotion()
   const pathname = usePathname()
+  const router = useRouter()
   // Hide the <h1> on mobile only on the top-level nav routes, where CurrentPageLabel already
   // pins the section name. Derived from the nav registry (exact href match) rather than a
   // per-page prop, so it stays in lockstep with CurrentPageLabel and can't drift. Exact match
@@ -65,11 +71,23 @@ export function PageShell({
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: 'easeInOut' }}
         className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
       >
-        {backHref && (
+        {(backHref || backHistory) && (
           <div>
-            <Button asChild variant="ghost" size="sm">
-              <Link href={backHref}>← {backLabel}</Link>
-            </Button>
+            {backHistory ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  window.history.length > 1 ? router.back() : router.push(backHref ?? '/')
+                }
+              >
+                ← {backLabel}
+              </Button>
+            ) : (
+              <Button asChild variant="ghost" size="sm">
+                <Link href={backHref!}>← {backLabel}</Link>
+              </Button>
+            )}
           </div>
         )}
 

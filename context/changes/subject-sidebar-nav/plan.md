@@ -280,34 +280,34 @@ None — no schema change, no data migration. `reorderNote`'s extra `revalidateP
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Production build passes: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 0a5bc1f
+- [x] 1.2 Linting passes: `pnpm lint` — 0a5bc1f
+- [x] 1.3 Production build passes: `pnpm build` — 0a5bc1f
 
 #### Manual
 
-- [x] 1.4 `/read` redirects to first note; `[noteId]` renders body with highlighting
-- [x] 1.5 Sidebar lists notes in `position` order matching continuous view
-- [x] 1.6 Empty subject shows prompt, not crash
-- [x] 1.7 Invalid/foreign `noteId` 404s
-- [x] 1.8 Verified on a production build, not `next dev`
+- [x] 1.4 `/read` redirects to first note; `[noteId]` renders body with highlighting — 0a5bc1f
+- [x] 1.5 Sidebar lists notes in `position` order matching continuous view — 0a5bc1f
+- [x] 1.6 Empty subject shows prompt, not crash — 0a5bc1f
+- [x] 1.7 Invalid/foreign `noteId` 404s — 0a5bc1f
+- [x] 1.8 Verified on a production build, not `next dev` — 0a5bc1f
 
 ### Phase 2: Sidebar DnD Island (Handle Split + Nav + Mobile)
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 `midpoint` unit test passes: `pnpm test`
-- [ ] 2.4 Production build passes: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 `midpoint` unit test passes: `pnpm test`
+- [x] 2.4 Production build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 2.5 Row click navigates + highlights; handle drag reorders; row-body click never drags
-- [ ] 2.6 Reorder persists across hard reload (revalidation reaches `/read`)
-- [ ] 2.7 Failed reorder reverts optimistic order AND shows error toast
-- [ ] 2.8 At 360px sidebar collapses to a sheet and lists notes
-- [ ] 2.9 Continuous view reorder still works unchanged
+- [x] 2.5 Row click navigates + highlights; handle drag reorders; row-body click never drags
+- [x] 2.6 Reorder persists across hard reload (revalidation reaches `/read`)
+- [x] 2.7 Failed reorder reverts optimistic order AND shows error toast
+- [x] 2.8 At 360px sidebar collapses to a sheet and lists notes
+- [x] 2.9 Continuous view reorder still works unchanged
 
 ### Phase 3: View-Flip Toggles
 

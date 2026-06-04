@@ -1,8 +1,8 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { PageShell } from '@/components/layout/page-shell'
+import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
 
 // Docs-style single-pane subject view (S-15) — a SEPARATE route from the continuous
@@ -27,21 +27,7 @@ export default async function SubjectReadLayout({
   return (
     <PageShell title={subject.title} backHref="/subjects" backLabel="Subjects" width="full">
       <div className="grid gap-6 md:grid-cols-[15rem_minmax(0,1fr)]">
-        <nav aria-label="Notes in this subject" className="flex flex-col gap-1">
-          {summaries.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No notes yet.</p>
-          ) : (
-            summaries.map((note) => (
-              <Link
-                key={note.id}
-                href={`/subjects/${id}/read/${note.id}`}
-                className="hover:bg-muted truncate rounded-md px-3 py-2 text-sm"
-              >
-                {note.title ?? 'Untitled'}
-              </Link>
-            ))
-          )}
-        </nav>
+        <SubjectNoteSidebar subjectId={id} notes={summaries} />
         <div className="min-w-0">{children}</div>
       </div>
     </PageShell>

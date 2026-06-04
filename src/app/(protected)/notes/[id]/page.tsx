@@ -47,8 +47,9 @@ export default async function NotePage({
       title={isEditingNote ? 'Edit note' : (note.title ?? 'Untitled')}
       subtitle={isEditingNote ? undefined : `Updated ${new Date(note.updated_at).toLocaleString()}`}
       width={isEditingNote ? 'wide' : 'prose'}
+      backHistory
       backHref="/notes"
-      backLabel="Notes"
+      backLabel="Back"
       actions={
         isEditingNote ? (
           <Button asChild variant="outline" size="sm">

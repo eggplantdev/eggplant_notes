@@ -21,19 +21,11 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { reorderNote } from '@/features/subjects/actions/reorder-note'
+import { midpoint } from '@/features/subjects/midpoint'
 import { useActionTransition } from '@/hooks/use-action-transition'
 import { cn } from '@/lib/utils'
 
 export type ReorderableNoteT = { id: string; title: string; position: number }
-
-// Fractional midpoint for a note dropped between its new neighbors. Top → half the next
-// position (stays positive, below it); bottom → just above the last; middle → the average.
-function midpoint(prev: number | undefined, next: number | undefined, fallback: number): number {
-  if (prev !== undefined && next !== undefined) return (prev + next) / 2
-  if (prev !== undefined) return prev + 1
-  if (next !== undefined) return next / 2
-  return fallback
-}
 
 function SortableRow({ id, title }: { id: string; title: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({

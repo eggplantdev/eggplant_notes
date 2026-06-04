@@ -28,5 +28,8 @@ export async function reorderNote(noteId: string, position: number): Promise<Act
   if (!result.success) return result
 
   revalidatePath('/subjects/[id]', 'page')
+  // Also refresh the S-15 docs-view sidebar, which renders the ordered note list in the
+  // read layout — without this a hard reload of /subjects/[id]/read would show stale order.
+  revalidatePath('/subjects/[id]/read', 'layout')
   return { success: true }
 }
