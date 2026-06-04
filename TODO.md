@@ -17,14 +17,12 @@ _App currently has no name/logo/footer._
 - [ ] Eggplant landing/about page ("bakłażan page") + a nav link to it.
 - [ ] Branded loader (bouncing eggplant) — replace remaining loaders/spinners.
 - [ ] Footer (copyright etc.).
+- [ ] **Open design question (not a task):** show note content/snippet in the notes list view, or keep titles-only?
 
 ## Cluster 2 — UI polish
 
 - [ ] Separate the drag handle from the card body in subject reorder — dnd affordance ≠ whole card.
-- [ ] Nicer mobile menu — refinement of the existing persistent nav (S-10).
-- [ ] Finish Framer Motion transitions — framer-motion already wired (page-shell + motion components); spec at `docs/superpowers/specs/2026-06-03-page-shell-and-motion-design.md`.
 - [ ] Edit a note directly from the `subjects/[id]` view.
-- [ ] **Open design question (not a task):** show note content/snippet in the notes list view, or keep titles-only?
 
 Subjects/id view
 New not -> add note
@@ -51,15 +49,13 @@ Separately - we need to also open note edit from this view
 - [ ] Pagination for the notes list.
 - [ ] Virtualised long lists (TanStack Virtual).
 
-## Cluster 5 — Real-data dogfooding benchmark (acceptance test) · **SEEDED — walkthrough pending**
+## Cluster 5 — Real-data dogfooding benchmark (acceptance test) · **IN PROGRESS / next up**
 
-- [x] **Seeded** Python — functional programming via a reusable generator (`supabase/seed-scripts/generate-section-seed.mjs`). Source: `/workspace/learning/python/functional_p/functional_programming_py_notes.md` + `flashcards/python_functional/functional_programming_flashcards.md`. Result: 1 subject → 52 ordered note-sections → 70 cards (~56 due now) + 168 review_events. `supabase db reset` green.
-- [x] **Replaced** the synthetic `test@gmail.com` playground (24 fake subjects / 60 fake notes). Login: `test@gmail.com` / `test@Test`.
-- [x] **Answer-field decision:** `topic_checks` has no answer column (`prompt`/`example`/`code_context` only). Resolved by using both real sources — note body = the prose/code section (notes file), card `example` = the flashcard `A:`. No duplication, no schema change.
-- [ ] Walk the flow on seeded data (subject-as-document → `/review` → card→note jump) and confirm it holds up.
-- [ ] (optional) Dial the due/future ratio down — 56 due now is a large first session (`fsrs()` in the generator, `j % 5`).
-- [ ] (optional) Seed a 2nd section to test multi-subject navigation.
-- [ ] (tidy) Strip the operator's absolute home path from the generated header comment in `seed.sql`.
+- [ ] Seed the app with REAL notes from `/workspace/learning` and verify the whole flow on real content (subject → ordered note-sections → cards in `/review` → card→note jump).
+- [ ] **First section chosen: Python — functional programming.**
+      Source: `/workspace/learning/python/functional_p/functional_programming_py_notes.md` + `/workspace/learning/flashcards/python_functional/functional_programming_flashcards.md`.
+- [ ] **Decision made:** REPLACE the synthetic `test@gmail.com` playground (24 fake subjects / 60 fake notes in `supabase/seed.sql`) with this real content.
+- **Modeling friction surfaced:** `topic_checks` has NO answer field (only `prompt`, `example`, `code_context`) — the recall model assumes the answer lives in the source note. The flashcards carry explicit `A:` answers, so seeding must decide where the answer goes. **Current plan: put the answer in the `example` field.**
 
 ## Cluster 6 — Later (explicitly deferred)
 

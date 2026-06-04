@@ -25,6 +25,7 @@ export function toastMessage(
     pauseOnHover: false,
     draggable: true,
     progress: undefined,
+    pauseOnFocusLoss: false,
     theme: 'dark',
     transition: Bounce,
   })
@@ -35,5 +36,5 @@ export function toastMessage(
 // form seam (toastActionResult) can't drift apart on that branching.
 export function toastResult(result: ActionResultT, successMessage?: string): void {
   if (!result.success) toastMessage(result.error, 'error')
-  else if (successMessage) toastMessage(successMessage, 'success')
+  else if (successMessage) toastMessage(`${successMessage} ✌️`, 'success')
 }
