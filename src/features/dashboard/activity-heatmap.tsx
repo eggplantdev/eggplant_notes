@@ -69,7 +69,7 @@ export function ActivityHeatmap({ columns }: PropsT) {
       </div>
 
       <div className="text-muted-foreground text-2xs mt-3 flex items-center gap-1">
-        Less
+        <span>Less</span>
         {HEAT_LEVELS.map((lvl) => (
           <span
             key={lvl}
@@ -77,7 +77,7 @@ export function ActivityHeatmap({ columns }: PropsT) {
             style={{ width: CELL, height: CELL }}
           />
         ))}
-        More
+        <span>More (16+)</span>
       </div>
 
       <HeatmapTooltip ref={tipRef} />

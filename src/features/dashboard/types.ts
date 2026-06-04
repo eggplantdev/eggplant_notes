@@ -74,8 +74,6 @@ export type DashboardStatsT = {
   retention: number | null // fraction 0–1 of reviews rated ≥3 in the window; null if none
   lapseRate: number | null // fraction 0–1 of reviews rated 1 (Again) in the window
   longestStreak: number
-  unassignedNotes: number
-  notesWithoutCards: number
   hardestCards: HardestCardT[]
   subjectRollup: SubjectRollupT[]
 }

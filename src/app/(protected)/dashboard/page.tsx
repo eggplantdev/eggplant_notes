@@ -45,8 +45,6 @@ export default async function DashboardPage() {
     { label: 'Reviews this week', value: s.reviewsThisWeek, sub: 'reviews in the last 7 days' },
     { label: 'Retention (30d)', value: pct(s.retention), sub: 'reviews rated Good or better' },
     { label: 'Lapse rate (30d)', value: pct(s.lapseRate), sub: 'reviews rated Again' },
-    { label: 'Unassigned notes', value: s.unassignedNotes, sub: 'notes with no subject' },
-    { label: 'Notes without cards', value: s.notesWithoutCards, sub: 'no topic checks yet' },
   ]
 
   return (

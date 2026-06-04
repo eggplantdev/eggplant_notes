@@ -6,12 +6,12 @@ describe('countToLevel', () => {
   it('maps counts to the five intensity buckets', () => {
     expect(countToLevel(0)).toBe(0)
     expect(countToLevel(1)).toBe(1)
-    expect(countToLevel(2)).toBe(1)
-    expect(countToLevel(3)).toBe(2)
-    expect(countToLevel(5)).toBe(2)
-    expect(countToLevel(6)).toBe(3)
-    expect(countToLevel(9)).toBe(3)
-    expect(countToLevel(10)).toBe(4)
+    expect(countToLevel(5)).toBe(1)
+    expect(countToLevel(6)).toBe(2)
+    expect(countToLevel(10)).toBe(2)
+    expect(countToLevel(11)).toBe(3)
+    expect(countToLevel(15)).toBe(3)
+    expect(countToLevel(16)).toBe(4)
     expect(countToLevel(99)).toBe(4)
   })
 
@@ -37,7 +37,7 @@ describe('buildHeatmapMatrix', () => {
     const monday = lastColumn.cells[1]
     expect(monday.date).toBe('2026-06-01')
     expect(monday.count).toBe(4)
-    expect(monday.level).toBe(2)
+    expect(monday.level).toBe(1)
   })
 
   it('pads days after today as null cells', () => {

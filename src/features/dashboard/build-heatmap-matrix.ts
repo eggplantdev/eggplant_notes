@@ -12,9 +12,9 @@ import type { ActivityDayT } from '@/types/activity'
 // review-count distribution when the data layer lands (noted in the design spec).
 export function countToLevel(count: number): HeatmapLevelT {
   if (count <= 0) return 0
-  if (count <= 2) return 1
-  if (count <= 5) return 2
-  if (count <= 9) return 3
+  if (count <= 5) return 1
+  if (count <= 10) return 2
+  if (count <= 15) return 3
   return 4
 }
 

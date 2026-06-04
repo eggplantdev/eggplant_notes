@@ -70,13 +70,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
 
   const hardestCards = buildHardest(checks, notes)
 
-  // Library coverage from the note set — one pass for both counts.
-  let unassignedNotes = 0
-  let notesWithoutCards = 0
-  for (const n of notes) {
-    if (n.subject_id === null) unassignedNotes += 1
-    if (!cardsByNote.has(n.id)) notesWithoutCards += 1
-  }
   const subjectRollup = buildSubjectRollup(subjects, notes, cardsByNote, dueByNote)
 
   // Review-quality stats over the fetched window — one pass for good/again/this-week.
@@ -106,8 +99,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     retention: total > 0 ? good / total : null,
     lapseRate: total > 0 ? again / total : null,
     longestStreak: getLongestStreak(activity),
-    unassignedNotes,
-    notesWithoutCards,
     hardestCards,
     subjectRollup,
   }
