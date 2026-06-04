@@ -1,10 +1,10 @@
 ---
 change_id: subject-sidebar-nav
 title: Docs-style single-pane subject view with sidebar nav + drag-reorder
-status: implemented
+status: archived
 created: 2026-06-04
 updated: 2026-06-04
-archived_at: null
+archived_at: 2026-06-04T13:13:49Z
 ---
 
 ## Notes
