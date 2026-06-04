@@ -270,11 +270,11 @@ The core win: the note read view no longer downloads/parses/hydrates CodeMirror.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — 88ed981
+- [x] 3.2 Linting passes: `pnpm lint` — 88ed981
 - [ ] 3.3 Unit tests pass: `pnpm test` (deferred to gate test step)
 - [ ] 3.4 E2E pass (list views + new shortcuts): `pnpm test:e2e` (deferred to gate test step)
-- [x] 3.5 Build succeeds: `pnpm build`
+- [x] 3.5 Build succeeds: `pnpm build` — 88ed981
 
 #### Manual
 
