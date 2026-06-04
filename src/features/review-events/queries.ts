@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+import { countDistinctReviewedOn } from '@/features/review-events/today-count'
 import type { ReviewEventT } from '@/features/review-events/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
@@ -44,6 +45,21 @@ export async function getReviewActivity(
     counts.set(day, (counts.get(day) ?? 0) + 1)
   }
   return [...counts].map(([date, count]) => ({ date, count }))
+}
+
+// Distinct cards reviewed *today* (in APP_TIME_ZONE), for the dashboard daily-goal bar. We
+// fetch a ~2-day buffer rather than `>= utcMidnight`: APP_TIME_ZONE is UTC+1/+2, so a review
+// late in the local evening can sit just before UTC midnight — a naive UTC-midnight cutoff
+// would drop it from "today." We over-fetch, then keep only rows whose zone-bucketed date is
+// today, and count distinct topic_check_id (the same card reviewed twice counts once).
+// Injectable client per the isolation rule.
+export async function getReviewedTodayCount(client?: SupabaseClient<Database>): Promise<number> {
+  const supabase = client ?? (await createClient())
+  const since = new Date(Date.now() - 2 * MS_PER_DAY).toISOString()
+  const rows = await runTableQuery(supabase, (c) =>
+    c.from('review_events').select('topic_check_id, reviewed_at').gte('reviewed_at', since),
+  )
+  return countDistinctReviewedOn(rows, isoDateInZone(new Date(), APP_TIME_ZONE))
 }
 
 // Rating + timestamp of every review in the trailing `windowDays`, backing the dashboard's

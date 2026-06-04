@@ -13,6 +13,7 @@ export type HeatmapLevelT = (typeof HEAT_LEVELS)[number]
 
 export type DashboardDataT = {
   dueToday: number
+  reviewedToday: number
   currentStreak: number
   activity: ActivityDayT[]
   stats: DashboardStatsT

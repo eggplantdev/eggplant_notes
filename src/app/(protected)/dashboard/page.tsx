@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
+import { DailyProgressBar } from '@/features/dashboard/daily-progress-bar'
 import { getDashboardData } from '@/features/dashboard/data'
 import { DueForecast } from '@/features/dashboard/due-forecast'
 import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
 import { SubjectRollup } from '@/features/dashboard/subject-rollup'
+import { getDailyGoal } from '@/features/settings/queries'
 import { getCurrentUser } from '@/lib/supabase/server'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
@@ -24,7 +26,13 @@ export default async function DashboardPage() {
   // getCurrentUser() is request-memoized (React cache()), so this reuses the user the
   // (protected) layout already validated — no second round-trip to Supabase Auth. The data
   // read is independent, so the two run in parallel.
-  const [user, data] = await Promise.all([getCurrentUser(), getDashboardData()])
+  // The route (app layer) joins the dashboard's reviewedToday with the goal owned by the
+  // settings feature, so features/dashboard never imports features/settings.
+  const [user, data, dailyGoal] = await Promise.all([
+    getCurrentUser(),
+    getDashboardData(),
+    getDailyGoal(),
+  ])
   const s = data.stats
   const columns = buildHeatmapMatrix(data.activity, {
     today: todayInZone(APP_TIME_ZONE),
@@ -57,6 +65,8 @@ export default async function DashboardPage() {
         </Button>
       }
     >
+      <DailyProgressBar reviewed={data.reviewedToday} goal={dailyGoal} />
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Review activity — last 12 months</CardTitle>

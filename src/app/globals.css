@@ -15,6 +15,11 @@
   --color-heat-2: var(--heat-2);
   --color-heat-3: var(--heat-3);
   --color-heat-4: var(--heat-4);
+  /* Daily-goal progress bar brand neon (fixed in light + dark): the green→cyan line gradient
+     (bg-linear-to-r from-neon-green to-neon-cyan). Direct values, not a :root indirection,
+     since they don't theme-swap. */
+  --color-neon-green: #10ffaa;
+  --color-neon-cyan: #00e5ff;
   --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
   --font-heading: var(--font-sans);
@@ -154,6 +159,16 @@
 @utility container-shell {
   @apply mx-auto w-full px-4 sm:px-6;
   max-width: 120rem; /* 1920px */
+}
+
+/* Daily-goal progress bar glow. Applied to the filled segment; intensifies at goal-hit
+   (neon-glow-hit) to mark the ≥100% state. Cyan-tinted to match the gradient's bright end. */
+@utility neon-glow {
+  box-shadow: 0 0 6px color-mix(in oklch, var(--color-neon-cyan) 70%, transparent);
+}
+
+@utility neon-glow-hit {
+  box-shadow: 0 0 12px color-mix(in oklch, var(--color-neon-cyan) 90%, transparent);
 }
 
 /* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
