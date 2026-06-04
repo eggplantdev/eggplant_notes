@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { updateNote } from '@/features/notes/actions/update-note'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { NoteForm } from '@/features/notes/note-form'
@@ -71,6 +72,8 @@ export default async function NotePage({
         // read branch is just the rendered body — no inline subject picker.
         <RenderMarkdown content={note.content} />
       )}
+
+      <Separator />
 
       {/* `note` is the body-edit sentinel — never a check id. Forwarding it as editId would
           trip TopicChecksSection's stale-?edit guard (no check has id `note`) and bounce the
