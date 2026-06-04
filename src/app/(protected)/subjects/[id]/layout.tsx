@@ -33,6 +33,7 @@ export default async function SubjectLayout({
       backHref="/subjects"
       backLabel="Subjects"
       width="full"
+      fill
       actions={
         <>
           <Button asChild size="sm">
@@ -45,9 +46,12 @@ export default async function SubjectLayout({
         </>
       }
     >
-      <div className="grid gap-6 md:grid-cols-[15rem_minmax(0,1fr)]">
+      {/* App-shell row (desktop): fills the bounded <main> (PageShell `fill`) and gives the grid
+          a single 1fr track, so the sidebar column and the content pane each scroll on their own
+          (md:overflow-y-auto below) while the page itself never scrolls. */}
+      <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[15rem_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
         <SubjectNoteSidebar subjectId={id} notes={summaries} />
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 md:min-h-0 md:overflow-y-auto">{children}</div>
       </div>
     </PageShell>
   )

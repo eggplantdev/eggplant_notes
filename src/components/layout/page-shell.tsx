@@ -28,6 +28,11 @@ type PropsT = {
   // already applies. 'full' = fill that cap (default; dashboard); 'prose' = max-w-2xl
   // (read-heavy pages); 'wide' = max-w-4xl (the note editor).
   width?: WidthT
+  // Opt-in app-shell mode (desktop only): bound <main> to the viewport below the sticky app
+  // nav bar and stop the page from scrolling, so scrollable children (e.g. a docs-style
+  // sidebar + content pane) scroll *internally* instead. The consumer must give the child it
+  // wants to fill `md:min-h-0 md:flex-1`. Off by default — normal pages keep page-level scroll.
+  fill?: boolean
   children: ReactNode
 }
 
@@ -51,6 +56,7 @@ export function PageShell({
   backLabel,
   backHistory,
   width = 'full',
+  fill = false,
   children,
 }: PropsT) {
   const shouldReduceMotion = useReducedMotion()
@@ -64,12 +70,18 @@ export function PageShell({
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (
-    <main className="container-shell py-4 sm:py-6">
+    <main
+      className={cn(
+        'container-shell py-4 sm:py-6',
+        // 4rem ≈ the desktop sticky app-nav bar height (AppNav: py-4 + a row of sm controls).
+        fill && 'md:flex md:h-[calc(100dvh-4rem)] md:flex-col md:overflow-hidden',
+      )}
+    >
       <motion.div
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: 'easeInOut' }}
-        className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
+        className={cn('flex flex-col gap-6', fill && 'md:min-h-0 md:flex-1', WIDTH_CLASS[width])}
       >
         {(backHref || backHistory) && (
           <div>

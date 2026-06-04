@@ -178,11 +178,12 @@ export function SubjectNoteSidebar({
 
   return (
     <>
-      {/* Desktop: persistent sidebar column — sticky below the nav bar, scrolls on its own when
-          the note list is long so the content pane scrolls independently. */}
+      {/* Desktop: persistent sidebar column. The layout's app-shell row (PageShell `fill` +
+          a 1fr grid track) bounds this cell to the viewport, so it just fills the row and
+          scrolls its own list when long — the content pane and page stay put. */}
       <nav
         aria-label="Notes in this subject"
-        className="hidden md:sticky md:top-20 md:block md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto"
+        className="hidden md:block md:min-h-0 md:overflow-y-auto"
       >
         <SortableNoteList
           dndId="subject-sidebar-desktop"
