@@ -4,8 +4,10 @@ import { notFound } from 'next/navigation'
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
+import { updateNote } from '@/features/notes/actions/update-note'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { NoteSubjectPicker } from '@/features/notes/components/note-subject-picker'
+import { NoteForm } from '@/features/notes/note-form'
 import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getTopicChecksForNote } from '@/features/topic-checks/queries'
@@ -13,7 +15,10 @@ import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section
 
 // Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
 // `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
-// 404. `?edit=<checkId>` drives the topic-check edit form (server-rendered, no client state).
+// 404. `?edit` carries two mutually exclusive meanings: `note` swaps the body+subject into
+// NoteForm in place (the old /notes/[id]/edit route, now inline); `<checkId>` drives the
+// topic-check edit form. Both are server-rendered (no client edit state) — forced because
+// RenderMarkdown is an async server-only Shiki component.
 export default async function NotePage({
   params,
   searchParams,
@@ -32,27 +37,55 @@ export default async function NotePage({
   ])
   if (!note) notFound()
 
+  const isEditingNote = edit === 'note'
+
   return (
     <PageShell
-      title={note.title ?? 'Untitled'}
-      subtitle={`Updated ${new Date(note.updated_at).toLocaleString()}`}
-      width="prose"
+      // Edit mode mirrors the deleted /notes/[id]/edit route: "Edit note" label (not the
+      // doc title, which would duplicate NoteForm's own title field) and the wider editor
+      // width for the side-by-side write/preview grid.
+      title={isEditingNote ? 'Edit note' : (note.title ?? 'Untitled')}
+      subtitle={isEditingNote ? undefined : `Updated ${new Date(note.updated_at).toLocaleString()}`}
+      width={isEditingNote ? 'wide' : 'prose'}
       backHref="/notes"
       backLabel="Notes"
       actions={
-        <>
+        isEditingNote ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/notes/${note.id}/edit`}>Edit</Link>
+            <Link href={`/notes/${note.id}`}>Cancel</Link>
           </Button>
-          <DeleteNoteButton id={note.id} />
-        </>
+        ) : (
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/notes/${note.id}?edit=note`}>Edit</Link>
+            </Button>
+            <DeleteNoteButton id={note.id} />
+          </>
+        )
       }
     >
-      <NoteSubjectPicker noteId={note.id} currentSubjectId={note.subject_id} subjects={subjects} />
+      {isEditingNote ? (
+        <NoteForm action={updateNote} note={note} subjects={subjects} />
+      ) : (
+        <>
+          <NoteSubjectPicker
+            noteId={note.id}
+            currentSubjectId={note.subject_id}
+            subjects={subjects}
+          />
 
-      <RenderMarkdown content={note.content} />
+          <RenderMarkdown content={note.content} />
+        </>
+      )}
 
-      <TopicChecksSection noteId={note.id} checks={topicChecks} editId={edit} />
+      {/* `note` is the body-edit sentinel — never a check id. Forwarding it as editId would
+          trip TopicChecksSection's stale-?edit guard (no check has id `note`) and bounce the
+          user out of body-edit, so suppress it while editing the body. */}
+      <TopicChecksSection
+        noteId={note.id}
+        checks={topicChecks}
+        editId={isEditingNote ? undefined : edit}
+      />
     </PageShell>
   )
 }
