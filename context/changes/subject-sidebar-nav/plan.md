@@ -247,28 +247,29 @@ Make the single-pane docs view the canonical subject view by moving the `/read` 
 
 ### Integration / E2E Tests (`e2e/`):
 
-- **Renders read view**: seed a subject with ≥2 notes, visit `/subjects/[id]/read` → asserts redirect to first note + body highlighted (`pre.shiki span[style*="--shiki"]` per `lessons.md:70-75`).
+- **Renders subject view**: seed a subject with ≥2 notes, visit `/subjects/[id]` → asserts redirect to first note (`/subjects/[id]/[noteId]`) + body highlighted (`pre.shiki span[style*="--shiki"]` per `lessons.md:70-75`).
 - **Sidebar navigation**: click a second note's row → URL changes to its `[noteId]`, pane body changes, active highlight moves. Select rows by `data-testid`/text, NOT `getByRole('listitem')` (`lessons.md:91-96`).
-- **Handle reorder**: drag the **handle's** bounding box (not the row body) to reorder; reload; assert new order. Clicking the row body navigates (does not drag).
+- **Handle reorder**: drag the **handle's** bounding box (not the row body) to reorder; reload; assert new order. Clicking the row body navigates (does not drag). Keyboard: arrow ↑/↓ move between note links; grip is not tab-focusable.
 - **Empty subject**: subject with 0 notes → empty prompt, no crash.
-- **Mobile sheet**: at 360px viewport, sidebar trigger opens the sheet list.
+- **Subject actions**: New note / Edit (`?edit` → SubjectForm) / Delete subject reachable from the layout header; note-delete returns to `/subjects/[id]`.
+- **Mobile sheet**: at 360px viewport, sidebar trigger opens the sheet list; tapping a note closes it.
 - Follow the fresh-per-test sign-up + `uniqueEmail` convention; `retries: 2` covers GoTrue flake (`lessons.md:34-39`).
 
 ### Manual Testing Steps:
 
-1. Production build (`next start`), load a seeded subject's `/read`; click through several notes — confirm only the pane streams.
+1. Production build (`next start`), open a seeded subject (`/subjects/[id]`); click through several notes — confirm only the pane swaps (fades in; no skeleton).
 2. Drag a handle to reorder; reload; confirm persistence.
 3. Resize to 360px; toggle the sidebar sheet.
-4. Flip both directions via the header links.
-5. Confirm the continuous view is unchanged.
+4. Edit a note → top-left "← Back" returns to the subject view; delete a note → returns to the subject.
+5. Subject actions (New note / Edit / Delete) work from the header.
 
 ## Performance Considerations
 
-The single-pane pane renders ~1 note body per navigation (vs the continuous view's N bodies), so Shiki cost per view is much lower; the `loading.tsx` boundary streams the pane so the sidebar is immediately interactive. The sidebar query is titles-only (no `content`). Virtual scrolling is deferred (assess-only) — a single body doesn't justify it. Validate latency on a prod build, never `next dev` (`lessons.md:55-60`).
+The pane renders ~1 note body per navigation (vs the old continuous view's N bodies), so Shiki cost per view is much lower. The `loading.tsx` skeleton was **removed** (operator preference) — without it the previous note stays visible during the swap, then the `template.tsx` motion fades the new one in. The sidebar query is titles-only (no `content`). Virtual scrolling is deferred (assess-only) — a single body doesn't justify it. Validate latency on a prod build, never `next dev` (`lessons.md:55-60`). True instant-revisit caching is **deferred to S-11** (Cache Components / Router Cache).
 
 ## Migration Notes
 
-None — no schema change, no data migration. `reorderNote`'s extra `revalidatePath` is additive and backward-compatible with the continuous view.
+None — no schema change, no data migration. The continuous `/subjects/[id]` view was **replaced** by the single-pane docs view (A/B resolved); its render code + the orphaned `ReorderableNoteList` / `getNotesForSubject` were deleted.
 
 ## References
 
@@ -322,10 +323,10 @@ None — no schema change, no data migration. `reorderNote`'s extra `revalidateP
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — 5669785
+- [x] 3.2 Linting passes: `pnpm lint` — 5669785
+- [x] 3.3 Production build passes: `pnpm build` — 5669785
 
 #### Manual
 
-- [x] 3.4 Opening `/subjects/[id]` lands on the docs view; subject actions (New note/Edit/Delete) work; note-delete returns to subject _(manual run waived by operator)_
+- [x] 3.4 Opening `/subjects/[id]` lands on the docs view; subject actions (New note/Edit/Delete) work; note-delete returns to subject _(manual run waived by operator)_ — 5669785
