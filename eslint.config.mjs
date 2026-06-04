@@ -34,6 +34,9 @@ const eslintConfig = defineConfig([
     // Playwright runs a separate production build into .next-e2e (distDir override) so it
     // never clobbers the dev .next — same generated output, never lint it.
     ".next-e2e/**",
+    // The prod-build-server skill builds into .next-prodtest (distDir override) — same
+    // generated output as .next, never lint it.
+    ".next-prodtest/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

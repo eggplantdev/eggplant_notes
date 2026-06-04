@@ -127,9 +127,9 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   await expect(page.getByRole('heading', { name: 'Topic checks' })).toBeVisible()
 
   // Edit the body in place → save → redirected off the ?edit URL with the new content rendered.
-  // Scope to the FIRST CodeMirror: edit mode shows two — NoteForm's body editor (first) and the
-  // TopicChecksSection add-form's code_context editor below — so the shared fillEditor's bare
-  // `.cm-content` locator would be ambiguous here.
+  // Since S-17 the add-check form is deferred (collapsed behind "Add check"), so edit mode now
+  // mounts only NoteForm's body editor — a single CodeMirror. `.first()` is kept defensively (it
+  // would still disambiguate if someone opened the add form), but the page is single-editor here.
   const marker = `inline-body-${Date.now()}`
   const bodyEditor = page.locator('.cm-content').first()
   await bodyEditor.click()
@@ -142,4 +142,49 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   // The dedicated edit route is gone.
   const resp = await page.goto(`${noteUrl}/edit`)
   expect(resp?.status()).toBe(404)
+})
+
+// S-17: each note card on /notes carries Edit + Delete shortcuts whose clicks must NOT trigger
+// the card's own navigation. Edit jumps straight into edit mode; Delete opens the shared confirm
+// dialog (no nav) and removes the row; clicking the card body still opens the note.
+test('notes list cards have working Edit/Delete shortcuts; card body still navigates', async ({
+  page,
+}) => {
+  await signUp(page, uniqueEmail('notes-list-actions'))
+  const title = `List actions ${Date.now()}`
+  await createNote(page, title)
+
+  // Card body still navigates to the note.
+  await page.goto('/notes')
+  await expect(page.getByText(title)).toBeVisible()
+  await page.getByText(title).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/)
+
+  // Edit shortcut → straight into the note's edit mode, not just the detail view.
+  await page.goto('/notes')
+  await page.getByRole('button', { name: 'Edit' }).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+\?edit=note$/)
+  await expect(page.getByLabel('Title')).toBeVisible()
+
+  // Delete shortcut → dialog opens WITHOUT navigating off the list, then confirm removes the row.
+  await page.goto('/notes')
+  await page.getByRole('button', { name: 'Delete' }).click()
+  await expect(page).toHaveURL('/notes')
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText(title)).toHaveCount(0, { timeout: 15_000 })
+})
+
+// S-17 Phase 2: subject assignment lives only in edit mode — the read view no longer shows an
+// inline Subject control (NoteSubjectPicker was removed); NoteForm's Subject field covers edit.
+test('subject control appears only in edit mode, not on the read view', async ({ page }) => {
+  await signUp(page, uniqueEmail('notes-subject-placement'))
+  await createNote(page, `Subject placement ${Date.now()}`)
+
+  // Read view: no Subject control.
+  await expect(page.getByText('Subject', { exact: true })).toHaveCount(0)
+
+  // Edit mode: the Subject field is present.
+  await page.getByRole('link', { name: 'Edit' }).click()
+  await expect(page).toHaveURL(/\?edit=note$/)
+  await expect(page.getByText('Subject', { exact: true })).toBeVisible()
 })

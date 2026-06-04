@@ -20,12 +20,18 @@ import type { TopicCheckT } from '@/features/topic-checks/types'
 
 // `check` present → edit (seeds defaults, calls updateTopicCheck); absent → create. Edit
 // state is carried in the URL (`?edit=<id>`), so on a successful edit we navigate back to the
-// bare note path to leave edit mode; on a successful create we just reset for the next add.
-// The server action revalidates the detail path, so the list refreshes either way. Only one
-// CodeMirror island (code_context) ever mounts — the single form is reused for add + edit.
-type TopicCheckFormPropsT = { noteId: string; check?: TopicCheckT }
+// bare note path to leave edit mode; on a successful create we reset for the next add and call
+// `onClose` so the add-mode caller (AddTopicCheck) can collapse the form — which unmounts the
+// CodeMirror island. The "Hide" button (add mode) calls the same `onClose` to dismiss without
+// submitting. The server action revalidates the detail path, so the list refreshes either way.
+// Only one CodeMirror island (code_context) ever mounts while the form is open.
+type TopicCheckFormPropsT = {
+  noteId: string
+  check?: TopicCheckT
+  onClose?: () => void
+}
 
-export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
+export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
 
@@ -43,8 +49,12 @@ export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
         setFormError(result.error)
         return
       }
-      if (check) router.push(`/notes/${noteId}`)
-      else form.reset()
+      if (check) {
+        router.push(`/notes/${noteId}`)
+      } else {
+        form.reset()
+        onClose?.()
+      }
     },
   })
 
@@ -58,7 +68,14 @@ export function TopicCheckForm({ noteId, check }: TopicCheckFormPropsT) {
         form.handleSubmit()
       }}
     >
-      <h3 className="font-medium">{check ? 'Edit topic check' : 'Add a topic check'}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-medium">{check ? 'Edit topic check' : 'Add a topic check'}</h3>
+        {!check && onClose && (
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            Hide
+          </Button>
+        )}
+      </div>
 
       <form.AppField name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
         {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
