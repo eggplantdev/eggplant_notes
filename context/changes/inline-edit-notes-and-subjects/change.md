@@ -1,7 +1,7 @@
 ---
 change_id: inline-edit-notes-and-subjects
 title: Collapse view + edit into one page for notes and subjects (in-place editing)
-status: implementing
+status: implemented
 created: 2026-06-04
 updated: 2026-06-04
 archived_at: null
