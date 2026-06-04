@@ -335,10 +335,10 @@ Negligible — one client container + an effect-driven reader. `<ToastContainer>
 
 #### Automated
 
-- [x] 4.1 `pnpm typecheck` passes
-- [x] 4.2 `pnpm lint` passes
-- [x] 4.3 `pnpm build` succeeds
-- [x] 4.4 `DeletedNotice` removed, no dangling imports (`grep -r DeletedNotice src` empty)
+- [x] 4.1 `pnpm typecheck` passes — fb55de2
+- [x] 4.2 `pnpm lint` passes — fb55de2
+- [x] 4.3 `pnpm build` succeeds — fb55de2
+- [x] 4.4 `DeletedNotice` removed, no dangling imports (`grep -r DeletedNotice src` empty) — fb55de2
 
 #### Manual
 
