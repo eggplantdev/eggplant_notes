@@ -39,8 +39,8 @@ Separately - we need to also open note edit from this view
 
 ## Cluster 3 — Dashboard features
 
-- [ ] Dail Goal
-- [ ] Today's progress bar.
+- [x] Dail Goal
+- [x] Today's progress bar.
 
 ## Cluster 4 — Performance (= roadmap S-11, already scoped)
 
@@ -86,3 +86,55 @@ These were in the raw braindump but are already shipped:
 - "0 due" header hidden when caught up
 - "New note" link on dashboard exists
 - Add-note already tied to a subject
+
+!!!
+switching notes has to be much faster
+
+copy code snippet feature (withou markdown code block)
+
+remove unnecessary shit from dashboard
+
+check on mobile
+push to prod
+
+eggplant logo
+
+Change the name to eggplant_notes
+
+Copyright in the footer etc
+
+Dodać linka do bakłażana page
+Na później - konto usera
+
+Why no caching when navigating between pages
+Do we have revalidate etc ?
+
+paginacja
+tenstack virtual scroll
+
+optymalizacja zapytań, np gdzie notes potrzebuję cały obiekt a gdzie nie
+
+Due in next 7 day
+
+Cards by state -> cards view
+generalnie statsy dotyczące cards - cards view
+statsy dotyczące notes - notes view
+
+total lapses - wtf
+
+reviews - do reviews
+
+Due forecast - out
+
+optimize getDashboardData - a lot of things removed
+
+move review to dashboard ?
+
+create notes out of markdown file or any file
+create notes by asking ai
+
+edit note view must have same editor like subject notes listing
+
+update note by agent via webhook?
+
+Adding notes instruction
