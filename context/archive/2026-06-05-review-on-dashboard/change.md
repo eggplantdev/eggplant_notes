@@ -1,10 +1,10 @@
 ---
 change_id: review-on-dashboard
 title: Move the review session onto the dashboard (pure relocation, S0)
-status: implemented
+status: archived
 created: 2026-06-05
 updated: 2026-06-05
-archived_at: null
+archived_at: 2026-06-05T12:16:46Z
 ---
 
 ## Notes
