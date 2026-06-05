@@ -28,9 +28,6 @@ export const MATURE_STABILITY_DAYS = 21
 // Rolling window (days) for retention / lapse-rate / review-volume stats.
 export const STATS_WINDOW_DAYS = 30
 
-// Forecast horizon (days, inclusive of today) for the upcoming-due bar chart.
-export const FORECAST_DAYS = 7
-
 export const MONTHS = [
   'Jan',
   'Feb',

@@ -7,7 +7,6 @@ import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { getDashboardData } from '@/features/dashboard/data'
-import { DueForecast } from '@/features/dashboard/due-forecast'
 import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
@@ -180,15 +179,6 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Due in the next 7 days</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DueForecast days={s.dueForecast} />
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Cards by state</CardTitle>

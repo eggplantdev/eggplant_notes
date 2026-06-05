@@ -38,9 +38,6 @@ export type RatingStatRowT = { rating: number; reviewed_at: string }
 // Counts of cards in each FSRS state (index = FSRS_STATE_LABELS index).
 export type StateCountsT = { new: number; learning: number; review: number; relearning: number }
 
-// One day of the upcoming-due forecast. `date` is ISO YYYY-MM-DD; day 0 folds in overdue.
-export type DueForecastDayT = { date: string; count: number }
-
 // A frequently-failed card, for the "needs attention" list. Links to its source note.
 export type HardestCardT = {
   id: string
@@ -66,7 +63,6 @@ export type DashboardStatsT = {
   totalSubjects: number
   stateCounts: StateCountsT
   overdue: number
-  dueForecast: DueForecastDayT[]
   matureCards: number
   youngCards: number
   totalLapses: number

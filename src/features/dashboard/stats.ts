@@ -1,4 +1,4 @@
-import { FORECAST_DAYS, MATURE_STABILITY_DAYS } from '@/features/dashboard/constants'
+import { MATURE_STABILITY_DAYS } from '@/features/dashboard/constants'
 import { getLongestStreak } from '@/features/review-events/streak'
 import type {
   CheckStatRowT,
@@ -34,13 +34,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
   const { checks, notes, subjects, ratings, activity, today } = input
 
   const todayStr = toISODate(today.getTime())
-  // Forecast day buckets: index 0 = today (folds in overdue), 1..N = each upcoming day.
-  const forecastDates = Array.from({ length: FORECAST_DAYS }, (_, i) =>
-    toISODate(today.getTime() + i * MS_PER_DAY),
-  )
-  const dueForecast = forecastDates.map((date) => ({ date, count: 0 }))
-  // date → bucket index, so the per-check assignment is an O(1) lookup, not an indexOf scan.
-  const forecastIdx = new Map(forecastDates.map((date, i) => [date, i]))
 
   const stateCounts = { new: 0, learning: 0, review: 0, relearning: 0 }
   const stateKeys = ['new', 'learning', 'review', 'relearning'] as const
@@ -59,12 +52,7 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     const dueStr = isoDateInZone(new Date(c.due_at), APP_TIME_ZONE)
     if (dueStr <= todayStr) {
       overdue += dueStr < todayStr ? 1 : 0
-      dueForecast[0].count += 1 // today + overdue land in the first bar
       dueByNote.set(c.note_id, (dueByNote.get(c.note_id) ?? 0) + 1)
-    } else {
-      // idx is never 0 here (today's cards took the branch above), so a defined idx is upcoming.
-      const idx = forecastIdx.get(dueStr)
-      if (idx !== undefined) dueForecast[idx].count += 1
     }
   }
 
@@ -90,7 +78,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     totalSubjects: subjects.length,
     stateCounts,
     overdue,
-    dueForecast,
     matureCards,
     youngCards: checks.length - matureCards,
     totalLapses,
