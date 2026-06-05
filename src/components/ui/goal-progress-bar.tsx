@@ -78,7 +78,8 @@ export function GoalProgressBar({
           {reviewed} / {goal}
         </span>
       </div>
-      {/* Transparent track only sets the 100% reference width; the line itself is the fill. */}
+      {/* Track sets the 100% reference width and shows a barely-visible empty state (the default
+          border colour); the line itself is the fill. */}
       <div
         role="progressbar"
         aria-label={label}
@@ -86,7 +87,7 @@ export function GoalProgressBar({
         aria-valuemax={goal}
         aria-valuenow={Math.min(reviewed, goal)}
         aria-valuetext={`${reviewed} / ${goal}`}
-        className="h-1 w-full"
+        className="bg-border h-1 w-full rounded-full"
       >
         <div
           className={cn('h-full rounded-full bg-linear-to-r', v.fill, hit ? v.glowHit : v.glow)}
