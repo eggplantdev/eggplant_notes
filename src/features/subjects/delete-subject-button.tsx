@@ -1,62 +1,26 @@
 'use client'
 
-import { FormError } from '@/components/forms/form-components/form-error'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
-import { deleteSubject } from '@/features/subjects/actions/delete-subject'
-import { useActionTransition } from '@/hooks/use-action-transition'
+import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
 
 type DeleteSubjectButtonPropsT = { id: string }
 
-// Destructive control on the subject page. Member notes are DETACHED, not deleted (FK set
-// null) — the copy says so explicitly. Mirrors DeleteNoteButton: confirm via AlertDialog,
-// fire the action in a transition, `preventDefault` so Radix doesn't close before it
-// resolves. On success the action redirects to /subjects; a failure surfaces inline.
+// Destructive control on the subject page: a trigger button plus its own DeleteSubjectDialog
+// instance (the dialog + deleteSubject logic live there, shared with the subjects list's single
+// shared dialog). Local open-state maps to the dialog's controlled `subjectId`. Mirrors
+// DeleteNoteButton. Member notes are DETACHED, not deleted (FK set null); deleteSubject
+// redirects to /subjects on success.
 export function DeleteSubjectButton({ id }: DeleteSubjectButtonPropsT) {
-  const { error, isPending, run } = useActionTransition()
+  const [open, setOpen] = useState(false)
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this subject?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This deletes the subject only. Its notes are kept and become unassigned — nothing is
-            lost. This can&apos;t be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <FormError message={error} />
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            disabled={isPending}
-            onClick={(e) => {
-              e.preventDefault()
-              // Redirects to /subjects on success → returns only on failure (hook toasts it).
-              // Success confirms via the Phase-4 ?toast flag after the redirect.
-              run(() => deleteSubject(id))
-            }}
-          >
-            {isPending ? 'Deleting…' : 'Delete'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+        Delete
+      </Button>
+      <DeleteSubjectDialog subjectId={open ? id : null} onOpenChange={setOpen} />
+    </>
   )
 }

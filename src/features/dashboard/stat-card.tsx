@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 
-type PropsT = { label: string; value: ReactNode; sub: string }
+type PropsT = { label: string; value: ReactNode; sub?: string }
 
 // Presentational summary tile (due-today / streak). Server-safe; no domain knowledge.
 export function StatCard({ label, value, sub }: PropsT) {
