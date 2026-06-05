@@ -22,7 +22,7 @@ checkpoint:
 
 ## Current System
 
-A live Next.js 16 (App Router) + React 19 + TypeScript web app on Vercel, with Supabase (Postgres + Auth + RLS). Shipped and archived: F-01 auth (email+password), F-02 per-user persistence + RLS, S-01 note capture with code highlighting, S-05 account+data deletion. S-03 recall loop (FSRS spaced repetition, ts-fsrs) shipped + archived. Tables: `notes`, `topic_checks` (FSRS state columns), `review_events`. BYOK via OpenRouter PKCE (v1 decision, carried forward).
+A live Next.js 16 (App Router) + React 19 + TypeScript web app on Vercel, with Supabase (Postgres + Auth + RLS). Shipped and archived: F-01 auth (email+password), F-02 per-user persistence + RLS, S-01 note capture with code highlighting, S-05 account+data deletion. S-03 recall loop (FSRS spaced repetition, ts-fsrs) shipped + archived. Tables: `notes`, `memory_cards` (FSRS state columns), `review_events`. BYOK via OpenRouter PKCE (v1 decision, carried forward).
 
 **State of the data:** no real users, no real notes/cards entered in the app yet — only the operator dogfooding. **There is nothing to preserve data-wise.** The v2 schema change can therefore be clean and destructive (drop/recreate, no migration, no backward-compat burden).
 
@@ -48,7 +48,7 @@ No change planned — v1 model preserved: email + password via Supabase Auth, fl
 
 ### Primary
 
-The operator (user zero) stops opening `/workspace/learning` markdown files and uses the app instead for at least one real subject. Concretely, end-to-end: create a **subject** → add notes to it as ordered sections → read the subject as one continuous document → cards (`topic_checks`) generated/attached to a note surface in the due-review loop → after reviewing a card, jump directly to its source note. Adoption-by-dogfooding is the bar, not feature count.
+The operator (user zero) stops opening `/workspace/learning` markdown files and uses the app instead for at least one real subject. Concretely, end-to-end: create a **subject** → add notes to it as ordered sections → read the subject as one continuous document → cards (`memory_cards`) generated/attached to a note surface in the due-review loop → after reviewing a card, jump directly to its source note. Adoption-by-dogfooding is the bar, not feature count.
 
 ### Secondary
 
@@ -64,11 +64,11 @@ Inline check creation and the small authoring nits (deferred eager-validation, l
 
 1. **Subjects** — new `subjects` table; `notes.subject_id` (nullable, FK); subject detail page renders member notes as one continuous document, ordered; reorder notes. (was roadmap S-06)
 2. **Finish recall loop** — complete S-03 (FSRS), near done.
-3. **Card→note jump (UI only)** — `topic_checks.note_id` already exists; add a "view source note" action on the review card / card lists that routes to the note detail page.
+3. **Card→note jump (UI only)** — `memory_cards.note_id` already exists; add a "view source note" action on the review card / card lists that routes to the note detail page.
 
 ## Fast-follow (after 06-10, before broader v2)
 
-- Inline topic-check creation during note create/edit, no redirect-first. (was roadmap S-07)
+- Inline memory-card creation during note create/edit, no redirect-first. (was roadmap S-07)
 - Defer eager title validation (no error while typing).
 - Language select when creating a note.
 
@@ -89,12 +89,12 @@ Inline check creation and the small authoring nits (deferred eager-validation, l
   > Socrates: Counter-argument considered: "created-order would be enough for v1, deferring the ordering-strategy decision." Resolution: kept — reading a subject as one document only works if note order is user-controlled, mirroring the operator's markdown heading structure. Ordering strategy (position int vs fractional index) deferred to /10x-plan.
 - FR-004: User can read a subject as one continuous document (member notes rendered in order). Priority: must-have. Change: new
 - FR-005: User can complete a due card review and have it rescheduled by FSRS. Priority: must-have. Change: modified
-- FR-006: User can jump from a card to its source note. Priority: must-have. Change: new (UI only — `topic_checks.note_id` FK already exists)
+- FR-006: User can jump from a card to its source note. Priority: must-have. Change: new (UI only — `memory_cards.note_id` FK already exists)
 - FR-007: Per-user data isolation (RLS by `auth.uid()`) holds across the new `subjects` table. Priority: must-have. Change: preserved
 
 ### Fast-follow (nice-to-have, post-06-10)
 
-- FR-008: User can attach topic checks inline while creating/editing a note. Priority: nice-to-have. Change: new
+- FR-008: User can attach memory cards inline while creating/editing a note. Priority: nice-to-have. Change: new
 - FR-009: Title validation does not show errors while typing (defer to blur/submit). Priority: nice-to-have. Change: modified
 - FR-010: User can select a code language when creating a note. Priority: nice-to-have. Change: new
 
@@ -108,7 +108,7 @@ Inline check creation and the small authoring nits (deferred eager-validation, l
 
 ## Business Logic
 
-Existing domain rule (unchanged): the app decides **when** a piece of knowledge should resurface for review, using **FSRS** spaced-repetition scheduling over `topic_checks` and `review_events`. This is the product's domain decision and it is not changing.
+Existing domain rule (unchanged): the app decides **when** a piece of knowledge should resurface for review, using **FSRS** spaced-repetition scheduling over `memory_cards` and `review_events`. This is the product's domain decision and it is not changing.
 
 The v2 change adds an **organizational layer** (Subject grouping notes; ordered reading; card→note navigation). This is structure, not a new domain rule — no new scoring/recommendation/classification rule is introduced in the v1-usable subset.
 

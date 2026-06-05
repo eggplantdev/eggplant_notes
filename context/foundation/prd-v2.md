@@ -28,7 +28,7 @@ A personal coding-learning web app: markdown notes with syntax-highlighted code,
 - **Architecture:** serverless web application, App Router, deployed on a managed hosting platform.
 - **Tech stack:** Next.js 16 (App Router) + React 19 + TypeScript; Tailwind v4 + shadcn/ui; Supabase (Postgres + Auth + Row-Level Security); Vercel. Bring-your-own-key LLM access via OpenRouter PKCE.
 - **Current user base:** the operator only (user zero, dogfooding). No real external users and no real notes/cards entered in the app yet.
-- **Core functionality today:** email+password auth; per-user persistent notes with code highlighting; a spaced-repetition recall loop (FSRS) over cards (`topic_checks`) each attached to a note; account-and-data deletion. Per-user isolation enforced at the persistence layer (RLS).
+- **Core functionality today:** email+password auth; per-user persistent notes with code highlighting; a spaced-repetition recall loop (FSRS) over cards (`memory_cards`) each attached to a note; account-and-data deletion. Per-user isolation enforced at the persistence layer (RLS).
 
 ## Problem Statement & Motivation
 

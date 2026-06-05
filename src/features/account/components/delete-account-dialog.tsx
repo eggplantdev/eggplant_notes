@@ -32,7 +32,7 @@ export function DeleteAccountDialog() {
         open={open}
         onOpenChange={setOpen}
         title="Delete your account?"
-        description="This permanently deletes your account and all your notes, topic checks, and review history. This cannot be undone."
+        description="This permanently deletes your account and all your notes, memory cards, and review history. This cannot be undone."
         isPending={isPending}
         error={error}
         confirmDisabled={!isConfirmed}

@@ -21,7 +21,7 @@ timeline_budget:
 
 Developers accumulate coding notes across many projects, languages, and environments — scattered, write-once, rarely revisited. Notes live in random repository READMEs, personal knowledge-base apps, and scratch files. There's no reminder to come back, no signal for what's retained vs forgotten, and no way to actively verify a concept by writing code that something will grade. Existing tools force a trade: knowledge-base products lack a recall layer; spaced-repetition products render code poorly and have no notes layer; products that combine the two treat AI as a bolt-on generator. Knowledge decays silently while the developer rewrites notes they already had.
 
-Many developers spend their working day inside terminal-based coding agents already. The insight: instead of bolting AI onto a notes app, make agent integration a first-class interface that runs alongside a conventional web UI. Notes and topic checks can be created from the terminal (for agent-native users) or via in-app forms (for everyone else). Code answers inside notes get verified by an AI agent in-app. Reminders and queries can also be issued from the terminal so the recall loop runs in the workflow the user already uses. The cost model is bring-your-own-key — each user authorizes the app to make LLM calls against their own external account, so calls are billed to them and revocable; the operator carries no LLM cost and the trust problem dissolves into a standard authorization scope.
+Many developers spend their working day inside terminal-based coding agents already. The insight: instead of bolting AI onto a notes app, make agent integration a first-class interface that runs alongside a conventional web UI. Notes and memory cards can be created from the terminal (for agent-native users) or via in-app forms (for everyone else). Code answers inside notes get verified by an AI agent in-app. Reminders and queries can also be issued from the terminal so the recall loop runs in the workflow the user already uses. The cost model is bring-your-own-key — each user authorizes the app to make LLM calls against their own external account, so calls are billed to them and revocable; the operator carries no LLM cost and the trust problem dissolves into a standard authorization scope.
 
 ## User & Persona
 
@@ -45,7 +45,7 @@ The reach moment: the developer spent hours learning a concept, wrote notes some
 
 ### Primary
 
-- A new user can complete the end-to-end recall loop in two sessions without errors: sign up → sign in → create a note with code rendered with syntax highlighting → attach a topic check → return after the scheduled interval → complete the review with a self-rating → see the next interval reschedule.
+- A new user can complete the end-to-end recall loop in two sessions without errors: sign up → sign in → create a note with code rendered with syntax highlighting → attach a memory card → return after the scheduled interval → complete the review with a self-rating → see the next interval reschedule.
 - After the first review, the user's dashboard reflects their activity: heatmap shows the day, streak counter reads 1.
 
 ### Secondary
@@ -56,25 +56,25 @@ The reach moment: the developer spent hours learning a concept, wrote notes some
 ### Guardrails
 
 - Per-user data isolation enforced at the persistence layer: no user ever sees another user's data, even with an application-layer bug.
-- Notes and topic checks persist reliably; nothing silently dropped.
-- Due reviews always surface on the dashboard at the scheduled time — the reminder loop never misses a topic check.
+- Notes and memory cards persist reliably; nothing silently dropped.
+- Due reviews always surface on the dashboard at the scheduled time — the reminder loop never misses a memory card.
 - Auth flows (sign-up, sign-in, password reset) all functional. Broken auth blocks all value.
 - Markdown code-block rendering preserves syntax highlighting on the languages most relevant to the audience (JavaScript / TypeScript at minimum; Python, Go, Rust as bonus). A note that renders code as plain text fails the product premise.
 
 ## User Stories
 
-### US-01: User creates and reviews a topic check
+### US-01: User creates and reviews a memory card
 
 - **Given** a signed-in user with no existing notes
-- **When** they create a note with a markdown body containing a code block, attach a topic check with a question, and return after the topic check's scheduled due date
-- **Then** the dashboard shows "1 topic check due", they can complete the review with a self-rating, and the topic check is rescheduled based on the recall-scheduling algorithm
+- **When** they create a note with a markdown body containing a code block, attach a memory card with a question, and return after the memory card's scheduled due date
+- **Then** the dashboard shows "1 memory card due", they can complete the review with a self-rating, and the memory card is rescheduled based on the recall-scheduling algorithm
 
 #### Acceptance Criteria
 
 - Note's code block renders with syntax highlighting (not plain text)
-- Topic check persists across sessions
-- Due topic checks surface on the dashboard exactly when scheduled
-- Rating the topic check updates the recall schedule and records a review event
+- Memory card persists across sessions
+- Due memory cards surface on the dashboard exactly when scheduled
+- Rating the memory card updates the recall schedule and records a review event
 - Heatmap reflects the review day with appropriate intensity color
 - Streak counter increments to 1 after the first review
 
@@ -88,7 +88,7 @@ The reach moment: the developer spent hours learning a concept, wrote notes some
 - FR-003: User can sign in with email + password. Priority: must-have
 - FR-004: User can reset their password via email link. Priority: must-have
 - FR-005: User can sign out. Priority: must-have
-- FR-006: User can delete their account from settings; deletion removes all owned data (notes, topic checks, review events, and any connected external-LLM credential). Priority: must-have
+- FR-006: User can delete their account from settings; deletion removes all owned data (notes, memory cards, review events, and any connected external-LLM credential). Priority: must-have
   > Socrates: Counter-argument considered: "self-service deletion is meaningful overhead; deletion requests could be handled manually via email until you have real users." Resolution: kept; self-service deletion is a baseline trust requirement, and the full-ownership-delete behavior is required by data-isolation guarantees anyway — only the UI overhead is saved by deferring.
 
 ### Notes
@@ -96,23 +96,23 @@ The reach moment: the developer spent hours learning a concept, wrote notes some
 - FR-007: User can create a note with a title and markdown body. **Edit surface: plain markdown with side-by-side live preview** — not WYSIWYG with toolbar buttons. Priority: must-have
 - FR-008: User can view a note rendered with markdown formatting and code-block syntax highlighting. Priority: must-have
 - FR-009: User can edit a note's title and body. Priority: must-have
-- FR-010: User can delete a note; attached topic checks are removed along with it. Priority: must-have
+- FR-010: User can delete a note; attached memory cards are removed along with it. Priority: must-have
 - FR-011: User can see a list of all their notes. Priority: must-have
 
-### Topic checks
+### Memory cards
 
-- FR-012: User can attach a topic check to a note (question + optional example + optional code-block context). Priority: must-have
-- FR-013: User can edit a topic check. Priority: must-have
-- FR-014: User can delete a topic check. Priority: must-have
-- FR-015: User can see all topic checks attached to a given note. Priority: must-have
+- FR-012: User can attach a memory card to a note (question + optional example + optional code-block context). Priority: must-have
+- FR-013: User can edit a memory card. Priority: must-have
+- FR-014: User can delete a memory card. Priority: must-have
+- FR-015: User can see all memory cards attached to a given note. Priority: must-have
 
 ### Review loop
 
-- FR-016: System surfaces topic checks due for review on the user's dashboard. Priority: must-have
-- FR-017: User can review a due topic check and self-rate Again / Hard / Good / Easy. Priority: must-have
-- FR-018: System reschedules each topic check's next due date using an adaptive recall-scheduling algorithm informed by the user's rating. Priority: must-have
+- FR-016: System surfaces memory cards due for review on the user's dashboard. Priority: must-have
+- FR-017: User can review a due memory card and self-rate Again / Hard / Good / Easy. Priority: must-have
+- FR-018: System reschedules each memory card's next due date using an adaptive recall-scheduling algorithm informed by the user's rating. Priority: must-have
   > Socrates: Counter-argument considered: "an adaptive recall-scheduling algorithm adds complexity vs hardcoded intervals (e.g. Again→1d, Hard→3d, Good→1w, Easy→1m)." Resolution: use an established modern adaptive algorithm — established implementations integrate trivially and offer no meaningful complexity overhead vs hardcoded intervals.
-- FR-019: User can see when each topic check is next due. Priority: must-have
+- FR-019: User can see when each memory card is next due. Priority: must-have
 
 ### Dashboard / activity
 
@@ -120,41 +120,41 @@ The reach moment: the developer spent hours learning a concept, wrote notes some
   > Socrates: Counter-argument considered: "streak + heatmap are motivation visualizations; the recall loop works without them." Resolution (applies to FR-020 + FR-021): kept. The user explicitly pulled these into MVP because the loop without visualization doesn't "feel real." Combined cost ~1-1.5 days; offsets v1.1 release pressure on the "show the user it's working" dimension.
 - FR-021: User can see a calendar heatmap of their review activity (last 30-90 days). Priority: must-have
   > Socrates: See resolution under FR-020 — challenge was combined for FR-020 + FR-021.
-- FR-022: User can see how many topic checks are due today. Priority: must-have
+- FR-022: User can see how many memory cards are due today. Priority: must-have
 
 ## Non-Functional Requirements
 
 - Code blocks in notes render with syntax highlighting that preserves token meaning — keywords, strings, comments, and types are visually distinguishable. A note rendering code as flat-colored text fails the product premise.
 - A user cannot see another user's data under any circumstance — isolation is enforced at the persistence layer (so an application-layer bug cannot leak data), not solely in application code.
-- A topic check scheduled to be due on date `D` appears in the due-list on date `D` — never silently dropped, never appears earlier than scheduled.
+- A memory card scheduled to be due on date `D` appears in the due-list on date `D` — never silently dropped, never appears earlier than scheduled.
 - The dashboard renders usably on viewport widths down to ~360px (mobile). The heatmap may compress; everything else stays usable. Mobile review (checking due-count on the go) is a real use case.
-- The review flow (open topic check → see question → rate → see next state) feels responsive — the user perceives the rating action as instant; no multi-second wait between submitting a rating and seeing the next topic check or the "no more due" state.
+- The review flow (open memory card → see question → rate → see next state) feels responsive — the user perceives the rating action as instant; no multi-second wait between submitting a rating and seeing the next memory card or the "no more due" state.
 - Auth flows (sign-up, sign-in, password reset) complete within human-perception timing — no multi-second delays under normal load.
-- The user's recall data (notes, topic checks, review events, and any connected external-LLM credential) survives normal browser closures and app updates without loss.
+- The user's recall data (notes, memory cards, review events, and any connected external-LLM credential) survives normal browser closures and app updates without loss.
 
 ## Business Logic
 
-The system schedules each topic check's next review date by adapting to the user's self-rated recall performance — making review intervals longer after successful recalls and shorter after failures.
+The system schedules each memory card's next review date by adapting to the user's self-rated recall performance — making review intervals longer after successful recalls and shorter after failures.
 
-Inputs the rule consumes (as user-facing inputs): the user's self-rating (Again / Hard / Good / Easy) after each review, plus the topic check's review history (timestamps and prior ratings). Output: the date the topic check next appears in the user's due-list. The user encounters this every time the dashboard shows "X topic checks due" — that count is entirely driven by the algorithm's scheduling decisions. A failed review reschedules the topic check sooner; a successful one reschedules it later. The system effectively learns each user's pacing per topic check.
+Inputs the rule consumes (as user-facing inputs): the user's self-rating (Again / Hard / Good / Easy) after each review, plus the memory card's review history (timestamps and prior ratings). Output: the date the memory card next appears in the user's due-list. The user encounters this every time the dashboard shows "X memory cards due" — that count is entirely driven by the algorithm's scheduling decisions. A failed review reschedules the memory card sooner; a successful one reschedules it later. The system effectively learns each user's pacing per memory card.
 
 This is the domain decision that makes the app non-trivial. Without it, the app degenerates into a tagged-notes list. The rule is the product.
 
 ## Access Control
 
-Multi-user. Every user owns their own notes, topic checks, review history, and any connected external-LLM credential; no data is shared between users. One role (regular user) — flat model.
+Multi-user. Every user owns their own notes, memory cards, review history, and any connected external-LLM credential; no data is shared between users. One role (regular user) — flat model.
 
 **Sign-up / sign-in (v1):** email + password. The auth layer handles password hashing, password reset, and email delivery. A verification email is sent at sign-up by default, but app access is NOT gated on verification status in v1 (see FR-002 resolution); the verification gate is deferred to v1.1.
 
-**Connected services (separate from app auth):** the user can connect an external LLM-credential service after sign-in, as a one-click "Connect" step in settings. Two states: connected (in-app AI features work — when those features ship in v1.1) or disconnected (in-app AI features are gated behind a "Connect to use" prompt; everything else — notes, topic checks, manual review, stats — works without it).
+**Connected services (separate from app auth):** the user can connect an external LLM-credential service after sign-in, as a one-click "Connect" step in settings. Two states: connected (in-app AI features work — when those features ship in v1.1) or disconnected (in-app AI features are gated behind a "Connect to use" prompt; everything else — notes, memory cards, manual review, stats — works without it).
 
 **External programmatic-write surface (v1.1, not in MVP):** authenticated per-user via a token the user generates in settings. Used by external coding-agent tools and a companion command-line client. Scope: same data as the user's web session; no cross-user access. Design intent captured here so isolation policies don't need refactoring when this surface ships.
 
-**Unauthenticated request handling:** any gated route (notes, topic checks, dashboard, settings) returns an unauthorized response / redirects to sign-in. Public surface: sign-in, sign-up, password reset, marketing landing (if any).
+**Unauthenticated request handling:** any gated route (notes, memory cards, dashboard, settings) returns an unauthorized response / redirects to sign-in. Public surface: sign-in, sign-up, password reset, marketing landing (if any).
 
 **Per-user data isolation:** enforced at the persistence layer — so an application-layer bug cannot expose another user's data. Application code does not become the boundary.
 
-**Account deletion:** user can delete their account from settings; the deletion removes all of their notes, topic checks, review events, and any connected external-LLM credential.
+**Account deletion:** user can delete their account from settings; the deletion removes all of their notes, memory cards, review events, and any connected external-LLM credential.
 
 ## Non-Goals
 
@@ -172,7 +172,7 @@ Items already deferred to v1.1 (in-app AI code-check, external-LLM credential in
 The following questions were tracked as open during shaping and have since been resolved. Recorded here so the resolution and rationale outlive the conversation that produced them.
 
 1. **Final product name** — **Coding Learning Companion** (the working title is the final name for v1). Resolved 2026-05-26.
-2. **User-facing label for the layer-2 concept** — **"topic check"**. Resolved 2026-05-26. The PRD's domain noun is also "topic check" throughout; the prior "recall prompt" wording has been replaced. Internal code may use a different identifier (e.g. `topic_check`, `topicCheck`) but the user-facing copy and PRD language is "topic check".
+2. **User-facing label for the layer-2 concept** — **"memory card"**. Resolved 2026-05-26. The PRD's domain noun is also "memory card" throughout; the prior "recall prompt" wording has been replaced. Internal code may use a different identifier (e.g. `memory_card`, `memoryCard`) but the user-facing copy and PRD language is "memory card".
 3. **Note editor surface** — **plain markdown with side-by-side live preview**, not WYSIWYG with toolbar buttons. Resolved 2026-05-26. Reflected in FR-007. The editor library (CodeMirror 6) is recorded in `tech-stack.md` rather than here, since library choice is implementation detail, not product requirement.
 4. **`target_scale.qps` and `target_scale.data_volume`** — confirmed `low` and `small` respectively, on the basis that this is a `users: small` (single-digit to handful) personal tool. Frontmatter values stand.
 

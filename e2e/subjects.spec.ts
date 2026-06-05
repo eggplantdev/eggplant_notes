@@ -103,7 +103,7 @@ test('docs view: open → first note, sidebar nav, handle reorder, delete-detach
   await expect(page.getByText(titleA)).toBeVisible()
   await expect(page.getByText(titleB)).toBeVisible()
 
-  // Note A's topic check survived the subject delete (detach, not cascade).
+  // Note A's memory card survived the subject delete (detach, not cascade).
   await page.getByText(titleA).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/)
   await expect(page.getByText(checkPrompt)).toBeVisible({ timeout: 15_000 })
