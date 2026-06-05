@@ -3,8 +3,9 @@ import { test, expect } from '@playwright/test'
 import { attachCheck, clientFor, createNote, signUp, uniqueEmail } from './helpers'
 
 // S-03 north-star path: the recall loop end-to-end (FR-016–019). Sign up → create a note →
-// attach a topic check → open /review → rate it → assert the check leaves the queue AND that
-// the schedule/event actually changed in the DB (review_events row written, due_at pushed to
+// attach a topic check → open /dashboard (the review panel lives here now) → rate it → assert
+// the check leaves the queue AND that the schedule/event actually changed in the DB
+// (review_events row written, due_at pushed to
 // the future). Plus cross-account RLS on the review read + rate paths. Shared helpers in
 // ./helpers (the read/rate helpers can't be imported into a raw spec — @/ alias + server-only
 // next/headers don't resolve outside the Next runtime, see lessons.md — so DB assertions use a
@@ -24,8 +25,8 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
   const prompt = `What is a closure? ${Date.now()}`
   await attachCheck(page, prompt)
 
-  // The review session shows the question + four rating buttons, each with an interval preview.
-  await page.goto('/review')
+  // The dashboard's review panel shows the question + four rating buttons, each with an interval preview.
+  await page.goto('/dashboard')
   await expect(page.getByText(prompt)).toBeVisible()
   for (const label of ['Again', 'Hard', 'Good', 'Easy']) {
     const button = page.getByRole('button', { name: new RegExp(label) })
@@ -53,8 +54,8 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
   expect(events.data?.[0].rating, 'recorded the Good grade').toBe(GOOD)
 })
 
-// RLS on the review path: account B can neither see nor rate account A's checks. B's /review is
-// empty even though A has a due check, and calling record_review against A's id writes nothing
+// RLS on the review path: account B can neither see nor rate account A's checks. B's dashboard
+// review panel is empty even though A has a due check, and calling record_review against A's id writes nothing
 // (the RPC's update-first ownership guard matches 0 rows under RLS → raises → no event).
 test('review path is isolated by account', async ({ browser }) => {
   const emailA = uniqueEmail('rev-iso-a')
@@ -85,8 +86,8 @@ test('review path is isolated by account', async ({ browser }) => {
   expect(tc.error, 'A topic_check insert failed').toBeNull()
   const aCheckId = tc.data!.id
 
-  // B opens /review → "All caught up" (A's due check is hidden by RLS, not visible to B).
-  await pageB.goto('/review')
+  // B opens /dashboard → "All caught up" (A's due check is hidden by RLS, not visible to B).
+  await pageB.goto('/dashboard')
   await expect(pageB.getByText('All caught up', { exact: false })).toBeVisible({ timeout: 15_000 })
   await ctxB.close()
 

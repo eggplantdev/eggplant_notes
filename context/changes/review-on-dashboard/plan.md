@@ -249,10 +249,10 @@ No data migration. The `/review` → `/dashboard` redirect (307) covers existing
 
 #### Automated
 
-- [x] 1.1 Typegen + type check pass: `pnpm exec next typegen && pnpm typecheck`
-- [x] 1.2 Lint passes: `pnpm lint`
-- [x] 1.3 Production build passes: `pnpm build`
-- [x] 1.4 No remaining `/review` route references in `src` (grep clean of href/goto/revalidate/nav)
+- [x] 1.1 Typegen + type check pass: `pnpm exec next typegen && pnpm typecheck` — b2eed64
+- [x] 1.2 Lint passes: `pnpm lint` — b2eed64
+- [x] 1.3 Production build passes: `pnpm build` — b2eed64
+- [x] 1.4 No remaining `/review` route references in `src` (grep clean of href/goto/revalidate/nav) — b2eed64
 
 #### Manual
 
@@ -267,7 +267,7 @@ No data migration. The `/review` → `/dashboard` redirect (307) covers existing
 #### Automated
 
 - [ ] 2.1 E2E suite passes: `pnpm test:e2e`
-- [ ] 2.2 Unit suite still green: `pnpm test`
+- [x] 2.2 Unit suite still green: `pnpm test`
 
 #### Manual
 
