@@ -26,5 +26,6 @@ export async function createTopicCheck(noteId: string, input: unknown): Promise<
   if (!result.success) return result
 
   revalidatePath(`/notes/${parsedNoteId.data}`)
+  revalidatePath('/topic-checks')
   return { success: true }
 }

@@ -21,15 +21,28 @@ export function toISODate(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10)
 }
 
+// `Intl.DateTimeFormat` construction loads ICU locale/zone data, so it's the costly part of
+// formatting. These helpers run per-row on list/heatmap renders, so memoize one formatter per
+// timezone instead of rebuilding it on every call.
+const zoneDateFormatters = new Map<string, Intl.DateTimeFormat>()
+function zoneDateFormatter(timeZone: string): Intl.DateTimeFormat {
+  let formatter = zoneDateFormatters.get(timeZone)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    zoneDateFormatters.set(timeZone, formatter)
+  }
+  return formatter
+}
+
 // `YYYY-MM-DD` for an instant as seen in a given IANA timezone. `en-CA` formats as
 // ISO year-month-day, which is the join key both the activity buckets and the heatmap use.
 export function isoDateInZone(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
+  return zoneDateFormatter(timeZone).format(date)
 }
 
 // A `YYYY-MM-DD` calendar date parsed to a Date at UTC-midnight. Anchoring at UTC lets the
@@ -40,22 +53,21 @@ function parseIsoDateUtc(isoDate: string): Date {
   return new Date(`${isoDate}T00:00:00.000Z`)
 }
 
+// A Date at UTC-midnight of an instant's *zone* calendar date. Two zone-midnights are directly
+// comparable for a whole-day diff regardless of the server's UTC clock (used by the topic-check
+// review-status label).
+export function zoneMidnight(date: Date, timeZone: string): Date {
+  return parseIsoDateUtc(isoDateInZone(date, timeZone))
+}
+
 // A Date at UTC-midnight of the *zone's* current calendar date. Returned this way so the
 // UTC-based helpers (utcMidnight / toISODate, used by the heatmap + streak) read the right
 // year/month/day — i.e. "today" follows the user's zone, not the UTC server clock.
 export function todayInZone(timeZone: string): Date {
-  return parseIsoDateUtc(isoDateInZone(new Date(), timeZone))
+  return zoneMidnight(new Date(), timeZone)
 }
 
 // --- Display formatters (presentation only) ---
-
-// Short weekday for a `YYYY-MM-DD` calendar date, e.g. "Mon". Used by the due-forecast bars.
-export function formatWeekdayShort(isoDate: string): string {
-  return parseIsoDateUtc(isoDate).toLocaleDateString('en-US', {
-    weekday: 'short',
-    timeZone: 'UTC',
-  })
-}
 
 // Full weekday + date for a `YYYY-MM-DD` calendar date, e.g. "Wed, Jun 3, 2025". Heatmap tooltip.
 export function formatFullDate(isoDate: string): string {

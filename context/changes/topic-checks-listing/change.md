@@ -29,4 +29,5 @@ Approved design decisions (brainstorm 2026-06-05):
 - New due/review status helper needed (none exists): maps FSRS `state` smallint
   (0=New,1=Learning,2=Review,3=Relearning) + `due_at` → human label. Lives in
   `features/topic-checks/utils/`.
-- Out of scope (YAGNI): no detail route, no grouping, no edit/delete from this list, no migration.
+- Out of scope (YAGNI): no detail route, no grouping, no migration. (Edit/delete on cards was
+  added mid-implementation per user request — see plan.md "Scope added mid-implementation".)

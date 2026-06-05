@@ -30,5 +30,6 @@ export async function updateTopicCheck(
   if (!result.success) return result
 
   revalidatePath(`/notes/${noteId}`)
+  revalidatePath('/topic-checks')
   return { success: true }
 }

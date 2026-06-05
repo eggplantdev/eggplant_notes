@@ -7,6 +7,7 @@ import { AddTopicCheck } from '@/features/topic-checks/add-topic-check'
 import { DeleteTopicCheckButton } from '@/features/topic-checks/delete-topic-check-button'
 import { TopicCheckForm } from '@/features/topic-checks/topic-check-form'
 import type { TopicCheckT } from '@/features/topic-checks/types'
+import { topicCheckEditHref } from '@/features/topic-checks/utils'
 
 type TopicChecksSectionPropsT = {
   noteId: string
@@ -54,7 +55,7 @@ export async function TopicChecksSection({ noteId, checks, editId }: TopicChecks
                 <p className="font-medium">{check.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/notes/${noteId}?edit=${check.id}#topic-check-form`}>Edit</Link>
+                    <Link href={topicCheckEditHref(noteId, check.id)}>Edit</Link>
                   </Button>
                   <DeleteTopicCheckButton noteId={noteId} id={check.id} />
                 </div>

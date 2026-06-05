@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { DeleteTopicCheckButton } from '@/features/topic-checks/delete-topic-check-button'
+import { topicCheckEditHref } from '@/features/topic-checks/utils'
 
 // Per-card Edit + Delete actions for the topic-checks list (AnimatedCardList's renderAction slot,
 // which wraps this in a nav-neutralizing container — so the controls just act). Edit jumps to the
@@ -20,7 +21,7 @@ export function TopicCheckCardActions({ noteId, checkId }: TopicCheckCardActions
       <Button
         variant="outline"
         size="sm"
-        onClick={() => router.push(`/notes/${noteId}?edit=${checkId}#topic-check-form`)}
+        onClick={() => router.push(topicCheckEditHref(noteId, checkId))}
       >
         Edit
       </Button>
