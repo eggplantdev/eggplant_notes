@@ -312,9 +312,9 @@ None — read-only over existing tables; no schema change.
 
 #### Automated
 
-- [x] 2.1 No dangling references to the old path (`grep -rn "notes-filter\|NotesFilter" src` empty)
-- [x] 2.2 Type checking passes: `pnpm typecheck`
-- [x] 2.3 Linting passes: `pnpm lint`
+- [x] 2.1 No dangling references to the old path (`grep -rn "notes-filter\|NotesFilter" src` empty) — 23a97ed
+- [x] 2.2 Type checking passes: `pnpm typecheck` — 23a97ed
+- [x] 2.3 Linting passes: `pnpm lint` — 23a97ed
 
 #### Manual
 
@@ -324,9 +324,9 @@ None — read-only over existing tables; no schema change.
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build passes: `pnpm build`
 
 #### Manual
 

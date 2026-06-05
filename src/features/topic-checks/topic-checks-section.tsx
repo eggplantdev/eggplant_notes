@@ -43,7 +43,13 @@ export async function TopicChecksSection({ noteId, checks, editId }: TopicChecks
       ) : (
         <ul className="flex flex-col gap-4">
           {checks.map((check) => (
-            <li key={check.id} className="flex flex-col gap-2 rounded-lg border p-4">
+            // id + scroll-mt make this a scroll target for the /topic-checks card→note deep link
+            // (`/notes/[id]#check-<id>`); scroll-mt keeps the sticky nav from covering it.
+            <li
+              key={check.id}
+              id={`check-${check.id}`}
+              className="flex scroll-mt-24 flex-col gap-2 rounded-lg border p-4"
+            >
               <div className="flex items-start justify-between gap-4">
                 <p className="font-medium">{check.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
