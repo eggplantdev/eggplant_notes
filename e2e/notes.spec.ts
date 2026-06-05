@@ -109,7 +109,7 @@ test('note body raw HTML is rendered inert, not executed (no stored XSS)', async
 // S-14 in-place edit: the body+subject edit moved off the deleted /notes/[id]/edit route into
 // a ?edit=note branch on the detail page. Locks three things the CRUD test above doesn't:
 // (1) the F3 no-redirect property — `?edit=note` must NOT bounce (a regression forwarding
-// editId='note' to TopicChecksSection would trip its stale-?edit guard and redirect to the bare
+// editId='note' to MemoryCardsSection would trip its stale-?edit guard and redirect to the bare
 // path); (2) the body actually round-trips through the inline form; (3) the old route 404s.
 test('in-place edit: ?edit=note shows the form without redirecting, edits the body, /edit 404s (S-14)', async ({
   page,
@@ -119,12 +119,12 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   const noteUrl = page.url()
 
   // F3 lock: a direct hit on ?edit=note stays put (form in place), it does NOT redirect away,
-  // and the topic-checks section still renders read-only below.
+  // and the memory-cards section still renders read-only below.
   await page.goto(`${noteUrl}?edit=note`)
   await expect(page).toHaveURL(/\?edit=note$/)
   await expect(page.getByLabel('Title')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Save changes' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Topic checks' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Memory cards' })).toBeVisible()
 
   // Edit the body in place → save → redirected off the ?edit URL with the new content rendered.
   // Since S-17 the add-check form is deferred (collapsed behind "Add check"), so edit mode now

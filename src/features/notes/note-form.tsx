@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
-import { promptSchema } from '@/features/topic-checks/schemas'
+import { promptSchema } from '@/features/memory-cards/schemas'
 import type { NoteT } from '@/types/note'
 import type { SubjectT } from '@/types/subject'
 import { cn } from '@/lib/utils'
@@ -24,8 +24,8 @@ import type { ActionResultT } from '@/types/action'
 // picker and back to null on the way out (the Combobox needs a concrete option value).
 const NO_SUBJECT = 'none'
 
-// A topic check staged client-side before the note exists (S-07). Shape is derived from
-// topicCheckInputSchema's input type (StagedCheckInputT) so it can't drift; blanks are coerced
+// A memory card staged client-side before the note exists (S-07). Shape is derived from
+// memoryCardInputSchema's input type (StagedCheckInputT) so it can't drift; blanks are coerced
 // to null server-side by its `optionalText` transform.
 const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: '' }
 
@@ -51,7 +51,7 @@ type MobileTabT = 'write' | 'preview'
 
 // Create/edit form. Title is a managed `AppField` (Zod-validated); the body lives in form
 // state but is rendered through the controlled CodeMirror island + a client preview pane.
-// In create mode the user can stage 0..N topic checks inline (a TanStack array field) and
+// In create mode the user can stage 0..N memory cards inline (a TanStack array field) and
 // they save atomically with the note. On success the server action redirects (throws), so the
 // form only ever sees the failure branch — mirrors sign-up/page.tsx. The Shiki-highlighted
 // render is the saved detail view; this preview stays plain to keep highlighting bytes off the client.
@@ -169,14 +169,14 @@ export function NoteForm(props: NoteFormPropsT) {
         )}
       </form.Field>
 
-      {/* Inline topic-check staging — create mode only. Edit keeps the detail-page section (S-02). */}
+      {/* Inline memory-card staging — create mode only. Edit keeps the detail-page section (S-02). */}
       {!note && (
         <form.Field name="checks" mode="array">
           {(checksField) => (
             <div className="flex flex-col gap-4 rounded-lg border p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex flex-col">
-                  <Label>Topic checks (optional)</Label>
+                  <Label>Memory cards (optional)</Label>
                   <span className="text-muted-foreground text-sm">
                     Add recall questions to save alongside this note.
                   </span>

@@ -21,7 +21,7 @@ type CodeBlockInserterPropsT = {
 
 // Action-style language picker that appends a fenced code block to a MarkdownEditor's value.
 // No bound `value` on the Combobox, so re-selecting the same language appends another block.
-// Pairs with any MarkdownEditor field — the note body and topic-check code context.
+// Pairs with any MarkdownEditor field — the note body and memory-card code context.
 export function CodeBlockInserter({
   value,
   onChange,

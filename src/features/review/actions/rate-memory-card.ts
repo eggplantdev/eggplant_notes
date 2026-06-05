@@ -7,25 +7,25 @@ import { goalSchema, ratingSchema } from '@/features/review/schemas'
 import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
 import { getReviewedTodayCount, getReviewsThisWeekCount } from '@/features/review-events/queries'
-import { topicCheckIdSchema } from '@/features/topic-checks/schemas'
+import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
 
 // The one mutation that closes the recall loop (FR-016–018). Server-trusted: the client island
-// sends only { topicCheckId, rating }. We re-fetch the card row (RLS scopes it to the owner),
+// sends only { memoryCardId, rating }. We re-fetch the card row (RLS scopes it to the owner),
 // compute the next FSRS state HERE — never trust a client-supplied schedule — and persist
-// atomically via the record_review RPC (one transaction: update topic_checks + insert
+// atomically via the record_review RPC (one transaction: update memory_cards + insert
 // review_events; its update-first ownership guard self-enforces the card<->caller link).
 // `user_id` is never sent (DB defaults auth.uid()). Deliberately does NOT use runTableAction:
 // that wrapper is single-schema → single PostgREST write → .select().single(); this has two
 // inputs (id + rating), an intermediate server-side read + FSRS compute, and an RPC that
 // returns void — so the {success}/error envelope is mirrored by hand here instead.
-export async function rateTopicCheck(
-  topicCheckId: string,
+export async function rateMemoryCard(
+  memoryCardId: string,
   rating: unknown,
   goal: unknown,
 ): Promise<RateResultT> {
-  const parsedId = validateInput(topicCheckIdSchema, topicCheckId)
+  const parsedId = validateInput(memoryCardIdSchema, memoryCardId)
   if (!parsedId.success) return parsedId
 
   const parsedRating = validateInput(ratingSchema, rating)
@@ -38,24 +38,24 @@ export async function rateTopicCheck(
   const dailyGoal = goalParsed.success ? goalParsed.data : 0
 
   const [{ data: row, error: fetchError }, dailyBefore, weeklyBefore] = await Promise.all([
-    supabase.from('topic_checks').select('*').eq('id', parsedId.data).maybeSingle(),
+    supabase.from('memory_cards').select('*').eq('id', parsedId.data).maybeSingle(),
     getReviewedTodayCount(supabase),
     getReviewsThisWeekCount(supabase),
   ])
   if (fetchError) {
-    console.error('[rateTopicCheck] fetch error', fetchError)
+    console.error('[rateMemoryCard] fetch error', fetchError)
     return { success: false, error: fetchError.message }
   }
-  if (!row) return { success: false, error: 'Topic check not found' }
+  if (!row) return { success: false, error: 'Memory card not found' }
 
   const card = applyRating(row, parsedRating.data, new Date())
   const { error } = await supabase.rpc('record_review', {
-    p_topic_check_id: parsedId.data,
+    p_memory_card_id: parsedId.data,
     p_rating: parsedRating.data,
     p_card: serializeCard(card),
   })
   if (error) {
-    console.error('[rateTopicCheck] record_review error', error)
+    console.error('[rateMemoryCard] record_review error', error)
     return { success: false, error: error.message }
   }
 

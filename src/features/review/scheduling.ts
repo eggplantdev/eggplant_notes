@@ -1,7 +1,7 @@
 import { type Card, fsrs, type Grade, type State } from 'ts-fsrs'
 
 import { GRADES } from '@/features/review/grades'
-import type { TopicCheckT } from '@/features/topic-checks/types'
+import type { MemoryCardT } from '@/features/memory-cards/types'
 
 // Single home for all ts-fsrs interaction: the algorithm choice is swappable here and the
 // row<->Card serialization seam (Postgres ISO strings <-> Date) lives in one place, unit-tested.
@@ -22,9 +22,9 @@ export type SerializedCardT = {
   last_review: string | null
 }
 
-// Build a ts-fsrs Card from a topic_checks row. Postgres returns timestamps as ISO strings;
+// Build a ts-fsrs Card from a memory_cards row. Postgres returns timestamps as ISO strings;
 // ts-fsrs wants Dates — convert on this edge (and back in serializeCard).
-function toCard(row: TopicCheckT): Card {
+function toCard(row: MemoryCardT): Card {
   return {
     due: new Date(row.due_at),
     stability: row.stability,
@@ -42,14 +42,14 @@ function toCard(row: TopicCheckT): Card {
 // The predicted next due date for each grade, for the Anki-style button previews. Keyed by the
 // four grade numbers (1=Again .. 4=Easy); `number` rather than the Rating enum keeps ts-fsrs
 // types out of consumers (the page/island index with plain 1..4).
-export function previewIntervals(row: TopicCheckT, now: Date): Record<number, Date> {
+export function previewIntervals(row: MemoryCardT, now: Date): Record<number, Date> {
   const preview = scheduler.repeat(toCard(row), now)
   return Object.fromEntries(GRADES.map(({ grade }) => [grade, preview[grade as Grade].card.due]))
 }
 
 // Apply the chosen grade -> the next Card state to persist. `rating` is the validated 1..4
 // number from the action boundary; cast to Grade keeps ts-fsrs types isolated to this module.
-export function applyRating(row: TopicCheckT, rating: number, now: Date): Card {
+export function applyRating(row: MemoryCardT, rating: number, now: Date): Card {
   return scheduler.next(toCard(row), now, rating as Grade).card
 }
 

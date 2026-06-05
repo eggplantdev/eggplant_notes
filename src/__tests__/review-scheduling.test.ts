@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { TopicCheckT } from '@/features/topic-checks/types'
+import type { MemoryCardT } from '@/features/memory-cards/types'
 import { applyRating, previewIntervals } from '@/features/review/scheduling'
 
 // FSRS Rating: Again=1, Hard=2, Good=3, Easy=4.
@@ -8,7 +8,7 @@ const AGAIN = 1
 const GOOD = 3
 
 // A fresh "New" card row: FSRS empty-card defaults (state=0, all counters 0), due now.
-function freshRow(now: Date): TopicCheckT {
+function freshRow(now: Date): MemoryCardT {
   return {
     id: '00000000-0000-0000-0000-000000000001',
     user_id: '00000000-0000-0000-0000-000000000002',

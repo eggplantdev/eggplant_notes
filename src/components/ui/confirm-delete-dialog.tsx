@@ -15,7 +15,7 @@ import {
 import { FormError } from '@/components/forms/form-components/form-error'
 
 // Shared, controlled destructive-confirm dialog. Domain-free chrome promoted out of the
-// per-feature delete dialogs (notes, subjects, topic-checks, account) once they passed the
+// per-feature delete dialogs (notes, subjects, memory-cards, account) once they passed the
 // 2nd-consumer threshold — see EX-380. Each feature keeps its thin wrapper that owns the
 // useActionTransition + Server Action call and maps it onto `onConfirm`/`isPending`/`error`.
 //

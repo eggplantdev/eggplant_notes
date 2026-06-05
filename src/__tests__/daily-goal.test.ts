@@ -11,7 +11,7 @@ describe('countDistinctReviewedOn', () => {
   const at = (dateStr: string, hour = 12): string =>
     new Date(`${dateStr}T${String(hour).padStart(2, '0')}:00:00.000Z`).toISOString()
   const row = (id: string, dateStr: string, hour?: number): ReviewedRowT => ({
-    topic_check_id: id,
+    memory_card_id: id,
     reviewed_at: at(dateStr, hour),
   })
 

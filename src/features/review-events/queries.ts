@@ -9,10 +9,10 @@ import type { Database } from '@/lib/supabase/types'
 import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
 
-// Review history for one topic check, newest first. RLS scopes rows to the owner, so a
-// caller can never read another user's review events even with a known topic_check_id.
+// Review history for one memory card, newest first. RLS scopes rows to the owner, so a
+// caller can never read another user's review events even with a known memory_card_id.
 export async function getReviewEvents(
-  topicCheckId: string,
+  memoryCardId: string,
   client?: SupabaseClient<Database>,
 ): Promise<ReviewEventT[]> {
   const supabase = client ?? (await createClient())
@@ -20,7 +20,7 @@ export async function getReviewEvents(
     c
       .from('review_events')
       .select('*')
-      .eq('topic_check_id', topicCheckId)
+      .eq('memory_card_id', memoryCardId)
       .order('reviewed_at', { ascending: false }),
   )
 }
@@ -52,13 +52,13 @@ export async function getReviewActivity(
 // fetch a ~2-day buffer rather than `>= utcMidnight`: APP_TIME_ZONE is UTC+1/+2, so a review
 // late in the local evening can sit just before UTC midnight — a naive UTC-midnight cutoff
 // would drop it from "today." We over-fetch, then keep only rows whose zone-bucketed date is
-// today, and count distinct topic_check_id (the same card reviewed twice counts once).
+// today, and count distinct memory_card_id (the same card reviewed twice counts once).
 // Injectable client per the isolation rule.
 export async function getReviewedTodayCount(client?: SupabaseClient<Database>): Promise<number> {
   const supabase = client ?? (await createClient())
   const since = new Date(Date.now() - 2 * MS_PER_DAY).toISOString()
   const rows = await runTableQuery(supabase, (c) =>
-    c.from('review_events').select('topic_check_id, reviewed_at').gte('reviewed_at', since),
+    c.from('review_events').select('memory_card_id, reviewed_at').gte('reviewed_at', since),
   )
   return countDistinctReviewedOn(rows, isoDateInZone(new Date(), APP_TIME_ZONE))
 }

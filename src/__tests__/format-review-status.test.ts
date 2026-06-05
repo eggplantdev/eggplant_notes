@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatReviewStatus } from '@/features/topic-checks/utils'
+import { formatReviewStatus } from '@/features/memory-cards/utils'
 import { APP_TIME_ZONE, MS_PER_DAY, todayInZone } from '@/lib/utils/date'
 
 // An ISO timestamp at noon (Warsaw) of the zone-date `dayOffset` days from today. Noon avoids

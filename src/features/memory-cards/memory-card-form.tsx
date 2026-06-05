@@ -13,25 +13,25 @@ import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createTopicCheck } from '@/features/topic-checks/actions/create-topic-check'
-import { updateTopicCheck } from '@/features/topic-checks/actions/update-topic-check'
-import { promptSchema } from '@/features/topic-checks/schemas'
-import type { TopicCheckT } from '@/features/topic-checks/types'
+import { createMemoryCard } from '@/features/memory-cards/actions/create-memory-card'
+import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
+import { promptSchema } from '@/features/memory-cards/schemas'
+import type { MemoryCardT } from '@/features/memory-cards/types'
 
-// `check` present → edit (seeds defaults, calls updateTopicCheck); absent → create. Edit
+// `check` present → edit (seeds defaults, calls updateMemoryCard); absent → create. Edit
 // state is carried in the URL (`?edit=<id>`), so on a successful edit we navigate back to the
 // bare note path to leave edit mode; on a successful create we reset for the next add and call
-// `onClose` so the add-mode caller (AddTopicCheck) can collapse the form — which unmounts the
+// `onClose` so the add-mode caller (AddMemoryCard) can collapse the form — which unmounts the
 // CodeMirror island. The "Hide" button (add mode) calls the same `onClose` to dismiss without
 // submitting. The server action revalidates the detail path, so the list refreshes either way.
 // Only one CodeMirror island (code_context) ever mounts while the form is open.
-type TopicCheckFormPropsT = {
+type MemoryCardFormPropsT = {
   noteId: string
-  check?: TopicCheckT
+  check?: MemoryCardT
   onClose?: () => void
 }
 
-export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT) {
+export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
 
@@ -43,8 +43,8 @@ export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT)
     },
     onSubmit: async ({ value }) => {
       const result = check
-        ? await updateTopicCheck(noteId, check.id, value)
-        : await createTopicCheck(noteId, value)
+        ? await updateMemoryCard(noteId, check.id, value)
+        : await createMemoryCard(noteId, value)
       if (!toastActionResult(result, { successMessage: check ? 'Check saved' : 'Check added' })) {
         setFormError(result.error)
         return
@@ -60,7 +60,7 @@ export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT)
 
   return (
     <form
-      id="topic-check-form"
+      id="memory-card-form"
       className="flex flex-col gap-4 rounded-lg border p-4"
       onSubmit={(e) => {
         e.preventDefault()
@@ -69,7 +69,7 @@ export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT)
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-medium">{check ? 'Edit topic check' : 'Add a topic check'}</h3>
+        <h3 className="font-medium">{check ? 'Edit memory card' : 'Add a memory card'}</h3>
         {!check && onClose && (
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Hide
@@ -84,9 +84,9 @@ export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT)
       <form.Field name="example">
         {(field) => (
           <div className="grid gap-2">
-            <Label htmlFor="topic-check-example">Example (optional)</Label>
+            <Label htmlFor="memory-card-example">Example (optional)</Label>
             <Textarea
-              id="topic-check-example"
+              id="memory-card-example"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -119,7 +119,7 @@ export function TopicCheckForm({ noteId, check, onClose }: TopicCheckFormPropsT)
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : check ? 'Save changes' : 'Add topic check'}
+              {isSubmitting ? 'Saving…' : check ? 'Save changes' : 'Add memory card'}
             </Button>
           )}
         </form.Subscribe>

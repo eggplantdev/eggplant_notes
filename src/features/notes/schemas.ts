@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { topicCheckInputSchema } from '@/features/topic-checks/schemas'
+import { memoryCardInputSchema } from '@/features/memory-cards/schemas'
 
 // Per-field schemas, passed to each field's `validators` (Standard Schema). The object
 // schema below composes them and is reused for server-side parsing in the actions.
@@ -17,7 +17,7 @@ export const contentSchema = z.string()
 // `subject_id` is optional: omitted by callers that don't touch assignment, `null` when
 // the form's subject picker selects "None", or a uuid when assigned. The note's
 // `position` is derived from this in the actions, never sent by the client.
-// z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB ids; see topic-checks/schemas.ts.
+// z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB ids; see memory-cards/schemas.ts.
 export const noteSubjectIdSchema = z.guid('Invalid subject id').nullable().optional()
 
 export const noteInputSchema = z.object({
@@ -29,16 +29,16 @@ export const noteInputSchema = z.object({
 // Validates the `id` route param / form value for update + delete actions.
 export const noteIdSchema = z.guid('Invalid note id')
 
-// S-07: note + its staged checks in one atomic write. Reuses topic-check's own input schema
-// (topic-checks owns that contract — same feature→feature edge as review/dashboard, not a
+// S-07: note + its staged checks in one atomic write. Reuses memory-card's own input schema
+// (memory-cards owns that contract — same feature→feature edge as review/dashboard, not a
 // promotion candidate). `checks` is capped to bound the RPC's bulk insert.
 export const createNoteWithChecksSchema = z.object({
   note: noteInputSchema,
-  checks: z.array(topicCheckInputSchema).max(50, 'At most 50 topic checks per note'),
+  checks: z.array(memoryCardInputSchema).max(50, 'At most 50 memory cards per note'),
 })
 
 export type NoteInputT = z.infer<typeof noteInputSchema>
 export type CreateNoteWithChecksT = z.infer<typeof createNoteWithChecksSchema>
 // The pre-transform (form-side) shape of one staged check — all strings, before `optionalText`
 // coerces blanks to null. Derived from the schema so it can never drift from the write-contract.
-export type StagedCheckInputT = z.input<typeof topicCheckInputSchema>
+export type StagedCheckInputT = z.input<typeof memoryCardInputSchema>

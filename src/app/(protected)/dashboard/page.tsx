@@ -16,7 +16,7 @@ import { RatingButtons } from '@/features/review/rating-buttons'
 import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
 import { previewIntervals } from '@/features/review/scheduling'
 import { getDailyGoal } from '@/features/settings/queries'
-import { getDueQueue } from '@/features/topic-checks/queries'
+import { getDueQueue } from '@/features/memory-cards/queries'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { getCurrentUser } from '@/lib/supabase/server'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   // Scalar stats rendered as a uniform StatCard grid. Cull a line to drop the card.
   const scalars = [
     { label: 'Longest streak', value: s.longestStreak, sub: 'best consecutive-day run' },
-    { label: 'Total cards', value: s.totalCards, sub: 'topic checks across all notes' },
+    { label: 'Total cards', value: s.totalCards, sub: 'memory cards across all notes' },
     { label: 'Total notes', value: s.totalNotes, sub: 'notes in your library' },
     { label: 'Subjects', value: s.totalSubjects, sub: 'subjects organizing notes' },
     { label: 'Overdue', value: s.overdue, sub: 'cards past their due date' },
@@ -113,12 +113,12 @@ export default async function DashboardPage() {
       {/* Embedded review session (relocated from the old /review route). Prose-width inside
           the full-width dashboard. ReviewCelebrationProvider wraps BOTH branches so the
           goal-celebration dialog survives RatingButtons unmounting when the last card is rated
-          (lessons.md:119-124). Advance is server-driven: rateTopicCheck revalidates /dashboard. */}
+          (lessons.md:119-124). Advance is server-driven: rateMemoryCard revalidates /dashboard. */}
       <div className="mx-auto w-full max-w-2xl">
         <ReviewCelebrationProvider>
           {!card ? (
             <p className="text-muted-foreground text-center text-sm">
-              All caught up 🎉 — no topic checks are due right now.
+              All caught up 🎉 — no memory cards are due right now.
             </p>
           ) : (
             <div className="flex flex-col gap-4">
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <RatingButtons topicCheckId={card.id} previews={previews} goal={dailyGoal} />
+              <RatingButtons memoryCardId={card.id} previews={previews} goal={dailyGoal} />
             </div>
           )}
         </ReviewCelebrationProvider>
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
 
       {/* Featured: today's actionable numbers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Due today" value={data.dueToday} sub="topic checks ready to review" />
+        <StatCard label="Due today" value={data.dueToday} sub="memory cards ready to review" />
         <StatCard
           label="Current streak"
           value={

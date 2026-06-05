@@ -18,7 +18,7 @@ type SubjectFilterPropsT = {
   selectedIds: string[]
 }
 
-// Shared subject ("topic") filter for any subject-filterable list (notes, topic-checks). Lives in
+// Shared subject ("topic") filter for any subject-filterable list (notes, memory-cards). Lives in
 // the subjects feature as the 2nd consumer promoted it out of notes; consuming pages compose it at
 // the route layer. Server-side: the selection lives in the URL and the page re-queries on change,
 // so the filter is shareable and scales past the loaded set. Two-mode selection avoids a desync:

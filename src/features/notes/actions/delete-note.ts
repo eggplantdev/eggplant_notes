@@ -7,7 +7,7 @@ import { runTableAction } from '@/lib/supabase/run-table-action'
 import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
-// Delete a note. Attached topic_checks (and their review_events) are removed by the DB
+// Delete a note. Attached memory_cards (and their review_events) are removed by the DB
 // FK `on delete cascade` — no app-side cascade needed (FR-010). RLS scopes the delete to
 // the owner. `.select().single()` returns the deleted row so runTableAction confirms a
 // row was actually removed. On success, revalidate the list and return to where the delete

@@ -3,15 +3,15 @@ import { redirect } from 'next/navigation'
 
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { Button } from '@/components/ui/button'
-import { AddTopicCheck } from '@/features/topic-checks/add-topic-check'
-import { DeleteTopicCheckButton } from '@/features/topic-checks/delete-topic-check-button'
-import { TopicCheckForm } from '@/features/topic-checks/topic-check-form'
-import type { TopicCheckT } from '@/features/topic-checks/types'
-import { topicCheckEditHref } from '@/features/topic-checks/utils'
+import { AddMemoryCard } from '@/features/memory-cards/add-memory-card'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
+import { MemoryCardForm } from '@/features/memory-cards/memory-card-form'
+import type { MemoryCardT } from '@/features/memory-cards/types'
+import { memoryCardEditHref } from '@/features/memory-cards/utils'
 
-type TopicChecksSectionPropsT = {
+type MemoryCardsSectionPropsT = {
   noteId: string
-  checks: TopicCheckT[]
+  checks: MemoryCardT[]
   editId?: string
 }
 
@@ -19,9 +19,9 @@ type TopicChecksSectionPropsT = {
 // checks on a note" view (FR-015). Edit state is the URL `?edit=<id>` param (editId), so
 // there's no client list state: an Edit link re-renders this on the server with the form
 // seeded for that check (`key` forces the client form to remount when the edit target
-// changes). When NOT editing, the add form is deferred behind <AddTopicCheck> so a read view
+// changes). When NOT editing, the add form is deferred behind <AddMemoryCard> so a read view
 // mounts no CodeMirror. Optional example/code_context render only when present.
-export async function TopicChecksSection({ noteId, checks, editId }: TopicChecksSectionPropsT) {
+export async function MemoryCardsSection({ noteId, checks, editId }: MemoryCardsSectionPropsT) {
   const editingCheck = editId ? checks.find((c) => c.id === editId) : undefined
   // Stale ?edit (check deleted or never owned): drop the param so the URL matches the
   // add-mode form it would fall back to, instead of claiming edit of a row that isn't there.
@@ -29,22 +29,22 @@ export async function TopicChecksSection({ noteId, checks, editId }: TopicChecks
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Topic checks</h2>
+      <h2 className="text-lg font-semibold">Memory cards</h2>
 
       {editingCheck ? (
-        <TopicCheckForm key={editId} noteId={noteId} check={editingCheck} />
+        <MemoryCardForm key={editId} noteId={noteId} check={editingCheck} />
       ) : (
-        <AddTopicCheck noteId={noteId} />
+        <AddMemoryCard noteId={noteId} />
       )}
 
       {checks.length === 0 ? (
         <p className="text-muted-foreground text-sm">
-          No topic checks yet. Add one above to start building your recall set.
+          No memory cards yet. Add one above to start building your recall set.
         </p>
       ) : (
         <ul className="flex flex-col gap-4">
           {checks.map((check) => (
-            // id + scroll-mt make this a scroll target for the /topic-checks card→note deep link
+            // id + scroll-mt make this a scroll target for the /memory-cards card→note deep link
             // (`/notes/[id]#check-<id>`); scroll-mt keeps the sticky nav from covering it.
             <li
               key={check.id}
@@ -55,9 +55,9 @@ export async function TopicChecksSection({ noteId, checks, editId }: TopicChecks
                 <p className="font-medium">{check.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
                   <Button asChild variant="outline" size="sm">
-                    <Link href={topicCheckEditHref(noteId, check.id)}>Edit</Link>
+                    <Link href={memoryCardEditHref(noteId, check.id)}>Edit</Link>
                   </Button>
-                  <DeleteTopicCheckButton noteId={noteId} id={check.id} />
+                  <DeleteMemoryCardButton noteId={noteId} id={check.id} />
                 </div>
               </div>
               {check.example && (

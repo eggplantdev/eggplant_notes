@@ -8,7 +8,7 @@ import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// S-07: creates a note together with its staged topic checks in one atomic write. `user_id` is
+// S-07: creates a note together with its staged memory cards in one atomic write. `user_id` is
 // NOT sent — the DB defaults it to auth.uid() and RLS `with check` guards it, so a client can
 // never spoof ownership. When the note is created already assigned to a subject,
 // `position = Date.now()` appends it to the end of that subject (no max() read, no append race);
@@ -16,7 +16,7 @@ import type { ActionResultT } from '@/types/action'
 // captures its id, and inserts every check against it in one transaction (all-or-nothing), then
 // returns the new id. Deliberately does NOT use runTableAction: that wrapper is single-schema →
 // single PostgREST write → .select().single(); this is a multi-table write through an RPC, so the
-// {success}/error envelope is mirrored by hand (same pattern as rateTopicCheck). On success we
+// {success}/error envelope is mirrored by hand (same pattern as rateMemoryCard). On success we
 // revalidate the list and redirect to the new note (redirect throws, so the form only ever
 // observes the failure branch).
 export async function createNote(input: unknown): Promise<ActionResultT> {

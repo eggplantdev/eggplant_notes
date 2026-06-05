@@ -10,13 +10,13 @@ import { clientFor, signUp, uniqueEmail } from './helpers'
 
 type SeedT = {
   noteId: string
-  topicCheckId: string
+  memoryCardId: string
   reviewEventId: string
   title: string
   prompt: string
 }
 
-// Seed the full cascade chain (note → topic_check → review_event) for one account. Every
+// Seed the full cascade chain (note → memory_card → review_event) for one account. Every
 // row's user_id defaults to auth.uid() (NOT NULL + RLS `with check`), so no client can
 // forge ownership. Returns the row ids so the other account can attempt to read them.
 async function seedChain(supabase: SupabaseClient, tag: string): Promise<SeedT> {
@@ -28,28 +28,28 @@ async function seedChain(supabase: SupabaseClient, tag: string): Promise<SeedT> 
   const noteId = note.data!.id
 
   const tc = await supabase
-    .from('topic_checks')
+    .from('memory_cards')
     .insert({ note_id: noteId, prompt })
     .select('id')
     .single()
-  expect(tc.error, `${tag} topic_check insert failed`).toBeNull()
-  const topicCheckId = tc.data!.id
+  expect(tc.error, `${tag} memory_card insert failed`).toBeNull()
+  const memoryCardId = tc.data!.id
 
   const re = await supabase
     .from('review_events')
-    .insert({ topic_check_id: topicCheckId, rating: 4 })
+    .insert({ memory_card_id: memoryCardId, rating: 4 })
     .select('id')
     .single()
   expect(re.error, `${tag} review_event insert failed`).toBeNull()
   const reviewEventId = re.data!.id
 
-  return { noteId, topicCheckId, reviewEventId, title, prompt }
+  return { noteId, memoryCardId, reviewEventId, title, prompt }
 }
 
 // Assert `client` sees its own row in `table` but NOT the other account's row.
 async function assertIsolated(
   client: SupabaseClient,
-  table: 'notes' | 'topic_checks' | 'review_events',
+  table: 'notes' | 'memory_cards' | 'review_events',
   ownId: string,
   foreignId: string,
 ) {
@@ -60,7 +60,7 @@ async function assertIsolated(
   expect(ids, `LEAK: foreign ${table} row visible`).not.toContain(foreignId)
 }
 
-test('accounts are isolated across notes, topic_checks, and review_events', async ({ browser }) => {
+test('accounts are isolated across notes, memory_cards, and review_events', async ({ browser }) => {
   const emailA = uniqueEmail('iso-a')
   const emailB = uniqueEmail('iso-b')
 
@@ -83,8 +83,8 @@ test('accounts are isolated across notes, topic_checks, and review_events', asyn
   // never the other's, in both directions, at all three levels of the cascade.
   await assertIsolated(supaA, 'notes', a.noteId, b.noteId)
   await assertIsolated(supaB, 'notes', b.noteId, a.noteId)
-  await assertIsolated(supaA, 'topic_checks', a.topicCheckId, b.topicCheckId)
-  await assertIsolated(supaB, 'topic_checks', b.topicCheckId, a.topicCheckId)
+  await assertIsolated(supaA, 'memory_cards', a.memoryCardId, b.memoryCardId)
+  await assertIsolated(supaB, 'memory_cards', b.memoryCardId, a.memoryCardId)
   await assertIsolated(supaA, 'review_events', a.reviewEventId, b.reviewEventId)
   await assertIsolated(supaB, 'review_events', b.reviewEventId, a.reviewEventId)
 })

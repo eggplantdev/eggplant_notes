@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 import { clientFor, signUp, uniqueEmail } from './helpers'
 
-// S-07 acceptance path: stage 0..N topic checks inline on /notes/new and save them atomically
+// S-07 acceptance path: stage 0..N memory cards inline on /notes/new and save them atomically
 // with the note (one create_note_with_checks RPC transaction). Rows use the prompt AppField +
 // the optional example Textarea; code_context (a CodeMirror island) is intentionally not driven
 // here — the create page mounts one .cm-content for the note body plus one per row, which would
@@ -10,7 +10,7 @@ import { clientFor, signUp, uniqueEmail } from './helpers'
 
 const noteIdFromUrl = (url: string) => url.match(/\/notes\/([0-9a-f-]+)$/)?.[1]
 
-test('create a note with two topic checks inline, saved together', async ({ page }) => {
+test('create a note with two memory cards inline, saved together', async ({ page }) => {
   const email = uniqueEmail('cnwc')
   await signUp(page, email)
 
@@ -46,7 +46,7 @@ test('create a note with two topic checks inline, saved together', async ({ page
   // And both rows actually landed in the DB, scoped to this user (the atomic write committed both).
   const supabase = await clientFor(email)
   const { data, error } = await supabase
-    .from('topic_checks')
+    .from('memory_cards')
     .select('prompt, example, note_id')
     .eq('note_id', noteId!)
   expect(error).toBeNull()
@@ -80,9 +80,9 @@ test('creating with zero checks behaves like a plain note', async ({ page }) => 
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
   const noteId = noteIdFromUrl(page.url())
 
-  // No topic checks listed, and none in the DB for this note.
+  // No memory cards listed, and none in the DB for this note.
   const supabase = await clientFor(email)
-  const { data, error } = await supabase.from('topic_checks').select('id').eq('note_id', noteId!)
+  const { data, error } = await supabase.from('memory_cards').select('id').eq('note_id', noteId!)
   expect(error).toBeNull()
   expect(data).toHaveLength(0)
 })

@@ -2,8 +2,8 @@ import { test, expect, type Page } from '@playwright/test'
 
 import { attachCheck, signUp, uniqueEmail } from './helpers'
 
-// Acceptance path for the standalone /topic-checks listing (S-17):
-//  1. Every owned topic check lists as a card showing its prompt + subject ("topic") chip +
+// Acceptance path for the standalone /memory-cards listing (S-17):
+//  1. Every owned memory card lists as a card showing its prompt + subject ("topic") chip +
 //     source-note title.
 //  2. The Subjects multiselect filters the list server-side (?subjects=<id> in the URL),
 //     committed on popover close (the debounce's flush-on-close) — joining through notes.
@@ -27,7 +27,7 @@ async function createNoteInSubject(page: Page, title: string, subject: string): 
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 }
 
-test('topic-checks listing: lists checks, filters by subject, card deep-links to its note', async ({
+test('memory-cards listing: lists checks, filters by subject, card deep-links to its note', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('tc-list'))
@@ -48,7 +48,7 @@ test('topic-checks listing: lists checks, filters by subject, card deep-links to
   await attachCheck(page, promptB)
 
   // (1) Both checks list, and card A carries its subject chip + source-note title.
-  await page.goto('/topic-checks')
+  await page.goto('/memory-cards')
   const cardA = page.getByRole('link').filter({ hasText: promptA })
   await expect(cardA).toBeVisible()
   await expect(page.getByRole('link').filter({ hasText: promptB })).toBeVisible()

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { DueCardT, TopicCheckListItemT, TopicCheckT } from '@/features/topic-checks/types'
+import type { DueCardT, MemoryCardListItemT, MemoryCardT } from '@/features/memory-cards/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -13,7 +13,7 @@ import type { Database } from '@/lib/supabase/types'
 // defaults `due_at` to now() so it is due immediately until its first review reschedules it.
 // Does NOT use runTableQuery: that wrapper returns rows and throws on null data, whereas here
 // we need both the row and the count off the same response — so it's hand-rolled. Embeds
-// notes(title) (typed via the topic_checks→notes FK) so the card can link to its source note
+// notes(title) (typed via the memory_cards→notes FK) so the card can link to its source note
 // by title (S-08) without a second round-trip.
 export async function getDueQueue(
   client?: SupabaseClient<Database>,
@@ -21,7 +21,7 @@ export async function getDueQueue(
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
   const { data, count, error } = await supabase
-    .from('topic_checks')
+    .from('memory_cards')
     .select('*, notes(title)', { count: 'exact' })
     .lte('due_at', now)
     .order('due_at', { ascending: true })
@@ -41,24 +41,24 @@ export async function getDueQueue(
 export async function getChecksForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
-    c.from('topic_checks').select('id, prompt, note_id, state, due_at, stability, lapses'),
+    c.from('memory_cards').select('id, prompt, note_id, state, due_at, stability, lapses'),
   )
 }
 
-// Backs the /topic-checks listing: every owned check with its source-note title + subject,
+// Backs the /memory-cards listing: every owned check with its source-note title + subject,
 // optionally narrowed to selected subjects, ordered soonest-due first so the list doubles as a
 // study-readiness view. RLS scopes rows to the owner. `notes!inner` is load-bearing — subject
 // filtering applies `.in('notes.subject_id', …)` on the embedded table, which PostgREST can only
 // filter through an inner join (a plain `notes(...)` embed is an outer join and won't filter the
 // parent). Personal-scale data, so fetching the full set is fine (same assumption as
 // getChecksForStats). Injectable client per the isolation rule.
-export async function getTopicChecksList(
+export async function getMemoryCardsList(
   opts?: { subjectIds?: string[] },
   client?: SupabaseClient<Database>,
-): Promise<TopicCheckListItemT[]> {
+): Promise<MemoryCardListItemT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) => {
-    let query = c.from('topic_checks').select('*, notes!inner(title, subjects(title))')
+    let query = c.from('memory_cards').select('*, notes!inner(title, subjects(title))')
     if (opts?.subjectIds && opts.subjectIds.length > 0) {
       query = query.in('notes.subject_id', opts.subjectIds)
     }
@@ -66,17 +66,17 @@ export async function getTopicChecksList(
   })
 }
 
-// Returns all topic checks attached to one note, oldest first (FR-015). RLS scopes rows to the
+// Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the
 // owner, so a note the caller doesn't own yields []. Injectable client (defaults to the server
 // client) so Playwright can call it with a signInWithPassword client per the isolation test.
-export async function getTopicChecksForNote(
+export async function getMemoryCardsForNote(
   noteId: string,
   client?: SupabaseClient<Database>,
-): Promise<TopicCheckT[]> {
+): Promise<MemoryCardT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
     c
-      .from('topic_checks')
+      .from('memory_cards')
       .select('*')
       .eq('note_id', noteId)
       .order('created_at', { ascending: true }),

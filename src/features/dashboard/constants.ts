@@ -17,7 +17,7 @@ export const HEAT_GLOW = ['', '', '', 'heat-glow', 'heat-glow-strong'] as const
 
 // MS_PER_DAY + APP_TIME_ZONE moved to src/lib/utils/date.ts (shared on review-events' 2nd use).
 
-// FSRS card states (ts-fsrs State enum). Index = topic_checks.state integer.
+// FSRS card states (ts-fsrs State enum). Index = memory_cards.state integer.
 // 0 New · 1 Learning · 2 Review · 3 Relearning. Drives the state-breakdown stat.
 export const FSRS_STATE_LABELS = ['New', 'Learning', 'Review', 'Relearning'] as const
 

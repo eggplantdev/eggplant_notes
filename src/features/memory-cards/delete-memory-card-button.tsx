@@ -4,18 +4,18 @@ import { useState } from 'react'
 
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Button } from '@/components/ui/button'
-import { deleteTopicCheck } from '@/features/topic-checks/actions/delete-topic-check'
+import { deleteMemoryCard } from '@/features/memory-cards/actions/delete-memory-card'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-type DeleteTopicCheckButtonPropsT = { noteId: string; id: string }
+type DeleteMemoryCardButtonPropsT = { noteId: string; id: string }
 
 // Destructive control per row (FR-014). Owns its own trigger Button + open state (the shared
-// ConfirmDeleteDialog is controlled-only, no built-in trigger), then fires the deleteTopicCheck
+// ConfirmDeleteDialog is controlled-only, no built-in trigger), then fires the deleteMemoryCard
 // Server Action inside a transition. The action revalidates the note's detail path, so on success
 // the row disappears and the dialog unmounts with it; a returned failure is surfaced inline and
 // the dialog stays open (the shared dialog suppresses close while pending). The check's
 // review_events cascade at the DB.
-export function DeleteTopicCheckButton({ noteId, id }: DeleteTopicCheckButtonPropsT) {
+export function DeleteMemoryCardButton({ noteId, id }: DeleteMemoryCardButtonPropsT) {
   const [open, setOpen] = useState(false)
   const { error, isPending, run } = useActionTransition()
 
@@ -27,12 +27,12 @@ export function DeleteTopicCheckButton({ noteId, id }: DeleteTopicCheckButtonPro
       <ConfirmDeleteDialog
         open={open}
         onOpenChange={setOpen}
-        title="Delete this topic check?"
-        description="This permanently deletes the topic check and its review history. This can’t be undone."
+        title="Delete this memory card?"
+        description="This permanently deletes the memory card and its review history. This can’t be undone."
         isPending={isPending}
         error={error}
         onConfirm={() =>
-          run(() => deleteTopicCheck(noteId, id), { successMessage: 'Check deleted' })
+          run(() => deleteMemoryCard(noteId, id), { successMessage: 'Check deleted' })
         }
       />
     </>

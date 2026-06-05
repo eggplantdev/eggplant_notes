@@ -9,7 +9,7 @@ import {
 } from '@/features/review-events/queries'
 import { getCurrentStreak } from '@/features/review-events/streak'
 import { getSubjects } from '@/features/subjects/queries'
-import { getChecksForStats } from '@/features/topic-checks/queries'
+import { getChecksForStats } from '@/features/memory-cards/queries'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
 // Composes the dashboard's per-user reads (S-03 data wiring, expanded for the stats panel).

@@ -22,7 +22,7 @@ export const subjectInputSchema = z.object({
 })
 
 // Validates the `id` route param / form value for update + delete actions.
-// z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB id; see topic-checks/schemas.ts.
+// z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB id; see memory-cards/schemas.ts.
 export const subjectIdSchema = z.guid('Invalid subject id')
 
 export type SubjectInputT = z.infer<typeof subjectInputSchema>

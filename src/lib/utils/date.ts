@@ -54,7 +54,7 @@ function parseIsoDateUtc(isoDate: string): Date {
 }
 
 // A Date at UTC-midnight of an instant's *zone* calendar date. Two zone-midnights are directly
-// comparable for a whole-day diff regardless of the server's UTC clock (used by the topic-check
+// comparable for a whole-day diff regardless of the server's UTC clock (used by the memory-card
 // review-status label).
 export function zoneMidnight(date: Date, timeZone: string): Date {
   return parseIsoDateUtc(isoDateInZone(date, timeZone))

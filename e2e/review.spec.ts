@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 import { attachCheck, clientFor, createNote, signUp, uniqueEmail } from './helpers'
 
 // S-03 north-star path: the recall loop end-to-end (FR-016–019). Sign up → create a note →
-// attach a topic check → open /dashboard (the review panel lives here now) → rate it → assert
+// attach a memory card → open /dashboard (the review panel lives here now) → rate it → assert
 // the check leaves the queue AND that the schedule/event actually changed in the DB
 // (review_events row written, due_at pushed to
 // the future). Plus cross-account RLS on the review read + rate paths. Shared helpers in
@@ -20,7 +20,7 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
   const email = uniqueEmail('rev-loop')
   await signUp(page, email)
 
-  // A note + a fresh topic check (due_at defaults to now → immediately due).
+  // A note + a fresh memory card (due_at defaults to now → immediately due).
   await createNote(page, `Review host ${Date.now()}`)
   const prompt = `What is a closure? ${Date.now()}`
   await attachCheck(page, prompt)
@@ -40,7 +40,7 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
 
   // The schedule + event actually changed: one review_event (rating 3), due_at now in the future.
   const supa = await clientFor(email)
-  const checks = await supa.from('topic_checks').select('id, due_at')
+  const checks = await supa.from('memory_cards').select('id, due_at')
   expect(checks.error).toBeNull()
   expect(checks.data?.length, 'one check exists').toBe(1)
   const check = checks.data![0]
@@ -48,7 +48,7 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
     Date.now(),
   )
 
-  const events = await supa.from('review_events').select('rating').eq('topic_check_id', check.id)
+  const events = await supa.from('review_events').select('rating').eq('memory_card_id', check.id)
   expect(events.error).toBeNull()
   expect(events.data?.length, 'one review_event recorded').toBe(1)
   expect(events.data?.[0].rating, 'recorded the Good grade').toBe(GOOD)
@@ -71,7 +71,7 @@ test('review path is isolated by account', async ({ browser }) => {
   const supaA = await clientFor(emailA)
   const supaB = await clientFor(emailB)
 
-  // A seeds a note + a due topic check.
+  // A seeds a note + a due memory card.
   const note = await supaA
     .from('notes')
     .insert({ title: `iso note ${Date.now()}` })
@@ -79,11 +79,11 @@ test('review path is isolated by account', async ({ browser }) => {
     .single()
   expect(note.error, 'A note insert failed').toBeNull()
   const tc = await supaA
-    .from('topic_checks')
+    .from('memory_cards')
     .insert({ note_id: note.data!.id, prompt: 'A only prompt' })
     .select('id')
     .single()
-  expect(tc.error, 'A topic_check insert failed').toBeNull()
+  expect(tc.error, 'A memory_card insert failed').toBeNull()
   const aCheckId = tc.data!.id
 
   // B opens /dashboard → "All caught up" (A's due check is hidden by RLS, not visible to B).
@@ -93,7 +93,7 @@ test('review path is isolated by account', async ({ browser }) => {
 
   // B tries to rate A's check directly → rejected by the RPC's ownership guard.
   const rpc = await supaB.rpc('record_review', {
-    p_topic_check_id: aCheckId,
+    p_memory_card_id: aCheckId,
     p_rating: GOOD,
     p_card: {
       stability: 1,
@@ -111,7 +111,7 @@ test('review path is isolated by account', async ({ browser }) => {
   expect(rpc.error, 'B rating A check should be rejected').not.toBeNull()
 
   // Nothing was written: A's check has no review_events.
-  const events = await supaA.from('review_events').select('id').eq('topic_check_id', aCheckId)
+  const events = await supaA.from('review_events').select('id').eq('memory_card_id', aCheckId)
   expect(events.error).toBeNull()
   expect(events.data?.length, 'LEAK: B wrote a review_event on A check').toBe(0)
 })

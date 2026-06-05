@@ -8,7 +8,7 @@ import type { ActionResultT } from '@/types/action'
 // Shared client-island scaffold for firing a Server Action: run it inside a transition (for the
 // pending/disabled state), surface a returned `{ success: false }` error inline AND as a toast,
 // and optionally toast a success message. Promoted to src/hooks on the 2nd consumer (review
-// rating buttons + topic-check delete) per the feature-first rule. `run` takes a thunk so the
+// rating buttons + memory-card delete) per the feature-first rule. `run` takes a thunk so the
 // caller binds the action's arguments, and RETURNS the resolved result so callers that own
 // optimistic state (reorder, subject-picker) can revert on failure — the transition still drives
 // `isPending`. Callers without optimistic state ignore the return.

@@ -13,7 +13,7 @@ export const promptSchema = z
 
 const optionalText = z.string().transform((v) => (v.trim().length > 0 ? v : null))
 
-export const topicCheckInputSchema = z.object({
+export const memoryCardInputSchema = z.object({
   prompt: promptSchema,
   example: optionalText,
   code_context: optionalText,
@@ -26,6 +26,6 @@ export const topicCheckInputSchema = z.object({
 // broke EVERY mutation. Existence/ownership is enforced downstream by RLS + the action re-fetch,
 // not here — keep this as z.guid. (Same reasoning for the note/subject id schemas.)
 export const noteIdSchema = z.guid('Invalid note id')
-export const topicCheckIdSchema = z.guid('Invalid topic check id')
+export const memoryCardIdSchema = z.guid('Invalid memory card id')
 
-export type TopicCheckInputT = z.infer<typeof topicCheckInputSchema>
+export type MemoryCardInputT = z.infer<typeof memoryCardInputSchema>

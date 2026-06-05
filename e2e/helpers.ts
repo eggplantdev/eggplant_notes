@@ -29,7 +29,7 @@ export async function signUp(page: Page, email: string) {
 }
 
 // Create a note via the UI (title only) and land on its detail page (/notes/<id>). Shared by
-// the specs that need a note to hang topic checks off (notes/topic-checks/review setup).
+// the specs that need a note to hang memory cards off (notes/memory-cards/review setup).
 export async function createNote(page: Page, title: string) {
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(title)
@@ -37,14 +37,14 @@ export async function createNote(page: Page, title: string) {
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 }
 
-// Attach a question-only topic check on the current note detail page and wait for it to list.
+// Attach a question-only memory card on the current note detail page and wait for it to list.
 // The add form is deferred behind an "Add check" toggle (S-17), so reveal it first; it
 // collapses again after a successful add, so each call re-reveals. (Specs exercising the
 // optional example/code_context fields add their checks inline instead.)
 export async function attachCheck(page: Page, prompt: string) {
   await page.getByRole('button', { name: 'Add check' }).click()
   await page.getByLabel('Question').fill(prompt)
-  await page.getByRole('button', { name: 'Add topic check' }).click()
+  await page.getByRole('button', { name: 'Add memory card' }).click()
   await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
 }
 

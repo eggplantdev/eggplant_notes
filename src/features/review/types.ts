@@ -14,7 +14,7 @@ export type GoalCelebrationT = {
   weeklyGoal: number
 }
 
-// rateTopicCheck's return contract: the shared action envelope plus an optional celebration.
+// rateMemoryCard's return contract: the shared action envelope plus an optional celebration.
 // A superset of ActionResultT (the shared type is untouched); `celebrate` is present only when
 // a goal was crossed.
 export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT }

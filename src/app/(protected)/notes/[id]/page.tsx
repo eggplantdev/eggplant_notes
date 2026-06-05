@@ -10,15 +10,15 @@ import { DeleteNoteButton } from '@/features/notes/delete-note-button'
 import { NoteForm } from '@/features/notes/note-form'
 import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
-import { getTopicChecksForNote } from '@/features/topic-checks/queries'
-import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
+import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
+import { MemoryCardsSection } from '@/features/memory-cards/memory-cards-section'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
 // `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
 // 404. `?edit` carries two mutually exclusive meanings: `note` swaps the body+subject into
 // NoteForm in place (the old /notes/[id]/edit route, now inline); `<checkId>` drives the
-// topic-check edit form. Both are server-rendered (no client edit state) — forced because
+// memory-card edit form. Both are server-rendered (no client edit state) — forced because
 // RenderMarkdown is an async server-only Shiki component.
 export default async function NotePage({
   params,
@@ -31,9 +31,9 @@ export default async function NotePage({
   const { edit } = await searchParams
   // Independent RLS-scoped reads — run them concurrently rather than paying two
   // round-trips in series (the wasted checks query on a 404 is one rare extra query).
-  const [note, topicChecks, subjects] = await Promise.all([
+  const [note, memoryCards, subjects] = await Promise.all([
     getNote(id),
-    getTopicChecksForNote(id),
+    getMemoryCardsForNote(id),
     getSubjects(),
   ])
   if (!note) notFound()
@@ -80,11 +80,11 @@ export default async function NotePage({
       <Separator />
 
       {/* `note` is the body-edit sentinel — never a check id. Forwarding it as editId would
-          trip TopicChecksSection's stale-?edit guard (no check has id `note`) and bounce the
+          trip MemoryCardsSection's stale-?edit guard (no check has id `note`) and bounce the
           user out of body-edit, so suppress it while editing the body. */}
-      <TopicChecksSection
+      <MemoryCardsSection
         noteId={note.id}
-        checks={topicChecks}
+        checks={memoryCards}
         editId={isEditingNote ? undefined : edit}
       />
     </PageShell>

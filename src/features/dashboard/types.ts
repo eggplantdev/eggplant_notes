@@ -3,7 +3,7 @@
 // the "components export only the component / shared types live in their own file" rule.
 //
 // DashboardDataT is the contract between the data layer (data.ts) and the UI; S-03 wired it
-// to real per-user queries over `topic_checks` / `review_events` without changing this shape.
+// to real per-user queries over `memory_cards` / `review_events` without changing this shape.
 
 import { HEAT_LEVELS } from '@/features/dashboard/constants'
 import type { ActivityDayT } from '@/types/activity'

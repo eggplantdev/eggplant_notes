@@ -2,18 +2,18 @@
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
-import { rateTopicCheck } from '@/features/review/actions/rate-topic-check'
+import { rateMemoryCard } from '@/features/review/actions/rate-memory-card'
 import { GRADES } from '@/features/review/grades'
 import { useReviewCelebration } from '@/features/review/review-celebration-context'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-type PropsT = { topicCheckId: string; previews: Record<number, string>; goal: number }
+type PropsT = { memoryCardId: string; previews: Record<number, string>; goal: number }
 
 // Four rating buttons, each showing its predicted next interval (server-formatted). Clicking
-// fires rateTopicCheck via useActionTransition (pending/disabled state + inline error); the
+// fires rateMemoryCard via useActionTransition (pending/disabled state + inline error); the
 // action revalidates /dashboard so the next due card streams in with no client queue state (no
 // useEffect). Buttons stack two-up on narrow widths (~360px), four-up from sm.
-export function RatingButtons({ topicCheckId, previews, goal }: PropsT) {
+export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()
   const { celebrate } = useReviewCelebration()
 
@@ -28,7 +28,7 @@ export function RatingButtons({ topicCheckId, previews, goal }: PropsT) {
             size="lg"
             disabled={isPending}
             onClick={() =>
-              run(() => rateTopicCheck(topicCheckId, grade, goal), {
+              run(() => rateMemoryCard(memoryCardId, grade, goal), {
                 successMessage: 'Review recorded',
               }).then((result) => {
                 if (result.success && result.celebrate) celebrate(result.celebrate)

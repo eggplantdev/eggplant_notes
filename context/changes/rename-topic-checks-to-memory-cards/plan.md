@@ -264,9 +264,9 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Automated
 
-- [x] 1.1 `supabase db reset` applies all migrations cleanly
-- [x] 1.2 `pnpm db:types` regenerates types.ts; no `topic_check` in types.ts
-- [x] 1.3 No `topic[_-]?check` remains in `supabase/` (one intentional exception: the `S-02 attach-topic-checks` historical slice-id comment in `..._add_topic_check_content_columns.sql`)
+- [x] 1.1 `supabase db reset` applies all migrations cleanly — 2ed4fd7
+- [x] 1.2 `pnpm db:types` regenerates types.ts; no `topic_check` in types.ts — 2ed4fd7
+- [x] 1.3 No `topic[_-]?check` remains in `supabase/` (one intentional exception: the `S-02 attach-topic-checks` historical slice-id comment in `..._add_topic_check_content_columns.sql`) — 2ed4fd7
 
 #### Manual
 
@@ -276,9 +276,9 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck` passes
-- [ ] 2.2 `pnpm lint` passes
-- [ ] 2.3 No `topic[_-]?check` in `src/ e2e/ src/__tests__/`
+- [x] 2.1 `pnpm typecheck` passes
+- [x] 2.2 `pnpm lint` passes
+- [x] 2.3 No `topic[_-]?check` in `src/ e2e/ src/__tests__/`
 
 #### Manual
 
