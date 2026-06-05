@@ -6,6 +6,7 @@ import { NotesFilter } from '@/features/notes/components/notes-filter'
 import { NotesList } from '@/features/notes/components/notes-list'
 import { getNotes } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
+import { pluralize } from '@/lib/utils/pluralize'
 
 // Notes list. Server Component — RLS scopes both reads to the signed-in user; the (protected)
 // layout already gates auth. `?subjects=a,b` filters the list by subject ("topic") server-side
@@ -28,7 +29,10 @@ export default async function NotesPage({
   return (
     <PageShell
       title="Notes"
-      width="prose"
+      // Count reflects the post-filter result set (`notes` is already filtered by `?subjects=`).
+      subtitle={pluralize(notes.length, 'note')}
+      // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
+      width="full"
       actions={
         <Button asChild>
           <Link href="/notes/new">New note</Link>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
+import { pluralize } from '@/lib/utils/pluralize'
 
 // Docs-style single-pane subject view (S-15) — now THE subject view (replaced the continuous
 // "subject-as-document" page). This layout holds the persistent shell + subject header/actions
@@ -29,7 +30,14 @@ export default async function SubjectLayout({
   return (
     <PageShell
       title={subject.title}
-      subtitle={subject.description ?? undefined}
+      subtitle={
+        <>
+          <span className="block">{pluralize(summaries.length, 'note')}</span>
+          {subject.description && (
+            <span className="mt-1 block max-w-prose">{subject.description}</span>
+          )}
+        </>
+      }
       backHref="/subjects"
       backLabel="Subjects"
       width="full"
@@ -46,6 +54,9 @@ export default async function SubjectLayout({
         </>
       }
     >
+      {/* Separates the subject header (title + description) from the note grid below. */}
+      <hr className="border-border my-2" />
+
       {/* App-shell row (desktop): fills the bounded <main> (PageShell `fill`) and gives the grid
           a single 1fr track, so the sidebar column and the content pane each scroll on their own
           (md:overflow-y-auto below) while the page itself never scrolls. */}

@@ -4,6 +4,7 @@ import { PageShell } from '@/components/layout/page-shell'
 import { Button } from '@/components/ui/button'
 import { SubjectsList } from '@/features/subjects/components/subjects-list'
 import { getSubjects } from '@/features/subjects/queries'
+import { pluralize } from '@/lib/utils/pluralize'
 
 // Subjects list. Server Component — RLS scopes getSubjects() to the signed-in user; the
 // (protected) layout gates auth. Newest-first, with an empty-state CTA. Mirrors NotesPage;
@@ -14,6 +15,7 @@ export default async function SubjectsPage() {
   return (
     <PageShell
       title="Subjects"
+      subtitle={pluralize(subjects.length, 'subject')}
       width="prose"
       actions={
         <Button asChild>
