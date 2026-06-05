@@ -1,4 +1,4 @@
-import { HEAT_BG } from '@/features/dashboard/constants'
+import { HEAT_BG, HEAT_GLOW } from '@/features/dashboard/constants'
 import type { HeatmapCellT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'
 
@@ -18,7 +18,11 @@ export function HeatmapCell({ cell, onEnter, onLeave }: PropsT) {
       className={cn(
         'rounded-xs',
         cell.date
-          ? `${HEAT_BG[cell.level]} hover:outline-foreground outline-offset-1 hover:outline`
+          ? cn(
+              HEAT_BG[cell.level],
+              HEAT_GLOW[cell.level],
+              'hover:outline-foreground outline-offset-1 hover:outline',
+            )
           : 'bg-transparent',
       )}
     />

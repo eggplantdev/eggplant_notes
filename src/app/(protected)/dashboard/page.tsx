@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
-import { DailyProgressBar } from '@/features/dashboard/daily-progress-bar'
+import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { getDashboardData } from '@/features/dashboard/data'
 import { DueForecast } from '@/features/dashboard/due-forecast'
 import { HardestCards } from '@/features/dashboard/hardest-cards'
@@ -50,7 +50,6 @@ export default async function DashboardPage() {
     { label: 'Young cards', value: s.youngCards, sub: 'still stabilizing' },
     { label: 'Total lapses', value: s.totalLapses, sub: 'times a card was forgotten' },
     { label: 'Reviews (30d)', value: s.reviewsInWindow, sub: 'reviews in the last 30 days' },
-    { label: 'Reviews this week', value: s.reviewsThisWeek, sub: 'reviews in the last 7 days' },
     { label: 'Retention (30d)', value: pct(s.retention), sub: 'reviews rated Good or better' },
     { label: 'Lapse rate (30d)', value: pct(s.lapseRate), sub: 'reviews rated Again' },
   ]
@@ -65,7 +64,23 @@ export default async function DashboardPage() {
         </Button>
       }
     >
-      <DailyProgressBar reviewed={data.reviewedToday} goal={dailyGoal} />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Flip variant to switch palettes: 'aurora' | 'fuchsia' | 'mono' | 'white'. */}
+        <GoalProgressBar
+          label="Today's progress"
+          reviewed={data.reviewedToday}
+          goal={dailyGoal}
+          variant="aurora"
+          goalHitText="Daily goal hit 🏄"
+        />
+        <GoalProgressBar
+          label="This week's progress"
+          reviewed={s.reviewsThisWeek}
+          goal={dailyGoal * 7}
+          variant="aurora"
+          goalHitText="Weekly goal hit 🚀"
+        />
+      </div>
 
       <Card className="w-full">
         <CardHeader>

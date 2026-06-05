@@ -10,6 +10,11 @@ export const HEAT_LEVELS = [0, 1, 2, 3, 4] as const
 // Index = HeatmapLevelT.
 export const HEAT_BG = ['bg-heat-0', 'bg-heat-1', 'bg-heat-2', 'bg-heat-3', 'bg-heat-4'] as const
 
+// Neon-style glow per level (globals.css @utility), empty for the dim levels so only the
+// brightest (most-active) cells glow. Literal strings for the same Tailwind-scanner reason as
+// HEAT_BG. Index = HeatmapLevelT.
+export const HEAT_GLOW = ['', '', '', 'heat-glow', 'heat-glow-strong'] as const
+
 // MS_PER_DAY + APP_TIME_ZONE moved to src/lib/utils/date.ts (shared on review-events' 2nd use).
 
 // FSRS card states (ts-fsrs State enum). Index = topic_checks.state integer.
