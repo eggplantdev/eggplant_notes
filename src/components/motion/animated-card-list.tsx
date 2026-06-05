@@ -5,7 +5,7 @@ import { type MouseEvent, type ReactNode } from 'react'
 import { AnimatePresence } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 // The whole card is a <Link>, so a click inside the action slot would navigate. This wrapper
@@ -27,8 +27,11 @@ type PropsT<T> = {
   // Optional overline above the title (e.g. a date), spanning the card's full width so it sits
   // clear of the action slot. Caller owns its markup. Omitted → no overline row.
   renderEyebrow?: (item: T) => ReactNode
-  // Optional secondary line, rendered as-is under the title (the caller owns its markup so
-  // each list can style it differently, e.g. a date vs a line-clamped description).
+  // Optional secondary line, pinned to the BOTTOM of the card (mt-auto) so it lines up across a
+  // row even when titles differ in length — in a grid where cards stretch to equal height. The
+  // caller owns its markup so each list styles it differently (a subject chip, a date, a clamped
+  // description). In the non-grid stack (subjects) cards are content-height, so there's no spare
+  // space to push into — it simply renders as the last block.
   renderSubtitle?: (item: T) => ReactNode
   // Optional top-right action, rendered as a sibling of the title inside the card. The slot
   // wraps it in a nav-neutralizing container (see blockCardNav), so the action just renders its
@@ -68,23 +71,18 @@ export function AnimatedCardList<T>({
                 <Card className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}>
                   <CardHeader>
                     {renderEyebrow?.(item)}
-                    {renderAction ? (
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="grid gap-1.5">
-                          <CardTitle>{renderTitle(item)}</CardTitle>
-                          {renderSubtitle?.(item)}
-                        </div>
-                        <div className="shrink-0" onClick={blockCardNav}>
-                          {renderAction(item)}
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <CardTitle>{renderTitle(item)}</CardTitle>
-                        {renderSubtitle?.(item)}
-                      </>
+                    <CardTitle>{renderTitle(item)}</CardTitle>
+                    {renderAction && (
+                      // CardAction is the grid's top-right slot. blockCardNav sits on this parent
+                      // (bubble phase) so each action's own handler fires first — consumers must
+                      // not re-add preventDefault/stopPropagation.
+                      <CardAction onClick={blockCardNav}>{renderAction(item)}</CardAction>
                     )}
                   </CardHeader>
+                  {/* Subtitle pinned to the bottom (mt-auto) so tags align across a grid row. */}
+                  {renderSubtitle && (
+                    <CardContent className="mt-auto">{renderSubtitle(item)}</CardContent>
+                  )}
                 </Card>
               </Link>
             </AnimatedListItem>

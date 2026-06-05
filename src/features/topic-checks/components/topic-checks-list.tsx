@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
+import { TopicCheckCardActions } from '@/features/topic-checks/components/topic-check-card-actions'
 import type { TopicCheckListItemT } from '@/features/topic-checks/types'
 import { formatReviewStatus } from '@/features/topic-checks/utils'
 
@@ -17,6 +18,7 @@ export function TopicChecksList({ checks }: { checks: TopicCheckListItemT[] }) {
       items={checks}
       getKey={(check) => check.id}
       getHref={(check) => `/notes/${check.note_id}#check-${check.id}`}
+      renderAction={(check) => <TopicCheckCardActions noteId={check.note_id} checkId={check.id} />}
       renderTitle={(check) => <span className="line-clamp-2">{check.prompt}</span>}
       renderEyebrow={(check) => (
         <span className="text-muted-foreground text-xs">{formatReviewStatus(check)}</span>

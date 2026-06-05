@@ -55,9 +55,18 @@ full list returns; click a card → lands on the note scrolled to the matching c
 
 - No topic-check detail route (`/topic-checks/[id]`) — clicking goes to the parent note.
 - No per-subject grouped sections — flat list + filter only, exact notes mirror.
-- No edit/delete actions from this list — those stay in the note detail view.
-- No DB migration, schema change, or new mutation — read-only over existing tables.
+- No DB migration or schema change — read-only over existing tables (the only mutation is the
+  existing `deleteTopicCheck`, now also revalidating `/topic-checks`).
 - No client scroll effect / highlight — native hash scroll + `scroll-mt` only.
+
+### Scope added mid-implementation (user request, 2026-06-05)
+
+- **Edit/delete on cards** — originally out of scope; the list now carries per-card Edit + Delete
+  (reusing `DeleteTopicCheckButton`; `deleteTopicCheck` revalidates `/topic-checks` too), mirroring
+  the notes cards. Edit jumps to the parent note's check-edit form.
+- **Bottom-aligned card subtitle** — `AnimatedCardList` now pins `renderSubtitle` to the card
+  bottom (`mt-auto`) and uses the shadcn `CardAction` slot, so tags line up across a grid row.
+  Applies to all shared cards (notes, subjects, topic-checks) per the user's choice.
 - No test-authoring in these phases — per the project review gate, tests are written after
   review + `/simplify`, against the cleaned-up code (see Testing Strategy).
 
@@ -324,9 +333,9 @@ None — read-only over existing tables; no schema change.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — 8521677
+- [x] 3.2 Linting passes: `pnpm lint` — 8521677
+- [x] 3.3 Production build passes: `pnpm build` — 8521677
 
 #### Manual
 
