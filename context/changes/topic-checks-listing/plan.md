@@ -305,16 +305,16 @@ None — read-only over existing tables; no schema change.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — b08e0fe
+- [x] 1.2 Linting passes: `pnpm lint` — b08e0fe
 
 ### Phase 2: Promote the subject filter to the subjects feature
 
 #### Automated
 
-- [ ] 2.1 No dangling references to the old path (`grep -rn "notes-filter\|NotesFilter" src` empty)
-- [ ] 2.2 Type checking passes: `pnpm typecheck`
-- [ ] 2.3 Linting passes: `pnpm lint`
+- [x] 2.1 No dangling references to the old path (`grep -rn "notes-filter\|NotesFilter" src` empty)
+- [x] 2.2 Type checking passes: `pnpm typecheck`
+- [x] 2.3 Linting passes: `pnpm lint`
 
 #### Manual
 

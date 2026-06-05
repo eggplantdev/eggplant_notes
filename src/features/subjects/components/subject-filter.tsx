@@ -7,25 +7,26 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { MultiSelect, type MultiSelectOptionT } from '@/components/ui/multi-select'
 
 // Batch rapid toggles into one server round-trip: picking several subjects in a single popover
-// session re-queries getNotes once on the trailing edge, not once per click (mirrors
+// session re-queries the page's list once on the trailing edge, not once per click (mirrors
 // wykonczymy's FilterMultiSelect). The transition keeps the list interactive during the
 // re-query.
 const DEBOUNCE_MS = 400
 
-type NotesFilterPropsT = {
+type SubjectFilterPropsT = {
   options: MultiSelectOptionT[]
   // Subject ids currently in the URL (`?subjects=a,b`) — server-derived, the source of truth.
   selectedIds: string[]
 }
 
-// Subject ("topic") filter for the notes list. Server-side: the selection lives in the URL and
-// NotesPage re-queries getNotes({ subjectIds }) on change, so the filter is shareable and
-// scales past the loaded set. Two-mode selection avoids a desync: while the popover is OPEN,
-// `localSelected` drives so toggles feel instant and the debounce can batch them; while CLOSED,
-// it's null and selection derives straight from the URL prop — so Back/Forward and external
-// edits stay in sync without a second source of truth. Opening reseeds from the URL; closing
-// flushes any pending debounce immediately.
-export function NotesFilter({ options, selectedIds }: NotesFilterPropsT) {
+// Shared subject ("topic") filter for any subject-filterable list (notes, topic-checks). Lives in
+// the subjects feature as the 2nd consumer promoted it out of notes; consuming pages compose it at
+// the route layer. Server-side: the selection lives in the URL and the page re-queries on change,
+// so the filter is shareable and scales past the loaded set. Two-mode selection avoids a desync:
+// while the popover is OPEN, `localSelected` drives so toggles feel instant and the debounce can
+// batch them; while CLOSED, it's null and selection derives straight from the URL prop — so
+// Back/Forward and external edits stay in sync without a second source of truth. Opening reseeds
+// from the URL; closing flushes any pending debounce immediately.
+export function SubjectFilter({ options, selectedIds }: SubjectFilterPropsT) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()

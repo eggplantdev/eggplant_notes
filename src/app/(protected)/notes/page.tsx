@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { Button } from '@/components/ui/button'
-import { NotesFilter } from '@/features/notes/components/notes-filter'
 import { NotesList } from '@/features/notes/components/notes-list'
 import { getNotes } from '@/features/notes/queries'
+import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { pluralize } from '@/lib/utils/pluralize'
 
@@ -39,7 +39,7 @@ export default async function NotesPage({
         </Button>
       }
     >
-      {subjects.length > 0 && <NotesFilter options={options} selectedIds={selectedIds} />}
+      {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
 
       {notes.length === 0 ? (
         isFiltered ? (
