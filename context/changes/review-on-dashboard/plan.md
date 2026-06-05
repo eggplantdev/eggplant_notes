@@ -267,7 +267,7 @@ No data migration. The `/review` → `/dashboard` redirect (307) covers existing
 #### Automated
 
 - [ ] 2.1 E2E suite passes: `pnpm test:e2e`
-- [x] 2.2 Unit suite still green: `pnpm test`
+- [x] 2.2 Unit suite still green: `pnpm test` — 6e147fd
 
 #### Manual
 
