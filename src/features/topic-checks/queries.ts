@@ -5,7 +5,7 @@ import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
-// The due-review queue for /review: the single soonest-due check plus the total due count, in
+// The due-review queue for the dashboard review panel: the single soonest-due check plus the total due count, in
 // one round-trip. RLS scopes rows to the owner. The `(user_id, due_at)` btree index backs the
 // `due_at <= now()` filter + ordering. `count: 'exact'` returns the full match count alongside
 // the `limit(1)` row, so the page renders one card without over-fetching the whole backlog.

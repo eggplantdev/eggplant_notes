@@ -1,7 +1,7 @@
 ---
 change_id: review-on-dashboard
-title: Move the review session onto the dashboard (S1 bite of S-11 caching)
-status: preparing
+title: Move the review session onto the dashboard (pure relocation, S0)
+status: implementing
 created: 2026-06-05
 updated: 2026-06-05
 archived_at: null
@@ -10,36 +10,42 @@ archived_at: null
 ## Notes
 
 Move the sequential FSRS review session off its own `/review` route and onto `/dashboard`,
-deleting the route. Decided to fold in the **first bite of S-11** (tag-based caching) on the
-review + dashboard read paths, because embedding a server-rendered review means advancing a
-card re-renders the whole dashboard route — so the heavy aggregate reads must be cached or they
-recompute on every rating.
+deleting the route. **Pure relocation (S0) — NO caching.**
 
-**Chosen size: S1** (of S0 pure-move / S1 unstable_cache / S2 full Cache Components):
+**Decision (2026-06-05):** `/10x-research` confirmed the S-11 blocker is unavoidable for the
+`unstable_cache` path — option (a) "keep the RLS anon client, pass `userId`" is impossible (the
+anon client is RLS-scoped only by the cookie; no read carries an explicit `user_id` filter), so
+caching would force a brand-new service-role client + hand-added `.eq('user_id', userId)` on
+every cached read, dropping RLS as the guardrail. Not worth it for this slice. **Operator's
+call: nuke the route, keep `revalidatePath` for now, deal with caching separately in S-11.**
 
-- Review session moves onto `/dashboard` as a panel **below the heatmap** (operator will
-  reposition later). Stays **server-rendered** — preserve the "rate → revalidate → next card"
-  model, no client queue state. Keep `ReviewCelebrationProvider` (confetti + goal dialog).
-- `/review` route deleted, redirected to `/dashboard` (mirrors existing `/` → `/dashboard`).
-- Nav "Review" item removed; "Due today" `StatCard` stops deep-linking to `/review` (in-page now).
-- `getDueQueue` → `unstable_cache`, tag `review-${userId}`.
-- `getDashboardData` → `unstable_cache`, tag `dashboard-${userId}` + a time `revalidate` floor.
-- `rateTopicCheck` → drop `revalidatePath('/review')` + `revalidatePath('/dashboard')`, replace
-  with `revalidateTag('review-${userId}')` only → aggregates stay cached on advance (cheap).
-  Other mutators (note/subject/goal) invalidate `dashboard-${userId}`.
-- **No `cacheComponents` flag flip** (that's S2 / full S-11). Using `unstable_cache` keeps the
-  blast radius small and avoids the repo-wide Suspense refactor; S-11 later swaps it for
-  `'use cache'`.
+Scope:
 
-**Accepted trade-off:** the heavy stats panel shows slightly stale numbers _during_ a review
-session (refreshes on next nav / time-revalidate). Operator OK with this; the planned stats
-trim may reduce the surface anyway. Flag in docs.
+- Review session moves onto `/dashboard` as a panel **below the activity-heatmap card**
+  (`dashboard/page.tsx:85-92`; insert after `:92`). Operator will reposition later.
+- Stays **server-rendered** — keep the "rate → `revalidatePath('/dashboard')` → next card"
+  model, no client queue state. The action **already** calls `revalidatePath('/dashboard')`
+  (`rate-topic-check.ts:75`), so the post-rate advance works on the dashboard out of the box.
+- `/review` route deleted; add a redirect `'/review' → '/dashboard'` in `next.config.ts`
+  (mirror the existing `'/' → '/dashboard'`). Run `pnpm exec next typegen` before typecheck.
+- Drop the now-dead `revalidatePath('/review')` (`rate-topic-check.ts:74`); keep `:75`.
+- Nav "Review" item removed (`nav-items.ts:7`).
+- Resolve self-referential links: "Due today" `StatCard` `Link href="/review"`
+  (`dashboard/page.tsx:96-101`) and "All caught up" `Link href="/dashboard"`
+  (`review/page.tsx:49`).
+- **Celebration-survives-unmount (load-bearing, lessons.md:119-124):** `ReviewCelebrationProvider`
+  must wrap **both** branches of the embedded panel with `<GoalCelebrationDialog>` as a provider
+  sibling, so rating the last card (→ `card` undefined → `RatingButtons` unmounts on
+  revalidation) keeps the dialog mounted.
+- **Width:** review is authored for `PageShell width="prose"`; dashboard is `width="full"`.
+  `PageShell.width` is page-level, so the panel needs its own inline `mx-auto w-full max-w-2xl`
+  wrapper (or a `w-full` Card like the heatmap).
+- **Data:** `getDailyGoal()` already runs on the dashboard; only `getDueQueue()` + the
+  `previewIntervals`/`formatInterval` mapping is a new fetch to add to the page `Promise.all`.
 
-**Open blocker for /10x-research + /10x-plan:** `unstable_cache` can't read cookies, but both
-reads build an RLS client from the auth cookie. Resolve: pass `userId` as an explicit arg +
-keep an RLS-scoped client, vs. a filtered service-role client (drops the RLS guardrail — avoid
-unless forced). This is the exact blocker S-11 documented (`roadmap.md` S-11 Unknowns), now hit
-early on two reads.
+**Tests:** repoint `e2e/review.spec.ts` (`:28`, `:88-89`) and `e2e/card-to-note.spec.ts` (`:20`)
+from `/review` → `/dashboard` + locate the panel. Unit tests unaffected (logic, not routes).
 
-**Out of scope (stays S-11):** stats-section trim, full `cacheComponents` migration,
-notes/subjects read caching, over-fetch cleanup.
+**Out of scope (stays S-11):** ALL caching (`unstable_cache`/`'use cache'`/tags), service-role
+client, RLS-vs-cache resolution, stats-section trim, notes/subjects read caching, over-fetch
+cleanup. The felt sluggishness of recomputing aggregates on each advance rides until S-11.

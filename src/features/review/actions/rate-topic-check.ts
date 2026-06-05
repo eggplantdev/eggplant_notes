@@ -71,7 +71,6 @@ export async function rateTopicCheck(
     dailyGoal,
   })
 
-  revalidatePath('/review')
   revalidatePath('/dashboard')
   return { success: true, celebrate }
 }

@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
         destination: '/dashboard',
         permanent: true,
       },
+      {
+        // /review was relocated onto /dashboard. 307 (not 308) — a relocation that could
+        // plausibly revert, and 308s get aggressively browser-cached.
+        source: '/review',
+        destination: '/dashboard',
+        permanent: false,
+      },
     ]
   },
 }

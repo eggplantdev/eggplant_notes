@@ -11,7 +11,7 @@ type PropsT = { topicCheckId: string; previews: Record<number, string>; goal: nu
 
 // Four rating buttons, each showing its predicted next interval (server-formatted). Clicking
 // fires rateTopicCheck via useActionTransition (pending/disabled state + inline error); the
-// action revalidates /review so the next due card streams in with no client queue state (no
+// action revalidates /dashboard so the next due card streams in with no client queue state (no
 // useEffect). Buttons stack two-up on narrow widths (~360px), four-up from sm.
 export function RatingButtons({ topicCheckId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()

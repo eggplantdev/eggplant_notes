@@ -12,7 +12,13 @@ import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
 import { SubjectRollup } from '@/features/dashboard/subject-rollup'
+import { formatInterval } from '@/features/review/format-interval'
+import { RatingButtons } from '@/features/review/rating-buttons'
+import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
+import { previewIntervals } from '@/features/review/scheduling'
 import { getDailyGoal } from '@/features/settings/queries'
+import { getDueQueue } from '@/features/topic-checks/queries'
+import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { getCurrentUser } from '@/lib/supabase/server'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
@@ -28,16 +34,30 @@ export default async function DashboardPage() {
   // read is independent, so the two run in parallel.
   // The route (app layer) joins the dashboard's reviewedToday with the goal owned by the
   // settings feature, so features/dashboard never imports features/settings.
-  const [user, data, dailyGoal] = await Promise.all([
+  const [user, data, dailyGoal, { first: card }] = await Promise.all([
     getCurrentUser(),
     getDashboardData(),
     getDailyGoal(),
+    getDueQueue(),
   ])
   const s = data.stats
   const columns = buildHeatmapMatrix(data.activity, {
     today: todayInZone(APP_TIME_ZONE),
     weeks: 53,
   })
+
+  // Interval previews for the embedded review card's four rating buttons — computed
+  // server-side exactly as the old /review page did, mapping each grade's next due_at to a
+  // human label. Empty when nothing is due.
+  const now = new Date()
+  const previews: Record<number, string> = card
+    ? Object.fromEntries(
+        Object.entries(previewIntervals(card, now)).map(([grade, due]) => [
+          grade,
+          formatInterval(now, due),
+        ]),
+      )
+    : {}
 
   // Scalar stats rendered as a uniform StatCard grid. Cull a line to drop the card.
   const scalars = [
@@ -91,14 +111,55 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
+      {/* Embedded review session (relocated from the old /review route). Prose-width inside
+          the full-width dashboard. ReviewCelebrationProvider wraps BOTH branches so the
+          goal-celebration dialog survives RatingButtons unmounting when the last card is rated
+          (lessons.md:119-124). Advance is server-driven: rateTopicCheck revalidates /dashboard. */}
+      <div className="mx-auto w-full max-w-2xl">
+        <ReviewCelebrationProvider>
+          {!card ? (
+            <p className="text-muted-foreground text-center text-sm">
+              All caught up 🎉 — no topic checks are due right now.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base font-medium">Recall</CardTitle>
+                  {card.notes?.title && (
+                    <Link
+                      href={`/notes/${card.note_id}`}
+                      className="text-muted-foreground hover:text-foreground text-sm"
+                    >
+                      From: {card.notes.title}
+                    </Link>
+                  )}
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <RenderMarkdown content={card.prompt} />
+                  {(card.example || card.code_context) && (
+                    <details className="border-t pt-3">
+                      <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
+                        Show answer
+                      </summary>
+                      <div className="mt-3 flex flex-col gap-3">
+                        {card.example && <RenderMarkdown content={card.example} />}
+                        {card.code_context && <RenderMarkdown content={card.code_context} />}
+                      </div>
+                    </details>
+                  )}
+                </CardContent>
+              </Card>
+
+              <RatingButtons topicCheckId={card.id} previews={previews} goal={dailyGoal} />
+            </div>
+          )}
+        </ReviewCelebrationProvider>
+      </div>
+
       {/* Featured: today's actionable numbers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link
-          href="/review"
-          className="focus-visible:ring-ring rounded-xl transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <StatCard label="Due today" value={data.dueToday} sub="topic checks ready to review" />
-        </Link>
+        <StatCard label="Due today" value={data.dueToday} sub="topic checks ready to review" />
         <StatCard
           label="Current streak"
           value={
