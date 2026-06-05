@@ -327,7 +327,7 @@ None — read-only over existing tables; no schema change.
 
 #### Manual
 
-- [ ] 2.4 Notes page filter still behaves exactly as before
+- [x] 2.4 Notes page filter still behaves exactly as before
 
 ### Phase 3: Topic-checks page, list, card anchors, and nav
 
@@ -339,8 +339,8 @@ None — read-only over existing tables; no schema change.
 
 #### Manual
 
-- [ ] 3.4 `/topic-checks` lists all checks, due-first, with prompt + subject + note title + status
-- [ ] 3.5 Subject filter narrows server-side; chips + count update; clear restores; multi-select batches
-- [ ] 3.6 Empty states render correctly (none yet vs none match filter)
-- [ ] 3.7 Card click opens parent note scrolled to the matching check; sticky nav doesn't cover it
-- [ ] 3.8 Nav "Topic checks" link works and shows active state
+- [x] 3.4 `/topic-checks` lists all checks, due-first, with prompt + subject + note title + status
+- [x] 3.5 Subject filter narrows server-side; chips + count update; clear restores; multi-select batches
+- [x] 3.6 Empty states render correctly (none yet vs none match filter)
+- [x] 3.7 Card click opens parent note scrolled to the matching check; sticky nav doesn't cover it
+- [x] 3.8 Nav "Topic checks" link works and shows active state
