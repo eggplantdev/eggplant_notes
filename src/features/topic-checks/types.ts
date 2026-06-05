@@ -8,3 +8,16 @@ export type TopicCheckT = Database['public']['Tables']['topic_checks']['Row']
 // level (the app enforces it via Zod), and `notes` is kept `| null` defensively for a note
 // deleted between the queue read and the render.
 export type DueCardT = TopicCheckT & { notes: { title: string | null } | null }
+
+// A check as shown on the /topic-checks listing: the row plus the joined source-note title (the
+// card→note link uses the row's own note_id) and subject title (the card's context chip). The
+// embed types via the topic_checks→notes→subjects FK chain. Subject filtering keys off
+// notes.subject_id in the query, but that column isn't projected here — the card doesn't need it.
+// `notes`/`subjects` stay `| null` defensively, mirroring DueCardT, even though the query's
+// `notes!inner` join makes notes non-null in practice.
+export type TopicCheckListItemT = TopicCheckT & {
+  notes: {
+    title: string | null
+    subjects: { title: string } | null
+  } | null
+}

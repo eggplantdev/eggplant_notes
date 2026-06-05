@@ -1,7 +1,7 @@
 ---
 change_id: topic-checks-listing
 title: Topic-checks listing page with server-side subject filtering
-status: planned
+status: implementing
 created: 2026-06-05
 updated: 2026-06-05
 archived_at: null

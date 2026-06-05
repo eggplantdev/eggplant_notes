@@ -305,8 +305,8 @@ None — read-only over existing tables; no schema change.
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes: `pnpm lint`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes: `pnpm lint`
 
 ### Phase 2: Promote the subject filter to the subjects feature
 

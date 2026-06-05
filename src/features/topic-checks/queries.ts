@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { DueCardT, TopicCheckT } from '@/features/topic-checks/types'
+import type { DueCardT, TopicCheckListItemT, TopicCheckT } from '@/features/topic-checks/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -43,6 +43,27 @@ export async function getChecksForStats(client?: SupabaseClient<Database>) {
   return runTableQuery(supabase, (c) =>
     c.from('topic_checks').select('id, prompt, note_id, state, due_at, stability, lapses'),
   )
+}
+
+// Backs the /topic-checks listing: every owned check with its source-note title + subject,
+// optionally narrowed to selected subjects, ordered soonest-due first so the list doubles as a
+// study-readiness view. RLS scopes rows to the owner. `notes!inner` is load-bearing — subject
+// filtering applies `.in('notes.subject_id', …)` on the embedded table, which PostgREST can only
+// filter through an inner join (a plain `notes(...)` embed is an outer join and won't filter the
+// parent). Personal-scale data, so fetching the full set is fine (same assumption as
+// getChecksForStats). Injectable client per the isolation rule.
+export async function getTopicChecksList(
+  opts?: { subjectIds?: string[] },
+  client?: SupabaseClient<Database>,
+): Promise<TopicCheckListItemT[]> {
+  const supabase = client ?? (await createClient())
+  return runTableQuery(supabase, (c) => {
+    let query = c.from('topic_checks').select('*, notes!inner(title, subjects(title))')
+    if (opts?.subjectIds && opts.subjectIds.length > 0) {
+      query = query.in('notes.subject_id', opts.subjectIds)
+    }
+    return query.order('due_at', { ascending: true })
+  })
 }
 
 // Returns all topic checks attached to one note, oldest first (FR-015). RLS scopes rows to the
