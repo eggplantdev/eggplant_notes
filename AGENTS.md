@@ -8,7 +8,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Repository Guidelines
 
-`coding-learning-companion` — a personal coding-learning web app (markdown notes + spaced-repetition "topic checks"). Stack: Next.js 16 (App Router) + React 19 + TypeScript, Tailwind v4 + shadcn/ui, Supabase (Postgres + Auth + RLS), deployed on Vercel. Solo MVP, hard deadline **2026-06-10**. This is the canonical, cross-tool agent onboarding file; Claude Code inherits it via `@AGENTS.md` in `CLAUDE.md`.
+`coding-learning-companion` — a personal coding-learning web app (markdown notes + spaced-repetition "memory cards"). Stack: Next.js 16 (App Router) + React 19 + TypeScript, Tailwind v4 + shadcn/ui, Supabase (Postgres + Auth + RLS), deployed on Vercel. Solo MVP, hard deadline **2026-06-10**. This is the canonical, cross-tool agent onboarding file; Claude Code inherits it via `@AGENTS.md` in `CLAUDE.md`.
 
 ## Hard rules (read first)
 
@@ -53,7 +53,7 @@ Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under
 
 - **E2E specs do NOT wipe or reset the DB** — there is no `globalSetup`/`db reset` in the test flow. Each spec self-seeds via real UI sign-up with a per-run `uniqueEmail` (`@e2e/helpers.ts`) and leaves its rows behind. They accumulate cruft, never wipe. If the local DB looks empty after testing, it's because **you** ran `supabase db reset` (e.g. to apply a new migration), not the specs.
 - **Dev/manual data comes from `@supabase/seed.sql`** — wired via `[db.seed]` in `@supabase/config.toml`, so it runs after migrations on every `supabase db reset`. DEV-ONLY (Vercel never runs `db reset`). Two login-able accounts: **`dev@example.com` / `password123`** (minimal FSRS smoke bed) and **`test@gmail.com` / `test@Test`** (real-content dogfooding playground, regenerated from `/workspace/learning` notes by `@supabase/seed-scripts/generate-section-seed.mjs` — see its header).
-- **`supabase db reset` is the canonical refresh** — clears E2E cruft AND rebuilds both accounts. Two traps: (1) it wipes **all** local data including any hand-made accounts — confirm first; (2) re-running `seed.sql` without a reset **double-inserts the `dev@example.com` `topic_checks`** (that block has no `on conflict` guard; the `test@gmail.com` block is id-keyed so it's idempotent). Refresh via `db reset`, not by re-applying the seed.
+- **`supabase db reset` is the canonical refresh** — clears E2E cruft AND rebuilds both accounts. Two traps: (1) it wipes **all** local data including any hand-made accounts — confirm first; (2) re-running `seed.sql` without a reset **double-inserts the `dev@example.com` `memory_cards`** (that block has no `on conflict` guard; the `test@gmail.com` block is id-keyed so it's idempotent). Refresh via `db reset`, not by re-applying the seed.
 
 ## Commits & CI
 

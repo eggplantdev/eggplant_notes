@@ -55,7 +55,7 @@ Separately - we need to also open note edit from this view
 - [ ] **First section chosen: Python — functional programming.**
       Source: `/workspace/learning/python/functional_p/functional_programming_py_notes.md` + `/workspace/learning/flashcards/python_functional/functional_programming_flashcards.md`.
 - [ ] **Decision made:** REPLACE the synthetic `test@gmail.com` playground (24 fake subjects / 60 fake notes in `supabase/seed.sql`) with this real content.
-- **Modeling friction surfaced:** `topic_checks` has NO answer field (only `prompt`, `example`, `code_context`) — the recall model assumes the answer lives in the source note. The flashcards carry explicit `A:` answers, so seeding must decide where the answer goes. **Current plan: put the answer in the `example` field.**
+- **Modeling friction surfaced:** `memory_cards` has NO answer field (only `prompt`, `example`, `code_context`) — the recall model assumes the answer lives in the source note. The flashcards carry explicit `A:` answers, so seeding must decide where the answer goes. **Current plan: put the answer in the `example` field.**
 
 ## Cluster 6 — Later (explicitly deferred)
 
