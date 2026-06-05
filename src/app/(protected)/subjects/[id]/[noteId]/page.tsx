@@ -21,7 +21,9 @@ export default async function SubjectReadNote({
   if (!note || note.subject_id !== id) notFound()
 
   return (
-    <article className="flex flex-col gap-4">
+    // max-w-4xl mirrors PageShell's 'wide' width on the standalone note page, so a note reads
+    // at the same measure in-subject as on /notes/[id]; mx-auto centers it in the content track.
+    <article className="mx-auto flex w-full max-w-4xl flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">{note.title ?? 'Untitled'}</h2>
         <div className="flex items-center gap-2">

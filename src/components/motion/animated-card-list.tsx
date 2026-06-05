@@ -6,6 +6,7 @@ import { AnimatePresence } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 // The whole card is a <Link>, so a click inside the action slot would navigate. This wrapper
 // neutralizes that ONCE for every consumer: preventDefault kills the native anchor activation,
@@ -23,6 +24,9 @@ type PropsT<T> = {
   getKey: (item: T) => string
   getHref: (item: T) => string
   renderTitle: (item: T) => ReactNode
+  // Optional overline above the title (e.g. a date), spanning the card's full width so it sits
+  // clear of the action slot. Caller owns its markup. Omitted → no overline row.
+  renderEyebrow?: (item: T) => ReactNode
   // Optional secondary line, rendered as-is under the title (the caller owns its markup so
   // each list can style it differently, e.g. a date vs a line-clamped description).
   renderSubtitle?: (item: T) => ReactNode
@@ -30,6 +34,9 @@ type PropsT<T> = {
   // wraps it in a nav-neutralizing container (see blockCardNav), so the action just renders its
   // controls — no need to preventDefault/stopPropagation itself. Omitted → card DOM unchanged.
   renderAction?: (item: T) => ReactNode
+  // Container arrangement. Default: a single vertical stack (subjects). Opt into `gridLayout`
+  // for a responsive card grid (1 col on mobile, 2 from md, 3 from xl) — used by the notes list.
+  gridLayout?: boolean
 }
 
 // The shared animated list-of-linked-cards scaffold. Owns the drift-prone chrome —
@@ -43,19 +50,24 @@ export function AnimatedCardList<T>({
   getKey,
   getHref,
   renderTitle,
+  renderEyebrow,
   renderSubtitle,
   renderAction,
+  gridLayout = false,
 }: PropsT<T>) {
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className={cn('gap-3', gridLayout ? 'grid md:grid-cols-2 xl:grid-cols-3' : 'flex flex-col')}
+    >
       <AnimatePresence mode="popLayout" initial={false}>
         {items.map((item) => {
           const key = getKey(item)
           return (
             <AnimatedListItem key={key} layoutId={key} layout>
-              <Link href={getHref(item)}>
-                <Card className="hover:border-ring transition-colors">
+              <Link href={getHref(item)} className={cn(gridLayout && 'block h-full')}>
+                <Card className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}>
                   <CardHeader>
+                    {renderEyebrow?.(item)}
                     {renderAction ? (
                       <div className="flex items-center justify-between gap-3">
                         <div className="grid gap-1.5">
