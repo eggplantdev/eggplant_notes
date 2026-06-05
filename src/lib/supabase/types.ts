@@ -28,107 +28,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      notes: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          position: number | null
-          subject_id: string | null
-          title: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content?: string
-          created_at?: string
-          id?: string
-          position?: number | null
-          subject_id?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          position?: number | null
-          subject_id?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'notes_subject_id_fkey'
-            columns: ['subject_id']
-            isOneToOne: false
-            referencedRelation: 'subjects'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      review_events: {
-        Row: {
-          id: string
-          rating: number
-          reviewed_at: string
-          topic_check_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          rating: number
-          reviewed_at?: string
-          topic_check_id: string
-          user_id?: string
-        }
-        Update: {
-          id?: string
-          rating?: number
-          reviewed_at?: string
-          topic_check_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'review_events_topic_check_id_fkey'
-            columns: ['topic_check_id']
-            isOneToOne: false
-            referencedRelation: 'topic_checks'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      subjects: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title: string
-          updated_at?: string
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      topic_checks: {
+      memory_cards: {
         Row: {
           code_context: string | null
           created_at: string
@@ -191,13 +91,113 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'topic_checks_note_id_fkey'
+            foreignKeyName: 'memory_cards_note_id_fkey'
             columns: ['note_id']
             isOneToOne: false
             referencedRelation: 'notes'
             referencedColumns: ['id']
           },
         ]
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          position: number | null
+          subject_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          position?: number | null
+          subject_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          position?: number | null
+          subject_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notes_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subjects'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      review_events: {
+        Row: {
+          id: string
+          memory_card_id: string
+          rating: number
+          reviewed_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          memory_card_id: string
+          rating: number
+          reviewed_at?: string
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          memory_card_id?: string
+          rating?: number
+          reviewed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'review_events_memory_card_id_fkey'
+            columns: ['memory_card_id']
+            isOneToOne: false
+            referencedRelation: 'memory_cards'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_settings: {
         Row: {
@@ -231,7 +231,7 @@ export type Database = {
       }
       delete_account: { Args: never; Returns: undefined }
       record_review: {
-        Args: { p_card: Json; p_rating: number; p_topic_check_id: string }
+        Args: { p_card: Json; p_memory_card_id: string; p_rating: number }
         Returns: undefined
       }
     }

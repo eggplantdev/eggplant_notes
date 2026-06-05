@@ -1,7 +1,7 @@
 -- S-05 delete-account-and-data: account self-deletion RPC.
 -- A SECURITY DEFINER function lets an authenticated client delete ONLY its own
 -- auth.users row without a service-role key. F-02's on-delete-cascade chain
--- (auth.users -> notes -> topic_checks -> review_events) tears down all owned data.
+-- (auth.users -> notes -> memory_cards -> review_events) tears down all owned data.
 --
 -- Safety rationale (do not weaken):
 --   * SECURITY DEFINER runs privileged, so RLS does NOT protect this function.

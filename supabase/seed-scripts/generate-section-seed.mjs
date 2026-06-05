@@ -6,7 +6,7 @@
 // for supabase/seed.sql:
 //
 //   subject  ->  one note per top-level (#) section of the notes file
-//            ->  topic_checks from the flashcards (Q -> prompt, A -> example),
+//            ->  memory_cards from the flashcards (Q -> prompt, A -> example),
 //                each attached to the note section it best matches.
 //
 // The two source files are independent real artifacts: the notes file holds the
@@ -179,7 +179,7 @@ const pad = (n) => String(n).padStart(12, '0');
 // Historically REQUIRED: the id schemas used Zod `z.uuid()` (strict RFC-4122), which rejects
 // version-0 ids like `…-0000-0000-…` even though Postgres `uuid` stores them fine — so such
 // seed ids silently failed every Server Action mutation. The schemas now validate SHAPE only
-// (`z.guid()`, see src/features/topic-checks/schemas.ts), so version-0 ids would also work; we
+// (`z.guid()`, see src/features/memory-cards/schemas.ts), so version-0 ids would also work; we
 // keep emitting valid v4 anyway for cleanliness and to match `gen_random_uuid()` output.
 const noteId = (i) => `0a7e0000-0000-4000-8000-${pad(i)}`;
 const cardId = (i) => `c4ec0000-0000-4000-8000-${pad(i)}`;
@@ -272,7 +272,7 @@ out.push(
 out.push(`on conflict (id) do nothing;`);
 out.push('');
 
-// topic_checks
+// memory_cards
 const cardRows = [];
 let cardSeq = 0;
 for (const g of matched) {
@@ -285,7 +285,7 @@ for (const g of matched) {
     );
   }
 }
-out.push(`insert into topic_checks (`);
+out.push(`insert into memory_cards (`);
 out.push(`  id, user_id, note_id, prompt, example, code_context,`);
 out.push(`  state, stability, difficulty, elapsed_days, scheduled_days,`);
 out.push(`  learning_steps, reps, lapses, due_at, last_review`);
@@ -297,7 +297,7 @@ out.push('');
 // review_events: 14 days of history for the overdue/review cards so the
 // dashboard heatmap + streak render with real history. rating FSRS 1..4.
 out.push(`-- Past review history (last 14 days) for the dashboard heatmap/streak.`);
-out.push(`insert into review_events (id, user_id, topic_check_id, rating, reviewed_at)`);
+out.push(`insert into review_events (id, user_id, memory_card_id, rating, reviewed_at)`);
 out.push(`select`);
 out.push(`  ('${eventId(0).slice(0, 24)}' || lpad((tc.rn * 100 + g.d)::text, 12, '0'))::uuid,`);
 out.push(`  '${USER_ID}',`);
@@ -306,7 +306,7 @@ out.push(`  (1 + (g.d % 4))::smallint,`);
 out.push(`  now() - (g.d || ' days')::interval`);
 out.push(`from (`);
 out.push(`  select id, row_number() over (order by id) as rn`);
-out.push(`  from topic_checks`);
+out.push(`  from memory_cards`);
 out.push(`  where user_id = '${USER_ID}' and state = 2`);
 out.push(`) as tc`);
 out.push(`cross join generate_series(0, 13) as g(d)`);

@@ -1,7 +1,7 @@
 -- supabase/seed.sql
 -- Runs automatically after migrations on `supabase db reset` (config.toml -> [db.seed]).
 -- Purpose: a deterministic DEV playground — one known, log-in-able account whose
--- topic_checks span the FSRS state/due spectrum, so the /review loop and the dashboard
+-- memory_cards span the FSRS state/due spectrum, so the /review loop and the dashboard
 -- can be exercised by hand without clicking through sign-up + note + card creation.
 --
 -- This is DEV-ONLY. It is never run on Vercel (preview/prod never call `db reset`); it
@@ -14,7 +14,7 @@
 --                                         cards + pending reviews (sections 5-9)
 --
 -- The test@gmail.com data is generated with deterministic UUIDs + `on conflict do
--- nothing`, so re-running this file is idempotent (unlike the dev topic_checks block).
+-- nothing`, so re-running this file is idempotent (unlike the dev memory_cards block).
 
 -- ----------------------------------------------------------------------------
 -- 1. A confirmed auth user. GoTrue needs BOTH auth.users and a matching
@@ -69,12 +69,12 @@ values (
 on conflict (id) do nothing;
 
 -- ----------------------------------------------------------------------------
--- 3. topic_checks across the FSRS spectrum. state: 0=New 1=Learning 2=Review 3=Relearning.
+-- 3. memory_cards across the FSRS spectrum. state: 0=New 1=Learning 2=Review 3=Relearning.
 --    The /review "due" query is `due_at <= now()`, so anything past/now appears in a
 --    session and anything future is hidden — giving you a visible due-count and a
 --    "come back later" empty state to verify in one seed.
 -- ----------------------------------------------------------------------------
-insert into topic_checks (
+insert into memory_cards (
   user_id, note_id, prompt, example, code_context,
   state, stability, difficulty, elapsed_days, scheduled_days,
   learning_steps, reps, lapses, due_at, last_review
@@ -99,7 +99,7 @@ values
   -- Review card due right now (boundary case for `<= now()`).
   ('dddddddd-dddd-dddd-dddd-dddddddddddd', '11111111-1111-4111-8111-111111111111',
    'What does `record_review` persist atomically?', null,
-   e'```sql\nupdate topic_checks ... ; insert into review_events ...\n```',
+   e'```sql\nupdate memory_cards ... ; insert into review_events ...\n```',
    2, 4.0, 6.0, 2, 2, 0, 2, 1, now(), now() - interval '2 days'),
 
   -- FUTURE review card (due in 5 days) — NOT due, must be hidden from /review.
@@ -111,13 +111,13 @@ values
 -- 4. A handful of past review_events so the dashboard heatmap/stats render with
 --    real history instead of an empty grid. rating is FSRS 1..4 (Again..Easy).
 -- ----------------------------------------------------------------------------
-insert into review_events (user_id, topic_check_id, rating, reviewed_at)
+insert into review_events (user_id, memory_card_id, rating, reviewed_at)
 select
   'dddddddd-dddd-dddd-dddd-dddddddddddd',
   tc.id,
   1 + (floor(random() * 4))::smallint,            -- 1..4
   now() - (g.d || ' days')::interval
-from topic_checks tc
+from memory_cards tc
 cross join generate_series(0, 6) as g(d)
 where tc.user_id = 'dddddddd-dddd-dddd-dddd-dddddddddddd'
   and tc.note_id = '11111111-1111-4111-8111-111111111111'
@@ -1394,7 +1394,7 @@ list1.extend([3, 4])  # list1 is now [1, 2, 3, 4]
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 52)
 on conflict (id) do nothing;
 
-insert into topic_checks (
+insert into memory_cards (
   id, user_id, note_id, prompt, example, code_context,
   state, stability, difficulty, elapsed_days, scheduled_days,
   learning_steps, reps, lapses, due_at, last_review
@@ -1692,7 +1692,7 @@ Expression unika mutowania zmiennej `result`.$seed$, null,
 on conflict (id) do nothing;
 
 -- Past review history (last 14 days) for the dashboard heatmap/streak.
-insert into review_events (id, user_id, topic_check_id, rating, reviewed_at)
+insert into review_events (id, user_id, memory_card_id, rating, reviewed_at)
 select
   ('5e1e0000-0000-4000-8000-' || lpad((tc.rn * 100 + g.d)::text, 12, '0'))::uuid,
   'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
@@ -1701,7 +1701,7 @@ select
   now() - (g.d || ' days')::interval
 from (
   select id, row_number() over (order by id) as rn
-  from topic_checks
+  from memory_cards
   where user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee' and state = 2
 ) as tc
 cross join generate_series(0, 13) as g(d)

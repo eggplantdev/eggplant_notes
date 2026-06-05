@@ -1,5 +1,5 @@
--- S-07 create-note-with-checks: atomic create of a note + N topic checks.
--- topic_checks.note_id is NOT NULL FK, so a check cannot exist before its note.
+-- S-07 create-note-with-checks: atomic create of a note + N memory cards.
+-- memory_cards.note_id is NOT NULL FK, so a check cannot exist before its note.
 -- This RPC inserts the note, captures its id, inserts each staged check against
 -- that id, and returns the new note id — all in one transaction (all-or-nothing).
 --
@@ -11,7 +11,7 @@
 -- Mass-assignment guard: note columns are read EXPLICITLY from p_note (title,
 -- content, subject_id, position) — never jsonb_populate_record — so a caller
 -- cannot smuggle in user_id and defeat the `default auth.uid()` + RLS guard.
--- user_id is left to its column default; the notes_insert_own / topic_checks_insert_own
+-- user_id is left to its column default; the notes_insert_own / memory_cards_insert_own
 -- `with check` policies (incl. S-06's owned-subject check) apply to these inserts.
 create function public.create_note_with_checks(p_note jsonb, p_checks jsonb)
 returns uuid
@@ -31,7 +31,7 @@ begin
   )
   returning id into v_note_id;
 
-  insert into public.topic_checks (note_id, prompt, example, code_context)
+  insert into public.memory_cards (note_id, prompt, example, code_context)
   select
     v_note_id,
     c->>'prompt',
