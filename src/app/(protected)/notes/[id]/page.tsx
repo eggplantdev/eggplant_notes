@@ -12,6 +12,7 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getTopicChecksForNote } from '@/features/topic-checks/queries'
 import { TopicChecksSection } from '@/features/topic-checks/topic-checks-section'
+import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
 // `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
@@ -45,8 +46,11 @@ export default async function NotePage({
       // doc title, which would duplicate NoteForm's own title field) and the wider editor
       // width for the side-by-side write/preview grid.
       title={isEditingNote ? 'Edit note' : (note.title ?? 'Untitled')}
-      subtitle={isEditingNote ? undefined : `Updated ${new Date(note.updated_at).toLocaleString()}`}
-      width={isEditingNote ? 'wide' : 'prose'}
+      subtitle={isEditingNote ? undefined : `Updated ${formatLocaleDateTime(note.updated_at)}`}
+      // Read and edit share the wider width: the editor needs it for the side-by-side
+      // write/preview grid, and the read view is intentionally matched to the in-subject
+      // note pane (subjects/[id]/[noteId]) so a note is the same width on either path.
+      width="wide"
       backHistory
       backHref="/notes"
       backLabel="Back"

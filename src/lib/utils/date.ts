@@ -32,9 +32,48 @@ export function isoDateInZone(date: Date, timeZone: string): string {
   }).format(date)
 }
 
+// A `YYYY-MM-DD` calendar date parsed to a Date at UTC-midnight. Anchoring at UTC lets the
+// toLocale* formatters below (with `timeZone: 'UTC'`) read back the same calendar day on any
+// runtime zone — without this, a `new Date('2025-06-03')` formatted in a negative-offset zone
+// would render the previous day.
+function parseIsoDateUtc(isoDate: string): Date {
+  return new Date(`${isoDate}T00:00:00.000Z`)
+}
+
 // A Date at UTC-midnight of the *zone's* current calendar date. Returned this way so the
 // UTC-based helpers (utcMidnight / toISODate, used by the heatmap + streak) read the right
 // year/month/day — i.e. "today" follows the user's zone, not the UTC server clock.
 export function todayInZone(timeZone: string): Date {
-  return new Date(`${isoDateInZone(new Date(), timeZone)}T00:00:00.000Z`)
+  return parseIsoDateUtc(isoDateInZone(new Date(), timeZone))
+}
+
+// --- Display formatters (presentation only) ---
+
+// Short weekday for a `YYYY-MM-DD` calendar date, e.g. "Mon". Used by the due-forecast bars.
+export function formatWeekdayShort(isoDate: string): string {
+  return parseIsoDateUtc(isoDate).toLocaleDateString('en-US', {
+    weekday: 'short',
+    timeZone: 'UTC',
+  })
+}
+
+// Full weekday + date for a `YYYY-MM-DD` calendar date, e.g. "Wed, Jun 3, 2025". Heatmap tooltip.
+export function formatFullDate(isoDate: string): string {
+  return parseIsoDateUtc(isoDate).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
+// Locale date for a timestamp instant (ISO string / ms / Date), e.g. "6/5/2026".
+export function formatLocaleDate(value: string | number | Date): string {
+  return new Date(value).toLocaleDateString()
+}
+
+// Locale date + time for a timestamp instant, e.g. "6/5/2026, 2:32:45 PM".
+export function formatLocaleDateTime(value: string | number | Date): string {
+  return new Date(value).toLocaleString()
 }

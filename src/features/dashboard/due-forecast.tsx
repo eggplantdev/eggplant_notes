@@ -1,4 +1,5 @@
 import type { DueForecastDayT } from '@/features/dashboard/types'
+import { formatWeekdayShort } from '@/lib/utils/date'
 
 type PropsT = { days: DueForecastDayT[] }
 
@@ -10,13 +11,7 @@ export function DueForecast({ days }: PropsT) {
   return (
     <div className="flex h-32 items-end gap-2">
       {days.map((d, i) => {
-        const label =
-          i === 0
-            ? 'Today'
-            : new Date(`${d.date}T00:00:00.000Z`).toLocaleDateString('en-US', {
-                weekday: 'short',
-                timeZone: 'UTC',
-              })
+        const label = i === 0 ? 'Today' : formatWeekdayShort(d.date)
         return (
           <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
             <span className="text-muted-foreground text-xs tabular-nums">{d.count}</span>
