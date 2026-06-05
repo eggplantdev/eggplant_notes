@@ -1,7 +1,7 @@
 ---
 change_id: rename-topic-checks-to-memory-cards
 title: Rename "topic checks" to "memory cards" across schema, code, routes, and copy
-status: implementing
+status: implemented
 created: 2026-06-05
 updated: 2026-06-05
 archived_at: null

@@ -289,12 +289,12 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Automated
 
-- [x] 3.1 `pnpm typecheck` passes
-- [x] 3.2 `pnpm lint` passes
-- [x] 3.3 `pnpm test` passes (61 unit)
-- [x] 3.4 `pnpm build` succeeds (route table shows `/memory-cards`)
+- [x] 3.1 `pnpm typecheck` passes — 47ebd2f
+- [x] 3.2 `pnpm lint` passes — 47ebd2f
+- [x] 3.3 `pnpm test` passes (61 unit) — 47ebd2f
+- [x] 3.4 `pnpm build` succeeds (route table shows `/memory-cards`) — 47ebd2f
 - [ ] 3.5 `pnpm test:e2e` passes — NOT cleanly green: 27 pass; reds are the documented GoTrue sign-up flake + a pre-existing bare-`getByRole('combobox')` ambiguity in `createNoteInSubject`/`createAssignedNote` (Subject select + code-block-inserter), NOT caused by the rename (editor diff was comment-only). Rename's own `memory-cards.spec.ts` isolation spec passed. Same env-block as the S-17 listing slice. Follow-up: disambiguate the combobox selector.
-- [x] 3.6 No `topic[_-]?check` in code/schema/`context/foundation/` (verified). Intentional out-of-scope residue: this change folder's own docs (describe the rename), roadmap slice-ids + archive paths (`attach-topic-checks`, `topic-checks-listing`), the kept non-init migration filename, superseded/historical docs (`v1-sprint-plan`, `docs/**`), and live rule files `AGENTS.md`/`CLAUDE.md`/`TODO.md` (separate scope — rule-file edits need the agent-rule-authoring skill; flagged as follow-up).
+- [x] 3.6 No `topic[_-]?check` in code/schema/`context/foundation/` (verified) — 47ebd2f. Intentional out-of-scope residue: this change folder's own docs (describe the rename), roadmap slice-ids + archive paths (`attach-topic-checks`, `topic-checks-listing`), the kept non-init migration filename, superseded/historical docs (`v1-sprint-plan`, `docs/**`), and live rule files `AGENTS.md`/`CLAUDE.md`/`TODO.md` (separate scope — rule-file edits need the agent-rule-authoring skill; flagged as follow-up).
 
 #### Manual
 
