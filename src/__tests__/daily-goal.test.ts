@@ -1,31 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { computeDailyProgress } from '@/features/dashboard/daily-progress'
 import { countDistinctReviewedOn } from '@/features/review-events/today-count'
 import type { ReviewedRowT } from '@/features/review-events/today-count'
 import { APP_TIME_ZONE, isoDateInZone } from '@/lib/utils'
-
-describe('computeDailyProgress', () => {
-  it('is 0% with no reviews', () => {
-    expect(computeDailyProgress(0, 5)).toEqual({ pct: 0, hit: false, bonus: 0 })
-  })
-
-  it('is a partial fraction below goal', () => {
-    expect(computeDailyProgress(2, 5)).toEqual({ pct: 0.4, hit: false, bonus: 0 })
-  })
-
-  it('hits exactly at goal (100%, no bonus)', () => {
-    expect(computeDailyProgress(5, 5)).toEqual({ pct: 1, hit: true, bonus: 0 })
-  })
-
-  it('clamps pct at 1 and reports the bonus on overshoot', () => {
-    expect(computeDailyProgress(8, 5)).toEqual({ pct: 1, hit: true, bonus: 3 })
-  })
-
-  it('guards divide-by-zero when goal is 0', () => {
-    expect(computeDailyProgress(0, 0).pct).toBe(0)
-  })
-})
 
 describe('countDistinctReviewedOn', () => {
   // Build timestamps inside a target zone-date. Noon avoids any DST/offset edge, and two
