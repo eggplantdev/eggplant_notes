@@ -270,7 +270,7 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Manual
 
-- [ ] 1.4 Both seed accounts load with memory cards after reset
+- [x] 1.4 Both seed accounts load with memory cards after reset — owner-confirmed
 
 ### Phase 2: Code + structure rename
 
@@ -282,8 +282,8 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Manual
 
-- [ ] 2.4 App boots; `/memory-cards` renders; nav shows "Memory cards"
-- [ ] 2.5 Create-with-cards, rate-a-card, dashboard review flow work in browser
+- [x] 2.4 App boots; `/memory-cards` renders; nav shows "Memory cards" — owner-confirmed
+- [x] 2.5 Create-with-cards, rate-a-card, dashboard review flow work in browser — owner-confirmed
 
 ### Phase 3: Docs + verify green
 
@@ -298,4 +298,4 @@ Rewrite-in-place, no data migration. The local DB is rebuilt via `supabase db re
 
 #### Manual
 
-- [ ] 3.7 Browser spot-check: copy reads "memory card(s)" consistently
+- [x] 3.7 Browser spot-check: copy reads "memory card(s)" consistently — owner-confirmed
