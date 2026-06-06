@@ -62,6 +62,10 @@ Separately - we need to also open note edit from this view
 - [ ] User account page ("konto usera — na później").
 - [ ] **Connect an external LLM via OpenRouter (BYOK, PKCE)** — do this **LAST**. Largest new surface: external dependency, credential storage, new auth flow.
 
+## Cluster 7 — Code health (dedup / simplification)
+
+- [ ] Work the remaining items in `@SIMPLIFICATION-PROPOSALS.md` (repo root). Section A (`CardActions`, `useDeleteDialogState`, `EmptyState`, `MutedText`) is shipped; next quick-wins: **D1** toast-layer split, **B3** `useFormSubmit`, **C1** `runTableSingleQuery`, **D2** split `heatmap-view.ts`. See the doc's top **Handoff** block for state + decisions.
+
 ---
 
 ## Suggested sequencing
