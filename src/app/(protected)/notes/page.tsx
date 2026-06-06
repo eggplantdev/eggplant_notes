@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { NotesList } from '@/features/notes/components/notes-list'
 import { getNotes } from '@/features/notes/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
@@ -42,18 +43,14 @@ export default async function NotesPage({
       {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
 
       {notes.length === 0 ? (
-        isFiltered ? (
-          <div className="text-muted-foreground rounded-lg border border-dashed p-8">
-            <p>No notes match the selected subjects.</p>
-          </div>
-        ) : (
-          <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-lg border border-dashed p-8">
-            <p>No notes yet. Capture your first one.</p>
-            <Button asChild variant="outline">
-              <Link href="/notes/new">Create a note</Link>
-            </Button>
-          </div>
-        )
+        <EmptyState
+          message={
+            isFiltered
+              ? 'No notes match the selected subjects.'
+              : 'No notes yet. Capture your first one.'
+          }
+          action={isFiltered ? undefined : { label: 'Create a note', href: '/notes/new' }}
+        />
       ) : (
         <NotesList notes={notes} />
       )}

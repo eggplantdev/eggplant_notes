@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { updateSubject } from '@/features/subjects/actions/update-subject'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
 import { SubjectForm } from '@/features/subjects/subject-form'
@@ -42,11 +43,9 @@ export default async function SubjectPage({
   }
 
   return (
-    <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-lg border border-dashed p-8">
-      <p>No notes in this subject yet.</p>
-      <Button asChild>
-        <Link href={`/notes/new?subject=${id}`}>New note</Link>
-      </Button>
-    </div>
+    <EmptyState
+      message="No notes in this subject yet."
+      action={{ label: 'New note', href: `/notes/new?subject=${id}`, variant: 'default' }}
+    />
   )
 }

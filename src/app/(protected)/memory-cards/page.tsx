@@ -1,7 +1,5 @@
-import Link from 'next/link'
-
 import { PageShell } from '@/components/layout/page-shell'
-import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
 import { getMemoryCardsList } from '@/features/memory-cards/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
@@ -38,18 +36,14 @@ export default async function MemoryCardsPage({
       {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
 
       {checks.length === 0 ? (
-        isFiltered ? (
-          <div className="text-muted-foreground rounded-lg border border-dashed p-8">
-            <p>No memory cards match the selected subjects.</p>
-          </div>
-        ) : (
-          <div className="text-muted-foreground flex flex-col items-start gap-3 rounded-lg border border-dashed p-8">
-            <p>No memory cards yet. Add one from a note to start building your recall set.</p>
-            <Button asChild variant="outline">
-              <Link href="/notes">Go to notes</Link>
-            </Button>
-          </div>
-        )
+        <EmptyState
+          message={
+            isFiltered
+              ? 'No memory cards match the selected subjects.'
+              : 'No memory cards yet. Add one from a note to start building your recall set.'
+          }
+          action={isFiltered ? undefined : { label: 'Go to notes', href: '/notes' }}
+        />
       ) : (
         <MemoryCardsList checks={checks} />
       )}
