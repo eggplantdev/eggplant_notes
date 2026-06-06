@@ -210,31 +210,31 @@ One Playwright spec proving the new filter surface end-to-end against a fresh pr
 
 #### Automated
 
-- [x] 1.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Build passes: `pnpm build`
+- [x] 1.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck` — d822d67
+- [x] 1.2 Linting passes: `pnpm lint` — d822d67
+- [x] 1.3 Build passes: `pnpm build` — d822d67
 
 #### Manual
 
-- [x] 1.4 Notes page subject filter behaves exactly as before
-- [x] 1.5 Memory-cards page subject filter behaves exactly as before
-- [x] 1.6 No visual change to either filter control
+- [x] 1.4 Notes page subject filter behaves exactly as before — d822d67
+- [x] 1.5 Memory-cards page subject filter behaves exactly as before — d822d67
+- [x] 1.6 No visual change to either filter control — d822d67
 
 ### Phase 2: Add state + maturity filters
 
 #### Automated
 
-- [ ] 2.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Build passes: `pnpm build`
+- [x] 2.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 2.4 State filter narrows the list; count/footer reflect filtered total
-- [ ] 2.5 Maturity Mature/Young/both behave correctly (Young incl. new)
-- [ ] 2.6 State + Maturity + Subjects + search compose (AND); filter change resets to page 1
-- [ ] 2.7 Back/Forward + deep-link pre-filtered load work
-- [ ] 2.8 Zero-match empty-state copy shows
+- [x] 2.4 State filter narrows the list; count/footer reflect filtered total
+- [x] 2.5 Maturity Mature/Young/both behave correctly (Young incl. new)
+- [x] 2.6 State + Maturity + Subjects + search compose (AND); filter change resets to page 1
+- [x] 2.7 Back/Forward + deep-link pre-filtered load work
+- [x] 2.8 Zero-match empty-state copy shows
 
 ### Phase 3: E2E coverage
 

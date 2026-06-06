@@ -4,8 +4,10 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
 import { TitledCard } from '@/components/ui/titled-card'
+import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
+import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
 import { getCardsForStats, getMemoryCardsList } from '@/features/memory-cards/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
@@ -17,18 +19,34 @@ import { pluralize } from '@/lib/utils/pluralize'
 export default async function MemoryCardsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ subjects?: string; q?: string; page?: string }>
+  searchParams: Promise<{
+    subjects?: string
+    q?: string
+    state?: string
+    maturity?: string
+    page?: string
+  }>
 }) {
   const sp = await searchParams
   const selectedIds = (sp.subjects ?? '').split(',').filter(Boolean)
   const q = sp.q ?? ''
+  // Drop junk: keep only the four valid FSRS state integers (0–3) and the two maturity buckets.
+  const states = (sp.state ?? '')
+    .split(',')
+    .filter(Boolean)
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 3)
+  const maturity = (sp.maturity ?? '')
+    .split(',')
+    .filter((v): v is 'mature' | 'young' => v === 'mature' || v === 'young')
   const { page, limit } = parsePagination(sp)
   const [subjects, { rows: cards, total }, statsCards] = await Promise.all([
     getSubjects(),
-    getMemoryCardsList({ subjectIds: selectedIds, q, page, limit }),
+    getMemoryCardsList({ subjectIds: selectedIds, q, states, maturity, page, limit }),
     getCardsForStats(),
   ])
-  const isFiltered = selectedIds.length > 0 || Boolean(q)
+  const isFiltered =
+    selectedIds.length > 0 || Boolean(q) || states.length > 0 || maturity.length > 0
   const options = subjects.map((subject) => ({ value: subject.id, label: subject.title }))
   const paginationMeta = buildPaginationMeta(total, page, limit)
 
@@ -50,6 +68,25 @@ export default async function MemoryCardsPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <SearchFilterInput placeholder="Search memory cards…" />
           {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
+          <UrlMultiSelectFilter
+            paramKey="state"
+            options={FSRS_STATE_LABELS.map((label, i) => ({ value: String(i), label }))}
+            selectedValues={states.map(String)}
+            placeholder="State"
+            searchPlaceholder="Search states…"
+            emptyMessage="No states found."
+          />
+          <UrlMultiSelectFilter
+            paramKey="maturity"
+            options={[
+              { value: 'mature', label: 'Mature' },
+              { value: 'young', label: 'Young' },
+            ]}
+            selectedValues={maturity}
+            placeholder="Maturity"
+            searchPlaceholder="Search maturity…"
+            emptyMessage="No options found."
+          />
         </div>
       )}
 

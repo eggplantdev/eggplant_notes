@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+import { MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
 import type {
   DueCardT,
   MemoryCardListItemT,
@@ -51,7 +52,14 @@ export async function getCardsForStats(client?: SupabaseClient<Database>) {
 // (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
 // `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(
-  opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
+  opts?: {
+    subjectIds?: string[]
+    q?: string
+    states?: number[]
+    maturity?: ('mature' | 'young')[]
+    page?: number
+    limit?: number
+  },
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
@@ -70,6 +78,16 @@ export async function getMemoryCardsList(
       })
     if (opts?.subjectIds && opts.subjectIds.length > 0) {
       query = query.in('subject_id', opts.subjectIds)
+    }
+    if (opts?.states && opts.states.length > 0) query = query.in('state', opts.states)
+    // Maturity is derived from `stability`, not a column of its own. Both buckets (or neither)
+    // selected = no constraint; exactly one bucket narrows. `stability` stays out of the
+    // projection — it's only needed for this WHERE clause.
+    if (opts?.maturity?.length === 1) {
+      query =
+        opts.maturity[0] === 'mature'
+          ? query.gte('stability', MATURE_STABILITY_DAYS)
+          : query.lt('stability', MATURE_STABILITY_DAYS)
     }
     if (orFilter) query = query.or(orFilter)
     return query

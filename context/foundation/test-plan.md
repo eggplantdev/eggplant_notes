@@ -149,6 +149,7 @@ the relevant rollout phase ships; before that, it reads "TBD — see §3 Phase N
 - **Location**: `e2e/<feature>.spec.ts`.
 - **Self-seeding**: each spec signs up a fresh per-run `uniqueEmail` (`e2e/helpers.ts`); specs do not reset the DB.
 - **Reference test**: `e2e/isolation.spec.ts` (two-account), `e2e/review.spec.ts` (recall loop).
+- **URL-multiselect filters** (subject/state/maturity): `e2e/memory-card-filters.spec.ts` — target via `data-testid="filter-<key>"`, assert list narrowing + AND composition (authored in `memory-card-state-maturity-filters` Phase 3).
 - **Run locally**: `pnpm test:e2e` (needs `supabase start` up).
 
 ### 6.4 Adding a test for the recall loop
