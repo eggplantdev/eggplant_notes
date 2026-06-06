@@ -25,7 +25,7 @@ export function ReviewPanel({ card, goal }: PropsT) {
           <Card>
             <CardHeader>
               <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
-              {card.notes?.title && (
+              {card.note_id && card.notes?.title && (
                 <SourceNoteLink
                   noteId={card.note_id}
                   subjectId={card.notes.subject_id}

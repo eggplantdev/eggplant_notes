@@ -19,7 +19,7 @@ export type DashboardDataT = {
 export type CardStatRowT = {
   id: string
   prompt: string
-  note_id: string
+  note_id: string | null // null for a standalone card (standalone-memory-cards)
   due_at: string
   stability: number
   lapses: number
@@ -27,11 +27,12 @@ export type CardStatRowT = {
 export type NoteStatRowT = { id: string; title: string | null }
 export type RatingStatRowT = { rating: number; reviewed_at: string }
 
-// A frequently-failed card, for the "needs attention" list. Links to its source note.
+// A frequently-failed card, for the "needs attention" list. Links to its source note when linked;
+// noteId is null for a standalone card (rendered as a plain, non-link title — Phase 3).
 export type HardestCardT = {
   id: string
   prompt: string
-  noteId: string
+  noteId: string | null
   noteTitle: string
   lapses: number
   stability: number

@@ -41,12 +41,13 @@ export type Database = {
           lapses: number
           last_review: string | null
           learning_steps: number
-          note_id: string
+          note_id: string | null
           prompt: string
           reps: number
           scheduled_days: number
           stability: number
           state: number
+          subject_id: string | null
           updated_at: string
           user_id: string
         }
@@ -62,12 +63,13 @@ export type Database = {
           lapses?: number
           last_review?: string | null
           learning_steps?: number
-          note_id: string
+          note_id?: string | null
           prompt: string
           reps?: number
           scheduled_days?: number
           stability?: number
           state?: number
+          subject_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -83,12 +85,13 @@ export type Database = {
           lapses?: number
           last_review?: string | null
           learning_steps?: number
-          note_id?: string
+          note_id?: string | null
           prompt?: string
           reps?: number
           scheduled_days?: number
           stability?: number
           state?: number
+          subject_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -98,6 +101,13 @@ export type Database = {
             columns: ['note_id']
             isOneToOne: false
             referencedRelation: 'notes'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'memory_cards_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subjects'
             referencedColumns: ['id']
           },
         ]

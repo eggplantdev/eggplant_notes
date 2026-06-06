@@ -280,13 +280,15 @@ for (const g of matched) {
     cardSeq++;
     const [state, stab, diff, sched, reps, dueExpr, lastExpr] = fsrs(cardSeq);
     cardRows.push(
-      `  ('${cardId(cardSeq)}', '${USER_ID}', '${noteId(g.noteIndex + 1)}', ${dq(c.prompt)}, ${c.example ? dq(c.example) : 'null'}, null,\n` +
+      `  ('${cardId(cardSeq)}', '${USER_ID}', '${noteId(g.noteIndex + 1)}', '${SUBJECT_ID}', ${dq(c.prompt)}, ${c.example ? dq(c.example) : 'null'}, null,\n` +
         `   ${state}, ${stab}, ${diff}, 0, ${sched}, 0, ${reps}, 0, ${dueExpr}, ${lastExpr})`,
     );
   }
 }
 out.push(`insert into memory_cards (`);
-out.push(`  id, user_id, note_id, prompt, example, code_context,`);
+// subject_id is seeded explicitly (the app owns it; no DB trigger) — every card
+// in a generated section belongs to that section's single subject.
+out.push(`  id, user_id, note_id, subject_id, prompt, example, code_context,`);
 out.push(`  state, stability, difficulty, elapsed_days, scheduled_days,`);
 out.push(`  learning_steps, reps, lapses, due_at, last_review`);
 out.push(`) values`);

@@ -67,7 +67,7 @@ function buildHardest(cards: CardStatRowT[], notes: NoteStatRowT[]): HardestCard
       id: c.id,
       prompt: c.prompt,
       noteId: c.note_id,
-      noteTitle: titleByNote.get(c.note_id) ?? 'Untitled',
+      noteTitle: (c.note_id ? titleByNote.get(c.note_id) : null) ?? 'Untitled',
       lapses: c.lapses,
       stability: c.stability,
     }))

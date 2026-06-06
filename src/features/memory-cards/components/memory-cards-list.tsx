@@ -19,21 +19,25 @@ export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
       items={cards}
       getKey={(card) => card.id}
       getHref={(card) => `/notes/${card.note_id}#card-${card.id}`}
-      renderAction={(card) => (
-        <CardActions
-          editHref={memoryCardEditHref(card.note_id, card.id)}
-          deleteControl={<DeleteMemoryCardButton noteId={card.note_id} id={card.id} />}
-        />
-      )}
+      renderAction={(card) =>
+        // Phase 1: every card still has a note, so guarding on note_id is behavior-preserving and
+        // narrows the now-nullable column to string. Phase 2/3 repoint edit + handle note-less cards.
+        card.note_id ? (
+          <CardActions
+            editHref={memoryCardEditHref(card.note_id, card.id)}
+            deleteControl={<DeleteMemoryCardButton noteId={card.note_id} id={card.id} />}
+          />
+        ) : null
+      }
       renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
       renderEyebrow={(card) => (
         <span className="text-muted-foreground text-xs">{formatReviewStatus(card)}</span>
       )}
       renderSubtitle={(card) => (
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-          {card.notes?.subjects?.title && (
+          {card.subjects?.title && (
             <span className="bg-muted text-foreground line-clamp-1 max-w-full rounded px-1.5 py-0.5 font-medium">
-              {card.notes.subjects.title}
+              {card.subjects.title}
             </span>
           )}
           {card.notes?.title && <span className="line-clamp-1">{card.notes.title}</span>}

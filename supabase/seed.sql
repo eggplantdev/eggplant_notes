@@ -1707,3 +1707,16 @@ from (
 cross join generate_series(0, 13) as g(d)
 where tc.rn <= 12
 on conflict (id) do nothing;
+
+-- ----------------------------------------------------------------------------
+-- Backfill each linked card's own subject_id from its source note. The DB
+-- trigger that once did this was dropped (standalone-memory-cards): the app
+-- owns subject_id now, so the seed seeds it explicitly here. Generator-
+-- independent and idempotent (only fills nulls), so it covers the hand-written
+-- dev block (whose note has no subject -> stays null) and the generated
+-- test@gmail.com block (note subject 5b1ec700… -> set) alike.
+-- ----------------------------------------------------------------------------
+update memory_cards mc
+set subject_id = n.subject_id
+from notes n
+where mc.note_id = n.id and mc.subject_id is null;

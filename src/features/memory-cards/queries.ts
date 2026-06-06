@@ -54,11 +54,11 @@ export async function getCardsForStats(client?: SupabaseClient<Database>) {
 // only the columns the card renders (never the `example`/`code_context` answer text), optionally
 // narrowed to selected subjects and/or a `?q=` search across the prompt+answer columns, ordered
 // soonest-due first so the list doubles as a study-readiness view. RLS scopes rows to the owner.
-// `notes!inner` is load-bearing — subject filtering applies `.in('notes.subject_id', …)` on the
-// embedded table, which PostgREST can only filter through an inner join (a plain `notes(...)`
-// embed is an outer join and won't filter the parent). Paginated: returns the page's rows + the
-// full match `total` off one `count: 'exact'` response (the getDueQueue precedent — hand-rolled,
-// not via runTableQuery). Injectable client per the isolation rule.
+// Subject is the card's OWN `subject_id` now (standalone-memory-cards): `subjects(title)` embeds via
+// the memory_cards→subjects FK and the filter keys off `memory_cards.subject_id`, so a note-less
+// card filters correctly. `notes(title)` is therefore a plain OUTER join (a standalone card has no
+// note). Paginated: returns the page's rows + the full match `total` off one `count: 'exact'`
+// response (the getDueQueue precedent — hand-rolled, not via runTableQuery). Injectable client.
 export async function getMemoryCardsList(
   opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
@@ -73,12 +73,12 @@ export async function getMemoryCardsList(
   const filtered = (head: boolean) => {
     let query = supabase
       .from('memory_cards')
-      .select('id, prompt, note_id, due_at, state, notes!inner(title, subjects(title))', {
+      .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
         count: 'exact',
         head,
       })
     if (opts?.subjectIds && opts.subjectIds.length > 0) {
-      query = query.in('notes.subject_id', opts.subjectIds)
+      query = query.in('subject_id', opts.subjectIds)
     }
     if (orFilter) query = query.or(orFilter)
     return query

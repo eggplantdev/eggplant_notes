@@ -13,6 +13,7 @@ function freshRow(now: Date): MemoryCardT {
     id: '00000000-0000-0000-0000-000000000001',
     user_id: '00000000-0000-0000-0000-000000000002',
     note_id: '00000000-0000-0000-0000-000000000003',
+    subject_id: null,
     prompt: 'What is a closure?',
     example: null,
     code_context: null,

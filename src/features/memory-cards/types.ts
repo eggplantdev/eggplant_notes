@@ -13,18 +13,14 @@ export type DueCardT = MemoryCardT & {
 
 // A card as shown on the /memory-cards listing: the slim columns the card renders (never the
 // `example`/`code_context` answer text or `stability` — the overview chart sources those from
-// getCardsForStats) plus the joined source-note title (the card→note link uses the row's own
-// note_id) and subject title (the card's context chip). The embed types via the
-// memory_cards→notes→subjects FK chain. Subject filtering keys off notes.subject_id in the query,
-// but that column isn't projected here — the card doesn't need it. `notes`/`subjects` stay
-// `| null` defensively, mirroring DueCardT, even though the query's `notes!inner` join makes notes
-// non-null in practice.
+// getCardsForStats) plus the card's OWN subject title (the context chip) and, when linked, its
+// source-note title. Post standalone-memory-cards the subject hangs off the card itself
+// (`memory_cards→subjects` FK), not the note — so a note-less card still carries a subject;
+// `note_id`/`notes` are nullable for standalone cards. Both embeds stay `| null` (outer joins).
 export type MemoryCardListItemT = Pick<
   MemoryCardT,
-  'id' | 'prompt' | 'note_id' | 'due_at' | 'state'
+  'id' | 'prompt' | 'note_id' | 'due_at' | 'state' | 'subject_id'
 > & {
-  notes: {
-    title: string | null
-    subjects: { title: string } | null
-  } | null
+  notes: { title: string | null } | null
+  subjects: { title: string } | null
 }
