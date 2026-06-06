@@ -7,8 +7,8 @@ import type { Database } from '@/lib/supabase/types'
 // + `count: 'exact'` returns a count with NO row payload — the cheapest existence probe. RLS
 // scopes both to the caller, so no user_id filter. This runs only inside loadSampleData (on an
 // explicit click), never on page render — the settings buttons are self-correcting, not gated by
-// an eager read. The optional client mirrors the getNotes pattern so the isolation E2E can inject
-// a per-account supabase-js client and drive the same guard.
+// an eager read. The optional client mirrors the getNotes pattern for testability (an injected
+// supabase-js client can drive the same guard).
 export async function isAccountEmpty(client?: SupabaseClient<Database>): Promise<boolean> {
   const supabase = client ?? (await createClient())
   const [notes, subjects] = await Promise.all([

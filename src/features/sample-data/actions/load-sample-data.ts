@@ -44,9 +44,19 @@ export async function loadSampleData(): Promise<ActionResultT> {
   for (const step of steps) {
     const { error } = await step()
     if (error) {
-      await deleteSeededRows(supabase)
-      console.error('[loadSampleData]', error)
-      return { success: false, error: error.message }
+      // Roll back any rows that landed before the failure. If the rollback ITSELF fails the
+      // account is left half-seeded — surface that so the user knows to recover via Clear (which
+      // is always rendered and idempotent), rather than silently reporting only the insert error.
+      const rollback = await deleteSeededRows(supabase)
+      console.error(
+        '[loadSampleData]',
+        error,
+        rollback.error ? `rollback failed: ${rollback.error}` : '',
+      )
+      const hint = rollback.error
+        ? ' Some sample data may remain — use “Clear sample data” to reset.'
+        : ''
+      return { success: false, error: `${error.message}${hint}` }
     }
   }
 
