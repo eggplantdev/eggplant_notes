@@ -4,8 +4,8 @@ import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
 import { MutedText } from '@/components/ui/muted-text'
 import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
+import type { SubjectListItemT } from '@/features/subjects/types'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
-import type { SubjectT } from '@/types/subject'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the subjects-specific href,
 // title, optional line-clamped description subtitle, and the per-card Edit/Delete actions.
@@ -14,7 +14,7 @@ import type { SubjectT } from '@/types/subject'
 // Delete uses ONE shared DeleteSubjectDialog driven by the pending-delete id (not a Radix dialog
 // per card). `openId` derives from the pending id AND its presence in `subjects`, so once the
 // delete revalidates the list (the row drops out) the dialog closes on its own — no effect.
-export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
+export function SubjectsList({ subjects }: { subjects: SubjectListItemT[] }) {
   const { openId, requestDelete, onOpenChange } = useDeleteDialogState(subjects)
 
   return (

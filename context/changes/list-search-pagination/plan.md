@@ -458,8 +458,8 @@ None — no schema change.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — a632b5a
+- [x] 2.2 Linting passes: `pnpm lint` — a632b5a
 
 #### Manual
 
@@ -470,9 +470,9 @@ None — no schema change.
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Build passes: `pnpm build`
 
 #### Manual
 
