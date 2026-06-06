@@ -72,7 +72,7 @@ export function PageShell({
   return (
     <main
       className={cn(
-        'container-shell py-4 sm:py-6',
+        'container-shell py-12',
         // 4rem ≈ the desktop sticky app-nav bar height (AppNav: py-4 + a row of sm controls).
         fill && 'md:flex md:h-[calc(100dvh-4rem)] md:flex-col md:overflow-hidden',
       )}
