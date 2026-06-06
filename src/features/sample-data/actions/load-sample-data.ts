@@ -7,16 +7,14 @@ import { deleteSeededRows, revalidateSeedPaths } from '@/features/sample-data/se
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import type { ActionResultT } from '@/types/action'
 
-// Populate the caller's account with the committed sample fixture under their own user_id, every
-// row flagged is_seeded. Guard → remap → ordered insert → rollback-on-failure.
+// Guard → remap → ordered insert → rollback-on-failure. Every row is flagged is_seeded.
 export async function loadSampleData(): Promise<ActionResultT> {
   const user = await getCurrentUser()
   if (!user) return { success: false, error: 'Not authenticated' }
 
   const supabase = await createClient()
 
-  // Only ever load into an empty account. This guard is also what makes the blanket is_seeded
-  // rollback safe — with no pre-existing seeded rows, a rollback can't delete user content.
+  // Empty-account guard also makes the blanket is_seeded rollback safe: no pre-existing seeded rows to delete.
   if (!(await isAccountEmpty(supabase))) {
     return { success: false, error: 'Sample data can only be loaded into an empty account.' }
   }
@@ -33,9 +31,8 @@ export async function loadSampleData(): Promise<ActionResultT> {
 
   const { subjects, notes, cards } = remapSampleData(SAMPLE_DATA, user.id, idFor)
 
-  // Ordered inserts: subjects → notes (FK subject_id) → cards (FK note_id). supabase-js multi-row
-  // insert is NOT one transaction, so on any failure roll back via the shared clear path before
-  // returning — a failed load must never leave a half-seeded account.
+  // FK order: subjects → notes → cards. supabase-js inserts are NOT one transaction, so any failure
+  // rolls back via the shared clear path — a failed load must never leave a half-seeded account.
   const steps = [
     () => supabase.from('subjects').insert(subjects),
     () => supabase.from('notes').insert(notes),
@@ -44,9 +41,7 @@ export async function loadSampleData(): Promise<ActionResultT> {
   for (const step of steps) {
     const { error } = await step()
     if (error) {
-      // Roll back any rows that landed before the failure. If the rollback ITSELF fails the
-      // account is left half-seeded — surface that so the user knows to recover via Clear (which
-      // is always rendered and idempotent), rather than silently reporting only the insert error.
+      // If the rollback ITSELF fails the account is left half-seeded — surface that so the user knows to recover via Clear.
       const rollback = await deleteSeededRows(supabase)
       console.error(
         '[loadSampleData]',

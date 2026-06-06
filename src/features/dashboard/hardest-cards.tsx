@@ -5,7 +5,6 @@ import type { HardestCardT } from '@/features/dashboard/types'
 
 type PropsT = { cards: HardestCardT[] }
 
-// "Needs attention" list: the most-lapsed cards, each linking to its source note (S-08 path).
 export function HardestCards({ cards }: PropsT) {
   if (cards.length === 0) {
     return <MutedText>No lapsed cards yet — nothing struggling.</MutedText>
@@ -15,7 +14,6 @@ export function HardestCards({ cards }: PropsT) {
       {cards.map((c) => (
         <li key={c.id} className="flex items-center justify-between gap-3 py-2">
           {c.noteId ? (
-            // Linked card: the row deep-links to its source note.
             <Link href={`/notes/${c.noteId}`} className="min-w-0 hover:underline">
               <p className="text-foreground truncate text-sm font-medium">{c.prompt}</p>
               <MutedText size="xs" truncate>
@@ -23,7 +21,6 @@ export function HardestCards({ cards }: PropsT) {
               </MutedText>
             </Link>
           ) : (
-            // Standalone card: no source note, so render a plain (non-link) title.
             <div className="min-w-0">
               <p className="text-foreground truncate text-sm font-medium">{c.prompt}</p>
               <MutedText size="xs" truncate>

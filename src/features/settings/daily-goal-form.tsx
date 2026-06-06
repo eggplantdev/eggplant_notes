@@ -11,10 +11,7 @@ import { dailyGoalFieldSchema } from '@/features/settings/schemas'
 
 type DailyGoalFormPropsT = { dailyGoal: number }
 
-// Small numeric form to view/update the daily review goal. The field value is a string (the
-// shared FormInput is string-typed); dailyGoalFieldSchema validates + bounds it on blur/submit
-// and the action re-validates server-side. No redirect — toastActionResult drives the inline
-// success/error toast, mirroring SubjectForm.
+// The field value is a string (the shared FormInput is string-typed); the action re-validates as a number server-side.
 export function DailyGoalForm({ dailyGoal }: DailyGoalFormPropsT) {
   const [formError, setFormError] = useState<string | undefined>(undefined)
 

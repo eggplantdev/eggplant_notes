@@ -7,11 +7,9 @@ export type RemappedRowsT = {
   cards: TablesInsert<'memory_cards'>[]
 }
 
-// Pure transform: fixture → insert-ready rows under `userId`. `idFor` assigns a fresh id per ref
-// and MUST be memoized by the caller (same ref → same id), so a note's `subjectRef` and a card's
-// `noteRef` resolve to the exact id their parent row was given. No DB and no randomness inside —
-// the caller injects `idFor` (a memoized crypto.randomUUID in the action, a deterministic stub in
-// the unit test). Cards get no id: nothing references them, so the DB default supplies one.
+// Pure transform: fixture → insert-ready rows. `idFor` MUST be memoized by the caller (same ref →
+// same id) so a note's subjectRef and a card's noteRef resolve to their parent's assigned id.
+// Cards get no id — nothing references them, so the DB default supplies one.
 export function remapSampleData(
   fixture: SampleDataT,
   userId: string,

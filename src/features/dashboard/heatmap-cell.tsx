@@ -9,8 +9,7 @@ type PropsT = {
   onLeave: () => void
 }
 
-// One day square in the contribution grid. Sized by the parent grid's track; color/glow come from
-// the active ramp. Padding cells (no date) render transparent and inert (no hover/tooltip).
+// Padding cells (no date) render transparent and inert (no hover/tooltip).
 export function HeatmapCell({ cell, ramp, onEnter, onLeave }: PropsT) {
   return (
     <div

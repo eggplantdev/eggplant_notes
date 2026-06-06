@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card'
 // `compact` shrinks the value type so four tiles read comfortably in a narrow side column.
 type PropsT = { label: string; value: ReactNode; sub?: string; compact?: boolean }
 
-// Presentational summary tile (due-today / streak). Server-safe; no domain knowledge.
 export function StatCard({ label, value, sub, compact }: PropsT) {
   return (
     <Card>

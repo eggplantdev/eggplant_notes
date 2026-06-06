@@ -1,13 +1,11 @@
 import type { HeatmapCellT } from '@/features/dashboard/types'
 import { formatFullDate } from '@/lib/utils/date'
 
-// Geometry for the contribution grid. The grid itself is fluid — columns are `1fr` tracks that
-// grow with the container, and an `aspect-ratio` keeps the 7×N lattice square (see
-// activity-heatmap.tsx). CELL is the fixed px size used only by the static legend swatches.
+// The grid itself is fluid (1fr tracks + aspect-ratio, see activity-heatmap.tsx); CELL is fixed px for the legend swatches only.
 export const CELL = 11 // px square (legend swatch only)
 export const GAP = 2 // px between cells
 
-// Tooltip copy for a cell: "3 reviews · Wed, Jun 3, 2025" (UTC, matching the date keys).
+// e.g. "3 reviews · Wed, Jun 3, 2025" — UTC, matching the date keys.
 export function formatCellLabel(cell: HeatmapCellT): string {
   if (!cell.date) return ''
   const when = formatFullDate(cell.date)

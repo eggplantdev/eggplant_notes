@@ -9,9 +9,7 @@ type LoadSampleDataButtonPropsT = {
   variant?: 'default' | 'outline'
 }
 
-// Shared Load trigger used by the notes empty state and the settings section. Fires the action
-// through useActionTransition (pending state + success/error toast); no confirm dialog since the
-// loader only ever writes into an already-empty account.
+// No confirm dialog: the loader only ever writes into an already-empty account.
 export function LoadSampleDataButton({
   label = 'Load sample data',
   variant = 'default',

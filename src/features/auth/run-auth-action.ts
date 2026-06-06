@@ -6,10 +6,8 @@ import type { ActionResultT } from '@/types/action'
 
 type SupabaseServerT = Awaited<ReturnType<typeof createClient>>
 
-// Shared skeleton for auth Server Actions: validate input, create the server client,
-// run the Supabase call, normalize its `{ error }` to an ActionResultT. Callers that
-// redirect on success do so themselves (the redirect target varies per action).
-// Not a Server Action itself — kept out of a `'use server'` file deliberately.
+// Not a Server Action itself — deliberately kept out of a `'use server'` file. Success
+// redirects are left to callers since the redirect target varies per action.
 export async function runAuthAction<T>(
   schema: ZodType<T>,
   input: unknown,

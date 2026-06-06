@@ -16,9 +16,7 @@ import { cn } from '@/lib/utils'
 
 type PropsT = { columns: HeatmapColumnT[]; variant?: HeatVariantT }
 
-// Composes the contribution grid (HeatmapCell per day), the month labels, the legend, and a
-// single shared HeatmapTooltip. Hover writes text/position to the tooltip imperatively via a
-// ref, so moving across the ~371 cells never re-renders the grid. `variant` picks the colour ramp.
+// Hover writes the shared tooltip imperatively via a ref so moving across the ~371 cells never re-renders the grid.
 export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: PropsT) {
   const ramp = HEAT_VARIANTS[variant]
   const tipRef = useRef<HTMLDivElement>(null)
@@ -29,7 +27,7 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
     const r = e.currentTarget.getBoundingClientRect()
     tip.textContent = formatCellLabel(cell)
     tip.style.left = `${r.left + r.width / 2}px`
-    tip.style.top = `${r.top - 4}px` // 4px gap above the cell (tooltip is lifted by -translate-y-full)
+    tip.style.top = `${r.top - 4}px`
     tip.style.opacity = '1'
   }
   const hideTip = () => {
@@ -40,8 +38,7 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
 
   return (
     <div className="w-full pb-1">
-      {/* month labels — share the grid's column tracks so they stay aligned as cells grow; text
-          overflows rightward into following tracks like GitHub */}
+      {/* Month labels share the grid's column tracks so they stay aligned as cells grow; text overflows rightward. */}
       <div
         className="text-muted-foreground text-3xs mb-1.5 grid uppercase"
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: `${GAP}px` }}
@@ -59,8 +56,7 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
         aria-label="Review activity heatmap for the last 12 months"
         className="grid grid-flow-col"
         style={{
-          // Fluid lattice: 7 fixed rows, N equal-width columns that grow with the container.
-          // aspect-ratio (cols : 7) drives the height so each cell stays square at any width.
+          // Fluid lattice: 7 fixed rows, N fluid columns; aspect-ratio (cols:7) keeps each cell square at any width.
           gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
           gridAutoColumns: 'minmax(0, 1fr)',
           gap: `${GAP}px`,

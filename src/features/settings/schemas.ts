@@ -2,15 +2,11 @@ import { z } from 'zod'
 
 import { MAX_DAILY_GOAL } from '@/features/settings/constants'
 
-// Daily goal = target distinct cards reviewed per day. Two schemas for two layers — same
-// string-vs-typed split as subjects' title (field validator) vs input (action contract):
-//
-// - dailyGoalFieldSchema: STRING input, for the form field validator. TanStack's StandardSchema
-//   bridge requires the field value type (string) as the schema input, so a `z.coerce.number()`
-//   (input `unknown`) can't validate the field. We validate the raw string and surface inline
-//   messages; empty/non-integer/out-of-range are all rejected with no write.
-// - dailyGoalSchema: the action contract — `{ dailyGoal: number }`, coerced + bounded. Mirrors
-//   the DB `daily_goal > 0` check and the MAX_DAILY_GOAL cap as the server-side re-validation.
+// Two schemas for two layers:
+// - dailyGoalFieldSchema: STRING input for the form field validator. TanStack's StandardSchema
+//   bridge requires the field value type (string) as input, so a `z.coerce.number()` can't validate it.
+// - dailyGoalSchema: the action contract `{ dailyGoal: number }`, coerced + bounded. Mirrors the
+//   DB `daily_goal > 0` check + MAX_DAILY_GOAL cap as server-side re-validation.
 export const dailyGoalFieldSchema = z
   .string()
   .trim()

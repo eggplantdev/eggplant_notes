@@ -11,15 +11,8 @@ import { getCurrentStreak } from '@/features/review-events/streak'
 import { getCardsForStats } from '@/features/memory-cards/queries'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
-// Composes the dashboard's per-user reads (S-03 data wiring, expanded for the stats panel).
-// The independent DB reads run in parallel; the streak + expanded stats — and the "Due today"
-// count — are derived purely from the already-fetched rows (no extra query). Shape is
-// DashboardDataT.
-//
-// `dailyGoalPromise` is the already-kicked-off settings read, handed in unawaited by the route
-// loader. The streaks are goal-relative, so we await it INSIDE this fan-out — that keeps the
-// goal fetch parallel with everything else AND keeps features/dashboard free of a
-// features/settings import (the cross-feature wiring lives in the app-layer loader).
+// `dailyGoalPromise` is handed in unawaited by the route loader and awaited INSIDE this fan-out:
+// keeps the goal fetch parallel AND keeps features/dashboard free of a features/settings import.
 export async function getDashboardData(dailyGoalPromise: Promise<number>): Promise<DashboardDataT> {
   const [activity, cards, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
     getReviewActivity(),
@@ -29,8 +22,7 @@ export async function getDashboardData(dailyGoalPromise: Promise<number>): Promi
     getReviewedTodayCount(),
     dailyGoalPromise,
   ])
-  // "Due now" = the same `due_at <= now()` rule getDueQueue uses, derived from the cards
-  // already in memory instead of a separate count query.
+  // "Due now" = getDueQueue's `due_at <= now()` rule, derived from in-memory cards (no extra query).
   const nowIso = new Date().toISOString()
   const dueToday = cards.filter((c) => c.due_at <= nowIso).length
   const currentStreak = getCurrentStreak(activity, dailyGoal)

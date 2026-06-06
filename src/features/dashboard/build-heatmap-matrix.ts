@@ -3,13 +3,10 @@ import type { HeatmapCellT, HeatmapColumnT, HeatmapLevelT } from '@/features/das
 import { MS_PER_DAY, toISODate, utcMidnight } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
 
-// GitHub-style contribution grid layout. Columns = weeks (oldest left → newest right),
-// each column has 7 cells indexed by weekday (0 = Sunday … 6 = Saturday). Days outside
-// the trailing window or after `today` are padding (`date: null`). This pure layout is
-// reused unchanged when real `review_events` aggregates replace the dummy data.
+// Contribution grid: columns = weeks (oldest left → newest right), each 7 cells indexed by
+// weekday (0 = Sunday … 6 = Saturday). Days outside the window or after `today` are padding (`date: null`).
 
-// Counts map to levels by fixed thresholds. First-pass buckets — re-tune against the real
-// review-count distribution when the data layer lands (noted in the design spec).
+// First-pass buckets — re-tune against the real review-count distribution.
 export function countToLevel(count: number): HeatmapLevelT {
   if (count <= 0) return 0
   if (count <= 5) return 1

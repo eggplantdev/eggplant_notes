@@ -3,12 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
-// The loader's guard: is the caller's account empty (zero notes AND zero subjects)? `head: true`
-// + `count: 'exact'` returns a count with NO row payload — the cheapest existence probe. RLS
-// scopes both to the caller, so no user_id filter. This runs only inside loadSampleData (on an
-// explicit click), never on page render — the settings buttons are self-correcting, not gated by
-// an eager read. The optional client mirrors the getNotes pattern for testability (an injected
-// supabase-js client can drive the same guard).
+// Empty = zero notes AND zero subjects. `head: true` + `count: 'exact'` returns a count with no
+// row payload — the cheapest existence probe. RLS scopes both to the caller, so no user_id filter.
 export async function isAccountEmpty(client?: SupabaseClient<Database>): Promise<boolean> {
   const supabase = client ?? (await createClient())
   const [notes, subjects] = await Promise.all([

@@ -7,13 +7,9 @@ import type {
 } from '@/features/dashboard/types'
 import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY, toISODate } from '@/lib/utils'
 
-// Pure aggregation for the dashboard's expanded stats. Kept synchronous and Supabase-free
-// (mirrors streak.ts) so it stays unit-testable in isolation — the data layer fetches the
-// rows, this turns them into the DashboardStatsT contract the UI renders.
-//
-// All day math runs in the UTC-midnight space the heatmap uses: `today` is todayInZone(...)
-// (UTC midnight of the zone's calendar date), and each timestamp is bucketed to its zone date
-// before comparing. ISO YYYY-MM-DD strings compare correctly with `<`/`===`.
+// Synchronous and Supabase-free (mirrors streak.ts) so it stays unit-testable in isolation.
+// All day math runs in UTC-midnight space: `today` is a zone calendar date at UTC midnight, each
+// timestamp is bucketed to its zone date first, and ISO YYYY-MM-DD strings compare correctly with `<`/`===`.
 
 type InputT = {
   cards: CardStatRowT[]
@@ -37,7 +33,7 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
 
   const hardestCards = buildHardest(cards, notes)
 
-  // Review-quality stats over the fetched window — one pass for good + this-week.
+  // One pass over the window for both good-rating count and this-week count.
   const total = ratings.length
   const weekStartStr = toISODate(today.getTime() - 6 * MS_PER_DAY)
   let good = 0

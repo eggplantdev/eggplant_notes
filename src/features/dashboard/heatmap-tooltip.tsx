@@ -2,9 +2,7 @@ import type { Ref } from 'react'
 
 type PropsT = { ref: Ref<HTMLDivElement> }
 
-// Single floating tooltip for the heatmap. Its text and position are written imperatively by
-// the parent through the forwarded ref (no per-hover React state), so hovering across the
-// grid never triggers a re-render.
+// Text/position are written imperatively via the forwarded ref (no per-hover state), so the grid never re-renders.
 export function HeatmapTooltip({ ref }: PropsT) {
   return (
     <div

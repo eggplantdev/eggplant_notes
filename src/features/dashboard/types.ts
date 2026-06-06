@@ -12,14 +12,12 @@ export type DashboardDataT = {
   stats: DashboardStatsT
 }
 
-// ── Expanded stats (all derived from existing columns; no schema change) ──────────────
-// Structural row shapes the pure stats computation reads. Defined here (not imported from
-// each feature's queries) so computeDashboardStats stays free of cross-feature type imports —
-// the feature read helpers return rows that are structurally assignable to these.
+// Structural row shapes defined here (not imported from each feature's queries) so
+// computeDashboardStats stays free of cross-feature type imports; feature reads return assignable rows.
 export type CardStatRowT = {
   id: string
   prompt: string
-  note_id: string | null // null for a standalone card (standalone-memory-cards)
+  note_id: string | null // null for a standalone card
   due_at: string
   stability: number
   lapses: number
@@ -27,8 +25,7 @@ export type CardStatRowT = {
 export type NoteStatRowT = { id: string; title: string | null }
 export type RatingStatRowT = { rating: number; reviewed_at: string }
 
-// A frequently-failed card, for the "needs attention" list. Links to its source note when linked;
-// noteId is null for a standalone card (rendered as a plain, non-link title — Phase 3).
+// noteId is null for a standalone card (rendered as a plain, non-link title).
 export type HardestCardT = {
   id: string
   prompt: string
