@@ -11,9 +11,8 @@ import {
 
 export type RadialDatumT = { key: string; value: number }
 
-// Shared radial-grid skeleton (shadcn chart-radial-grid). Each datum is one ring; `key` must
-// match a `config` entry, whose `color` ChartContainer exposes as `--color-<key>` for the fill.
-// `glow` haloes each ring in its own colour (via per-Cell `color` + the ring-glow filter).
+// Each datum is one ring; `key` must match a `config` entry, whose `color` ChartContainer exposes
+// as `--color-<key>` for the fill. `glow` haloes each ring via per-Cell `color` + the ring-glow filter.
 export function RadialCountChart({
   data,
   config,
@@ -31,7 +30,7 @@ export function RadialCountChart({
           <PolarGrid gridType="circle" />
           <RadialBar dataKey="value">
             {data.map((d) => {
-              // color = fill so the ring-glow filter's currentColor matches each ring.
+              // style.color = fill so the ring-glow filter's currentColor matches each ring.
               const fill = `var(--color-${d.key})`
               return (
                 <Cell
@@ -45,9 +44,9 @@ export function RadialCountChart({
           </RadialBar>
         </RadialBarChart>
       </ChartContainer>
-      {/* Legend lives BELOW the chart (not inside the SVG, where recharts crammed it against the
-          rings). Doubles as the screen-reader/non-hover count readout — the tooltip is hover-only.
-          Colours come from `config` (global theme tokens), not the chart-scoped `--color-<key>`. */}
+      {/* Legend below the chart (not in the SVG) — doubles as the non-hover / screen-reader count
+          readout since the tooltip is hover-only. Colours from `config` (global theme tokens),
+          not the chart-scoped `--color-<key>`. */}
       <ul className="text-muted-foreground mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs">
         {data.map((d) => (
           <li key={d.key} className="flex items-center gap-1.5">

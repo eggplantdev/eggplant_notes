@@ -30,15 +30,11 @@ import type { MemoryCardT } from '@/features/memory-cards/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
 import type { SubjectT } from '@/types/subject'
 
-// "None" sentinel for the subject Combobox: an unfiled card maps to this constant for the picker
-// and back to null on the way out (the Combobox needs a concrete option value). Mirrors note-form.
+// Combobox needs a concrete option value; unfiled card ↔ this sentinel ↔ null on the way out.
 const NO_SUBJECT = 'none'
 
-// The unified ROUTE form for /memory-cards/new (standalone create) and /memory-cards/[id]/edit
-// (edit any card). Sibling to the in-note `memory-card-form.tsx` (which stays the subject-less
-// inline ADD form) — kept separate per the plan so each stays thin. `card` present → edit (seeds
-// defaults, calls updateMemoryCard); absent → create (createStandaloneCard). Both actions redirect
-// to /memory-cards on success (redirect throws), so the form only ever observes the failure branch.
+// `card` present → edit (updateMemoryCard); absent → create (createStandaloneCard). Both actions
+// redirect on success (redirect throws), so the form only ever observes the failure branch.
 // `sourceNote` (edit of a linked card) renders a source-note row + an Unlink action.
 type CardFormPropsT = {
   subjects: SubjectT[]
@@ -57,11 +53,10 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
-  // subject changed); null when no confirm is pending. (standalone-memory-cards invariant)
+  // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
-  // Code context is optional and pulls in the heavy CodeMirror chunk, so its editor is mounted
-  // (and thus dynamically loaded) only after the user opts in — already-present content (edit
-  // mode) starts expanded. Mirrors how AddMemoryCard defers the editor on the note page.
+  // Code context pulls in the heavy CodeMirror chunk, so its editor mounts (and loads) only on
+  // opt-in; already-present content (edit mode) starts expanded.
   const [showCode, setShowCode] = useState(Boolean(card?.code_context))
   const { isPending: isUnlinking, run: runUnlink } = useActionTransition()
 
@@ -81,9 +76,8 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
       code_context: card?.code_context ?? '',
     },
     onSubmit: async ({ value }) => {
-      // Invariant: a linked card shares its note's subject, so changing a linked card's subject
-      // must unlink it. Pause and confirm before saving; a standalone card or an unchanged subject
-      // just saves.
+      // A linked card shares its note's subject, so changing its subject must unlink it — confirm
+      // before saving.
       if (card?.note_id && value.subject_id !== card.subject_id) {
         setPendingValues(value)
         return
@@ -92,8 +86,7 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
     },
   })
 
-  // Resume the save once the unlink is (or isn't) needed. Success redirects (throws), so only the
-  // failure branch is observed; clear any pending confirm either way.
+  // Success redirects (throws), so only the failure branch is observed.
   async function submitCard(values: CardFormValuesT, unlinkFromNote: boolean) {
     setPendingValues(undefined)
     const result = card
@@ -166,7 +159,6 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
                 </Button>
               )}
             </div>
-            {/* Mounted only after opt-in, so the CodeMirror chunk loads on demand. */}
             {showCode && (
               <EditorWithPreview value={field.state.value} onChange={field.handleChange} />
             )}

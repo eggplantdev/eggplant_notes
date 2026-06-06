@@ -3,6 +3,5 @@
 export const FSRS_STATE_LABELS = ['New', 'Learning', 'Review', 'Relearning'] as const
 
 // A card is "mature" once FSRS stability (≈ days until recall drops to 90%) crosses this.
-// 21d is the conventional Anki maturity line. NOTE: mirrors the dashboard's own copy — the
-// dashboard still computes its (now-unused) mature/young aggregate; consolidate if that's removed.
+// 21d is the conventional Anki maturity line.
 export const MATURE_STABILITY_DAYS = 21

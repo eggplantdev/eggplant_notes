@@ -13,16 +13,11 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
 
-// The due-review queue for the dashboard review panel: the single soonest-due card plus the total due count, in
-// one round-trip. RLS scopes rows to the owner. The `(user_id, due_at)` btree index backs the
-// `due_at <= now()` filter + ordering. `count: 'exact'` returns the full match count alongside
-// the `limit(1)` row, so the page renders one card without over-fetching the whole backlog.
-// As of S-03 the review write path sets a future `due_at` via FSRS; a freshly-created card
-// defaults `due_at` to now() so it is due immediately until its first review reschedules it.
-// Does NOT use runTableQuery: that wrapper returns rows and throws on null data, whereas here
-// we need both the row and the count off the same response — so it's hand-rolled. Embeds
-// notes(title) (typed via the memory_cards→notes FK) so the card can link to its source note
-// by title (S-08) without a second round-trip.
+// The single soonest-due card plus the total due count, in one round-trip. RLS scopes rows to the
+// owner. The `(user_id, due_at)` btree index backs the `due_at <= now()` filter + ordering.
+// `count: 'exact'` returns the full match count alongside the `limit(1)` row, so the page renders
+// one card without over-fetching the backlog. Hand-rolled (not runTableQuery) because we need both
+// the row and the count off the same response.
 export async function getDueQueue(
   client?: SupabaseClient<Database>,
 ): Promise<{ first?: DueCardT; count: number }> {
@@ -41,13 +36,9 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
-// Lean read backing the dashboard stats AND the /memory-cards "cards overview" charts: every
-// owned card, but only the columns the aggregation needs. RLS scopes rows to the owner. Returns
-// the full set so counts/buckets are computed in TS — PostgREST can't group by the
-// APP_TIME_ZONE-shifted due date in a plain select (same constraint as getReviewActivity), and a
-// lean fetch-all is sub-ms at personal scale. `state` is here for the cards-overview FSRS
-// state-mix chart (it reads the entire deck, decoupled from the paginated list). Personal-scale
-// data, so fetching all rows is fine. Injectable client per the isolation rule.
+// Every owned card, only the columns the aggregation needs. Returns the full set so counts/buckets
+// are computed in TS — PostgREST can't group by the APP_TIME_ZONE-shifted due date in a plain
+// select, and a lean fetch-all is sub-ms at personal scale. RLS scopes rows to the owner.
 export async function getCardsForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
@@ -55,15 +46,10 @@ export async function getCardsForStats(client?: SupabaseClient<Database>) {
   )
 }
 
-// Backs the /memory-cards listing: each owned card with its source-note title + subject, selecting
-// only the columns the card renders (never the `example`/`code_context` answer text), optionally
-// narrowed to selected subjects and/or a `?q=` search across the prompt+answer columns, ordered
-// soonest-due first so the list doubles as a study-readiness view. RLS scopes rows to the owner.
-// Subject is the card's OWN `subject_id` now (standalone-memory-cards): `subjects(title)` embeds via
-// the memory_cards→subjects FK and the filter keys off `memory_cards.subject_id`, so a note-less
-// card filters correctly. `notes(title)` is therefore a plain OUTER join (a standalone card has no
-// note). Paginated: returns the page's rows + the full match `total` off one `count: 'exact'`
-// response (the getDueQueue precedent — hand-rolled, not via runTableQuery). Injectable client.
+// Backs the /memory-cards listing, ordered soonest-due first. Selects only the columns the card
+// renders (never the `example`/`code_context` answer text). Subject is the card's OWN `subject_id`
+// (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
+// `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(
   opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
@@ -74,7 +60,7 @@ export async function getMemoryCardsList(
   const offset = (page - 1) * limit
   const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
 
-  // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
+  // `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
   const filtered = (head: boolean) => {
     let query = supabase
       .from('memory_cards')
@@ -98,10 +84,9 @@ export async function getMemoryCardsList(
   )
 }
 
-// Single card by id for the unified edit page (standalone-memory-cards), with its source note
-// (id + title) embedded for the Unlink row. Missing OR not-owned both resolve to `undefined`
-// (caller decides 404), via `maybeSingle` — same contract as getSubject/getNote. The note embed
-// is an outer join, so a standalone card returns `notes: null`. Injectable client per the rule.
+// Single card by id with its source note (id + title) embedded for the Unlink row. Missing OR
+// not-owned both resolve to `undefined` via `maybeSingle` (caller decides 404). The note embed is
+// an outer join, so a standalone card returns `notes: null`.
 export async function getMemoryCard(
   id: string,
   client?: SupabaseClient<Database>,
@@ -120,9 +105,8 @@ export async function getMemoryCard(
 }
 
 // Single card by id in the exact DueCardT shape ReviewPanel consumes, so the standalone card page
-// reuses the dashboard review component verbatim. Embeds `notes(title, subject_id)` — NOT
-// getMemoryCard's `notes(id, title)`, which lacks the subject_id that SourceNoteLink needs. Missing
-// or not-owned → undefined (caller 404s), same contract as getMemoryCard.
+// reuses the review component verbatim. Embeds `notes(title, subject_id)` — subject_id is what
+// SourceNoteLink needs. Missing or not-owned → undefined (caller 404s).
 export async function getMemoryCardForReview(
   id: string,
   client?: SupabaseClient<Database>,
@@ -140,9 +124,9 @@ export async function getMemoryCardForReview(
   return data ?? undefined
 }
 
-// Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the
-// owner, so a note the caller doesn't own yields []. Injectable client (defaults to the server
-// client) so Playwright can call it with a signInWithPassword client per the isolation test.
+// All memory cards attached to one note, oldest first. RLS scopes rows to the owner, so a note the
+// caller doesn't own yields []. Injectable client so Playwright can pass a signInWithPassword
+// client for the isolation test.
 export async function getMemoryCardsForNote(
   noteId: string,
   client?: SupabaseClient<Database>,

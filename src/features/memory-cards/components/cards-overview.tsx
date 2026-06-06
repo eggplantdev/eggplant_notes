@@ -6,10 +6,8 @@ import type { MemoryCardT } from '@/features/memory-cards/types'
 
 type PropsT = { cards: Pick<MemoryCardT, 'state' | 'stability'>[] }
 
-// Aggregate view over the user's ENTIRE deck (sourced from getCardsForStats, not the paginated
-// list — so it ignores `?q`/`?page`/`?subjects` and stays a stable "whole deck" dashboard). Two
-// distinct axes, each its own radial chart: the FSRS state mix (New/Learning/Review/Relearning)
-// and the maturity split (stability ≥ MATURE_STABILITY_DAYS).
+// Aggregate over the ENTIRE deck (getCardsForStats, not the paginated list — so it ignores
+// `?q`/`?page`/`?subjects`). Two axes: the FSRS state mix and the maturity split.
 export function CardsOverview({ cards }: PropsT) {
   const stateCounts = [0, 0, 0, 0]
   let mature = 0

@@ -8,14 +8,10 @@ import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// Edit a memory card's content AND subject (standalone-memory-cards). Keys off the card `id`
-// alone; RLS scopes the update to the owner. Hand-rolls the envelope (not runTableAction) because
-// it reads the card's current note for revalidation and can clear the link in the same write.
-//
-// Invariant: a LINKED card always shares its note's subject. So changing a linked card's subject
-// necessarily unlinks it — the form confirms that, then passes `unlinkFromNote`, which sets
-// `note_id = null` alongside the new subject. (A standalone card just updates its subject.) The
-// old note's path is revalidated from the pre-update read, since the link is gone afterward.
+// Hand-rolls the envelope (not runTableAction) because it reads the card's current note for
+// revalidation and can clear the link in the same write. Invariant: a linked card shares its note's
+// subject, so changing its subject must unlink it — `unlinkFromNote` then sets `note_id = null`
+// alongside the new subject. RLS scopes the update to the owner.
 export async function updateMemoryCard(
   id: string,
   input: unknown,
@@ -27,7 +23,7 @@ export async function updateMemoryCard(
   if (!parsed.success) return parsed
 
   const supabase = await createClient()
-  // Current note_id for revalidation — lost from the row once we unlink.
+  // Read note_id before the write — lost from the row once we unlink.
   const { data: current } = await supabase
     .from('memory_cards')
     .select('note_id')

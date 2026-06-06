@@ -10,20 +10,15 @@ import {
   memoryCardHref,
 } from '@/features/memory-cards/utils'
 
-// Thin client wrapper over the shared AnimatedCardList: supplies the memory-card card href, the
-// prompt as the title, a review-status eyebrow, and a subtitle of the subject ("topic") chip +
-// source-note title. Data is fetched on the server (MemoryCardsPage) and passed in; this stays a
-// client component only so it can hand render functions to the list.
+// Thin client wrapper over the shared AnimatedCardList — client only so it can hand render
+// functions to the list; data is fetched on the server and passed in.
 export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
   return (
     <AnimatedCardList
       gridLayout
       items={cards}
       getKey={(card) => card.id}
-      // Every card — linked or standalone — opens its on-demand review page (memory-card-review-page);
-      // the per-row Edit button still reaches the edit page.
       getHref={(card) => memoryCardHref(card.id)}
-      // Edit + Delete render for EVERY card (route-based edit; delete works with or without a note).
       renderAction={(card) => (
         <CardActions
           editHref={memoryCardEditHref(card.id)}

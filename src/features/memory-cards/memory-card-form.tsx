@@ -14,11 +14,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { createMemoryCard } from '@/features/memory-cards/actions/create-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 
-// The in-note inline ADD form (standalone-memory-cards made it create-only — editing any card now
-// lives at the unified /memory-cards/[id]/edit route via CardForm). No subject picker: a card
-// added here is seeded with the note's subject server-side, changeable later on the edit page. On
-// a successful add we reset for the next card and call `onClose` so AddMemoryCard collapses the
-// form — unmounting the single CodeMirror island (code_context). "Hide" fires the same `onClose`.
+// In-note inline ADD form (create-only). No subject picker: the card is seeded with the note's
+// subject server-side, changeable later on the edit page. A successful add resets and fires
+// `onClose` so AddMemoryCard collapses the form, unmounting the CodeMirror island.
 type MemoryCardFormPropsT = {
   noteId: string
   onClose?: () => void

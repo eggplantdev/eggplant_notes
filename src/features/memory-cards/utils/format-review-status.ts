@@ -1,10 +1,8 @@
 import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
 import { APP_TIME_ZONE, MS_PER_DAY, todayInZone, zoneMidnight } from '@/lib/utils/date'
 
-// Short human label for a card's review status on the /memory-cards card. New/Learning show the
-// state label; scheduled cards (Review/Relearning) show calendar-relative due text in
-// APP_TIME_ZONE: a past day → "Overdue", today → "Due today", else "Due in Nd". Both operands are
-// snapped to zone-midnight, so the diff is a whole-day count, DST-safe.
+// New/Learning show the state label; scheduled cards show calendar-relative due text in
+// APP_TIME_ZONE. Both operands snap to zone-midnight, so the diff is a whole-day count (DST-safe).
 export function formatReviewStatus(input: { state: number; due_at: string }): string {
   if (input.state === 0 || input.state === 1) return FSRS_STATE_LABELS[input.state]
   const days = Math.round(
