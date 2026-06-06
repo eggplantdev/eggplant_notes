@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
-import { getDashboardData } from '@/features/dashboard/data'
 import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
@@ -16,11 +15,9 @@ import { formatInterval } from '@/features/review/format-interval'
 import { RatingButtons } from '@/features/review/rating-buttons'
 import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
 import { previewIntervals } from '@/features/review/scheduling'
-import { getDailyGoal } from '@/features/settings/queries'
-import { getDueQueue } from '@/features/memory-cards/queries'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
-import { getCurrentUser } from '@/lib/supabase/server'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
+import { getDashboardPageData } from './loader'
 
 // Format a 0–1 fraction as a whole-percent string; em-dash when there's no data yet.
 const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%`)
@@ -29,19 +26,20 @@ const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%
 // expanded with the full stats panel. NOTE: this renders every available stat at once for the
 // cull pass — trim the cards/sections you don't want, then their fields in computeDashboardStats.
 export default async function DashboardPage() {
-  // getCurrentUser() is request-memoized (React cache()), so this reuses the user the
-  // (protected) layout already validated — no second round-trip to Supabase Auth. The data
-  // read is independent, so the two run in parallel.
-  // The route (app layer) joins the dashboard's reviewedToday with the goal owned by the
-  // settings feature, so features/dashboard never imports features/settings.
-  const [user, data, dailyGoal, { first: card }] = await Promise.all([
-    getCurrentUser(),
-    getDashboardData(),
-    getDailyGoal(),
-    getDueQueue(),
-  ])
-  const s = data.stats
-  const columns = buildHeatmapMatrix(data.activity, {
+  // One route-level fan-out: getDashboardPageData (./loader) composes every read this page
+  // needs in a single Promise.all and does the cross-feature join.
+  const {
+    user,
+    stats: s,
+    activity,
+    dueToday,
+    reviewedToday,
+    currentStreak,
+    dailyGoal,
+    card,
+  } = await getDashboardPageData()
+
+  const columns = buildHeatmapMatrix(activity, {
     today: todayInZone(APP_TIME_ZONE),
     weeks: 53,
   })
@@ -88,7 +86,7 @@ export default async function DashboardPage() {
         {/* Flip variant to switch palettes: 'aurora' | 'fuchsia' | 'mono' | 'white'. */}
         <GoalProgressBar
           label="Today's progress"
-          reviewed={data.reviewedToday}
+          reviewed={reviewedToday}
           goal={dailyGoal}
           variant="aurora"
           goalHitText="Daily goal hit 🏄"
@@ -154,12 +152,12 @@ export default async function DashboardPage() {
 
       {/* Featured: today's actionable numbers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Due today" value={data.dueToday} sub="memory cards ready to review" />
+        <StatCard label="Due today" value={dueToday} sub="memory cards ready to review" />
         <StatCard
           label="Current streak"
           value={
             <>
-              🔥 {data.currentStreak}{' '}
+              🔥 {currentStreak}{' '}
               <span className="text-muted-foreground text-lg font-medium">days</span>
             </>
           }
