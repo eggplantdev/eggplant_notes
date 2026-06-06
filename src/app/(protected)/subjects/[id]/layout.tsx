@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { PageShell } from '@/components/layout/page-shell'
 import { ButtonLink } from '@/components/ui/button-link'
 import { MutedText } from '@/components/ui/muted-text'
+import { Separator } from '@/components/ui/separator'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
@@ -55,7 +56,7 @@ export default async function SubjectLayout({
       }
     >
       {/* Separates the subject header (title + description) from the note grid below. */}
-      <hr className="border-border my-2" />
+      <Separator className="my-2" />
 
       {/* App-shell row (desktop): fills the bounded <main> (PageShell `fill`) and gives the grid
           a single 1fr track, so the sidebar column and the content pane each scroll on their own
