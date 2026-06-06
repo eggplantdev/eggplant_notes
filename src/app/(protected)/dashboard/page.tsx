@@ -32,9 +32,10 @@ export default async function DashboardPage() {
     weeks: 53,
   })
 
-  // Scalar stats rendered as a uniform StatCard grid. Cull a line to drop the card.
-  const scalars = [
-    { label: 'Longest streak', value: s.longestStreak, sub: 'best consecutive-day run' },
+  // Compact tiles flanking the review panel: today's actionable numbers + the 30-day quality
+  // pair. Rendered as a 2×2 grid of small StatCards. Cull a line to drop a tile.
+  const tiles = [
+    { label: 'Due today', value: dueToday, sub: 'memory cards ready to review' },
     { label: 'Overdue', value: s.overdue, sub: 'cards past their due date' },
     { label: 'Reviews (30d)', value: s.reviewsInWindow, sub: 'reviews in the last 30 days' },
     { label: 'Retention (30d)', value: pct(s.retention), sub: 'reviews rated Good or better' },
@@ -68,13 +69,17 @@ export default async function DashboardPage() {
         <ActivityHeatmap columns={columns} />
       </TitledCard>
 
-      <div className="mx-auto w-full max-w-2xl">
+      {/* Review session beside its key numbers — stacked on small screens, side-by-side on lg. */}
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ReviewPanel card={card} goal={dailyGoal} />
+        <div className="grid grid-cols-2 gap-4">
+          {tiles.map((tile) => (
+            <StatCard key={tile.label} {...tile} compact />
+          ))}
+        </div>
       </div>
 
-      {/* Featured: today's actionable numbers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Due today" value={dueToday} sub="memory cards ready to review" />
         <StatCard
           label="Current streak"
           value={
@@ -85,13 +90,7 @@ export default async function DashboardPage() {
           }
           sub="consecutive days with ≥1 review"
         />
-      </div>
-
-      {/* All scalar stats */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {scalars.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
+        <StatCard label="Longest streak" value={s.longestStreak} sub="best consecutive-day run" />
       </div>
 
       {/* Surfaced only once there's a real backlog of lapsing cards — a single struggler isn't
