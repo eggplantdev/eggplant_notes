@@ -4,10 +4,7 @@ import { MobileNav } from './mobile-nav'
 import { NAV_ITEMS, SETTINGS_ITEM } from './nav-items'
 import { NavLink } from './nav-link'
 
-// Protected-shell navigation. Server-rendered; only the NavLink and MobileNav leaf
-// islands carry 'use client'. Desktop (md+): a full-bleed sticky top bar. Mobile: no bar
-// chrome at all — just a fixed floating hamburger (MobileNav), since the bar held nothing
-// else there.
+// Mobile has no bar chrome at all — just MobileNav's floating hamburger; the bar held nothing else there.
 export function AppNav() {
   return (
     <>

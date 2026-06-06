@@ -20,9 +20,7 @@ export type ComboboxOptionT = { value: string; label: string }
 type ComboboxPropsT = {
   options: readonly ComboboxOptionT[]
   onChange: (value: string) => void
-  // Omit `value` for action-style use (always shows the placeholder, no persistent selection,
-  // re-selecting the same option fires `onChange` again). Provide it for value-bound selects
-  // (trigger shows the selected label + a check beside the active option).
+  // Omit for action-style use (re-selecting the same option fires `onChange` again); provide for a value-bound select.
   value?: string
   // Set on the trigger so an external `<Label htmlFor>` can target it.
   id?: string
@@ -33,9 +31,7 @@ type ComboboxPropsT = {
   disabled?: boolean
 }
 
-// Generic searchable select built on Command (cmdk) inside a Popover. Pure primitive — no
-// domain knowledge; callers supply options + handler. The trigger width drives the popover
-// width via the Radix CSS var, so size it through `className` (e.g. `w-48`, `w-full`).
+// Trigger width drives popover width via the Radix CSS var, so size it through `className`.
 export function Combobox({
   options,
   onChange,
@@ -75,9 +71,7 @@ export function Combobox({
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
-                // `value` is the (unique) option id so cmdk never collides on duplicate
-                // labels; `keywords` keeps search matching the visible label. `data-checked`
-                // drives the CommandItem's own trailing check (no second icon).
+                // `value` is the unique option id so cmdk doesn't collide on duplicate labels; `keywords` keeps search matching the label.
                 <CommandItem
                   key={option.value}
                   value={option.value}

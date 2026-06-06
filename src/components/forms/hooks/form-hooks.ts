@@ -4,7 +4,6 @@ import { FormInput } from '@/components/forms/form-components/form-input'
 
 const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts()
 
-// Bound form hook with the minimal field-component set the auth forms need.
 const { useAppForm } = createFormHook({
   fieldComponents: {
     Input: FormInput,

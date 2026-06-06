@@ -13,28 +13,16 @@ type WidthT = 'full' | 'prose' | 'wide'
 
 type PropsT = {
   title: string
-  // Optional content rendered directly ABOVE the title (e.g. a contextual "Open in <subject>"
-  // link). Sits in the title column, below the back link.
   eyebrow?: ReactNode
-  // Optional secondary line under the title (e.g. "Updated …", an email, a description).
   subtitle?: ReactNode
-  // Trailing controls on the title row (e.g. a "New note" button, "N due", edit/delete).
   actions?: ReactNode
-  // Optional back link rendered above the header, visible on every breakpoint.
   backHref?: string
   backLabel?: string
-  // When true, the back control navigates browser history (router.back()) instead of linking to
-  // backHref — so it returns to wherever the user came from. Falls back to backHref (or '/') when
-  // there's no history to go back to (e.g. a directly-opened deep link).
+  // Navigate browser history (router.back) instead of backHref; falls back to backHref/'/' on a deep link with no history.
   backHistory?: boolean
-  // Inner content width, within the shared `container-shell` cap (max-w 120rem) the <main>
-  // already applies. 'full' = fill that cap (default; dashboard); 'prose' = max-w-2xl
-  // (read-heavy pages); 'wide' = max-w-4xl (the note editor).
+  // Inner width within the container-shell cap: 'full' fills it, 'prose' = max-w-2xl, 'wide' = max-w-4xl.
   width?: WidthT
-  // Opt-in app-shell mode (desktop only): bound <main> to the viewport below the sticky app
-  // nav bar and stop the page from scrolling, so scrollable children (e.g. a docs-style
-  // sidebar + content pane) scroll *internally* instead. The consumer must give the child it
-  // wants to fill `md:min-h-0 md:flex-1`. Off by default — normal pages keep page-level scroll.
+  // Desktop app-shell mode: bound <main> to the viewport so children scroll internally; consumer must give the fill child `md:min-h-0 md:flex-1`.
   fill?: boolean
   children: ReactNode
 }
@@ -45,12 +33,7 @@ const WIDTH_CLASS: Record<WidthT, string> = {
   wide: 'mx-auto w-full max-w-4xl',
 }
 
-// The single layout wrapper for every protected page: standardized padding, top-aligned
-// content, a consistent title/subtitle/actions header, an optional back link, and a
-// page-transition fade+slide on mount (honors prefers-reduced-motion → opacity-only).
-// Replaces the per-page hand-rolled <main> wrappers that had drifted on padding, gap, width,
-// and vertical alignment (settings was vertically centered). Server pages stay Server
-// Components and pass their content as children — only this shell crosses the client boundary.
+// Shared layout wrapper for every protected page; the mount fade+slide honors prefers-reduced-motion → opacity-only.
 export function PageShell({
   title,
   eyebrow,
@@ -66,11 +49,8 @@ export function PageShell({
   const shouldReduceMotion = useReducedMotion()
   const pathname = usePathname()
   const router = useRouter()
-  // Hide the <h1> on mobile only on the top-level nav routes, where CurrentPageLabel already
-  // pins the section name. Derived from the nav registry (exact href match) rather than a
-  // per-page prop, so it stays in lockstep with CurrentPageLabel and can't drift. Exact match
-  // (not isNavActive) is deliberate: detail/new/edit pages live *under* a nav route but their
-  // title is unique content (a note's own name), so they must keep the <h1> on mobile.
+  // Hides the mobile <h1> only on nav-root routes (CurrentPageLabel pins those). Exact match,
+  // not isNavActive: detail/new/edit pages live under a nav route but their title is unique content.
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (

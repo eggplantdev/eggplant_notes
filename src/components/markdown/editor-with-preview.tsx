@@ -10,12 +10,7 @@ import { cn } from '@/lib/utils'
 
 type MobileTabT = 'write' | 'preview'
 
-// The full markdown editing surface with everything baked in: the CodeBlockInserter toolbar, the
-// CodeMirror editor, and the live preview side by side (md+). On mobile there's no room for two
-// columns, so a Write/Preview tab toggles which one shows. Shared by NoteForm (the note body) and
-// CardForm (a card's code context) so the layout can't drift between them — `MarkdownEditor` and
-// `MarkdownPreview` are the lower-level primitives; this pairs them. `value`/`onChange` come from
-// the consuming form's field; the inserter and preview both read/write that same value.
+// Editor + live preview side by side on md+; on mobile the Write/Preview tab toggles which shows (no room for two columns).
 export function EditorWithPreview({
   value,
   onChange,

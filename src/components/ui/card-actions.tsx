@@ -5,12 +5,8 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 
-// Per-card Edit + Delete controls for an AnimatedCardList row (its renderAction slot wraps this in
-// a nav-neutralizing container, so the controls just act). Promoted out of the per-feature
-// *CardActions wrappers (notes, subjects, memory-cards) once they were the same shape. Edit always
-// routes to `editHref`. For the delete control, either pass `onRequestDelete` — which renders the
-// default destructive button (notes/subjects request deletion via the list's single shared dialog)
-// — or pass a custom `deleteControl` node (memory-cards supply their own self-contained button).
+// Per-card Edit + Delete controls. For delete, pass either `onRequestDelete` (renders the default
+// destructive button) or a custom `deleteControl` node (e.g. memory-cards' self-contained button).
 type CardActionsPropsT = {
   editHref: string
   onRequestDelete?: () => void

@@ -19,14 +19,12 @@ export type MultiSelectOptionT = { value: string; label: string }
 
 type MultiSelectPropsT = {
   options: readonly MultiSelectOptionT[]
-  // Controlled selection. Toggling an option calls onValuesChange with the next set; the
-  // popover stays open so several can be picked in one go (callers debounce any commit).
+  // The popover stays open on toggle so several can be picked in one go (callers debounce any commit).
   values: string[]
   onValuesChange: (values: string[]) => void
   // Set on the trigger so an external `<Label htmlFor>` can target it.
   id?: string
-  // Open state is controllable so a caller can hook open/close (e.g. to reseed or flush a
-  // debounced commit). Omit both to let the primitive manage its own open state.
+  // Controllable so a caller can hook open/close (e.g. to flush a debounced commit); omit both to self-manage.
   open?: boolean
   onOpenChange?: (open: boolean) => void
   placeholder?: string
@@ -35,10 +33,7 @@ type MultiSelectPropsT = {
   className?: string
 }
 
-// The multi-select sibling of Combobox: a searchable cmdk list inside a Popover where each
-// option toggles in/out of a value set. Pure primitive — no domain knowledge; callers supply
-// options + handler. `data-checked` drives CommandItem's own trailing check (same convention
-// as Combobox, no second icon). Trigger width drives popover width via the Radix CSS var.
+// Multi-select sibling of Combobox; trigger width drives popover width via the Radix CSS var.
 export function MultiSelect({
   options,
   values,

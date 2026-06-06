@@ -3,11 +3,7 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 
-// Shared empty-state panel: a dashed-border card with muted copy and an optional CTA link.
-// Promoted out of the per-page empty branches (notes, subjects, memory-cards, subject view) once
-// the markup was the same. Omit `action` for filtered/"no match" states (text only); pass it for
-// "nothing here yet" states. `action.variant` defaults to 'outline' (the list-page CTA); the
-// subject view passes 'default' for its primary "New note" prompt.
+// Shared empty-state panel. Omit `action` for filtered/"no match" states; pass it for "nothing here yet".
 type EmptyStatePropsT = {
   message: ReactNode
   action?: { label: string; href: string; variant?: 'default' | 'outline' }

@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
-// Debounce each keystroke into one trailing server re-query (matches SubjectFilter's DEBOUNCE_MS),
-// so typing a word fires one navigation, not one per character.
+// Debounce keystrokes into one trailing server re-query, so typing a word fires one navigation, not one per character.
 const DEBOUNCE_MS = 400
 
 type SearchFilterInputPropsT = {
@@ -17,17 +16,9 @@ type SearchFilterInputPropsT = {
   className?: string
 }
 
-// Self-contained, URL-driven search box for the paginated list pages. Writes `?q=` via
-// router.replace({ scroll: false }) inside a transition so the list stays interactive during the
-// re-query. Deletes `page` on every commit — changing the query must reset to page 1, else the user
-// is stranded on a now-out-of-range deep page (the cross-component page-reset invariant;
-// SubjectFilter does the same on its commit).
-//
-// Two-mode (mirrors SubjectFilter): while FOCUSED, `local` drives so keystrokes are instant and the
-// debounce can batch them; while BLURRED it's null and the value derives straight from the URL — so
-// Back/Forward and a cleared filter stay in sync without a resync effect (the project's
-// "avoid useEffect / no setState-in-effect" rule). On blur a pending debounce is flushed so the last
-// keystrokes aren't lost.
+// URL-driven search box. Two-mode to avoid a resync effect: while focused `local` drives (instant,
+// debounce-batched keystrokes); while blurred it's null and the value derives from the URL, so
+// Back/Forward and a cleared filter stay in sync. Blur flushes a pending debounce so keystrokes aren't lost.
 export function SearchFilterInput({ placeholder = 'Search…', className }: SearchFilterInputPropsT) {
   const router = useRouter()
   const pathname = usePathname()
@@ -38,14 +29,11 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const value = local ?? urlQuery
-  // The typed value diverges from the committed `?q=` from the first keystroke until the re-query's
-  // results render (urlQuery only updates when the transition's navigation completes) — so it spans
-  // the debounce + the server round-trip, exactly the "searching" window the spinner marks.
+  // True from the first keystroke until the re-query's results render — the "searching" window the spinner marks.
   const isSearching = local !== null && local.trim() !== urlQuery
 
   function commit(next: string) {
-    // buildUrlWithParams deletes empty-string keys: an empty term clears `q`, and `page: ''` always
-    // resets to page 1 (the cross-component page-reset invariant; SubjectFilter does the same).
+    // `page: ''` resets to page 1 on every query change, else the user is stranded on an out-of-range deep page.
     const url = buildUrlWithParams(pathname, searchParams.toString(), {
       q: next.trim(),
       page: '',
@@ -75,9 +63,7 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
     setLocal(null) // hand control back to the URL prop
   }
 
-  // Cleanup-only timer teardown — clear a pending debounce on unmount so it can't router.replace
-  // from a dead component (same teardown pattern as SubjectFilter; no setState, so not the banned
-  // derived-state effect).
+  // Cleanup-only: clear a pending debounce on unmount so it can't router.replace from a dead component.
   useEffect(() => () => clearTimeout(timer.current ?? undefined), [])
 
   return (

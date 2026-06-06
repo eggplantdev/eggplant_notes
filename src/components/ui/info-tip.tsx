@@ -5,8 +5,6 @@ import type { ReactNode } from 'react'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-// Small inline "ⓘ" affordance that reveals a short explanatory tip on hover/focus. Non-domain:
-// the caller passes the tip body, so it carries no feature knowledge.
 export function InfoTip({
   children,
   label = 'More info',

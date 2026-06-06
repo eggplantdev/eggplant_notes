@@ -3,10 +3,8 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
-// Presentational pagination primitives — no navigation logic of their own. PaginationLink (and the
-// Previous/Next/Ellipsis built on it) render as a NON-anchor <span> on purpose: UrlPagination wraps
-// each in a Next <Link>, and an <a> inside an <a> is invalid HTML. The styled span carries the
-// active/disabled state; the surrounding Link owns the href + client navigation.
+// PaginationLink renders a NON-anchor <span> on purpose: UrlPagination wraps each in a Next <Link>,
+// and an <a> inside an <a> is invalid HTML.
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (

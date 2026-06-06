@@ -9,15 +9,12 @@ type AnimatedListItemPropsT = {
   children: ReactNode
   className?: string
   layoutId?: string
-  // Opt-in FLIP layout animation. Off by default — without this, intra-item content
-  // changes won't transform unrelated descendants. Required when the parent uses
-  // <AnimatePresence mode="popLayout"> for reordering.
+  // Required when the parent uses <AnimatePresence mode="popLayout"> for reordering (FLIP layout animation).
   layout?: boolean
 }
 
-// Ported from the fest reference repo (components/wrappers/animated-list-item.tsx). One list
-// row: fades + slides in on enter, out on exit, and (with layout) slides to its new position
-// when siblings are added/removed. Honors prefers-reduced-motion → opacity-only.
+// One list row: fades/slides on enter/exit, and (with layout) slides to its new position on reorder.
+// Honors prefers-reduced-motion → opacity-only.
 export function AnimatedListItem({
   children,
   className,

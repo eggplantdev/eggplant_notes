@@ -5,7 +5,6 @@ import { useFieldContext } from '@/components/forms/hooks/form-hooks'
 import type { FormControlPropsT } from '@/components/forms/types/form-types'
 import { getFieldErrorText } from '@/components/forms/utils'
 
-// Field-context-aware input over the shadcn Input + Label, rendering validation errors.
 export function FormInput(props: FormControlPropsT) {
   const field = useFieldContext<string>()
   const isInvalid = field.state.meta.errors.length > 0

@@ -10,10 +10,7 @@ import { SignOutButton } from '@/features/auth/components/sign-out-button'
 import { isNavActive } from './is-nav-active'
 import { ALL_NAV_ITEMS } from './nav-items'
 
-// The open (hamburger) and close (X) controls are the exact same button in the exact same
-// spot — same size, variant, position, margins — so opening/closing reads as one toggle.
-// Only the icon differs. shadcn's built-in close button is disabled (showCloseButton={false})
-// in favor of this one.
+// Open and close controls share these exact classes so they sit in one spot and read as a single toggle.
 const TOGGLE_BUTTON_CLASS = 'fixed top-4 right-4 z-50 md:hidden'
 
 export function MobileNav() {

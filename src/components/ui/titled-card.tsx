@@ -9,8 +9,6 @@ type TitledCardPropsT = {
   className?: string
 }
 
-// A Card with a header title (and optional description) over a content body — the
-// repeated panel shape used by the dashboard panels and the auth pages.
 export function TitledCard({ title, children, description, className }: TitledCardPropsT) {
   return (
     <Card className={className}>

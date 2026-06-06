@@ -1,7 +1,5 @@
-// Languages offered by the markdown "insert code block" picker. `value` is the Shiki language
-// id written into the ```fence (so the saved detail view highlights it); `label` is the human
-// name shown in the combobox. Curated, not exhaustive — Shiki supports far more. Ordered
-// alphabetically by label (the combobox preserves source order).
+// `value` must be the Shiki language id (written into the fence so the detail view highlights it).
+// Curated, not exhaustive; ordered alphabetically by label since the combobox preserves source order.
 export const CODE_LANGUAGES = [
   { value: 'bash', label: 'Bash' },
   { value: 'c', label: 'C' },
@@ -25,7 +23,5 @@ export const CODE_LANGUAGES = [
   { value: 'yaml', label: 'YAML' },
 ] as const
 
-// Single source of truth for the highlighter's preload set: the picker's language ids ARE the
-// grammars Shiki loads on boot (see render-markdown.tsx). Deriving both from one array means the
-// set you can insert and the set that highlights can never drift. `text` is the fallback target.
+// Derived from CODE_LANGUAGES so the insertable set and Shiki's preloaded grammars can never drift.
 export const SHIKI_LANGS: readonly string[] = CODE_LANGUAGES.map((l) => l.value)

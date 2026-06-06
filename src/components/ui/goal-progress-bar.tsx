@@ -7,15 +7,11 @@ type PropsT = {
   reviewed: number
   goal: number
   variant?: GoalBarVariantT
-  // Text shown once the goal is hit, e.g. "Daily goal hit" / "Weekly goal hit" (the caller
-  // includes any emoji it wants in the string).
+  // Shown once the goal is hit; caller includes any emoji in the string.
   goalHitText?: string
 }
 
-// Per-variant fill gradient, glow utilities, and goal-hit accent colour. Literal class strings
-// (not built from the variant token) because Tailwind only scans static class names — a
-// template like `from-neon-${x}` would never be generated. Keep each entry's classes spelled
-// out in full for the same reason.
+// Classes spelled out in full (not built from the token) because Tailwind only scans static class names.
 const VARIANT: Record<
   GoalBarVariantT,
   { fill: string; glow: string; glowHit: string; accent: string }
@@ -46,11 +42,7 @@ const VARIANT: Record<
   },
 }
 
-// Reusable goal progress bar: a bare ~4px neon line that fills toward a goal, sitting over the
-// content (no track background/outline). Static (no animation). `variant` picks the colour
-// scheme; at ≥100% the fill intensifies its glow (goal-hit) and `goalHitText` appears. The
-// filled width is the one allowed inline style (a dynamic percentage Tailwind can't express as
-// a token). Domain-free — callers pass reviewed/goal already computed.
+// The filled width is the one allowed inline style — a dynamic percentage Tailwind can't express as a token.
 export function GoalProgressBar({
   label,
   reviewed,
@@ -78,8 +70,7 @@ export function GoalProgressBar({
           {reviewed} / {goal}
         </span>
       </div>
-      {/* Track sets the 100% reference width and shows a barely-visible empty state (the default
-          border colour); the line itself is the fill. */}
+      {/* Track sets the 100% reference width; the inner line is the fill. */}
       <div
         role="progressbar"
         aria-label={label}

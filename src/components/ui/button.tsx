@@ -18,8 +18,7 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
-        // bg-black is repeated across states so the destructive variant's dark:/hover: fills can't
-        // win via twMerge variant precedence. For Delete/Again wanting a glow over a soft fill.
+        // bg-black repeated across states so destructive's dark:/hover: fills can't win via twMerge precedence.
         'glowy-red':
           'neon-glow-red hover:neon-glow-red-hit text-destructive bg-black hover:bg-black dark:bg-black dark:hover:bg-black transition-shadow focus-visible:border-destructive/40 focus-visible:ring-destructive/20',
         link: 'text-primary underline-offset-4 hover:underline',

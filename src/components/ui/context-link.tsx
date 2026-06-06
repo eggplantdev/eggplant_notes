@@ -10,10 +10,7 @@ type PropsT = {
   className?: string
 }
 
-// Muted, arrow-suffixed navigation link — the shared "go somewhere related" affordance (a
-// card's source note, a note's surrounding subject). The trailing arrow is what marks the muted
-// text as a navigable link at rest, not just on hover. Presentational only: the caller owns the
-// href and label, so it carries no domain knowledge.
+// The trailing arrow is what marks the muted text as a navigable link at rest, not just on hover.
 export function ContextLink({ href, children, className }: PropsT) {
   return (
     <MutedText asChild interactive className={className}>

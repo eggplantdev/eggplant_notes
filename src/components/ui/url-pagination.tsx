@@ -23,11 +23,8 @@ type UrlPaginationPropsT = {
   className?: string
 }
 
-// Windowed page links driven entirely by the URL: each link is a Next <Link> (client navigation,
-// scroll preserved) whose href is built with buildUrlWithParams so `q` / `subjects` ride along and
-// `page` drops to nothing on page 1. Renders prev / first(+ellipsis) / window / (ellipsis+)last /
-// next. Reads the live query string from useSearchParams so links always reflect the current
-// filters. Renders nothing for a single page.
+// hrefs are built with buildUrlWithParams so `q`/`subjects` ride along and `page` drops on page 1.
+// Reads the live query string so links reflect current filters. Renders nothing for a single page.
 export function UrlPagination({
   currentPage,
   totalPages,

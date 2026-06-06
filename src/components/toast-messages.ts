@@ -1,13 +1,7 @@
-// Post-redirect success messages, keyed by a short URL-safe token. A redirecting Server Action
-// appends `?toast=<key>` to its destination; <ActionToast> reads it after navigation and toasts
-// the mapped message (an in-closure `toast.success` is unreachable past `redirect()`). Closed
-// `as const` map → URLs carry a key, not raw copy, and the wording stays centralized here.
-//
-// Split out of `toasts.ts` (the react-toastify wrapper): this copy registry changes when product
-// copy / redirect keys change, which is unrelated to the toastify transition/theme config — two
-// reasons to change, so two files. The typed WRITER of this convention is `toastRedirect` in
-// `@/lib/toast-redirect` — kept out of this client-imported module so its server-only
-// `next/navigation` import doesn't leak here.
+// Post-redirect success messages keyed by URL-safe token: a redirecting Server Action can't toast
+// directly (an in-closure toast is unreachable past redirect()), so it appends `?toast=<key>` and
+// <ActionToast> toasts the mapped message after navigation. Client-importable, so the server-only
+// writer (toastRedirect) lives separately to keep its next/navigation import out of here.
 export const TOAST_MESSAGES = {
   'note-saved': 'Note saved',
   'note-deleted': 'Note deleted',

@@ -1,8 +1,6 @@
 const DEFAULT_VISIBLE = 5
 
-// Returns the contiguous run of page numbers to render around the current page (centered, clamped
-// to [1, totalPages]). UrlPagination renders first/last + an ellipsis around this window. Pure and
-// framework-agnostic — ported verbatim from the wykonczymy reference.
+// The contiguous run of page numbers around the current page (centered, clamped to [1, totalPages]).
 export function getWindowedPages(
   currentPage: number,
   totalPages: number,
