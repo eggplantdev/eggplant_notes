@@ -74,17 +74,20 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                         | Goal (one line)                                                                         | Risks covered | Test types                                                       | Status      | Change folder |
-| --- | ---------------------------------- | --------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------- | ----------- | ------------- |
-| 1   | RLS isolation depth                | Prove no cross-user read/write on any table and every RPC at the right privilege        | #1            | integration + e2e                                                | not started | —             |
-| 2   | Recall-loop scheduling integrity   | Prove reschedule direction and due-set membership are correct after a rating            | #2            | unit + integration                                               | not started | —             |
-| 3   | Mutation-feedback regression guard | Prove no Server Action mutation can fail silently                                       | #6            | e2e                                                              | not started | —             |
-| 4   | AI generation safety               | Prove AI output is schema-validated, preview-gated, and bounded by a token/size ceiling | #3, #4        | unit + integration; Playwright MCP exploratory on the preview UI | not started | —             |
-| 5   | OpenRouter credential lifecycle    | Prove the BYOK key never leaks and is removed on account deletion                       | #5            | integration + response/bundle scan                               | not started | —             |
+| #   | Phase name                         | Goal (one line)                                                                                  | Risks covered                  | Test types                                                       | Status       | Change folder                                       |
+| --- | ---------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------ | ---------------------------------------------------------------- | ------------ | --------------------------------------------------- |
+| 1   | RLS isolation depth                | Prove no cross-user read/write on any table and every RPC at the right privilege                 | #1                             | integration + e2e                                                | not started  | —                                                   |
+| 2   | Recall-loop scheduling integrity   | Prove reschedule direction and due-set membership are correct after a rating                     | #2                             | unit + integration                                               | not started  | —                                                   |
+| 3   | Mutation-feedback regression guard | Prove no Server Action mutation can fail silently                                                | #6                             | e2e                                                              | not started  | —                                                   |
+| 4   | AI generation safety               | Prove AI output is schema-validated, preview-gated, and bounded by a token/size ceiling          | #3, #4                         | unit + integration; Playwright MCP exploratory on the preview UI | not started  | —                                                   |
+| 5   | OpenRouter credential lifecycle    | Prove the BYOK key never leaks and is removed on account deletion                                | #5                             | integration + response/bundle scan                               | not started  | —                                                   |
+| 6   | Memory-card filter surface         | Prove state/maturity/subject filters narrow server-side, AND-compose, and deep-link pre-filtered | regression (not a §2 top risk) | e2e                                                              | implementing | context/changes/memory-card-state-maturity-filters/ |
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
 Phases 1–3 are testable against today's code. Phases 4–5 are **gated on S-19 Phase 2** (the AI surface is unbuilt) — they remain `not started` until that feature lands, then activate. This ordering is deliberate: the operator's top fears live in unbuilt code, so the plan names them now and attacks them when there is code to attack.
+
+Phase 6 is **out-of-band regression coverage**, registered post-hoc for an already-shipped feature (`memory-card-state-maturity-filters`, committed d822d67 + 34fd528). It does not map to a §2 top risk — it is a read-side correctness guard for the filter surface. Its E2E (`e2e/memory-card-filters.spec.ts`) is authored as that change's Phase 3, **after** its `/simplify` pass per the per-slice review gate.
 
 ## 4. Stack
 
