@@ -45,6 +45,8 @@ Scripts: `@package.json`. Run `mise install` once (Node 24 + pnpm + the Supabase
 
 ## Testing
 
+**Before adding or changing any test, read `@context/foundation/test-plan.md`** — the risk-first phased test rollout and quality contract (what's worth testing here, the cheapest layer per risk, and what's deliberately not tested).
+
 Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under `e2e/**/*.spec.ts` (`pnpm test:e2e`) — requires the local Supabase stack (`supabase start`) up; the config auto-runs a **production build** (`pnpm build && pnpm start`, not `next dev` — avoids hydration races) and uses **system Chrome** (`channel: 'chrome'`, no bundled browser). Commands in `@package.json`.
 
 **E2E always builds a fresh server, never reuses one** — `reuseExistingServer: false`, isolated port (3100) + build dir (`NEXT_DIST_DIR=.next-e2e`) so it can't hijack a running `next dev`. Don't set it `true` for speed. Why this is load-bearing → `@context/foundation/lessons.md`.

@@ -10,7 +10,7 @@
 
 ## 1. Strategy
 
-Tests follow three non-negotiable principles for this project:
+Tests follow four non-negotiable principles for this project:
 
 1. **Cost × signal.** The cheapest test that gives a real signal for the
    risk wins. Do not promote to e2e because e2e "feels safer." Do not put a
@@ -26,6 +26,13 @@ Tests follow three non-negotiable principles for this project:
    produced by `/10x-research` during each rollout phase. If the plan and
    research disagree about where the failure lives, research is the
    ground truth.
+4. **Assert the effect, not the 200.** A test must assert the observable or
+   persisted result of a scenario — the rescheduled due-date, the written
+   row, the denied access — never the fact that an action "returned
+   success." A returned 200 (or a green optimistic UI) is not proof a
+   side-effect happened; a swallowed error can return success while the real
+   work failed. The oracle for the expected effect comes from the risk /
+   requirement, never from the code under test.
 
 Hot-spot scope used for likelihood weighting: `src/`, `supabase/` (hand-written only; excludes docs, fixtures, archive, build output, and 10x-cli-managed files).
 
@@ -106,17 +113,20 @@ The full set of gates that must pass before a change reaches production.
 "Required after §3 Phase N" means the gate is enforced once that rollout
 phase lands; before that, the gate is `planned`.
 
-| Gate                                                 | Where                             | Required?                         | Catches                                    |
-| ---------------------------------------------------- | --------------------------------- | --------------------------------- | ------------------------------------------ |
-| lint + typecheck                                     | local (pre-commit) + Vercel build | required                          | syntactic / type drift                     |
-| unit + integration                                   | local + CI                        | required after §3 Phase 1         | logic + isolation + scheduling regressions |
-| e2e on critical flows (auth, isolation, recall loop) | local + CI                        | required after §3 Phase 1         | broken critical user paths                 |
-| post-edit hook                                       | local (agent loop)                | recommended (configured in M3 L3) | regressions at edit time                   |
-| AI output-contract gate                              | local + CI                        | required after §3 Phase 4         | unvalidated/over-budget AI generations     |
-| credential-leak scan                                 | CI                                | required after §3 Phase 5         | secret in logs/responses/bundle            |
-| pre-prod manual smoke (incl. sample-data load)       | between merge + prod              | optional                          | environment-specific + demo-path failures  |
+| Gate                                                 | Where                             | Required?                         | Catches                                                                                       |
+| ---------------------------------------------------- | --------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------- |
+| lint + typecheck                                     | local (pre-commit) + Vercel build | required                          | syntactic / type drift                                                                        |
+| unit + integration                                   | local + CI                        | required after §3 Phase 1         | logic + isolation + scheduling regressions                                                    |
+| e2e on critical flows (auth, isolation, recall loop) | local + CI                        | required after §3 Phase 1         | broken critical user paths                                                                    |
+| post-edit hook                                       | local (agent loop)                | recommended (configured in M3 L3) | regressions at edit time                                                                      |
+| mutation-verification (test proven to fail)          | local on changed files            | recommended after §3 Phase 1      | tautological tests that pass even when the code is broken (assertion mirrors, oracle problem) |
+| AI output-contract gate                              | local + CI                        | required after §3 Phase 4         | unvalidated/over-budget AI generations                                                        |
+| credential-leak scan                                 | CI                                | required after §3 Phase 5         | secret in logs/responses/bundle                                                               |
+| pre-prod manual smoke (incl. sample-data load)       | between merge + prod              | optional                          | environment-specific + demo-path failures                                                     |
 
 CI today is Vercel's GitHub integration (preview on push, prod on merge); there is no `.github/workflows/*`. Gates marked "CI" become enforceable when a CI runner is wired — that wiring is owned by M1 L5 / M2 L5, not this plan.
+
+Mutation-verification is the discipline of confirming a test actually fails when the code it guards is broken (it catches assertion-mirrors and the oracle problem). Scope it to changed files only (e.g. a mutation runner like Stryker on the diff); a full-suite mutation run is too slow to gate on. Tooling and exact invocation are decided when Phase 1 lands — this row names the discipline, not the config.
 
 ## 6. Cookbook Patterns
 
