@@ -49,6 +49,14 @@ export default async function NotePage({
       // doc title, which would duplicate NoteForm's own title field) and the wider editor
       // width for the side-by-side write/preview grid.
       title={isEditingNote ? 'Edit note' : (note.title ?? 'Untitled')}
+      // Read view only: a contextual link above the title to open the note inside its subject.
+      eyebrow={
+        !isEditingNote && subject ? (
+          <ContextLink href={`/subjects/${subject.id}/${note.id}`}>
+            Open in {subject.title}
+          </ContextLink>
+        ) : undefined
+      }
       subtitle={isEditingNote ? undefined : `Updated ${formatLocaleDateTime(note.updated_at)}`}
       // Read and edit share the wider width: the editor needs it for the side-by-side
       // write/preview grid, and the read view is intentionally matched to the in-subject
@@ -73,21 +81,23 @@ export default async function NotePage({
       }
     >
       {isEditingNote ? (
-        <NoteForm action={updateNote} note={note} subjects={subjects} />
+        <NoteForm
+          action={updateNote}
+          note={note}
+          subjects={subjects}
+          linkedCards={memoryCards.map((c) => ({ id: c.id, prompt: c.prompt }))}
+        />
       ) : (
-        // Read view: subject is changed only in edit mode (NoteForm's Combobox). When the note is
-        // assigned, surface a link that opens it inside its subject context (the sidebar pane).
+        // Read view: subject is changed only in edit mode (NoteForm's Combobox). The "Open in
+        // <subject>" context link now sits above the title (PageShell `eyebrow`).
         <div className="flex flex-col gap-4">
-          {subject && (
-            <ContextLink href={`/subjects/${subject.id}/${note.id}`}>
-              Open in {subject.title}
-            </ContextLink>
-          )}
           <RenderMarkdown content={note.content} />
         </div>
       )}
 
-      <Separator />
+      {/* Glowy teal rule between the note body and its cards — the aurora progress-bar palette
+          (neon-green→cyan gradient + cyan glow). The gradient image paints over bg-border. */}
+      <Separator className="from-neon-green to-neon-cyan neon-glow bg-linear-to-r" />
 
       <MemoryCardsSection noteId={note.id} cards={memoryCards} />
     </PageShell>

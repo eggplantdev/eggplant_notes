@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 
 import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
+import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
@@ -12,12 +13,12 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { MoveLinkedCardsDialog, type LinkedCardT } from '@/features/notes/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { NoteT } from '@/types/note'
 import type { SubjectT } from '@/types/subject'
-import { cn } from '@/lib/utils'
 import type { ActionResultT } from '@/types/action'
 
 // "None" sentinel for the subject Combobox: an unassigned note maps to this constant for the
@@ -31,9 +32,11 @@ const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: 
 
 // `note` present → edit (action needs the id); absent → create. The union lets TS narrow
 // the action signature off `note`'s truthiness. Create now sends a note + its staged checks
-// together (CreateNoteWithChecksT); edit keeps the note-only NoteInputT contract.
+// together (CreateNoteWithChecksT); edit keeps the note-only NoteInputT contract, plus a
+// `moveLinkedCards` flag set by the subject-change confirm dialog (standalone-memory-cards).
 // `subjects` feeds the assignment picker. `defaultSubjectId` (create only) pre-selects a
 // subject — set when arriving from a subject's "New note" entry point (?subject=<id>).
+// `linkedCards` (edit only) drives the per-card move/unlink dialog on a subject change.
 type NoteFormPropsT =
   | {
       action: (input: CreateNoteWithChecksT) => Promise<ActionResultT>
@@ -42,12 +45,15 @@ type NoteFormPropsT =
       note?: undefined
     }
   | {
-      action: (id: string, input: NoteInputT) => Promise<ActionResultT>
+      action: (
+        id: string,
+        input: NoteInputT,
+        cardActions?: { move: string[]; unlink: string[] },
+      ) => Promise<ActionResultT>
       subjects: SubjectT[]
       note: NoteT
+      linkedCards: LinkedCardT[]
     }
-
-type MobileTabT = 'write' | 'preview'
 
 // Create/edit form. Title is a managed `AppField` (Zod-validated); the body lives in form
 // state but is rendered through the controlled CodeMirror island + a client preview pane.
@@ -58,7 +64,10 @@ type MobileTabT = 'write' | 'preview'
 export function NoteForm(props: NoteFormPropsT) {
   const { note } = props
   const [formError, setFormError] = useState<string | undefined>(undefined)
-  const [mobileTab, setMobileTab] = useState<MobileTabT>('write')
+  // When editing a note WITH linked cards and the subject changes, submit pauses here and the
+  // per-card move/unlink dialog opens; the user's choices resume it. Undefined when no prompt is
+  // pending. (standalone-memory-cards)
+  const [pendingInput, setPendingInput] = useState<NoteInputT | undefined>(undefined)
 
   // "None" + the user's subjects, shaped for the Combobox. Memoized so the form's frequent
   // re-renders (typing, tab toggles) don't re-allocate the list.
@@ -86,13 +95,34 @@ export function NoteForm(props: NoteFormPropsT) {
         content: value.content,
         subject_id: value.subject_id,
       }
-      const result = props.note
-        ? await props.action(props.note.id, noteInput)
-        : await props.action({ note: noteInput, checks: value.checks })
-      // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
-      if (!toastActionResult(result)) setFormError(result.error)
+      if (!props.note) {
+        const result = await props.action({ note: noteInput, checks: value.checks })
+        if (!toastActionResult(result)) setFormError(result.error)
+        return
+      }
+      // Edit: a subject change on a note that has linked cards opens the per-card move/unlink
+      // dialog before saving. Plain title/content edits skip it.
+      const subjectChanged = value.subject_id !== props.note.subject_id
+      if (subjectChanged && props.linkedCards.length > 0) {
+        setPendingInput(noteInput)
+        return
+      }
+      await submitEdit(noteInput)
     },
   })
+
+  // Resume an edit submit, optionally carrying the per-card move/unlink decisions. `props.note` is
+  // the edit variant here — onSubmit only calls this on the edit path. Success redirects (throws),
+  // so only the failure branch is observed; clear the prompt either way.
+  async function submitEdit(
+    noteInput: NoteInputT,
+    cardActions?: { move: string[]; unlink: string[] },
+  ) {
+    if (!props.note) return
+    setPendingInput(undefined)
+    const result = await props.action(props.note.id, noteInput, cardActions)
+    if (!toastActionResult(result)) setFormError(result.error)
+  }
 
   return (
     <form
@@ -125,48 +155,7 @@ export function NoteForm(props: NoteFormPropsT) {
       </form.Field>
 
       <form.Field name="content">
-        {(field) => (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <CodeBlockInserter value={field.state.value} onChange={field.handleChange} />
-              <div className="ml-auto flex gap-2 md:hidden" role="tablist">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={mobileTab === 'write' ? 'default' : 'outline'}
-                  onClick={() => setMobileTab('write')}
-                >
-                  Write
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={mobileTab === 'preview' ? 'default' : 'outline'}
-                  onClick={() => setMobileTab('preview')}
-                >
-                  Preview
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div
-                className={cn('min-w-0', mobileTab === 'write' ? 'block' : 'hidden', 'md:block')}
-              >
-                <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
-              </div>
-              <div
-                className={cn(
-                  'prose dark:prose-invert h-80 max-w-none min-w-0 overflow-auto rounded-lg border p-4',
-                  mobileTab === 'preview' ? 'block' : 'hidden',
-                  'md:block',
-                )}
-              >
-                <MarkdownPreview content={field.state.value} />
-              </div>
-            </div>
-          </div>
-        )}
+        {(field) => <EditorWithPreview value={field.state.value} onChange={field.handleChange} />}
       </form.Field>
 
       {/* Inline memory-card staging — create mode only. Edit keeps the detail-page section (S-02). */}
@@ -264,6 +253,16 @@ export function NoteForm(props: NoteFormPropsT) {
           </Button>
         )}
       </form.Subscribe>
+
+      {/* Per-card move/unlink prompt (edit only) — mounted only while a decision is pending, so it
+          starts fresh each time. Escape / Cancel aborts the save entirely. */}
+      {props.note && pendingInput && (
+        <MoveLinkedCardsDialog
+          cards={props.linkedCards}
+          onConfirm={(actions) => submitEdit(pendingInput, actions)}
+          onCancel={() => setPendingInput(undefined)}
+        />
+      )}
     </form>
   )
 }

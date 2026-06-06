@@ -13,6 +13,9 @@ type WidthT = 'full' | 'prose' | 'wide'
 
 type PropsT = {
   title: string
+  // Optional content rendered directly ABOVE the title (e.g. a contextual "Open in <subject>"
+  // link). Sits in the title column, below the back link.
+  eyebrow?: ReactNode
   // Optional secondary line under the title (e.g. "Updated …", an email, a description).
   subtitle?: ReactNode
   // Trailing controls on the title row (e.g. a "New note" button, "N due", edit/delete).
@@ -50,6 +53,7 @@ const WIDTH_CLASS: Record<WidthT, string> = {
 // Components and pass their content as children — only this shell crosses the client boundary.
 export function PageShell({
   title,
+  eyebrow,
   subtitle,
   actions,
   backHref,
@@ -105,6 +109,7 @@ export function PageShell({
 
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
+            {eyebrow}
             <h1 className={cn('text-2xl font-semibold', isNavRoot && 'hidden md:block')}>
               {title}
             </h1>

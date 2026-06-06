@@ -3,12 +3,20 @@
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
-import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
-import { MarkdownEditor } from '@/components/markdown/markdown-editor'
-import { MarkdownPreview } from '@/components/markdown/markdown-preview'
+import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Combobox } from '@/components/ui/combobox'
@@ -38,9 +46,23 @@ type CardFormPropsT = {
   sourceNote?: { id: string; title: string | null }
 }
 
+type CardFormValuesT = {
+  subject_id: string | null
+  prompt: string
+  example: string
+  code_context: string
+}
+
 export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
+  // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
+  // subject changed); null when no confirm is pending. (standalone-memory-cards invariant)
+  const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
+  // Code context is optional and pulls in the heavy CodeMirror chunk, so its editor is mounted
+  // (and thus dynamically loaded) only after the user opts in — already-present content (edit
+  // mode) starts expanded. Mirrors how AddMemoryCard defers the editor on the note page.
+  const [showCode, setShowCode] = useState(Boolean(card?.code_context))
   const { isPending: isUnlinking, run: runUnlink } = useActionTransition()
 
   const subjectOptions = useMemo(
@@ -59,12 +81,26 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
       code_context: card?.code_context ?? '',
     },
     onSubmit: async ({ value }) => {
-      const result = card
-        ? await updateMemoryCard(card.id, value)
-        : await createStandaloneCard(value)
-      if (!toastActionResult(result)) setFormError(result.error)
+      // Invariant: a linked card shares its note's subject, so changing a linked card's subject
+      // must unlink it. Pause and confirm before saving; a standalone card or an unchanged subject
+      // just saves.
+      if (card?.note_id && value.subject_id !== card.subject_id) {
+        setPendingValues(value)
+        return
+      }
+      await submitCard(value, false)
     },
   })
+
+  // Resume the save once the unlink is (or isn't) needed. Success redirects (throws), so only the
+  // failure branch is observed; clear any pending confirm either way.
+  async function submitCard(values: CardFormValuesT, unlinkFromNote: boolean) {
+    setPendingValues(undefined)
+    const result = card
+      ? await updateMemoryCard(card.id, values, unlinkFromNote)
+      : await createStandaloneCard(values)
+    if (!toastActionResult(result)) setFormError(result.error)
+  }
 
   return (
     <form
@@ -116,15 +152,23 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
       <form.Field name="code_context">
         {(field) => (
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <Label>Code context (optional)</Label>
-              <CodeBlockInserter value={field.state.value} onChange={field.handleChange} />
+              {!showCode && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  data-testid="card-form-add-code"
+                  onClick={() => setShowCode(true)}
+                >
+                  Add code context
+                </Button>
+              )}
             </div>
-            <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
-            {field.state.value.trim().length > 0 && (
-              <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">
-                <MarkdownPreview content={field.state.value} />
-              </div>
+            {/* Mounted only after opt-in, so the CodeMirror chunk loads on demand. */}
+            {showCode && (
+              <EditorWithPreview value={field.state.value} onChange={field.handleChange} />
             )}
           </div>
         )}
@@ -171,6 +215,34 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
           Cancel
         </ButtonLink>
       </div>
+
+      {card && pendingValues && (
+        <AlertDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setPendingValues(undefined)
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unlink from note?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Changing the subject will unlink this card from “{sourceNote?.title ?? 'its note'}”.
+                The card keeps the new subject and becomes standalone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                data-testid="card-unlink-confirm"
+                onClick={() => submitCard(pendingValues, true)}
+              >
+                Unlink &amp; save
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </form>
   )
 }

@@ -17,17 +17,19 @@ A user clicks "New card", writes a card, optionally picks a subject, submits, an
 
 ## Key Decisions Made
 
-| Decision                             | Choice                                                                      | Why                                                                                 |
-| ------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Can a card exist without a note?     | Yes — `note_id` nullable                                                    | Simpler model, no phantom notes                                                     |
-| Where does a card's subject live?    | `memory_cards.subject_id`, app-owned, on every card                         | Single read source; editable (a trigger can't coexist with editing)                 |
-| DB triggers for subject sync?        | **None**                                                                    | App owns every `subject_id` write; the only cross-entity behavior is user-confirmed |
-| Subject of a card added from a note  | Seeded from the note at create (app-level), then editable                   | Convenience default, not a lock                                                     |
-| Card editing                         | **One** route `/memory-cards/[id]/edit` for all cards (content + subject)   | Single surface, no note-page coupling, no drift                                     |
-| Note-subject change → linked cards   | Confirm dialog → bulk move (overwrites all linked)                          | User is authority; no spooky cascade, no orphan drift                               |
-| card↔note link                       | One `note_id` per card; unlinkable to null from card side **and** note side | Decouples subject from the note; keeps the card + subject on unlink                 |
-| Subject required in standalone form? | Optional (`subject_id` nullable)                                            | Unfiled cards allowed                                                               |
-| After create →                       | Redirect to `/memory-cards`                                                 | User's call                                                                         |
+| Decision                             | Choice                                                                                          | Why                                                                                 |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Can a card exist without a note?     | Yes — `note_id` nullable                                                                        | Simpler model, no phantom notes                                                     |
+| Where does a card's subject live?    | `memory_cards.subject_id`, app-owned, on every card                                             | Single read source; editable (a trigger can't coexist with editing)                 |
+| DB triggers for subject sync?        | **None**                                                                                        | App owns every `subject_id` write; the only cross-entity behavior is user-confirmed |
+| Subject of a card added from a note  | Seeded from the note at create (app-level), then editable                                       | Convenience default, not a lock                                                     |
+| Card editing                         | **One** route `/memory-cards/[id]/edit` for all cards (content + subject)                       | Single surface, no note-page coupling, no drift                                     |
+| **Invariant: linked ⇒ same subject** | While linked, a card's subject MUST equal its note's; any divergence resolves to move-or-unlink | No silent mismatched state; the link means "same topic", not just "source"          |
+| Card-subject change on a LINKED card | Confirm dialog → unlinks the card (keeps the new subject, becomes standalone)                   | Can't keep the link and diverge (invariant); user is warned before it happens       |
+| Note-subject change → linked cards   | One dialog, **per-card** Move (follow, stay linked) / Unlink (keep old subject, detach)         | User decides each card; preserves the invariant either way; no blind overwrite      |
+| card↔note link                       | One `note_id` per card; unlinkable to null from card side **and** note side                     | Decouples subject from the note; keeps the card + subject on unlink                 |
+| Subject required in standalone form? | Optional (`subject_id` nullable)                                                                | Unfiled cards allowed                                                               |
+| After create →                       | Redirect to `/memory-cards`                                                                     | User's call                                                                         |
 
 ## Scope
 
@@ -53,7 +55,7 @@ DB-up, four phases. Subject is a first-class app-owned card property; reads use 
 
 ## Open Risks & Assumptions
 
-- Bulk-move overwrites **all** linked cards' subjects (the confirm dialog is the safety; no dirty-flag tracking) — intended.
+- **Invariant (revised mid-build):** a linked card always shares its note's subject. Changing a linked card's subject unlinks it (confirm dialog); changing a note's subject opens a per-card move/unlink dialog. This replaced the earlier "card subject is freely independent / note-change bulk-overwrites all" design — divergence-while-linked is no longer possible, so there's nothing to blindly overwrite.
 - `updateMemoryCard` signature changes from `(noteId, id, input)` to `(id, input)` — update all callers.
 - Supabase generated types must be regenerated/committed or typecheck fails against the old shape.
 

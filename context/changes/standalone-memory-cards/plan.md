@@ -246,25 +246,28 @@ Surface "New card" where the user expects it, and make the card list/stats/delet
 
 ---
 
-## Phase 4: Note-side link management (confirmed bulk-move + per-card unlink)
+## Phase 4: Note-side link management (per-card move/unlink + per-card unlink)
+
+> **Invariant (revised mid-build):** a linked card always shares its note's subject. So a note-subject change can't silently keep a mismatched linked card — each linked card is resolved to **move** (follow, stay linked) or **unlink** (keep its old subject, detach). The earlier "Move all / Keep all (overwrite)" design is superseded. (The symmetric card-side rule — changing a linked card's subject unlinks it — is layered onto Phase 2's `CardForm`/`updateMemoryCard`.)
 
 ### Overview
 
-When a note's subject changes and it has linked cards, ask the user whether to move those cards too; on confirm, one bulk update moves them. Separately, the note's card section gets a per-card **Unlink** affordance (same `note_id → null` write as the card-side unlink).
+When a note's subject changes and it has linked cards, open one dialog listing each card with a per-card **Move / Unlink** choice; on save, moved cards take the new subject (stay linked) and unlinked cards keep their subject (detach). Separately, the note's card section gets a per-card **Unlink** affordance (same `note_id → null` write as the card-side unlink).
 
 ### Changes Required
 
-#### 1. Bulk-move on note-subject change
+#### 1. Per-card move/unlink on note-subject change
 
-**Files**: `src/features/notes/actions/update-note.ts` + `src/features/notes/note-form.tsx`
+**Files**: `src/features/notes/actions/update-note.ts` + `src/features/notes/note-form.tsx` + `src/features/notes/move-linked-cards-dialog.tsx` (new)
 
-**Intent**: User-confirmed cascade of a note's subject to its linked cards. No trigger.
+**Intent**: User decides, per card, whether each linked card follows the note's new subject or detaches. No trigger.
 
 **Contract**:
 
-- `note-form.tsx` (edit mode only): accept a `linkedCardCount: number` prop. On submit, if the subject changed (`value.subject_id !== note.subject_id`) **and** `linkedCardCount > 0`, show a confirm dialog — _"Move this note's N cards to the new subject too?"_ [Move cards] / [Keep as-is] — and pass the choice as `moveLinkedCards: boolean` into `updateNote`. (Plain title/content edits never prompt.)
-- `update-note.ts`: extend the existing subject-change branch (`:30-40`). When `data.subject_id` changed and `moveLinkedCards` is true, run one `update memory_cards set subject_id = :new where note_id = :id` (RLS-scoped) inside the same action. **Overwrites all linked cards' subjects** (the confirm dialog is the safety; no dirty-flag tracking). Revalidate `/memory-cards` in addition to the note paths.
-- Note detail page (`notes/[id]/page.tsx`): pass `linkedCardCount={memoryCards.length}` into `NoteForm` in edit mode.
+- `move-linked-cards-dialog.tsx` (new): a controlled dialog listing each linked card (`{id, prompt}`) with a Move/Unlink toggle (+ "Move all" / "Unlink all" shortcuts). Mounted only while a decision is pending so its state starts fresh. `onConfirm({ move: string[], unlink: string[] })`.
+- `note-form.tsx` (edit mode only): accept a `linkedCards: {id, prompt}[]` prop. On submit, if the subject changed (`value.subject_id !== note.subject_id`) **and** `linkedCards.length > 0`, open the dialog; pass its `{move, unlink}` choices into `updateNote`. (Plain title/content edits never prompt.)
+- `update-note.ts`: on a real subject change, run `update memory_cards set subject_id = :new where note_id = :id and id in (move)` and `update memory_cards set note_id = null where note_id = :id and id in (unlink)`. Revalidate `/memory-cards` in addition to the note paths.
+- Note detail page (`notes/[id]/page.tsx`): pass `linkedCards={memoryCards.map(c => ({id:c.id, prompt:c.prompt}))}` into `NoteForm` in edit mode.
 
 #### 2. Per-card Unlink in the note's card section
 
@@ -302,7 +305,7 @@ When a note's subject changes and it has linked cards, ask the user whether to m
 
 - Insert a standalone card with a subject → row has `note_id = null`, `subject_id` set; RLS rejects a subject owned by another user (insert + update).
 - `createMemoryCard` from a note → card's `subject_id` = the note's subject (app seed).
-- `updateNote` with `moveLinkedCards` → all linked cards' `subject_id` follows; without it → unchanged.
+- `updateNote` with per-card `{move, unlink}` → moved cards' `subject_id` follows + stay linked; unlinked cards keep their subject + `note_id` null. Changing a linked card's own subject (`updateMemoryCard` with `unlinkFromNote`) → new subject + `note_id` null.
 - `unlinkCardFromNote` → `note_id` null, `subject_id` untouched; RLS rejects a non-owned card.
 
 ### E2E (Playwright, `data-testid` selectors)
@@ -380,27 +383,28 @@ Negligible. The `subject_id` index supports the list filter; the bulk move is a 
 
 #### Automated
 
-- [x] 3.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [x] 3.2 Lint passes: `pnpm lint`
-- [x] 3.3 Build passes: `pnpm build`
+- [x] 3.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck` — b19cc3a
+- [x] 3.2 Lint passes: `pnpm lint` — b19cc3a
+- [x] 3.3 Build passes: `pnpm build` — b19cc3a
 
 #### Manual
 
-- [ ] 3.4 Dashboard + `/memory-cards` show a working "New card" button
-- [ ] 3.5 Standalone card row: Edit (route) + Delete, no broken note link, deletes
-- [ ] 3.6 Standalone "hardest" card renders without `/notes/undefined`
-- [ ] 3.7 Linked cards unaffected (note link + edit + delete)
+- [x] 3.4 Dashboard + `/memory-cards` show a working "New card" button — b19cc3a
+- [x] 3.5 Standalone card row: Edit (route) + Delete, no broken note link, deletes — b19cc3a
+- [x] 3.6 Standalone "hardest" card renders without `/notes/undefined` — b19cc3a
+- [x] 3.7 Linked cards unaffected (note link + edit + delete) — b19cc3a
 
 ### Phase 4: Note-side link management
 
 #### Automated
 
-- [ ] 4.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [ ] 4.2 Lint passes: `pnpm lint`
-- [ ] 4.3 Build passes: `pnpm build`
+- [x] 4.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
+- [x] 4.2 Lint passes: `pnpm lint`
+- [x] 4.3 Build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 4.4 Note subject change with linked cards → prompt; Move relocates all; Keep leaves them
-- [ ] 4.5 Plain title/content edit → no prompt
-- [ ] 4.6 Per-card Unlink in the note section drops `note_id`; card survives in `/memory-cards`
+- [x] 4.4 Note subject change with linked cards → per-card dialog; Move follows the new subject (stays linked), Unlink keeps old subject (detaches)
+- [x] 4.5 Plain title/content edit → no prompt
+- [x] 4.6 Per-card Unlink in the note section drops `note_id`; card survives in `/memory-cards`
+- [x] 4.7 Editing a LINKED card's subject → "this will unlink" confirm; on confirm the card takes the new subject and detaches (invariant)

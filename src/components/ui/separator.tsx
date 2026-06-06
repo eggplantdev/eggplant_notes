@@ -17,7 +17,9 @@ function Separator({
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        'bg-border shrink-0 data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch',
+        // `my-6` default gives horizontal rules consistent breathing room so layouts don't each
+        // repeat it; tighter consumers override via `className` (plain `my-*` → twMerge wins).
+        'bg-border my-6 shrink-0 data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch',
         className,
       )}
       {...props}
