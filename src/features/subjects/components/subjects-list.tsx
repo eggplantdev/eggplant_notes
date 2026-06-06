@@ -24,7 +24,7 @@ export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
         getKey={(subject) => subject.id}
         getHref={(subject) => `/subjects/${subject.id}`}
         renderTitle={(subject) => subject.title}
-        renderSubtitle={(subject) => <MutedText clamp={2}>{subject.description}</MutedText>}
+        renderDescription={(subject) => <MutedText clamp={2}>{subject.description}</MutedText>}
         renderAction={(subject) => (
           <CardActions
             editHref={`/subjects/${subject.id}?edit`}

@@ -5,7 +5,14 @@ import { type MouseEvent, type ReactNode } from 'react'
 import { AnimatePresence } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 // The whole card is a <Link>, so a click inside the action slot would navigate. This wrapper
@@ -24,6 +31,10 @@ type PropsT<T> = {
   getKey: (item: T) => string
   getHref: (item: T) => string
   renderTitle: (item: T) => ReactNode
+  // Optional description, stacked under the title in the SAME left content column — so it sits
+  // beside the action slot (gap-x-4 away), not below it. This is for prose that belongs with the
+  // title (a subject's blurb), NOT for tags/chips — those go full width below via renderSubtitle.
+  renderDescription?: (item: T) => ReactNode
   // Optional overline above the title (e.g. a date), spanning the card's full width so it sits
   // clear of the action slot. Caller owns its markup. Omitted → no overline row.
   renderEyebrow?: (item: T) => ReactNode
@@ -53,6 +64,7 @@ export function AnimatedCardList<T>({
   getKey,
   getHref,
   renderTitle,
+  renderDescription,
   renderEyebrow,
   renderSubtitle,
   renderAction,
@@ -69,9 +81,14 @@ export function AnimatedCardList<T>({
             <AnimatedListItem key={key} layoutId={key} layout>
               <Link href={getHref(item)} className={cn(gridLayout && 'block h-full')}>
                 <Card className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}>
-                  <CardHeader>
+                  {/* gap-x-4: keep the title/eyebrow column clear of the action slot (gap-1 alone
+                      let Edit/Delete crowd the title); row gap stays tight via the base gap-1. */}
+                  <CardHeader className="gap-x-4">
                     {renderEyebrow?.(item)}
                     <CardTitle>{renderTitle(item)}</CardTitle>
+                    {renderDescription && (
+                      <CardDescription>{renderDescription(item)}</CardDescription>
+                    )}
                     {renderAction && (
                       // CardAction is the grid's top-right slot. blockCardNav sits on this parent
                       // (bubble phase) so each action's own handler fires first — consumers must
