@@ -29,7 +29,7 @@ export async function createMemoryCard(noteId: string, input: unknown): Promise<
       .single()
     return supabase
       .from('memory_cards')
-      .insert({ note_id: parsedNoteId.data, subject_id: note?.subject_id ?? null, ...data })
+      .insert({ ...data, note_id: parsedNoteId.data, subject_id: note?.subject_id ?? null })
       .select('id')
       .single()
   })

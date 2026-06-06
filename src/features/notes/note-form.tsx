@@ -2,13 +2,10 @@
 
 import { useMemo, useState } from 'react'
 
-import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
-import { MarkdownEditor } from '@/components/markdown/markdown-editor'
-import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
@@ -221,19 +218,11 @@ export function NoteForm(props: NoteFormPropsT) {
                   <form.Field name={`checks[${i}].code_context`}>
                     {(field) => (
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <Label>Code context (optional)</Label>
-                          <CodeBlockInserter
-                            value={field.state.value}
-                            onChange={field.handleChange}
-                          />
-                        </div>
-                        <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
-                        {field.state.value.trim().length > 0 && (
-                          <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">
-                            <MarkdownPreview content={field.state.value} />
-                          </div>
-                        )}
+                        <Label>Code context (optional)</Label>
+                        <EditorWithPreview
+                          value={field.state.value}
+                          onChange={field.handleChange}
+                        />
                       </div>
                     )}
                   </form.Field>
