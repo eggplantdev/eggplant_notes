@@ -22,13 +22,14 @@ type InputT = {
   notes: NoteStatRowT[]
   ratings: RatingStatRowT[]
   activity: ActivityDayT[]
+  dailyGoal: number
   today: Date
 }
 
 const HARDEST_LIMIT = 5
 
 export function computeDashboardStats(input: InputT): DashboardStatsT {
-  const { checks, notes, ratings, activity, today } = input
+  const { checks, notes, ratings, activity, dailyGoal, today } = input
 
   const todayStr = toISODate(today.getTime())
 
@@ -55,7 +56,7 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     reviewsInWindow: total,
     reviewsThisWeek,
     retention: total > 0 ? good / total : null,
-    longestStreak: getLongestStreak(activity),
+    longestStreak: getLongestStreak(activity, dailyGoal),
     hardestCards,
   }
 }

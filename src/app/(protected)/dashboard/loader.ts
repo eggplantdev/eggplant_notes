@@ -9,11 +9,13 @@ import { getCurrentUser } from '@/lib/supabase/server'
 // getCurrentUser() is request-memoized (React cache()), so it reuses the user the (protected)
 // layout already validated; all reads run concurrently.
 export async function getDashboardPageData() {
-  const [user, data, dailyGoal, { first: card }] = await Promise.all([
+  // Start the settings read here (app layer owns the cross-feature wiring) and hand the
+  // unawaited promise to getDashboardData, which awaits it inside its own fan-out for the
+  // goal-relative streaks. `dailyGoal` comes back as part of `data`.
+  const [user, data, { first: card }] = await Promise.all([
     getCurrentUser(),
-    getDashboardData(),
-    getDailyGoal(),
+    getDashboardData(getDailyGoal()),
     getDueQueue(),
   ])
-  return { user, ...data, dailyGoal, card }
+  return { user, ...data, card }
 }

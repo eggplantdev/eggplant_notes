@@ -7,6 +7,7 @@ export type DashboardDataT = {
   dueToday: number
   reviewedToday: number
   currentStreak: number
+  dailyGoal: number
   activity: ActivityDayT[]
   stats: DashboardStatsT
 }

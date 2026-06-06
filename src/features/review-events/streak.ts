@@ -1,33 +1,34 @@
 import { APP_TIME_ZONE, MS_PER_DAY, todayInZone, toISODate } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
 
-// Consecutive days (in APP_TIME_ZONE) with ≥1 review, ending today — or yesterday when
-// today has no review yet. Pure + synchronous, derived from the already-fetched
-// getReviewActivity() series, so the dashboard composes both stats from a single activity
-// read (no second DB query). Lives apart from queries.ts so it stays importable without the
-// Supabase server client (and its env validation) — keeps it unit-testable in isolation.
-export function getCurrentStreak(activity: ActivityDayT[]): number {
-  const active = new Set(activity.filter((a) => a.count > 0).map((a) => a.date))
+// Consecutive days (in APP_TIME_ZONE) that MET the daily goal, ending today — or yesterday
+// when today hasn't hit the goal yet. A day qualifies when its activity count ≥ `goal`; the
+// count is distinct cards reviewed that day (getReviewActivity), the same unit the goal bar
+// measures, so "goal hit today" and "streak counts today" always agree. Pure + synchronous,
+// derived from the already-fetched getReviewActivity() series (no second DB query). Lives
+// apart from queries.ts so it stays importable without the Supabase server client — keeps it
+// unit-testable in isolation.
+export function getCurrentStreak(activity: ActivityDayT[], goal: number): number {
+  const met = new Set(activity.filter((a) => a.count >= goal).map((a) => a.date))
   let cursorMs = todayInZone(APP_TIME_ZONE).getTime()
-  // Grace day: an un-reviewed today doesn't zero a live streak — count the run ending
-  // yesterday until today is actually missed. Only today gets this grace; any earlier
-  // gap still ends the streak.
-  if (!active.has(toISODate(cursorMs))) cursorMs -= MS_PER_DAY
+  // Grace day: a goal-short today doesn't zero a live streak — count the run ending yesterday
+  // until today is actually missed. Only today gets this grace; any earlier gap still ends it.
+  if (!met.has(toISODate(cursorMs))) cursorMs -= MS_PER_DAY
   let streak = 0
-  while (active.has(toISODate(cursorMs))) {
+  while (met.has(toISODate(cursorMs))) {
     streak += 1
     cursorMs -= MS_PER_DAY
   }
   return streak
 }
 
-// Longest all-time run of consecutive active days in the series — the "best" against which
-// the current streak is read. Same purity contract as getCurrentStreak; derived from the
-// already-fetched activity, so no extra DB query. The series spans the ~400-day heatmap
-// window, so "all-time" is bounded by that read (good enough for the dashboard).
-export function getLongestStreak(activity: ActivityDayT[]): number {
+// Longest all-time run of consecutive goal-meeting days in the series — the "best" against
+// which the current streak is read. Same purity contract + goal semantics as getCurrentStreak;
+// derived from the already-fetched activity, so no extra DB query. The series spans the ~400-day
+// heatmap window, so "all-time" is bounded by that read (good enough for the dashboard).
+export function getLongestStreak(activity: ActivityDayT[], goal: number): number {
   const days = activity
-    .filter((a) => a.count > 0)
+    .filter((a) => a.count >= goal)
     .map((a) => Date.parse(`${a.date}T00:00:00.000Z`))
     .sort((a, b) => a - b)
   let longest = 0

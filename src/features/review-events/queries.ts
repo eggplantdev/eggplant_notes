@@ -25,27 +25,31 @@ export async function getReviewEvents(
   )
 }
 
-// Per-day review counts for the dashboard activity heatmap, bucketed in APP_TIME_ZONE (not
-// UTC). PostgREST can't group by a timezone-shifted date in a plain select, so we fetch the
-// timestamps (RLS scopes them to the owner) and bucket in TS. The read is bounded to the last
-// ~400 days — the 53-week heatmap window (371d) plus streak slack — so it can't grow unbounded
-// as all-time history accumulates. Injectable client per the isolation rule (Playwright passes
-// a signInWithPassword client). Shape reuses the shared ActivityDayT.
+// Per-day DISTINCT-card counts for the dashboard activity heatmap, bucketed in APP_TIME_ZONE
+// (not UTC). `count` is distinct cards reviewed that day, not raw review events — the same unit
+// the daily-goal bar (getReviewedTodayCount) and the goal-relative streak use, so re-reviewing
+// one card N times can't inflate a day. PostgREST can't group by a timezone-shifted date in a
+// plain select, so we fetch the rows (RLS scopes them to the owner) and bucket in TS. The read
+// is bounded to the last ~400 days — the 53-week heatmap window (371d) plus streak slack — so it
+// can't grow unbounded as all-time history accumulates. Injectable client per the isolation rule
+// (Playwright passes a signInWithPassword client). Shape reuses the shared ActivityDayT.
 export async function getReviewActivity(
   client?: SupabaseClient<Database>,
 ): Promise<ActivityDayT[]> {
   const supabase = client ?? (await createClient())
   const since = new Date(Date.now() - 400 * MS_PER_DAY).toISOString()
   const rows = await runTableQuery(supabase, (c) =>
-    c.from('review_events').select('reviewed_at').gte('reviewed_at', since),
+    c.from('review_events').select('memory_card_id, reviewed_at').gte('reviewed_at', since),
   )
 
-  const counts = new Map<string, number>()
-  for (const { reviewed_at } of rows) {
+  const cardsByDay = new Map<string, Set<string>>()
+  for (const { memory_card_id, reviewed_at } of rows) {
     const day = isoDateInZone(new Date(reviewed_at), APP_TIME_ZONE)
-    counts.set(day, (counts.get(day) ?? 0) + 1)
+    const cards = cardsByDay.get(day) ?? new Set<string>()
+    cards.add(memory_card_id)
+    cardsByDay.set(day, cards)
   }
-  return [...counts].map(([date, count]) => ({ date, count }))
+  return [...cardsByDay].map(([date, cards]) => ({ date, count: cards.size }))
 }
 
 // Distinct cards reviewed *today* (in APP_TIME_ZONE), for the dashboard daily-goal bar. We

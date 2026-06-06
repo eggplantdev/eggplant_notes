@@ -15,25 +15,32 @@ import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 // The independent DB reads run in parallel; the streak + expanded stats — and the "Due today"
 // count — are derived purely from the already-fetched rows (no extra query). Shape is
 // DashboardDataT.
-export async function getDashboardData(): Promise<DashboardDataT> {
-  const [activity, checks, notes, ratings, reviewedToday] = await Promise.all([
+//
+// `dailyGoalPromise` is the already-kicked-off settings read, handed in unawaited by the route
+// loader. The streaks are goal-relative, so we await it INSIDE this fan-out — that keeps the
+// goal fetch parallel with everything else AND keeps features/dashboard free of a
+// features/settings import (the cross-feature wiring lives in the app-layer loader).
+export async function getDashboardData(dailyGoalPromise: Promise<number>): Promise<DashboardDataT> {
+  const [activity, checks, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
     getReviewActivity(),
     getChecksForStats(),
     getNotesForStats(),
     getRecentRatings(STATS_WINDOW_DAYS),
     getReviewedTodayCount(),
+    dailyGoalPromise,
   ])
   // "Due now" = the same `due_at <= now()` rule getDueQueue uses, derived from the checks
   // already in memory instead of a separate count query.
   const nowIso = new Date().toISOString()
   const dueToday = checks.filter((c) => c.due_at <= nowIso).length
-  const currentStreak = getCurrentStreak(activity)
+  const currentStreak = getCurrentStreak(activity, dailyGoal)
   const stats = computeDashboardStats({
     checks,
     notes,
     ratings,
     activity,
+    dailyGoal,
     today: todayInZone(APP_TIME_ZONE),
   })
-  return { dueToday, reviewedToday, currentStreak, activity, stats }
+  return { dueToday, reviewedToday, currentStreak, dailyGoal, activity, stats }
 }
