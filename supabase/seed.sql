@@ -105,7 +105,13 @@ values
   -- FUTURE review card (due in 5 days) — NOT due, must be hidden from /review.
   ('dddddddd-dddd-dddd-dddd-dddddddddddd', '11111111-1111-4111-8111-111111111111',
    'Why is this card not in today''s session?', 'Because due_at > now().', null,
-   2, 12.0, 4.0, 1, 5, 0, 4, 0, now() + interval '5 days', now() - interval '1 day');
+   2, 12.0, 4.0, 1, 5, 0, 4, 0, now() + interval '5 days', now() - interval '1 day'),
+
+  -- MATURE review card: stability past the 21-day maturity line, so the dashboard
+  -- "By maturity" chart shows a non-empty mature ring. Long interval => not due.
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', '11111111-1111-4111-8111-111111111111',
+   'What makes a card "mature" in this app?', 'Stability >= 21 days (MATURE_STABILITY_DAYS).', null,
+   2, 45.0, 3.5, 30, 35, 0, 6, 0, now() + interval '25 days', now() - interval '10 days');
 
 -- ----------------------------------------------------------------------------
 -- 4. A handful of past review_events so the dashboard heatmap/stats render with
@@ -1395,34 +1401,34 @@ list1.extend([3, 4])  # list1 is now [1, 2, 3, 4]
 on conflict (id) do nothing;
 
 insert into memory_cards (
-  id, user_id, note_id, prompt, example, code_context,
+  id, user_id, note_id, subject_id, prompt, example, code_context,
   state, stability, difficulty, elapsed_days, scheduled_days,
   learning_steps, reps, lapses, due_at, last_review
 ) values
-  ('c4ec0000-0000-4000-8000-000000000001', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', $seed$Czym różni się programowanie imperatywne od deklaratywnego?$seed$, $seed$Imperatywne definiuje **co** i **jak** ma się wydarzyć (krok po kroku). Deklaratywne skupia się tylko na **co** chcemy osiągnąć, ukrywając implementację.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000001', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym różni się programowanie imperatywne od deklaratywnego?$seed$, $seed$Imperatywne definiuje **co** i **jak** ma się wydarzyć (krok po kroku). Deklaratywne skupia się tylko na **co** chcemy osiągnąć, ukrywając implementację.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000002', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', $seed$Na czym polega programowanie funkcyjne?$seed$, $seed$Na tworzeniu funkcji zamiast mutowania stanu. Głównym celem jest uczynienie kodu bardziej deklaratywnym - przekształcamy dane zamiast zmieniać zmienne.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000002', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', '5b1ec700-0000-4000-8000-000000000001', $seed$Na czym polega programowanie funkcyjne?$seed$, $seed$Na tworzeniu funkcji zamiast mutowania stanu. Głównym celem jest uczynienie kodu bardziej deklaratywnym - przekształcamy dane zamiast zmieniać zmienne.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '3 days', now() - interval '6 days'),
-  ('c4ec0000-0000-4000-8000-000000000003', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', $seed$Podaj przykład imperatywnego i deklaratywnego podejścia do sumowania listy w Pythonie.$seed$, $seed$Imperatywne: pętla `for` z akumulatorem `total += num`. Deklaratywne: `return sum(nums) / len(nums)` - nie śledzimy stanu, interesuje nas tylko wynik.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000003', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', '5b1ec700-0000-4000-8000-000000000001', $seed$Podaj przykład imperatywnego i deklaratywnego podejścia do sumowania listy w Pythonie.$seed$, $seed$Imperatywne: pętla `for` z akumulatorem `total += num`. Deklaratywne: `return sum(nums) / len(nums)` - nie śledzimy stanu, interesuje nas tylko wynik.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000004', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', $seed$Dlaczego CSS jest dobrym przykładem programowania deklaratywnego?$seed$, $seed$Bo opisujemy **co** chcemy osiągnąć (np. `button { color: red; }`), a nie **jak** przeglądarka ma to zrealizować krok po kroku.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000005', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', $seed$Dlaczego niemutowalność oznacza mniej bugów?$seed$, $seed$Gdy zmienna jest niemutowalna, mamy pewność, że nie zmieniła się od momentu utworzenia. Nie musimy sprawdzać, która z 10 funkcji mogła ją zmodyfikować.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000004', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000001', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego CSS jest dobrym przykładem programowania deklaratywnego?$seed$, $seed$Bo opisujemy **co** chcemy osiągnąć (np. `button { color: red; }`), a nie **jak** przeglądarka ma to zrealizować krok po kroku.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '25 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000005', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego niemutowalność oznacza mniej bugów?$seed$, $seed$Gdy zmienna jest niemutowalna, mamy pewność, że nie zmieniła się od momentu utworzenia. Nie musimy sprawdzać, która z 10 funkcji mogła ją zmodyfikować.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000006', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', $seed$Czym różnią się `tuple` od `list` w kontekście mutowalności?$seed$, $seed$`tuple` jest niemutowalna - nie można do niej dodać elementu. `list` jest mutowalna. Aby "dodać" element do tuple, trzeba stworzyć nową kopię z dodaną wartością.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000006', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym różnią się `tuple` od `list` w kontekście mutowalności?$seed$, $seed$`tuple` jest niemutowalna - nie można do niej dodać elementu. `list` jest mutowalna. Aby "dodać" element do tuple, trzeba stworzyć nową kopię z dodaną wartością.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000007', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', $seed$Jak utworzyć jednoelementową tuple w Pythonie?$seed$, $seed$Trzeba dodać przecinek po elemencie: `more_ages = (80,)`. Bez przecinka Python potraktuje to jako zwykłą wartość w nawiasach.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000007', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', '5b1ec700-0000-4000-8000-000000000001', $seed$Jak utworzyć jednoelementową tuple w Pythonie?$seed$, $seed$Trzeba dodać przecinek po elemencie: `more_ages = (80,)`. Bez przecinka Python potraktuje to jako zwykłą wartość w nawiasach.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '2 days', now() - interval '5 days'),
-  ('c4ec0000-0000-4000-8000-000000000008', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', $seed$Jak "dodać" element do tuple, skoro jest niemutowalna?$seed$, $seed$Tworząc nową tuple przez konkatenację:
+  ('c4ec0000-0000-4000-8000-000000000008', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000004', '5b1ec700-0000-4000-8000-000000000001', $seed$Jak "dodać" element do tuple, skoro jest niemutowalna?$seed$, $seed$Tworząc nową tuple przez konkatenację:
 ```py
 ages = (16, 21, 30)
 all_ages = ages + (80,)
 # (16, 21, 30, 80)
 ```$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000009', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Jakie dwa warunki musi spełnić pure function?$seed$, $seed$1) Zawsze zwraca ten sam wynik dla tych samych argumentów. 2) Nie powoduje żadnych side effects.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000010', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Dlaczego poniższa funkcja jest impure?
+  ('c4ec0000-0000-4000-8000-000000000009', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Jakie dwa warunki musi spełnić pure function?$seed$, $seed$1) Zawsze zwraca ten sam wynik dla tych samych argumentów. 2) Nie powoduje żadnych side effects.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '30 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000010', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego poniższa funkcja jest impure?
 ```py
 total = 0
 def dirty_add(x):
@@ -1431,21 +1437,21 @@ def dirty_add(x):
     return total
 ```$seed$, $seed$Bo modyfikuje zmienną globalną `total` (side effect) i zwraca różne wyniki dla tego samego argumentu - `dirty_add(10)` da kolejno 10, 20, 30.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000011', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Co to jest referential transparency?$seed$, $seed$Właściwość pure functions - można je zastąpić ich wartością zwracaną bez zmiany zachowania programu. Np. `add(2, 3)` zawsze można zastąpić liczbą `5`.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000011', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest referential transparency?$seed$, $seed$Właściwość pure functions - można je zastąpić ich wartością zwracaną bez zmiany zachowania programu. Np. `add(2, 3)` zawsze można zastąpić liczbą `5`.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000012', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Dlaczego mimo zalet pure functions czasem potrzebujemy impure functions?$seed$, $seed$Bo potrzebujemy side effects - program bez nich byłby bezużyteczny. Zapis do bazy, wyświetlenie wyniku, request HTTP - to wszystko wymaga side effects.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000012', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego mimo zalet pure functions czasem potrzebujemy impure functions?$seed$, $seed$Bo potrzebujemy side effects - program bez nich byłby bezużyteczny. Zapis do bazy, wyświetlenie wyniku, request HTTP - to wszystko wymaga side effects.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '1 days', now() - interval '4 days'),
-  ('c4ec0000-0000-4000-8000-000000000013', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', $seed$Co to jest side effect w kontekście funkcji?$seed$, $seed$Wszystko, co funkcja robi oprócz zwracania wartości.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000013', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest side effect w kontekście funkcji?$seed$, $seed$Wszystko, co funkcja robi oprócz zwracania wartości.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000014', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', $seed$Wymień co najmniej 5 przykładów side effects.$seed$, $seed$Wypisywanie do konsoli, zapis/odczyt z bazy danych, dostęp do internetu, modyfikacja zmiennych globalnych, modyfikacja argumentów wejściowych, zapis do pliku, operacje I/O.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000015', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', $seed$Co oznacza I/O w programowaniu i jaki ma związek z side effects?$seed$, $seed$I/O to input/output - wszystko co wchodzi w interakcję ze "światem zewnętrznym" (poza pamięcią aplikacji). Każda operacja I/O jest formą side effect, łącznie z `print()`.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000014', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', '5b1ec700-0000-4000-8000-000000000001', $seed$Wymień co najmniej 5 przykładów side effects.$seed$, $seed$Wypisywanie do konsoli, zapis/odczyt z bazy danych, dostęp do internetu, modyfikacja zmiennych globalnych, modyfikacja argumentów wejściowych, zapis do pliku, operacje I/O.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '21 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000015', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', '5b1ec700-0000-4000-8000-000000000001', $seed$Co oznacza I/O w programowaniu i jaki ma związek z side effects?$seed$, $seed$I/O to input/output - wszystko co wchodzi w interakcję ze "światem zewnętrznym" (poza pamięcią aplikacji). Każda operacja I/O jest formą side effect, łącznie z `print()`.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000016', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', $seed$Co to jest No-Op i co sugeruje o funkcji?$seed$, $seed$No-Op to operacja, która nic nie robi. Jeśli funkcja nic nie zwraca, prawdopodobnie jest impure i wykonuje side effects.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000016', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000021', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest No-Op i co sugeruje o funkcji?$seed$, $seed$No-Op to operacja, która nic nie robi. Jeśli funkcja nic nie zwraca, prawdopodobnie jest impure i wykonuje side effects.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000017', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000011', $seed$Co oznacza, że Python ma first-class functions?$seed$, $seed$Że funkcje mogą być traktowane jak każdy inny obiekt - przypisane do zmiennej, przekazane jako argument, zwrócone z funkcji i przechowywane w strukturach danych.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000017', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000011', '5b1ec700-0000-4000-8000-000000000001', $seed$Co oznacza, że Python ma first-class functions?$seed$, $seed$Że funkcje mogą być traktowane jak każdy inny obiekt - przypisane do zmiennej, przekazane jako argument, zwrócone z funkcji i przechowywane w strukturach danych.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '6 days', now() - interval '9 days'),
-  ('c4ec0000-0000-4000-8000-000000000018', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000011', $seed$Pokaż jak przypisać funkcję do zmiennej w Pythonie.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000018', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000011', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż jak przypisać funkcję do zmiennej w Pythonie.$seed$, $seed$```py
 def foo(a, b):
     return a + b
 
@@ -1454,49 +1460,49 @@ print(sum_foo(2, 2))  # 4
 ```
 Przypisujemy referencję do funkcji (bez nawiasów) do nowej zmiennej.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000019', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', $seed$Co to jest lambda w Pythonie i czym odpowiada w JavaScript?$seed$, $seed$Lambda to anonimowa (nienazwana) funkcja. Odpowiada arrow function w JS: `lambda x: x + 1` to ekwiwalent `(x) => x + 1`.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000020', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', $seed$Jakie jest kluczowe ograniczenie lambda w Pythonie?$seed$, $seed$Lambda może zawierać tylko jedno wyrażenie (single expression). Nie można w niej np. najpierw wywołać `print()`, a potem zwrócić wartość - w przeciwieństwie do callbacka w JS.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000019', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest lambda w Pythonie i czym odpowiada w JavaScript?$seed$, $seed$Lambda to anonimowa (nienazwana) funkcja. Odpowiada arrow function w JS: `lambda x: x + 1` to ekwiwalent `(x) => x + 1`.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '26 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000020', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', '5b1ec700-0000-4000-8000-000000000001', $seed$Jakie jest kluczowe ograniczenie lambda w Pythonie?$seed$, $seed$Lambda może zawierać tylko jedno wyrażenie (single expression). Nie można w niej np. najpierw wywołać `print()`, a potem zwrócić wartość - w przeciwieństwie do callbacka w JS.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000021', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', $seed$Jaka jest składnia lambda w Pythonie?$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000021', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000012', '5b1ec700-0000-4000-8000-000000000001', $seed$Jaka jest składnia lambda w Pythonie?$seed$, $seed$```py
 lambda argumenty: wyrażenie
 # np.
 lambda x, y: x + y
 ```
 Wynik wyrażenia jest zwracany automatycznie.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000022', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Co to jest higher-order function?$seed$, $seed$Funkcja, która przyjmuje inną funkcję jako argument lub zwraca funkcję.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000022', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest higher-order function?$seed$, $seed$Funkcja, która przyjmuje inną funkcję jako argument lub zwraca funkcję.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '5 days', now() - interval '8 days'),
-  ('c4ec0000-0000-4000-8000-000000000023', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Jakie trzy wbudowane higher-order functions w Pythonie są najczęściej używane?$seed$, $seed$`map()`, `filter()` i `functools.reduce()`.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000023', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Jakie trzy wbudowane higher-order functions w Pythonie są najczęściej używane?$seed$, $seed$`map()`, `filter()` i `functools.reduce()`.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000024', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Dlaczego `print(map(square, [1, 2, 3]))` nie wypisuje listy wyników?$seed$, $seed$Bo `map()` zwraca obiekt typu `map`, a nie listę. Trzeba go przekonwertować: `list(map(square, [1, 2, 3]))`.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000025', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Jaka jest składnia `filter()` i co zwraca?$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000024', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego `print(map(square, [1, 2, 3]))` nie wypisuje listy wyników?$seed$, $seed$Bo `map()` zwraca obiekt typu `map`, a nie listę. Trzeba go przekonwertować: `list(map(square, [1, 2, 3]))`.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '31 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000025', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Jaka jest składnia `filter()` i co zwraca?$seed$, $seed$```py
 evens = list(filter(lambda x: x % 2 == 0, numbers))
 ```
 Przyjmuje funkcję zwracającą `bool` i iterable. Zwraca obiekt filter (trzeba owinąć w `list()`).$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000026', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Czym `functools.reduce()` różni się od `map()` i `filter()`?$seed$, $seed$`reduce()` trzeba zaimportować z modułu `functools`. Przyjmuje funkcję z dwoma argumentami (akumulator i bieżący element) i redukuje iterable do jednej wartości.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000026', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym `functools.reduce()` różni się od `map()` i `filter()`?$seed$, $seed$`reduce()` trzeba zaimportować z modułu `functools`. Przyjmuje funkcję z dwoma argumentami (akumulator i bieżący element) i redukuje iterable do jednej wartości.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000027', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Pokaż użycie `reduce()` z lambdą.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000027', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż użycie `reduce()` z lambdą.$seed$, $seed$```py
 import functools
 total = functools.reduce(lambda a, b: a + b, [1, 2, 3, 4])
 # 10
 ```$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '4 days', now() - interval '7 days'),
-  ('c4ec0000-0000-4000-8000-000000000028', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Co robi funkcja `zip()` i co zwraca?$seed$, $seed$Łączy dwa iterables w nowy iterable, gdzie każdy element to tuple z jednym elementem z każdego źródła. Zwraca obiekt `zip` (trzeba owinąć w `list()`).$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000028', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Co robi funkcja `zip()` i co zwraca?$seed$, $seed$Łączy dwa iterables w nowy iterable, gdzie każdy element to tuple z jednym elementem z każdego źródła. Zwraca obiekt `zip` (trzeba owinąć w `list()`).$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000029', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', $seed$Co się stanie, gdy przekażemy do `zip()` iterables o różnej długości?$seed$, $seed$Zwróci tylko tyle par, ile pozwala krótszy iterable. Nadmiarowe elementy z dłuższego są ignorowane.
+  ('c4ec0000-0000-4000-8000-000000000029', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000013', '5b1ec700-0000-4000-8000-000000000001', $seed$Co się stanie, gdy przekażemy do `zip()` iterables o różnej długości?$seed$, $seed$Zwróci tylko tyle par, ile pozwala krótszy iterable. Nadmiarowe elementy z dłuższego są ignorowane.
 ```py
 list(zip([1, 2, 3, 4, 5], [1, 2, 3]))
 # [(1, 1), (2, 2), (3, 3)]
 ```$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000030', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', $seed$Co to jest closure?$seed$, $seed$Funkcja, która "pamięta" zmienne z otaczającego zakresu (enclosing scope), nawet po zakończeniu wykonania tego zakresu. Closure jest z natury stanowa (stateful).$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '22 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000030', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest closure?$seed$, $seed$Funkcja, która "pamięta" zmienne z otaczającego zakresu (enclosing scope), nawet po zakończeniu wykonania tego zakresu. Closure jest z natury stanowa (stateful).$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000031', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', $seed$Kiedy potrzebujemy słowa kluczowego `nonlocal` w closure?$seed$, $seed$Gdy chcemy **reasignować** (ponownie przypisać) zmienną niemutowalną z otaczającego zakresu (np. string, int). Przy modyfikacji mutowalnego obiektu (np. `list.append()`) `nonlocal` nie jest potrzebny.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000031', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', '5b1ec700-0000-4000-8000-000000000001', $seed$Kiedy potrzebujemy słowa kluczowego `nonlocal` w closure?$seed$, $seed$Gdy chcemy **reasignować** (ponownie przypisać) zmienną niemutowalną z otaczającego zakresu (np. string, int). Przy modyfikacji mutowalnego obiektu (np. `list.append()`) `nonlocal` nie jest potrzebny.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000032', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', $seed$Pokaż przykład closure, który nie wymaga `nonlocal`.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000032', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż przykład closure, który nie wymaga `nonlocal`.$seed$, $seed$```py
 def new_collection(initial_docs):
     init_copy = initial_docs.copy()
     def foo(str):
@@ -1506,7 +1512,7 @@ def new_collection(initial_docs):
 ```
 Lista jest mutowalna, więc `.append()` działa bez `nonlocal`.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '3 days', now() - interval '6 days'),
-  ('c4ec0000-0000-4000-8000-000000000033', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', $seed$Pokaż przykład closure, który wymaga `nonlocal`.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000033', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000037', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż przykład closure, który wymaga `nonlocal`.$seed$, $seed$```py
 def concatter():
     doc = ""
     def doc_builder(word):
@@ -1517,11 +1523,11 @@ def concatter():
 ```
 String jest niemutowalny, więc `doc += ...` to reasignacja.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000034', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', $seed$Co to jest function transformation?$seed$, $seed$Specyficzny typ higher-order function - funkcja, która przyjmuje inną funkcję jako argument **i zwraca nową funkcję**.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000035', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', $seed$Dlaczego function transformations są przydatne?$seed$, $seed$Pozwalają współdzielić funkcjonalność. Zamiast tworzyć wiele oddzielnych funkcji, tworzymy jedną transformację, która generuje wyspecjalizowane warianty.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000034', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest function transformation?$seed$, $seed$Specyficzny typ higher-order function - funkcja, która przyjmuje inną funkcję jako argument **i zwraca nową funkcję**.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '27 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000035', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego function transformations są przydatne?$seed$, $seed$Pozwalają współdzielić funkcjonalność. Zamiast tworzyć wiele oddzielnych funkcji, tworzymy jedną transformację, która generuje wyspecjalizowane warianty.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000036', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', $seed$Pokaż przykład function transformation tworzącego wyspecjalizowane funkcje.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000036', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000036', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż przykład function transformation tworzącego wyspecjalizowane funkcje.$seed$, $seed$```py
 def self_math(math_func):
     def inner_func(x):
         return math_func(x, x)
@@ -1531,9 +1537,9 @@ square_func = self_math(multiply)  # 5 -> 25
 double_func = self_math(add)       # 5 -> 10
 ```$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000037', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', $seed$Co to jest currying?$seed$, $seed$Transformacja funkcji wieloargumentowej w łańcuch funkcji jednoargumentowych. `sum(a, b)` staje się `sum(a)(b)`.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000037', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest currying?$seed$, $seed$Transformacja funkcji wieloargumentowej w łańcuch funkcji jednoargumentowych. `sum(a, b)` staje się `sum(a)(b)`.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '2 days', now() - interval '5 days'),
-  ('c4ec0000-0000-4000-8000-000000000038', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', $seed$Pokaż currying w Pythonie.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000038', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż currying w Pythonie.$seed$, $seed$```py
 def sum(a):
     def inner_sum(b):
         return a + b
@@ -1542,11 +1548,11 @@ def sum(a):
 print(sum(1)(2))  # 3
 ```$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000039', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', $seed$Kiedy currying jest przydatny?$seed$, $seed$Gdy trzeba dostosować sygnaturę funkcji do wymagań zewnętrznego narzędzia. Np. gdy API oczekuje funkcji jednoargumentowej, a nasza ma dwa argumenty - currying pozwala "wpiąć" pierwszy argument i zwrócić jednoargumentową wersję.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000040', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', $seed$Co to jest decorator w Pythonie?$seed$, $seed$Syntactic sugar wokół function transformations. Upraszcza zapis wyższego rzędu funkcji, która przyjmuje funkcję i zwraca nową funkcję.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000039', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000039', '5b1ec700-0000-4000-8000-000000000001', $seed$Kiedy currying jest przydatny?$seed$, $seed$Gdy trzeba dostosować sygnaturę funkcji do wymagań zewnętrznego narzędzia. Np. gdy API oczekuje funkcji jednoargumentowej, a nasza ma dwa argumenty - currying pozwala "wpiąć" pierwszy argument i zwrócić jednoargumentową wersję.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '32 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000040', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest decorator w Pythonie?$seed$, $seed$Syntactic sugar wokół function transformations. Upraszcza zapis wyższego rzędu funkcji, która przyjmuje funkcję i zwraca nową funkcję.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000041', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', $seed$Pokaż równoważne zapisy z i bez decoratora.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000041', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż równoważne zapisy z i bez decoratora.$seed$, $seed$```py
 # Bez decoratora:
 def myFoo(val):
     print(val)
@@ -1558,7 +1564,7 @@ def myFoo(val):
     print(val)
 ```$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000042', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', $seed$W jakiej kolejności wykonują się stacked decorators?$seed$, $seed$Od dołu do góry. Najpierw stosowany jest dekorator najbliżej funkcji, potem kolejne w górę.
+  ('c4ec0000-0000-4000-8000-000000000042', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', '5b1ec700-0000-4000-8000-000000000001', $seed$W jakiej kolejności wykonują się stacked decorators?$seed$, $seed$Od dołu do góry. Najpierw stosowany jest dekorator najbliżej funkcji, potem kolejne w górę.
 ```py
 @to_uppercase       # 2. owijamy wynik get_truncate
 @get_truncate(9)    # 1. najpierw owijamy print_input
@@ -1566,9 +1572,9 @@ def print_input(input):
     print(input)
 ```$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '1 days', now() - interval '4 days'),
-  ('c4ec0000-0000-4000-8000-000000000043', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', $seed$Co to jest `lru_cache` i do czego służy?$seed$, $seed$Dekorator z `functools`, który memoizuje wyniki funkcji. Cachuje pary input-output w słowniku o ograniczonym rozmiarze - przyspiesza powtarzające się wywołania z tymi samymi argumentami.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000043', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest `lru_cache` i do czego służy?$seed$, $seed$Dekorator z `functools`, który memoizuje wyniki funkcji. Cachuje pary input-output w słowniku o ograniczonym rozmiarze - przyspiesza powtarzające się wywołania z tymi samymi argumentami.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000044', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', $seed$Pokaż użycie `lru_cache`.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000044', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000047', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż użycie `lru_cache`.$seed$, $seed$```py
 from functools import lru_cache
 
 @lru_cache()
@@ -1578,10 +1584,10 @@ def factorial_r(x):
     return x * factorial_r(x - 1)
 ```
 Kolejne wywołania z tymi samymi argumentami korzystają z cache.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000045', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', $seed$Jak działa parametr `key` w `sorted()`?$seed$, $seed$Przyjmuje funkcję, która jest wywoływana na każdym elemencie, tworząc tymczasowy "klucz sortowania". Elementy są sortowane wg kluczy, ale zwracane są oryginalne wartości.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '23 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000045', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', '5b1ec700-0000-4000-8000-000000000001', $seed$Jak działa parametr `key` w `sorted()`?$seed$, $seed$Przyjmuje funkcję, która jest wywoływana na każdym elemencie, tworząc tymczasowy "klucz sortowania". Elementy są sortowane wg kluczy, ale zwracane są oryginalne wartości.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000046', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', $seed$Pokaż sortowanie dat za pomocą `sorted()` z `key`.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000046', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż sortowanie dat za pomocą `sorted()` z `key`.$seed$, $seed$```py
 def transform_date(date_str):
     month, day, year = date_str.split("-")
     return year + month + day
@@ -1590,15 +1596,15 @@ sorted(dates, key=transform_date)
 ```
 Daty w formacie "MM-DD-YYYY" są sortowane chronologicznie.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000047', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', $seed$Czym różni się `sort()` od `sorted()`?$seed$, $seed$`list.sort()` mutuje oryginalną listę (in-place). `sorted()` zwraca nową posortowaną listę, nie zmieniając oryginału.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000047', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000019', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym różni się `sort()` od `sorted()`?$seed$, $seed$`list.sort()` mutuje oryginalną listę (in-place). `sorted()` zwraca nową posortowaną listę, nie zmieniając oryginału.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '6 days', now() - interval '9 days'),
-  ('c4ec0000-0000-4000-8000-000000000048', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000024', $seed$Czym różni się `copy()` od `copy.deepcopy()`?$seed$, $seed$`.copy()` tworzy płytką kopię (shallow copy) - zagnieżdżone obiekty nadal są referencjami. `copy.deepcopy()` tworzy głęboką kopię - kopiuje rekurencyjnie wszystkie zagnieżdżone obiekty.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000048', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000024', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym różni się `copy()` od `copy.deepcopy()`?$seed$, $seed$`.copy()` tworzy płytką kopię (shallow copy) - zagnieżdżone obiekty nadal są referencjami. `copy.deepcopy()` tworzy głęboką kopię - kopiuje rekurencyjnie wszystkie zagnieżdżone obiekty.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000049', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000024', $seed$Co się stanie, jeśli zrobimy `new_list = old_list` zamiast `new_list = old_list.copy()`?$seed$, $seed$`new_list` będzie referencją do tego samego obiektu - zmiany w jednej zmiennej będą widoczne w drugiej.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000050', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000022', $seed$Które typy w Pythonie są przekazywane przez referencję, a które przez wartość?$seed$, $seed$Przez referencję: `list`, `dict`, `set` (mutowalne). Przez wartość: `int`, `float`, `str`, `bool`, `tuple` (niemutowalne).$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000049', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000024', '5b1ec700-0000-4000-8000-000000000001', $seed$Co się stanie, jeśli zrobimy `new_list = old_list` zamiast `new_list = old_list.copy()`?$seed$, $seed$`new_list` będzie referencją do tego samego obiektu - zmiany w jednej zmiennej będą widoczne w drugiej.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '28 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000050', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000022', '5b1ec700-0000-4000-8000-000000000001', $seed$Które typy w Pythonie są przekazywane przez referencję, a które przez wartość?$seed$, $seed$Przez referencję: `list`, `dict`, `set` (mutowalne). Przez wartość: `int`, `float`, `str`, `bool`, `tuple` (niemutowalne).$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000051', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000022', $seed$Co się stanie, gdy zmodyfikujemy listę przekazaną do funkcji?$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000051', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000022', '5b1ec700-0000-4000-8000-000000000001', $seed$Co się stanie, gdy zmodyfikujemy listę przekazaną do funkcji?$seed$, $seed$```py
 def modify_list(inner_lst):
     inner_lst.append(4)
 
@@ -1608,15 +1614,15 @@ modify_list(outer_lst)
 ```
 Lista jest przekazywana przez referencję - modyfikacja wewnątrz funkcji zmienia oryginał.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000052', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Co to jest memoization?$seed$, $seed$Cachowanie (przechowywanie) wyników obliczeń, aby nie trzeba było ich powtarzać dla tych samych danych wejściowych.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000052', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest memoization?$seed$, $seed$Cachowanie (przechowywanie) wyników obliczeń, aby nie trzeba było ich powtarzać dla tych samych danych wejściowych.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '5 days', now() - interval '8 days'),
-  ('c4ec0000-0000-4000-8000-000000000053', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Dlaczego pure functions mogą być bezpiecznie memoizowane, a impure nie?$seed$, $seed$Bo pure functions zawsze zwracają ten sam wynik dla tych samych argumentów. Impure functions mogą zwracać różne wyniki - cache dawałby błędne odpowiedzi.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000053', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego pure functions mogą być bezpiecznie memoizowane, a impure nie?$seed$, $seed$Bo pure functions zawsze zwracają ten sam wynik dla tych samych argumentów. Impure functions mogą zwracać różne wyniki - cache dawałby błędne odpowiedzi.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000054', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', $seed$Jaki jest trade-off przy memoization?$seed$, $seed$Szybkość vs pamięć RAM. Memoization przyspiesza obliczenia kosztem zużycia pamięci na cache. Jeśli funkcja jest wystarczająco szybka, memoization może nie być opłacalna.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000055', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', $seed$Co robią `*args` i `**kwargs`?$seed$, $seed$`*args` zbiera argumenty pozycyjne do tuple (kolejność ma znaczenie). `**kwargs` zbiera argumenty nazwane (keyword) do słownika.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000054', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000020', '5b1ec700-0000-4000-8000-000000000001', $seed$Jaki jest trade-off przy memoization?$seed$, $seed$Szybkość vs pamięć RAM. Memoization przyspiesza obliczenia kosztem zużycia pamięci na cache. Jeśli funkcja jest wystarczająco szybka, memoization może nie być opłacalna.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '33 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000055', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', '5b1ec700-0000-4000-8000-000000000001', $seed$Co robią `*args` i `**kwargs`?$seed$, $seed$`*args` zbiera argumenty pozycyjne do tuple (kolejność ma znaczenie). `**kwargs` zbiera argumenty nazwane (keyword) do słownika.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000056', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', $seed$Pokaż różnicę między argumentami pozycyjnymi a keyword.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000056', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż różnicę między argumentami pozycyjnymi a keyword.$seed$, $seed$```py
 def sub(a, b):
     return a - b
 
@@ -1624,25 +1630,25 @@ sub(3, 2)       # pozycyjne: a=3, b=2, wynik=1
 sub(b=3, a=2)   # keyword: a=2, b=3, wynik=-1
 ```$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000057', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', $seed$Jaka jest zasada kolejności argumentów pozycyjnych i keyword?$seed$, $seed$Argumenty pozycyjne muszą być **przed** keyword. `sub(b=3, 2)` spowoduje błąd.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000057', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', '5b1ec700-0000-4000-8000-000000000001', $seed$Jaka jest zasada kolejności argumentów pozycyjnych i keyword?$seed$, $seed$Argumenty pozycyjne muszą być **przed** keyword. `sub(b=3, 2)` spowoduje błąd.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '4 days', now() - interval '7 days'),
-  ('c4ec0000-0000-4000-8000-000000000058', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', $seed$Co robi `**` przy rozpakowaniu słownika?$seed$, $seed$Konwertuje klucze słownika na keyword arguments:
+  ('c4ec0000-0000-4000-8000-000000000058', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000041', '5b1ec700-0000-4000-8000-000000000001', $seed$Co robi `**` przy rozpakowaniu słownika?$seed$, $seed$Konwertuje klucze słownika na keyword arguments:
 ```py
 my_dict = {"name": "Konrad", "age": 38}
 greet(**my_dict)  # = greet(name="Konrad", age=38)
 ```
 Funkcja musi przyjmować parametry o takich samych nazwach jak klucze.$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000059', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000042', $seed$Do czego służy `enumerate()` i dlaczego jest lepszy od `range(len())`?$seed$, $seed$Daje dostęp do indeksu i elementu jednocześnie podczas iteracji. Jest lepszy od `range(len())`, bo nie wymaga ręcznego indeksowania, jest czytelniejszy i bezpieczniejszy.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000060', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000042', $seed$Pokaż składnię `enumerate()`.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000059', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000042', '5b1ec700-0000-4000-8000-000000000001', $seed$Do czego służy `enumerate()` i dlaczego jest lepszy od `range(len())`?$seed$, $seed$Daje dostęp do indeksu i elementu jednocześnie podczas iteracji. Jest lepszy od `range(len())`, bo nie wymaga ręcznego indeksowania, jest czytelniejszy i bezpieczniejszy.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '24 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000060', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000042', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż składnię `enumerate()`.$seed$, $seed$```py
 for index, item in enumerate(args):
     print(f"{index + 1}. {item}")
 ```$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000061', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000002', $seed$Do czego służy `Enum` w Pythonie?$seed$, $seed$Definiuje zamknięty zbiór dopuszczalnych wartości. Zapewnia centralne miejsce z listą prawidłowych wartości i rzuca wyjątek przy próbie użycia nieprawidłowej.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000061', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000002', '5b1ec700-0000-4000-8000-000000000001', $seed$Do czego służy `Enum` w Pythonie?$seed$, $seed$Definiuje zamknięty zbiór dopuszczalnych wartości. Zapewnia centralne miejsce z listą prawidłowych wartości i rzuca wyjątek przy próbie użycia nieprawidłowej.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000062', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000002', $seed$Pokaż dwa sposoby tworzenia Enum w Pythonie.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000062', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000002', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż dwa sposoby tworzenia Enum w Pythonie.$seed$, $seed$```py
 # Sposób 1 - funkcja:
 Color = Enum('Color', ['RED', 'GREEN', 'BLUE'])
 
@@ -1653,9 +1659,9 @@ class DocFormat(Enum):
     MD = 3
 ```$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '3 days', now() - interval '6 days'),
-  ('c4ec0000-0000-4000-8000-000000000063', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000044', $seed$Czym jest `match` w Pythonie i co odpowiada mu w JavaScript?$seed$, $seed$`match` to odpowiednik `switch` z JS. Porównuje wartość z wieloma wzorcami i wykonuje kod dla pierwszego dopasowania. `case _:` to domyślny przypadek (jak `default`).$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000063', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000044', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym jest `match` w Pythonie i co odpowiada mu w JavaScript?$seed$, $seed$`match` to odpowiednik `switch` z JS. Porównuje wartość z wieloma wzorcami i wykonuje kod dla pierwszego dopasowania. `case _:` to domyślny przypadek (jak `default`).$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000064', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000044', $seed$Pokaż `match` z dopasowywaniem tuple.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000064', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000044', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż `match` z dopasowywaniem tuple.$seed$, $seed$```py
 match (color, shade):
     case (Color.RED, Shade.LIGHT):
         return "#FFAAAA"
@@ -1665,12 +1671,12 @@ match (color, shade):
         return "#FFFFFF"
 ```
 Pozwala dopasowywać kombinacje wielu wartości jednocześnie.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000065', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', $seed$Czym różnią się statements od expressions?$seed$, $seed$Statements to akcje do wykonania (np. `n = 7`, `if x > 10`). Expressions to podzbiór statements, który **produkuje wartości** (np. `2 + 2`, `len("hello")`).$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '29 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000065', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', '5b1ec700-0000-4000-8000-000000000001', $seed$Czym różnią się statements od expressions?$seed$, $seed$Statements to akcje do wykonania (np. `n = 7`, `if x > 10`). Expressions to podzbiór statements, który **produkuje wartości** (np. `2 + 2`, `len("hello")`).$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null),
-  ('c4ec0000-0000-4000-8000-000000000066', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', $seed$Dlaczego w programowaniu funkcyjnym preferujemy expressions?$seed$, $seed$Bo expressions produkują wartości, są reusable, deklaratywne, nie mutują stanu i minimalizują side effects.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000066', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', '5b1ec700-0000-4000-8000-000000000001', $seed$Dlaczego w programowaniu funkcyjnym preferujemy expressions?$seed$, $seed$Bo expressions produkują wartości, są reusable, deklaratywne, nie mutują stanu i minimalizują side effects.$seed$, null,
    1, 1.2, 5, 0, 0, 0, 1, 0, now() - interval '10 minutes', now() - interval '10 minutes'),
-  ('c4ec0000-0000-4000-8000-000000000067', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', $seed$Pokaż ternary expression w Pythonie i wyjaśnij, dlaczego jest lepszy od if/else.$seed$, $seed$```py
+  ('c4ec0000-0000-4000-8000-000000000067', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000009', '5b1ec700-0000-4000-8000-000000000001', $seed$Pokaż ternary expression w Pythonie i wyjaśnij, dlaczego jest lepszy od if/else.$seed$, $seed$```py
 # Statement (mutuje result):
 result = 0
 if number % 2 == 0:
@@ -1683,11 +1689,11 @@ result = number / 2 if number % 2 == 0 else (number * 3) + 1
 ```
 Expression unika mutowania zmiennej `result`.$seed$, null,
    2, 8, 5.5, 0, 4, 0, 3, 0, now() - interval '2 days', now() - interval '5 days'),
-  ('c4ec0000-0000-4000-8000-000000000068', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', $seed$Co to jest rekurencja i dlaczego jest ważna w programowaniu funkcyjnym?$seed$, $seed$Funkcja wywołująca samą siebie. W FP jest ważna, bo pozwala uniknąć pętli ze stanowymi zmiennymi (akumulatorami).$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000068', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest rekurencja i dlaczego jest ważna w programowaniu funkcyjnym?$seed$, $seed$Funkcja wywołująca samą siebie. W FP jest ważna, bo pozwala uniknąć pętli ze stanowymi zmiennymi (akumulatorami).$seed$, null,
    2, 4, 6, 0, 2, 0, 2, 0, now(), now() - interval '2 days'),
-  ('c4ec0000-0000-4000-8000-000000000069', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', $seed$Co to jest base case i co się stanie bez niego?$seed$, $seed$Base case to warunek kończący rekurencję. Bez niego funkcja będzie się wywoływać w nieskończoność, co doprowadzi do stack overflow.$seed$, null,
-   2, 12, 4, 0, 5, 0, 4, 0, now() + interval '7 days', now() - interval '1 day'),
-  ('c4ec0000-0000-4000-8000-000000000070', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', $seed$Kiedy rekurencja jest lepsza od pętli?$seed$, $seed$Przy strukturach "drzewiastych" o nieznanej głębokości - zagnieżdżone słowniki, systemy plików, HTML, JSON. Dla jednowymiarowych list prosta pętla jest zazwyczaj lepsza.$seed$, null,
+  ('c4ec0000-0000-4000-8000-000000000069', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', '5b1ec700-0000-4000-8000-000000000001', $seed$Co to jest base case i co się stanie bez niego?$seed$, $seed$Base case to warunek kończący rekurencję. Bez niego funkcja będzie się wywoływać w nieskończoność, co doprowadzi do stack overflow.$seed$, null,
+   2, 45, 4, 0, 35, 0, 5, 0, now() + interval '34 days', now() - interval '10 days'),
+  ('c4ec0000-0000-4000-8000-000000000070', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '0a7e0000-0000-4000-8000-000000000032', '5b1ec700-0000-4000-8000-000000000001', $seed$Kiedy rekurencja jest lepsza od pętli?$seed$, $seed$Przy strukturach "drzewiastych" o nieznanej głębokości - zagnieżdżone słowniki, systemy plików, HTML, JSON. Dla jednowymiarowych list prosta pętla jest zazwyczaj lepsza.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null)
 on conflict (id) do nothing;
 

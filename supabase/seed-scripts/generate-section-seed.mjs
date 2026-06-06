@@ -198,8 +198,8 @@ function fsrs(j) {
       return [2, 8.0, 5.5, 4, 3, `now() - interval '${1 + (j % 6)} days'`, `now() - interval '${4 + (j % 6)} days'`];
     case 3: // Review due right now
       return [2, 4.0, 6.0, 2, 2, 'now()', `now() - interval '2 days'`];
-    default: // Future review (hidden from /review)
-      return [2, 12.0, 4.0, 5, 4, `now() + interval '${3 + (j % 5)} days'`, `now() - interval '1 day'`];
+    default: // Future review, MATURE — stability past the 21-day maturity line (hidden from /review)
+      return [2, 45.0, 4.0, 35, 5, `now() + interval '${21 + (j % 14)} days'`, `now() - interval '10 days'`];
   }
 }
 
