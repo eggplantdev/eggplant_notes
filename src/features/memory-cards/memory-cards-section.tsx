@@ -1,8 +1,7 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { AddMemoryCard } from '@/features/memory-cards/add-memory-card'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
 import { MemoryCardForm } from '@/features/memory-cards/memory-card-form'
@@ -54,9 +53,13 @@ export async function MemoryCardsSection({ noteId, checks, editId }: MemoryCards
               <div className="flex items-start justify-between gap-4">
                 <p className="font-medium">{check.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={memoryCardEditHref(noteId, check.id)}>Edit</Link>
-                  </Button>
+                  <ButtonLink
+                    href={memoryCardEditHref(noteId, check.id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Edit
+                  </ButtonLink>
                   <DeleteMemoryCardButton noteId={noteId} id={check.id} />
                 </div>
               </div>

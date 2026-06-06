@@ -1,9 +1,8 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Separator } from '@/components/ui/separator'
 import { updateNote } from '@/features/notes/actions/update-note'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
@@ -56,14 +55,14 @@ export default async function NotePage({
       backLabel="Back"
       actions={
         isEditingNote ? (
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/notes/${note.id}`}>Cancel</Link>
-          </Button>
+          <ButtonLink href={`/notes/${note.id}`} variant="outline" size="sm">
+            Cancel
+          </ButtonLink>
         ) : (
           <>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/notes/${note.id}?edit=note`}>Edit</Link>
-            </Button>
+            <ButtonLink href={`/notes/${note.id}?edit=note`} variant="outline" size="sm">
+              Edit
+            </ButtonLink>
             <DeleteNoteButton id={note.id} />
           </>
         )

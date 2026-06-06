@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { updateSubject } from '@/features/subjects/actions/update-subject'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
@@ -29,9 +28,9 @@ export default async function SubjectPage({
     return (
       <div className="flex flex-col gap-4">
         <SubjectForm action={updateSubject} subject={subject} />
-        <Button asChild variant="ghost" size="sm" className="self-start">
-          <Link href={`/subjects/${id}`}>Cancel</Link>
-        </Button>
+        <ButtonLink href={`/subjects/${id}`} variant="ghost" size="sm" className="self-start">
+          Cancel
+        </ButtonLink>
       </div>
     )
   }

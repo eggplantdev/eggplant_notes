@@ -1,9 +1,8 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { PageShell } from '@/components/layout/page-shell'
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { MutedText } from '@/components/ui/muted-text'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
@@ -45,12 +44,12 @@ export default async function SubjectLayout({
       fill
       actions={
         <>
-          <Button asChild size="sm">
-            <Link href={`/notes/new?subject=${id}`}>New note</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/subjects/${id}?edit`}>Edit</Link>
-          </Button>
+          <ButtonLink href={`/notes/new?subject=${id}`} size="sm">
+            New note
+          </ButtonLink>
+          <ButtonLink href={`/subjects/${id}?edit`} variant="outline" size="sm">
+            Edit
+          </ButtonLink>
           <DeleteSubjectButton id={id} />
         </>
       }

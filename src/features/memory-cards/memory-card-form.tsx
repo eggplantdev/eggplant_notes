@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -11,6 +10,7 @@ import { toastActionResult } from '@/components/forms/toast-result'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
 import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createMemoryCard } from '@/features/memory-cards/actions/create-memory-card'
@@ -124,9 +124,9 @@ export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT)
           )}
         </form.Subscribe>
         {check && (
-          <Button asChild variant="ghost">
-            <Link href={`/notes/${noteId}`}>Cancel</Link>
-          </Button>
+          <ButtonLink href={`/notes/${noteId}`} variant="ghost">
+            Cancel
+          </ButtonLink>
         )}
       </div>
     </form>

@@ -1,7 +1,5 @@
-import Link from 'next/link'
-
 import { PageShell } from '@/components/layout/page-shell'
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { NotesList } from '@/features/notes/components/notes-list'
 import { getNotes } from '@/features/notes/queries'
@@ -34,11 +32,7 @@ export default async function NotesPage({
       subtitle={pluralize(notes.length, 'note')}
       // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
       width="full"
-      actions={
-        <Button asChild>
-          <Link href="/notes/new">New note</Link>
-        </Button>
-      }
+      actions={<ButtonLink href="/notes/new">New note</ButtonLink>}
     >
       {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
 

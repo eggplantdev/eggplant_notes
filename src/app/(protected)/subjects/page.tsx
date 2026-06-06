@@ -1,7 +1,5 @@
-import Link from 'next/link'
-
 import { PageShell } from '@/components/layout/page-shell'
-import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { SubjectsList } from '@/features/subjects/components/subjects-list'
 import { getSubjects } from '@/features/subjects/queries'
@@ -18,11 +16,7 @@ export default async function SubjectsPage() {
       title="Subjects"
       subtitle={pluralize(subjects.length, 'subject')}
       width="prose"
-      actions={
-        <Button asChild>
-          <Link href="/subjects/new">New subject</Link>
-        </Button>
-      }
+      actions={<ButtonLink href="/subjects/new">New subject</ButtonLink>}
     >
       {subjects.length === 0 ? (
         <EmptyState
