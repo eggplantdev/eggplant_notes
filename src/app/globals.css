@@ -15,6 +15,12 @@
   --color-heat-2: var(--heat-2);
   --color-heat-3: var(--heat-3);
   --color-heat-4: var(--heat-4);
+  /* Neon-cyan heatmap ramp → bg-heat-cyan-0 … 4 / text-heat-cyan-* (selectable HEAT_VARIANTS). */
+  --color-heat-cyan-0: var(--heat-cyan-0);
+  --color-heat-cyan-1: var(--heat-cyan-1);
+  --color-heat-cyan-2: var(--heat-cyan-2);
+  --color-heat-cyan-3: var(--heat-cyan-3);
+  --color-heat-cyan-4: var(--heat-cyan-4);
   /* Goal progress bar brand neon (fixed in light + dark): the green→cyan→fuchsia (x1) gradient
      (bg-linear-to-r from-neon-green via-neon-cyan via-60% to-neon-fuchsia). Direct values, not a
      :root indirection, since they don't theme-swap. */
@@ -129,6 +135,13 @@
   --heat-2: oklch(0.53 0 0);
   --heat-3: oklch(0.74 0 0);
   --heat-4: oklch(0.985 0 0);
+  /* Neon-cyan heatmap ramp (selectable variant) — dark → blazing #00e5ff. Dark-first like the
+     grayscale ramp above (no :root copy). */
+  --heat-cyan-0: oklch(0.25 0.03 210);
+  --heat-cyan-1: oklch(0.52 0.12 210);
+  --heat-cyan-2: oklch(0.68 0.15 205);
+  --heat-cyan-3: oklch(0.82 0.16 200);
+  --heat-cyan-4: oklch(0.9 0.15 200);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -235,14 +248,19 @@
 }
 
 /* Activity-heatmap cell glow — same color-mix box-shadow idea as the progress-bar glow, applied
-   only to the brightest (most-active) cells so high-activity days pop. heat-glow-strong is the
-   top level (white, "more"); heat-glow is the level just below it. Kept small (4–7px) so the
-   bloom doesn't swamp the tiny squares or their neighbours. */
-@utility heat-glow {
-  box-shadow: 0 0 4px color-mix(in oklch, var(--color-heat-4) 50%, transparent);
+   to the busiest cells so high-activity days pop. Three rising tiers; the active HEAT_VARIANTS
+   ramp assigns them per level. Bloom is in `currentColor` (set by each cell's text-* class) so a
+   ramp haloes in its own hue — grayscale glows white, neon-cyan glows cyan. Kept small (4–11px)
+   so the bloom doesn't swamp the tiny squares. currentColor in color-mix needs a modern engine
+   (Chrome 111+/Safari 16.2+). */
+@utility heat-glow-sm {
+  box-shadow: 0 0 4px color-mix(in oklch, currentColor 55%, transparent);
 }
-@utility heat-glow-strong {
-  box-shadow: 0 0 7px color-mix(in oklch, var(--color-heat-4) 80%, transparent);
+@utility heat-glow-md {
+  box-shadow: 0 0 7px color-mix(in oklch, currentColor 75%, transparent);
+}
+@utility heat-glow-lg {
+  box-shadow: 0 0 11px color-mix(in oklch, currentColor 90%, transparent);
 }
 
 /* Code blocks blend into the card surface: Shiki sets the theme background inline on

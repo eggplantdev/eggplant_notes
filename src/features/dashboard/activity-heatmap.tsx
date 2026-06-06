@@ -2,19 +2,25 @@
 
 import { useRef } from 'react'
 
-import { HEAT_BG, HEAT_LEVELS } from '@/features/dashboard/constants'
+import {
+  DEFAULT_HEAT_VARIANT,
+  HEAT_LEVELS,
+  HEAT_VARIANTS,
+  type HeatVariantT,
+} from '@/features/dashboard/constants'
 import { HeatmapCell } from '@/features/dashboard/heatmap-cell'
 import { HeatmapTooltip } from '@/features/dashboard/heatmap-tooltip'
 import { CELL, formatCellLabel, GAP } from '@/features/dashboard/heatmap-view'
 import type { HeatmapCellT, HeatmapColumnT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'
 
-type PropsT = { columns: HeatmapColumnT[] }
+type PropsT = { columns: HeatmapColumnT[]; variant?: HeatVariantT }
 
 // Composes the contribution grid (HeatmapCell per day), the month labels, the legend, and a
 // single shared HeatmapTooltip. Hover writes text/position to the tooltip imperatively via a
-// ref, so moving across the ~371 cells never re-renders the grid.
-export function ActivityHeatmap({ columns }: PropsT) {
+// ref, so moving across the ~371 cells never re-renders the grid. `variant` picks the colour ramp.
+export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: PropsT) {
+  const ramp = HEAT_VARIANTS[variant]
   const tipRef = useRef<HTMLDivElement>(null)
 
   const showTip = (cell: HeatmapCellT, e: React.MouseEvent) => {
@@ -63,7 +69,13 @@ export function ActivityHeatmap({ columns }: PropsT) {
       >
         {columns.map((col, ci) =>
           col.cells.map((cell, ri) => (
-            <HeatmapCell key={`${ci}-${ri}`} cell={cell} onEnter={showTip} onLeave={hideTip} />
+            <HeatmapCell
+              key={`${ci}-${ri}`}
+              cell={cell}
+              ramp={ramp}
+              onEnter={showTip}
+              onLeave={hideTip}
+            />
           )),
         )}
       </div>
@@ -73,7 +85,7 @@ export function ActivityHeatmap({ columns }: PropsT) {
         {HEAT_LEVELS.map((lvl) => (
           <span
             key={lvl}
-            className={cn('inline-block rounded-xs', HEAT_BG[lvl])}
+            className={cn('inline-block rounded-xs', ramp.bg[lvl])}
             style={{ width: CELL, height: CELL }}
           />
         ))}

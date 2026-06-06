@@ -1,16 +1,17 @@
-import { HEAT_BG, HEAT_GLOW } from '@/features/dashboard/constants'
+import type { HeatRampT } from '@/features/dashboard/constants'
 import type { HeatmapCellT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'
 
 type PropsT = {
   cell: HeatmapCellT
+  ramp: HeatRampT
   onEnter: (cell: HeatmapCellT, e: React.MouseEvent) => void
   onLeave: () => void
 }
 
-// One day square in the contribution grid. Sized by the parent grid's track; color is its
-// intensity level. Padding cells (no date) render transparent and inert (no hover/tooltip).
-export function HeatmapCell({ cell, onEnter, onLeave }: PropsT) {
+// One day square in the contribution grid. Sized by the parent grid's track; color/glow come from
+// the active ramp. Padding cells (no date) render transparent and inert (no hover/tooltip).
+export function HeatmapCell({ cell, ramp, onEnter, onLeave }: PropsT) {
   return (
     <div
       onMouseEnter={(e) => onEnter(cell, e)}
@@ -19,8 +20,9 @@ export function HeatmapCell({ cell, onEnter, onLeave }: PropsT) {
         'rounded-xs',
         cell.date
           ? cn(
-              HEAT_BG[cell.level],
-              HEAT_GLOW[cell.level],
+              ramp.bg[cell.level],
+              ramp.text[cell.level],
+              ramp.glow[cell.level],
               'hover:outline-foreground outline-offset-1 hover:outline',
             )
           : 'bg-transparent',
