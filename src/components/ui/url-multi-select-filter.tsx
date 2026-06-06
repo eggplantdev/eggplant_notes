@@ -14,7 +14,7 @@ const DEBOUNCE_MS = 400
 type UrlMultiSelectFilterPropsT = {
   // The URL query-param key this filter owns (e.g. `subjects`, `state`, `maturity`).
   paramKey: string
-  options: MultiSelectOptionT[]
+  options: readonly MultiSelectOptionT[]
   // Values currently in the URL (`?<paramKey>=a,b`) — server-derived, the source of truth.
   selectedValues: string[]
   placeholder?: string

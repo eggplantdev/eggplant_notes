@@ -7,7 +7,11 @@ import { TitledCard } from '@/components/ui/titled-card'
 import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
-import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
+import {
+  FSRS_STATE_LABELS,
+  MATURITY_OPTIONS,
+  type MaturityT,
+} from '@/features/memory-cards/constants'
 import { getCardsForStats, getMemoryCardsList } from '@/features/memory-cards/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
@@ -38,7 +42,7 @@ export default async function MemoryCardsPage({
     .filter((n) => Number.isInteger(n) && n >= 0 && n <= 3)
   const maturity = (sp.maturity ?? '')
     .split(',')
-    .filter((v): v is 'mature' | 'young' => v === 'mature' || v === 'young')
+    .filter((v): v is MaturityT => MATURITY_OPTIONS.some((option) => option.value === v))
   const { page, limit } = parsePagination(sp)
   const [subjects, { rows: cards, total }, statsCards] = await Promise.all([
     getSubjects(),
@@ -78,10 +82,7 @@ export default async function MemoryCardsPage({
           />
           <UrlMultiSelectFilter
             paramKey="maturity"
-            options={[
-              { value: 'mature', label: 'Mature' },
-              { value: 'young', label: 'Young' },
-            ]}
+            options={MATURITY_OPTIONS}
             selectedValues={maturity}
             placeholder="Maturity"
             searchPlaceholder="Search maturity…"

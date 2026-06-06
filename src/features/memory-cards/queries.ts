@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
+import { MATURE_STABILITY_DAYS, type MaturityT } from '@/features/memory-cards/constants'
 import type {
   DueCardT,
   MemoryCardListItemT,
@@ -56,7 +56,7 @@ export async function getMemoryCardsList(
     subjectIds?: string[]
     q?: string
     states?: number[]
-    maturity?: ('mature' | 'young')[]
+    maturity?: MaturityT[]
     page?: number
     limit?: number
   },
