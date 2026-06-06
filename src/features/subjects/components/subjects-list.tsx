@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
-import { SubjectCardActions } from '@/features/subjects/components/subject-card-actions'
+import { CardActions } from '@/components/ui/card-actions'
 import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
+import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 import type { SubjectT } from '@/types/subject'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the subjects-specific href,
@@ -15,9 +14,7 @@ import type { SubjectT } from '@/types/subject'
 // per card). `openId` derives from the pending id AND its presence in `subjects`, so once the
 // delete revalidates the list (the row drops out) the dialog closes on its own — no effect.
 export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
-  const openId =
-    pendingDeleteId && subjects.some((s) => s.id === pendingDeleteId) ? pendingDeleteId : null
+  const { openId, requestDelete, onOpenChange } = useDeleteDialogState(subjects)
 
   return (
     <>
@@ -32,15 +29,13 @@ export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
           ) : null
         }
         renderAction={(subject) => (
-          <SubjectCardActions subjectId={subject.id} onRequestDelete={setPendingDeleteId} />
+          <CardActions
+            editHref={`/subjects/${subject.id}?edit`}
+            onRequestDelete={() => requestDelete(subject.id)}
+          />
         )}
       />
-      <DeleteSubjectDialog
-        subjectId={openId}
-        onOpenChange={(open) => {
-          if (!open) setPendingDeleteId(null)
-        }}
-      />
+      <DeleteSubjectDialog subjectId={openId} onOpenChange={onOpenChange} />
     </>
   )
 }

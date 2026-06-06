@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
-import { MemoryCardActions } from '@/features/memory-cards/components/memory-card-actions'
+import { CardActions } from '@/components/ui/card-actions'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
 import type { MemoryCardListItemT } from '@/features/memory-cards/types'
-import { formatReviewStatus } from '@/features/memory-cards/utils'
+import { formatReviewStatus, memoryCardEditHref } from '@/features/memory-cards/utils'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the memory-card card href, the
 // prompt as the title, a review-status eyebrow, and a subtitle of the subject ("topic") chip +
@@ -18,7 +19,12 @@ export function MemoryCardsList({ checks }: { checks: MemoryCardListItemT[] }) {
       items={checks}
       getKey={(check) => check.id}
       getHref={(check) => `/notes/${check.note_id}#check-${check.id}`}
-      renderAction={(check) => <MemoryCardActions noteId={check.note_id} checkId={check.id} />}
+      renderAction={(check) => (
+        <CardActions
+          editHref={memoryCardEditHref(check.note_id, check.id)}
+          deleteControl={<DeleteMemoryCardButton noteId={check.note_id} id={check.id} />}
+        />
+      )}
       renderTitle={(check) => <span className="line-clamp-2">{check.prompt}</span>}
       renderEyebrow={(check) => (
         <span className="text-muted-foreground text-xs">{formatReviewStatus(check)}</span>

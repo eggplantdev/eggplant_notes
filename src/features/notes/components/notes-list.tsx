@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
-import { NoteCardActions } from '@/features/notes/components/note-card-actions'
+import { CardActions } from '@/components/ui/card-actions'
 import { DeleteNoteDialog } from '@/features/notes/delete-note-dialog'
 import type { NoteListItemT } from '@/features/notes/types'
+import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 import { formatLocaleDate } from '@/lib/utils/date'
 
 // Thin client wrapper over the shared AnimatedCardList: supplies the notes-specific href,
@@ -17,9 +16,7 @@ import { formatLocaleDate } from '@/lib/utils/date'
 // per card). `openId` derives from the pending id AND its presence in `notes`, so once the
 // delete revalidates the list (the row drops out) the dialog closes on its own — no effect.
 export function NotesList({ notes }: { notes: NoteListItemT[] }) {
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
-  const openId =
-    pendingDeleteId && notes.some((n) => n.id === pendingDeleteId) ? pendingDeleteId : null
+  const { openId, requestDelete, onOpenChange } = useDeleteDialogState(notes)
 
   return (
     <>
@@ -33,7 +30,10 @@ export function NotesList({ notes }: { notes: NoteListItemT[] }) {
           <span className="text-muted-foreground text-xs">{formatLocaleDate(note.created_at)}</span>
         )}
         renderAction={(note) => (
-          <NoteCardActions noteId={note.id} onRequestDelete={setPendingDeleteId} />
+          <CardActions
+            editHref={`/notes/${note.id}?edit=note`}
+            onRequestDelete={() => requestDelete(note.id)}
+          />
         )}
         renderSubtitle={(note) =>
           note.subjects?.title ? (
@@ -43,12 +43,7 @@ export function NotesList({ notes }: { notes: NoteListItemT[] }) {
           ) : null
         }
       />
-      <DeleteNoteDialog
-        noteId={openId}
-        onOpenChange={(open) => {
-          if (!open) setPendingDeleteId(null)
-        }}
-      />
+      <DeleteNoteDialog noteId={openId} onOpenChange={onOpenChange} />
     </>
   )
 }
