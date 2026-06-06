@@ -5,6 +5,7 @@ import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
 import { NotesList } from '@/features/notes/components/notes-list'
 import { getNotes } from '@/features/notes/queries'
+import { LoadSampleDataButton } from '@/features/sample-data/components/load-sample-data-button'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
@@ -49,12 +50,17 @@ export default async function NotesPage({
       )}
 
       {total === 0 ? (
-        <EmptyState
-          message={
-            isFiltered ? 'No notes match your search.' : 'No notes yet. Capture your first one.'
-          }
-          action={isFiltered ? undefined : { label: 'Create a note', href: '/notes/new' }}
-        />
+        <div className="flex flex-col items-start gap-3">
+          <EmptyState
+            message={
+              isFiltered ? 'No notes match your search.' : 'No notes yet. Capture your first one.'
+            }
+            action={isFiltered ? undefined : { label: 'Create a note', href: '/notes/new' }}
+          />
+          {/* Brand-new account (no notes AND no subjects, unfiltered): offer the demo dataset
+              beside the create CTA. Hidden once any subject exists or a filter is active. */}
+          {!isFiltered && subjects.length === 0 && <LoadSampleDataButton variant="outline" />}
+        </div>
       ) : (
         <>
           <NotesList notes={notes} />

@@ -454,9 +454,9 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [x] 3.1 Unit tests pass: `pnpm test`
-- [x] 3.2 Type checking passes: `pnpm typecheck`
-- [x] 3.3 Linting passes: `pnpm lint`
+- [x] 3.1 Unit tests pass: `pnpm test` — 2f0c5e3
+- [x] 3.2 Type checking passes: `pnpm typecheck` — 2f0c5e3
+- [x] 3.3 Linting passes: `pnpm lint` — 2f0c5e3
 
 #### Manual
 
@@ -466,9 +466,9 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `pnpm typecheck`
-- [ ] 4.2 Linting passes: `pnpm lint`
-- [ ] 4.3 Build passes: `pnpm build`
+- [x] 4.1 Type checking passes: `pnpm typecheck`
+- [x] 4.2 Linting passes: `pnpm lint`
+- [x] 4.3 Build passes: `pnpm build`
 
 #### Manual
 
