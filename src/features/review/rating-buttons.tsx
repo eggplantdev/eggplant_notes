@@ -19,7 +19,7 @@ export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
   const { celebrate } = useReviewCelebration()
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mt-6 flex flex-col gap-3">
       <FormError message={error} />
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {GRADES.map(({ grade, label, variant }) => (

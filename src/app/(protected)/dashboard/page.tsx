@@ -86,7 +86,7 @@ export default async function DashboardPage() {
         />
       </div>
       <TitledCard title="Review activity — last 12 months" className="w-full">
-        <ActivityHeatmap columns={columns} />
+        <ActivityHeatmap columns={columns} variant="neon-cyan" />
       </TitledCard>
       {/* Review session beside its key numbers — stacked on small screens, side-by-side on lg. */}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
