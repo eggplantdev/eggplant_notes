@@ -19,9 +19,8 @@ import { cn } from '@/lib/utils'
 type CardChoiceT = 'move' | 'unlink'
 export type LinkedCardT = { id: string; prompt: string }
 
-// One segmented Move/Unlink toggle for a single card row. A `layoutId` pill slides (and resizes)
-// behind the active option as it changes. `id` makes the layoutId unique per row, so each row's
-// pill animates on its own instead of all of them sharing one.
+// `id` makes the layoutId unique per row, so each row's pill animates on its own instead of all
+// of them sharing one.
 function ChoiceToggle({
   id,
   value,
@@ -65,11 +64,10 @@ function ChoiceToggle({
   )
 }
 
-// Per-card decision dialog shown when a note's subject changes and it has linked cards
-// (standalone-memory-cards). For each card the user picks Move (follow the note to the new
-// subject, stay linked) or Unlink (keep its current subject, become standalone) — preserving the
-// invariant that a linked card always shares its note's subject. Rendered only while a decision is
-// pending (the parent mounts it on submit), so its choices state starts fresh each time.
+// Per-card Move/Unlink decision dialog shown when a note's subject changes and it has linked
+// cards. Move keeps a card linked (preserving the invariant that a linked card shares its note's
+// subject); Unlink drops the link. Mounted only while a decision is pending, so its choices state
+// starts fresh each time.
 export function MoveLinkedCardsDialog({
   cards,
   onConfirm,

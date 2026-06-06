@@ -9,16 +9,11 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
 
-// First data-access layer in the repo. Rows are scoped to the owner automatically by
-// RLS — no explicit `user_id` filter needed. Selects only the columns the list card renders
-// (id/title/created_at + the subjects(title) embed, typed via the notes→subjects FK) — never
-// `content`, so list payloads stay slim at scale. `opts.subjectIds` (from the `?subjects=` URL
-// filter) narrows to notes in those subjects; `opts.q` adds a case-insensitive search across
-// title+content (composes AND with the subject filter). Paginated: returns the page's rows plus
-// the full match `total` off one `count: 'exact'` response (the getDueQueue precedent — so it
-// hand-rolls the query rather than going through runTableQuery, which returns rows only). The
-// optional client is injectable so the isolation E2E can drive the same path with a per-account
-// supabase-js client; app code calls it with no client and gets the per-request server one.
+// RLS scopes rows to the owner — no explicit `user_id` filter. Selects only the list-card columns
+// (never `content`) so payloads stay slim. Hand-rolls the query rather than using runTableQuery
+// because it needs the full match `total` off one `count: 'exact'` response (returns rows + total).
+// The optional client is injectable so the isolation E2E can drive the same path with a per-account
+// supabase-js client; app code passes none and gets the per-request server one.
 export async function getNotes(
   opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
@@ -50,17 +45,15 @@ export async function getNotes(
   )
 }
 
-// Lean read backing the dashboard stats: every owned note, only the columns coverage stats
-// need (id / title) — avoids pulling note `content` into the dashboard. RLS scopes rows to
-// the owner. Injectable client per the isolation rule.
+// Lean read for the dashboard stats: id/title only, never `content`. Injectable client per the
+// isolation rule.
 export async function getNotesForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) => c.from('notes').select('id, title'))
 }
 
-// Fetch a single note by id. RLS already scopes to the owner, so a missing OR
-// not-owned id both resolve to `undefined` (caller decides 404). Uses `maybeSingle`
-// (no-match → `{ data: null, error: null }`), so it does NOT go through runTableQuery,
+// RLS scopes to the owner, so a missing OR not-owned id both resolve to `undefined` (caller
+// decides 404). Uses `maybeSingle` (no-match → null, no error), so it can't use runTableQuery,
 // which throws on null data.
 export async function getNote(
   id: string,

@@ -2,10 +2,8 @@ import { z } from 'zod'
 
 import { memoryCardInputSchema } from '@/features/memory-cards/schemas'
 
-// Per-field schemas, passed to each field's `validators` (Standard Schema). The object
-// schema below composes them and is reused for server-side parsing in the actions.
-// `title` is required at the app layer (the DB column is nullable); `content` may be
-// empty (the editor can save a title-only note).
+// `title` is required at the app layer (the DB column is nullable); `content` may be empty (a
+// title-only note is valid).
 export const titleSchema = z
   .string()
   .trim()
@@ -14,9 +12,7 @@ export const titleSchema = z
 
 export const contentSchema = z.string()
 
-// `subject_id` is optional: omitted by callers that don't touch assignment, `null` when
-// the form's subject picker selects "None", or a uuid when assigned. The note's
-// `position` is derived from this in the actions, never sent by the client.
+// `subject_id` optional: omitted (no assignment change), null ("None" picked), or a uuid.
 // z.guid (shape only), not z.uuid (RFC version/variant) — opaque DB ids; see memory-cards/schemas.ts.
 export const noteSubjectIdSchema = z.guid('Invalid subject id').nullable().optional()
 
@@ -29,9 +25,8 @@ export const noteInputSchema = z.object({
 // Validates the `id` route param / form value for update + delete actions.
 export const noteIdSchema = z.guid('Invalid note id')
 
-// S-07: note + its staged checks in one atomic write. Reuses memory-card's own input schema
-// (memory-cards owns that contract — same feature→feature edge as review/dashboard, not a
-// promotion candidate). `checks` is capped to bound the RPC's bulk insert.
+// Reuses memory-card's own input schema (memory-cards owns that contract). `checks` is capped to
+// bound the RPC's bulk insert.
 export const createNoteWithChecksSchema = z.object({
   note: noteInputSchema,
   checks: z.array(memoryCardInputSchema).max(50, 'At most 50 memory cards per note'),

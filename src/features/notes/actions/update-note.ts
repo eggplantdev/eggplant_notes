@@ -9,16 +9,13 @@ import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// Per-card decisions when a note's subject changes (standalone-memory-cards): each linked card is
-// either MOVED to the new subject (stays linked — preserves the invariant that a linked card
-// shares its note's subject) or UNLINKED (note_id → null, keeps its current subject, becomes
-// standalone). The edit form's dialog collects these.
+// Per-card decisions when a note's subject changes: each linked card is either MOVED to the new
+// subject (stays linked — preserves the invariant that a linked card shares its note's subject)
+// or UNLINKED (note_id → null, kept on its current subject as standalone).
 type CardActionsT = { move: string[]; unlink: string[] }
 
-// Update a note's title + body, and optionally its subject assignment. RLS scopes the update to
-// the owner (a non-owned id matches zero rows and `.single()` errors → failure; the extended
-// `with check` also rejects pointing at a subject you don't own). Hand-rolls the envelope (not
-// runTableAction) because a subject change can fan out into the per-card moves/unlinks above.
+// Hand-rolls the envelope (not runTableAction) because a subject change can fan out into the
+// per-card moves/unlinks above.
 export async function updateNote(
   id: string,
   input: unknown,
@@ -35,10 +32,8 @@ export async function updateNote(
     title: data.title,
     content: data.content,
   }
-  // Assignment is optional on update. Only (re)derive `position` when the subject actually
-  // changes — Date.now() appends to the new subject's end, null clears it on unassign — so a plain
-  // title/content edit never reorders the note. Reading the note's OWN row to detect the change is
-  // not the max(position) aggregate the F2 fix banned; there is no append race on a single row.
+  // Only (re)derive `position` when the subject actually changes, so a plain title/content edit
+  // never reorders the note. Reading the note's OWN row to detect the change has no append race.
   let subjectChanged = false
   if (data.subject_id !== undefined) {
     const { data: current } = await supabase
@@ -62,9 +57,7 @@ export async function updateNote(
     return { success: false, error: error.message }
   }
 
-  // Apply the per-card decisions only on a real subject change. Both writes are scoped to this
-  // note's cards (`note_id = id`) on top of RLS. Moved cards take the new subject and stay linked;
-  // unlinked cards keep their subject and drop the link.
+  // Per-card decisions apply only on a real subject change.
   if (subjectChanged && cardActions) {
     if (cardActions.move.length > 0) {
       const { error: moveError } = await supabase
