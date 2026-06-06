@@ -11,7 +11,7 @@ type PaginationFooterPropsT = {
 // List footer: a "Showing X–Y of Z" range summary + the windowed page nav (UrlPagination). Renders
 // nothing for a single page — the PageShell subtitle already carries the total count, so a footer
 // would be redundant noise when everything fits on one page. The page-size <Select> from the
-// reference is dropped (fixed 24, no selector for MVP).
+// reference is dropped (fixed page size = DEFAULT_LIMIT, no selector for MVP).
 export function PaginationFooter({ paginationMeta, baseUrl, className }: PaginationFooterPropsT) {
   const { currentPage, totalPages, totalDocs, limit } = paginationMeta
   if (totalPages <= 1) return null
