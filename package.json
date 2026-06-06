@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/types.ts",
+    "seed:dump-fixture": "node supabase/seed-scripts/dump-sample-fixture.mjs",
     "prepare": "husky"
   },
   "dependencies": {

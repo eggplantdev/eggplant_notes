@@ -430,25 +430,25 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `supabase db reset`
-- [x] 1.2 Type checking passes: `pnpm typecheck`
-- [x] 1.3 Linting passes: `pnpm lint`
+- [x] 1.1 Migration applies cleanly: `supabase db reset` — ebd022e
+- [x] 1.2 Type checking passes: `pnpm typecheck` — ebd022e
+- [x] 1.3 Linting passes: `pnpm lint` — ebd022e
 
 #### Manual
 
-- [x] 1.4 `is_seeded boolean not null default false` present on subjects, notes, memory_cards
+- [x] 1.4 `is_seeded boolean not null default false` present on subjects, notes, memory_cards — ebd022e
 
 ### Phase 2: Fixture generator + committed fixture
 
 #### Automated
 
-- [ ] 2.1 Dump runs against a reset local DB: `pnpm seed:dump-fixture`
-- [ ] 2.2 Generated file imports + type-checks: `pnpm typecheck`
-- [ ] 2.3 Linting passes: `pnpm lint`
+- [x] 2.1 Dump runs against a reset local DB: `pnpm seed:dump-fixture`
+- [x] 2.2 Generated file imports + type-checks: `pnpm typecheck`
+- [x] 2.3 Linting passes: `pnpm lint`
 
 #### Manual
 
-- [ ] 2.4 Fixture contains expected subjects/notes-with-code/cards, counts ≈ corpus
+- [x] 2.4 Fixture contains expected subjects/notes-with-code/cards, counts ≈ corpus
 
 ### Phase 3: Gating queries + Server Actions
 
