@@ -502,9 +502,9 @@ None — no schema change.
 
 #### Automated
 
-- [ ] 5.1 Unit tests pass: `pnpm test`
+- [x] 5.1 Unit tests pass: `pnpm test`
 - [ ] 5.2 E2E pass: `pnpm test:e2e`
-- [ ] 5.3 Type/lint/build pass
+- [x] 5.3 Type/lint/build pass
 
 #### Manual
 

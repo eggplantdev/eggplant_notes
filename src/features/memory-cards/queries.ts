@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { DueCardT, MemoryCardListItemT, MemoryCardT } from '@/features/memory-cards/types'
+import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
@@ -66,26 +67,30 @@ export async function getMemoryCardsList(
   const page = opts?.page ?? 1
   const limit = opts?.limit ?? DEFAULT_LIMIT
   const offset = (page - 1) * limit
-
-  let query = supabase
-    .from('memory_cards')
-    .select('id, prompt, note_id, due_at, state, notes!inner(title, subjects(title))', {
-      count: 'exact',
-    })
-  if (opts?.subjectIds && opts.subjectIds.length > 0) {
-    query = query.in('notes.subject_id', opts.subjectIds)
-  }
   const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
-  if (orFilter) query = query.or(orFilter)
 
-  const { data, count, error } = await query
-    .order('due_at', { ascending: true })
-    .range(offset, offset + limit - 1)
-  if (error) {
-    console.error('[getMemoryCardsList] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
+  // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
+  const filtered = (head: boolean) => {
+    let query = supabase
+      .from('memory_cards')
+      .select('id, prompt, note_id, due_at, state, notes!inner(title, subjects(title))', {
+        count: 'exact',
+        head,
+      })
+    if (opts?.subjectIds && opts.subjectIds.length > 0) {
+      query = query.in('notes.subject_id', opts.subjectIds)
+    }
+    if (orFilter) query = query.or(orFilter)
+    return query
   }
-  return { rows: data ?? [], total: count ?? 0 }
+
+  return runPaginatedQuery(
+    'getMemoryCardsList',
+    filtered(false)
+      .order('due_at', { ascending: true })
+      .range(offset, offset + limit - 1),
+    () => filtered(true),
+  )
 }
 
 // Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the

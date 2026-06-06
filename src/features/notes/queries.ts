@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { NoteListItemT } from '@/features/notes/types'
 import type { NoteT } from '@/types/note'
+import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
@@ -26,24 +27,27 @@ export async function getNotes(
   const page = opts?.page ?? 1
   const limit = opts?.limit ?? DEFAULT_LIMIT
   const offset = (page - 1) * limit
-
-  let query = supabase.from('notes').select('id, title, created_at, subjects(title)', {
-    count: 'exact',
-  })
-  if (opts?.subjectIds && opts.subjectIds.length > 0) {
-    query = query.in('subject_id', opts.subjectIds)
-  }
   const orFilter = opts?.q ? searchOr(['title', 'content'], opts.q) : null
-  if (orFilter) query = query.or(orFilter)
 
-  const { data, count, error } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
-  if (error) {
-    console.error('[getNotes] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
+  // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
+  const filtered = (head: boolean) => {
+    let query = supabase
+      .from('notes')
+      .select('id, title, created_at, subjects(title)', { count: 'exact', head })
+    if (opts?.subjectIds && opts.subjectIds.length > 0) {
+      query = query.in('subject_id', opts.subjectIds)
+    }
+    if (orFilter) query = query.or(orFilter)
+    return query
   }
-  return { rows: data ?? [], total: count ?? 0 }
+
+  return runPaginatedQuery(
+    'getNotes',
+    filtered(false)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1),
+    () => filtered(true),
+  )
 }
 
 // Lean read backing the dashboard stats: every owned note, only the columns coverage stats

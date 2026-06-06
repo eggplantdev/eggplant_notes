@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
@@ -38,6 +38,10 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const value = local ?? urlQuery
+  // The typed value diverges from the committed `?q=` from the first keystroke until the re-query's
+  // results render (urlQuery only updates when the transition's navigation completes) — so it spans
+  // the debounce + the server round-trip, exactly the "searching" window the spinner marks.
+  const isSearching = local !== null && local.trim() !== urlQuery
 
   function commit(next: string) {
     // buildUrlWithParams deletes empty-string keys: an empty term clears `q`, and `page: ''` always
@@ -78,7 +82,11 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
 
   return (
     <div className={cn('relative', className)}>
-      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+      {isSearching ? (
+        <Loader2 className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2 animate-spin" />
+      ) : (
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+      )}
       <Input
         type="search"
         value={value}

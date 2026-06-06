@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { type MouseEvent, type ReactNode } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
 import {
@@ -70,42 +71,58 @@ export function AnimatedCardList<T>({
   renderAction,
   gridLayout = false,
 }: PropsT<T>) {
+  // Re-fade the whole list when the URL query changes (search / subject filter / page), so a page
+  // swap reads as a clean content transition on the freshly-loaded data — instead of the inner
+  // per-item popLayout FLIP trying to reshuffle an entirely new key-set (which finishes before the
+  // new page is in and looks janky). `initial={false}` keeps the FIRST render quiet under
+  // PageShell's own mount fade; only navigations (navKey change) animate. Within a page — add /
+  // delete with no URL change — navKey is stable, so the inner FLIP still does its job.
+  const navKey = useSearchParams().toString()
   return (
-    <div
-      className={cn('gap-3', gridLayout ? 'grid md:grid-cols-2 xl:grid-cols-3' : 'flex flex-col')}
-    >
-      <AnimatePresence mode="popLayout" initial={false}>
-        {items.map((item) => {
-          const key = getKey(item)
-          return (
-            <AnimatedListItem key={key} layoutId={key} layout>
-              <Link href={getHref(item)} className={cn(gridLayout && 'block h-full')}>
-                <Card className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}>
-                  {/* gap-x-4: keep the title/eyebrow column clear of the action slot (gap-1 alone
-                      let Edit/Delete crowd the title); row gap stays tight via the base gap-1. */}
-                  <CardHeader className="gap-x-4">
-                    {renderEyebrow?.(item)}
-                    <CardTitle>{renderTitle(item)}</CardTitle>
-                    {renderDescription && (
-                      <CardDescription>{renderDescription(item)}</CardDescription>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={navKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className={cn('gap-3', gridLayout ? 'grid md:grid-cols-2 xl:grid-cols-3' : 'flex flex-col')}
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          {items.map((item) => {
+            const key = getKey(item)
+            return (
+              <AnimatedListItem key={key} layoutId={key} layout>
+                <Link href={getHref(item)} className={cn(gridLayout && 'block h-full')}>
+                  <Card
+                    className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}
+                  >
+                    {/* gap-x-4: keep the title/eyebrow column clear of the action slot (gap-1 alone
+                        let Edit/Delete crowd the title); row gap stays tight via the base gap-1. */}
+                    <CardHeader className="gap-x-4">
+                      {renderEyebrow?.(item)}
+                      <CardTitle>{renderTitle(item)}</CardTitle>
+                      {renderDescription && (
+                        <CardDescription>{renderDescription(item)}</CardDescription>
+                      )}
+                      {renderAction && (
+                        // CardAction is the grid's top-right slot. blockCardNav sits on this parent
+                        // (bubble phase) so each action's own handler fires first — consumers must
+                        // not re-add preventDefault/stopPropagation.
+                        <CardAction onClick={blockCardNav}>{renderAction(item)}</CardAction>
+                      )}
+                    </CardHeader>
+                    {/* Subtitle pinned to the bottom (mt-auto) so tags align across a grid row. */}
+                    {renderSubtitle && (
+                      <CardContent className="mt-auto">{renderSubtitle(item)}</CardContent>
                     )}
-                    {renderAction && (
-                      // CardAction is the grid's top-right slot. blockCardNav sits on this parent
-                      // (bubble phase) so each action's own handler fires first — consumers must
-                      // not re-add preventDefault/stopPropagation.
-                      <CardAction onClick={blockCardNav}>{renderAction(item)}</CardAction>
-                    )}
-                  </CardHeader>
-                  {/* Subtitle pinned to the bottom (mt-auto) so tags align across a grid row. */}
-                  {renderSubtitle && (
-                    <CardContent className="mt-auto">{renderSubtitle(item)}</CardContent>
-                  )}
-                </Card>
-              </Link>
-            </AnimatedListItem>
-          )
-        })}
-      </AnimatePresence>
-    </div>
+                  </Card>
+                </Link>
+              </AnimatedListItem>
+            )
+          })}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
   )
 }

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
@@ -34,21 +35,24 @@ export async function getSubjectsList(
   const page = opts?.page ?? 1
   const limit = opts?.limit ?? DEFAULT_LIMIT
   const offset = (page - 1) * limit
-
-  let query = supabase.from('subjects').select('id, title, description, created_at', {
-    count: 'exact',
-  })
   const orFilter = opts?.q ? searchOr(['title', 'description'], opts.q) : null
-  if (orFilter) query = query.or(orFilter)
 
-  const { data, count, error } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
-  if (error) {
-    console.error('[getSubjectsList] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
+  // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
+  const filtered = (head: boolean) => {
+    let query = supabase
+      .from('subjects')
+      .select('id, title, description, created_at', { count: 'exact', head })
+    if (orFilter) query = query.or(orFilter)
+    return query
   }
-  return { rows: data ?? [], total: count ?? 0 }
+
+  return runPaginatedQuery(
+    'getSubjectsList',
+    filtered(false)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1),
+    () => filtered(true),
+  )
 }
 
 // Single subject by id. Missing OR not-owned both resolve to `undefined` (caller
