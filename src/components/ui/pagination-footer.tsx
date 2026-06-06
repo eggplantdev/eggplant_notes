@@ -16,7 +16,10 @@ export function PaginationFooter({ paginationMeta, baseUrl, className }: Paginat
   const { currentPage, totalPages, totalDocs, limit } = paginationMeta
   if (totalPages <= 1) return null
 
-  const from = (currentPage - 1) * limit + 1
+  // Clamp `from` to totalDocs so an out-of-range deep page (?page=99) reads "Showing 30–30 of 30"
+  // rather than "Showing 2353–30 of 30" — the accepted no-redirect out-of-range case (parsePagination
+  // clamps only the lower bound, so an upper overflow reaches here).
+  const from = totalDocs === 0 ? 0 : Math.min((currentPage - 1) * limit + 1, totalDocs)
   const to = Math.min(currentPage * limit, totalDocs)
 
   return (

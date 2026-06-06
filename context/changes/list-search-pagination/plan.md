@@ -159,6 +159,11 @@ escape PostgREST special chars (`%`, `,`, `(`, `)`) identically.
 `null` when `q` is blank. All three list queries will import it, so it's born shared in
 `src/lib/supabase/` (2nd-consumer rule already satisfied) — not held in `notes/queries.ts`.
 
+> Implemented (review F2): instead of per-char escaping, the term is **wrapped in double quotes**
+> (`col.ilike."%term%"`) with `"`/`\` backslash-escaped. Double-quoting makes PostgREST's structural
+> chars (`,` `.` `(` `)`) literal in one move — a sounder, injection-safe mechanism than escaping
+> each char. `%`/`_` stay live as ilike wildcards (acceptable for a search box).
+
 #### 7. Cards-overview stats source
 
 **File**: `src/features/memory-cards/queries.ts`
@@ -485,8 +490,8 @@ None — no schema change.
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `pnpm typecheck`
-- [x] 4.2 Linting passes: `pnpm lint`
+- [x] 4.1 Type checking passes: `pnpm typecheck` — dcacef0
+- [x] 4.2 Linting passes: `pnpm lint` — dcacef0
 
 #### Manual
 

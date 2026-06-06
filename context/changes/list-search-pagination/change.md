@@ -1,7 +1,7 @@
 ---
 change_id: list-search-pagination
 title: Server-side search + pagination across notes, memory cards, and subjects
-status: implementing
+status: impl_reviewed
 created: 2026-06-06
 updated: 2026-06-06
 archived_at: null

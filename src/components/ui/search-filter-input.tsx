@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
 // Debounce each keystroke into one trailing server re-query (matches SubjectFilter's DEBOUNCE_MS),
 // so typing a word fires one navigation, not one per character.
@@ -39,13 +40,13 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
   const value = local ?? urlQuery
 
   function commit(next: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    const trimmed = next.trim()
-    if (trimmed) params.set('q', trimmed)
-    else params.delete('q')
-    params.delete('page') // a query change always returns to page 1
-    const qs = params.toString()
-    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }))
+    // buildUrlWithParams deletes empty-string keys: an empty term clears `q`, and `page: ''` always
+    // resets to page 1 (the cross-component page-reset invariant; SubjectFilter does the same).
+    const url = buildUrlWithParams(pathname, searchParams.toString(), {
+      q: next.trim(),
+      page: '',
+    })
+    startTransition(() => router.replace(url, { scroll: false }))
   }
 
   function scheduleCommit(next: string) {

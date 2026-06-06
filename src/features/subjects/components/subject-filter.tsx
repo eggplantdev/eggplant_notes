@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
 import { MultiSelect, type MultiSelectOptionT } from '@/components/ui/multi-select'
+import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
 // Batch rapid toggles into one server round-trip: picking several subjects in a single popover
 // session re-queries the page's list once on the trailing edge, not once per click (mirrors
@@ -38,12 +39,13 @@ export function SubjectFilter({ options, selectedIds }: SubjectFilterPropsT) {
   const selected = localSelected ?? selectedIds
 
   function commit(next: string[]) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (next.length > 0) params.set('subjects', next.join(','))
-    else params.delete('subjects')
-    params.delete('page') // a subject change returns to page 1 (else it strands on a now-empty deep page)
-    const qs = params.toString()
-    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }))
+    // buildUrlWithParams deletes empty-string keys: empty selection clears `subjects`, and
+    // `page: ''` resets to page 1 (else a subject change strands on a now-empty deep page).
+    const url = buildUrlWithParams(pathname, searchParams.toString(), {
+      subjects: next.join(','),
+      page: '',
+    })
+    startTransition(() => router.replace(url, { scroll: false }))
   }
 
   function scheduleCommit(next: string[]) {
