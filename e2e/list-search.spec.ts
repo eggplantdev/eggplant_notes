@@ -7,7 +7,7 @@ import { clientFor, signUp, uniqueEmail } from './helpers'
 // authenticated supabase-js client (per lessons.md — UI for auth, programmatic client for data).
 // `user_id` is omitted on insert: the DB defaults it to auth.uid() and RLS guards it.
 
-test('notes list: 24-cap + footer, body-only search narrows, page links preserve ?q', async ({
+test('notes list: 100-cap + footer, body-only search narrows, page links preserve ?q', async ({
   page,
 }) => {
   const email = uniqueEmail('list-search')
@@ -15,24 +15,25 @@ test('notes list: 24-cap + footer, body-only search narrows, page links preserve
   const supabase = await clientFor(email)
 
   const stamp = Date.now()
-  const tag = `bulk${stamp}` // in EVERY title → a search for it returns the whole 26-row set
+  const tag = `bulk${stamp}` // in EVERY title → a search for it returns the whole 105-row set
   const bodyToken = `bodyonly${stamp}` // ONLY in one note's content, never in any title
 
-  const rows = Array.from({ length: 26 }, (_, i) => ({
+  // 105 rows → page 1 holds 100 (DEFAULT_LIMIT), page 2 holds the remaining 5.
+  const rows = Array.from({ length: 105 }, (_, i) => ({
     title: `${tag} note ${i + 1}`,
-    content: i === 25 ? `this note mentions ${bodyToken} in its body only` : '',
+    content: i === 104 ? `this note mentions ${bodyToken} in its body only` : '',
   }))
   const { error } = await supabase.from('notes').insert(rows)
   expect(error, 'bulk note insert failed').toBeNull()
 
-  // Page 1 caps at 24 of 26; the footer shows the range.
+  // Page 1 caps at 100 of 105; the footer shows the range.
   await page.goto('/notes')
-  await expect(page.getByText('26 notes')).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByText(/Showing 1.24 of 26/)).toBeVisible()
+  await expect(page.getByText('105 notes')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(/Showing 1.100 of 105/)).toBeVisible()
 
   // Page 2 shows the tail.
   await page.goto('/notes?page=2')
-  await expect(page.getByText(/Showing 25.26 of 26/)).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(/Showing 101.105 of 105/)).toBeVisible({ timeout: 15_000 })
 
   // Body-only search: the token lives only in one note's content (not its title) → that note
   // returns, proving search hits `content`, and the result fits one page (footer hidden).
@@ -45,7 +46,7 @@ test('notes list: 24-cap + footer, body-only search narrows, page links preserve
   // Whole-set search keeps pagination; the page-2 link must preserve ?q.
   await page.getByPlaceholder(/Search notes/).fill(tag)
   await expect(page).toHaveURL(new RegExp(`[?&]q=${tag}`), { timeout: 15_000 })
-  await expect(page.getByText(/Showing 1.24 of 26/)).toBeVisible()
+  await expect(page.getByText(/Showing 1.100 of 105/)).toBeVisible()
   await expect(page.getByRole('link', { name: 'Go to page 2' })).toHaveAttribute(
     'href',
     new RegExp(`q=${tag}`),

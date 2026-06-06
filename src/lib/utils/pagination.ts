@@ -1,6 +1,6 @@
 // Fixed list page size across the app's paginated list reads (notes / memory cards / subjects).
-// Chosen to fill the 1/2/3-column responsive card grid cleanly; no per-page selector for MVP.
-export const DEFAULT_LIMIT = 24
+// No per-page selector for MVP.
+export const DEFAULT_LIMIT = 100
 
 // Shape the PaginationFooter / UrlPagination render from. `totalDocs` is the full match count
 // (the query's `total`), not the page length.
