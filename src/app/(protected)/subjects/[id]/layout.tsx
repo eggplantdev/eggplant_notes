@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { Button } from '@/components/ui/button'
+import { MutedText } from '@/components/ui/muted-text'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
@@ -33,9 +34,9 @@ export default async function SubjectLayout({
       subtitle={
         <>
           <span className="block">{pluralize(summaries.length, 'note')}</span>
-          {subject.description && (
-            <span className="mt-1 block max-w-prose">{subject.description}</span>
-          )}
+          <MutedText as="span" className="mt-1 block max-w-prose">
+            {subject.description}
+          </MutedText>
         </>
       }
       backHref="/subjects"

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MutedText } from '@/components/ui/muted-text'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { buildPreviews } from '@/features/review/build-previews'
 import { RatingButtons } from '@/features/review/rating-buttons'
@@ -27,12 +28,9 @@ export function ReviewPanel({ card, goal }: PropsT) {
             <CardHeader>
               <CardTitle className="text-base font-medium">Recall</CardTitle>
               {card.notes?.title && (
-                <Link
-                  href={`/notes/${card.note_id}`}
-                  className="text-muted-foreground hover:text-foreground text-sm"
-                >
-                  From: {card.notes.title}
-                </Link>
+                <MutedText asChild interactive>
+                  <Link href={`/notes/${card.note_id}`}>From: {card.notes.title}</Link>
+                </MutedText>
               )}
             </CardHeader>
             <CardContent className="flex flex-col gap-4">

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { MutedText } from '@/components/ui/muted-text'
 import type { HardestCardT } from '@/features/dashboard/types'
 
 type PropsT = { cards: HardestCardT[] }
@@ -7,9 +8,7 @@ type PropsT = { cards: HardestCardT[] }
 // "Needs attention" list: the most-lapsed cards, each linking to its source note (S-08 path).
 export function HardestCards({ cards }: PropsT) {
   if (cards.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">No lapsed cards yet — nothing struggling.</p>
-    )
+    return <MutedText>No lapsed cards yet — nothing struggling.</MutedText>
   }
   return (
     <ul className="divide-border divide-y">
@@ -17,7 +16,9 @@ export function HardestCards({ cards }: PropsT) {
         <li key={c.id} className="flex items-center justify-between gap-3 py-2">
           <Link href={`/notes/${c.noteId}`} className="min-w-0 hover:underline">
             <p className="text-foreground truncate text-sm font-medium">{c.prompt}</p>
-            <p className="text-muted-foreground truncate text-xs">{c.noteTitle}</p>
+            <MutedText size="xs" truncate>
+              {c.noteTitle}
+            </MutedText>
           </Link>
           <span className="text-destructive shrink-0 text-xs font-medium tabular-nums">
             {c.lapses} {c.lapses === 1 ? 'lapse' : 'lapses'}

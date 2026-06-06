@@ -2,6 +2,7 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
+import { MutedText } from '@/components/ui/muted-text'
 import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 import type { SubjectT } from '@/types/subject'
@@ -23,11 +24,7 @@ export function SubjectsList({ subjects }: { subjects: SubjectT[] }) {
         getKey={(subject) => subject.id}
         getHref={(subject) => `/subjects/${subject.id}`}
         renderTitle={(subject) => subject.title}
-        renderSubtitle={(subject) =>
-          subject.description ? (
-            <p className="text-muted-foreground line-clamp-2 text-sm">{subject.description}</p>
-          ) : null
-        }
+        renderSubtitle={(subject) => <MutedText clamp={2}>{subject.description}</MutedText>}
         renderAction={(subject) => (
           <CardActions
             editHref={`/subjects/${subject.id}?edit`}
