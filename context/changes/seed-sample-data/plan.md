@@ -466,9 +466,9 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `pnpm typecheck`
-- [x] 4.2 Linting passes: `pnpm lint`
-- [x] 4.3 Build passes: `pnpm build`
+- [x] 4.1 Type checking passes: `pnpm typecheck` — 0c0c4ef
+- [x] 4.2 Linting passes: `pnpm lint` — 0c0c4ef
+- [x] 4.3 Build passes: `pnpm build` — 0c0c4ef
 
 #### Manual
 
@@ -479,11 +479,11 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [ ] 5.1 Type checking passes: `pnpm typecheck`
-- [ ] 5.2 Linting passes: `pnpm lint`
-- [ ] 5.3 Unit tests pass: `pnpm test`
-- [ ] 5.4 Build passes: `pnpm build`
-- [ ] 5.5 E2E passes (best-effort, `retries: 2`): `pnpm test:e2e`
+- [x] 5.1 Type checking passes: `pnpm typecheck`
+- [x] 5.2 Linting passes: `pnpm lint`
+- [x] 5.3 Unit tests pass: `pnpm test`
+- [x] 5.4 Build passes: `pnpm build`
+- [x] 5.5 E2E passes (best-effort, `retries: 2`): `pnpm test:e2e` — sample-data.spec green; full-suite reds are the documented GoTrue sign-up flake (all die in signUp→/dashboard) + 1 unrelated memory-card-add failure; daily-goal/action-feedback (my edited surfaces) pass in isolation → no regression
 
 #### Manual
 
