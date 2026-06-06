@@ -1,14 +1,6 @@
-// Dashboard data + heatmap shape contracts. Feature-local shared types, consumed by the
-// matrix builder, the page, and the heatmap component — kept out of the component files per
-// the "components export only the component / shared types live in their own file" rule.
-//
-// DashboardDataT is the contract between the data layer (data.ts) and the UI; S-03 wired it
-// to real per-user queries over `memory_cards` / `review_events` without changing this shape.
-
 import { HEAT_LEVELS } from '@/features/dashboard/constants'
 import type { ActivityDayT } from '@/types/activity'
 
-// Level type derived from the HEAT_LEVELS const in constants.ts (its single source).
 export type HeatmapLevelT = (typeof HEAT_LEVELS)[number]
 
 export type DashboardDataT = {

@@ -1,6 +1,5 @@
 import type { Database } from '@/lib/supabase/types'
 
-// Row type re-exported from the generated Database schema — single source of truth.
 export type MemoryCardT = Database['public']['Tables']['memory_cards']['Row']
 
 // A due-review card plus its source note's title, for the card→note link (S-08). The
