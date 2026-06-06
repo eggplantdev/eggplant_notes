@@ -5,8 +5,6 @@ import { Cell, PolarGrid, RadialBar, RadialBarChart } from 'recharts'
 import {
   type ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
@@ -27,15 +25,6 @@ export function RadialCountChart({
 }) {
   return (
     <>
-      {/* Counts as text for screen-reader / non-hover users — the rings convey them only
-          visually, the tooltip only on hover. */}
-      <ul className="sr-only">
-        {data.map((d) => (
-          <li key={d.key}>
-            {String(config[d.key]?.label ?? d.key)}: {d.value}
-          </li>
-        ))}
-      </ul>
       <ChartContainer config={config} className="mx-auto aspect-square w-full max-w-[220px]">
         <RadialBarChart data={data} innerRadius={30} outerRadius={110}>
           <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel nameKey="key" />} />
@@ -54,9 +43,23 @@ export function RadialCountChart({
               )
             })}
           </RadialBar>
-          <ChartLegend content={<ChartLegendContent nameKey="key" />} />
         </RadialBarChart>
       </ChartContainer>
+      {/* Legend lives BELOW the chart (not inside the SVG, where recharts crammed it against the
+          rings). Doubles as the screen-reader/non-hover count readout — the tooltip is hover-only.
+          Colours come from `config` (global theme tokens), not the chart-scoped `--color-<key>`. */}
+      <ul className="text-muted-foreground mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs">
+        {data.map((d) => (
+          <li key={d.key} className="flex items-center gap-1.5">
+            <span
+              className="size-2 shrink-0 rounded-[2px]"
+              style={{ backgroundColor: config[d.key]?.color }}
+            />
+            <span>{String(config[d.key]?.label ?? d.key)}</span>
+            <span className="text-foreground font-mono font-medium tabular-nums">{d.value}</span>
+          </li>
+        ))}
+      </ul>
     </>
   )
 }
