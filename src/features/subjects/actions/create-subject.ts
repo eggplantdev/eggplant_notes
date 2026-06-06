@@ -7,9 +7,8 @@ import { runTableAction } from '@/lib/supabase/run-table-action'
 import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
-// Mirrors createNote. `user_id` is NOT sent — the DB defaults it to auth.uid() and RLS
-// `with check` guards it. On success, revalidate the list and redirect to the new
-// subject (redirect throws, so the form only ever observes the failure branch).
+// `user_id` is NOT sent — the DB defaults it to auth.uid() and RLS `with check` guards it.
+// redirect throws, so the form only ever observes the failure branch.
 export async function createSubject(input: unknown): Promise<ActionResultT> {
   const result = await runTableAction(subjectInputSchema, input, (supabase, data) =>
     supabase.from('subjects').insert(data).select('id').single(),

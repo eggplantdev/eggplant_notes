@@ -11,11 +11,9 @@ const reorderInputSchema = z.object({
   position: z.number(),
 })
 
-// Persist one note's new fractional position after a drag. The client computes the midpoint
-// from the visible neighbors and sends it; the server writes only that single row (RLS scopes
-// to the owner — and the F1 with-check still requires the note's subject to be the caller's).
-// No sequence recompute. Returns success/error (no redirect) so the optimistic island can
-// revert and surface a message on failure; the user stays on the subject page.
+// Persist one note's new fractional position after a drag — the client sends the midpoint of the
+// visible neighbors, the server writes only that one row (no sequence recompute). Returns
+// success/error (no redirect) so the optimistic island can revert and surface a message.
 export async function reorderNote(noteId: string, position: number): Promise<ActionResultT> {
   const result = await runTableAction(reorderInputSchema, { noteId, position }, (supabase, data) =>
     supabase
@@ -27,9 +25,8 @@ export async function reorderNote(noteId: string, position: number): Promise<Act
   )
   if (!result.success) return result
 
-  // Revalidate the whole subject subtree (layout): the sidebar's ordered note list lives in the
-  // /subjects/[id] layout, so 'layout' covers both the index and the active [noteId] segment —
-  // without it a hard reload would show stale order.
+  // 'layout' revalidates the whole subtree: the ordered sidebar list lives in the /subjects/[id]
+  // layout, so this covers both the index and the active [noteId] segment (else stale order on reload).
   revalidatePath('/subjects/[id]', 'layout')
   return { success: true }
 }

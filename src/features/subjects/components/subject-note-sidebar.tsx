@@ -30,9 +30,9 @@ import type { SubjectNoteSummaryT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
 import { cn } from '@/lib/utils'
 
-// Arrow ↑/↓ moves focus between note links within the same list, so keyboard users browse notes
-// without tabbing through every grip. Scoped to the current <ul> (closest) so the desktop column
-// and the mobile sheet never cross-focus each other.
+// Arrow ↑/↓ moves focus between note links in the same list so keyboard users browse without
+// tabbing through every grip. Scoped to the current <ul> so desktop column and mobile sheet
+// don't cross-focus.
 function handleNoteLinkKeyNav(e: KeyboardEvent<HTMLAnchorElement>) {
   if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
   e.preventDefault()
@@ -44,8 +44,6 @@ function handleNoteLinkKeyNav(e: KeyboardEvent<HTMLAnchorElement>) {
   next?.focus()
 }
 
-// The navigation link shared by the sortable row and the static (filtered) row — swaps the active
-// note via soft RSC navigation, highlights when active.
 function NoteNavLink({
   subjectId,
   id,
@@ -76,11 +74,10 @@ function NoteNavLink({
   )
 }
 
-// A single sidebar row: the body is a navigation Link (swap the active note); the grip is a
-// mouse-only drag handle (NOT keyboard-focusable — `tabIndex=-1`, no dnd `attributes`/KeyboardSensor)
-// so keyboard nav is one Tab stop per row (the link) + arrow keys, not a grip→link two-step. The
-// useSortable node stays the <li> (measured by verticalListSortingStrategy); only pointer `listeners`
-// live on the grip. Keyboard reorder is intentionally dropped here — the continuous-view ToC keeps it.
+// The grip is a mouse-only drag handle (NOT keyboard-focusable — `tabIndex=-1`, no dnd
+// `attributes`/KeyboardSensor) so keyboard nav is one Tab stop per row (the link) + arrow keys,
+// not a grip→link two-step. Keyboard reorder is intentionally dropped here; the continuous-view
+// ToC keeps it.
 function SortableNoteRow({
   subjectId,
   id,
@@ -162,11 +159,9 @@ function SortableNoteList({
   )
 }
 
-// Static (non-draggable) list used while a title filter is active. Reorder is intentionally OFF
-// when filtering: dragging a filtered SUBSET would compute fractional positions against the wrong
-// neighbors (the hidden rows between two visible ones), so the only coherent options are
-// full-list-draggable OR filtered-static. The grip column is dropped; left padding keeps the links
-// aligned with the draggable view.
+// Reorder is intentionally OFF while filtering: dragging a filtered SUBSET would compute
+// fractional positions against the wrong neighbors (the hidden rows between two visible ones),
+// so the only coherent options are full-list-draggable OR filtered-static.
 function FilteredNoteList({
   subjectId,
   items,
@@ -210,17 +205,11 @@ function SidebarFilter({ value, onChange }: { value: string; onChange: (next: st
   )
 }
 
-// Docs-view sidebar (S-15): persistent list of a subject's notes — each row navigates (Link)
-// and reorders (grip handle). Desktop renders as a column; mobile collapses behind a sheet
-// trigger (mirrors the S-10 app-nav pattern). Optimistic `items` state is lifted here so the
-// desktop column and the mobile sheet share one source of truth; a drag writes the moved row's
-// new fractional position via reorderNote and reverts on failure. Always renders the list (even
-// for <2 notes) — it's a nav surface, not only a reorder control.
-//
-// Title filter (client-side, no URL): the full summary set is already loaded here, so filtering it
-// in-memory is instant and needs no server round-trip — and the host layout can't read searchParams
-// anyway. `term` drives a derived `visible` list; a non-empty term switches to the static list
-// (drag off, see FilteredNoteList).
+// Optimistic `items` state is lifted here so the desktop column and the mobile sheet share one
+// source of truth; a drag writes the moved row's new fractional position via reorderNote and
+// reverts on failure. Title filter is client-side (no URL): the full summary set is already
+// loaded, so filtering in-memory is instant — and the host layout can't read searchParams anyway.
+// A non-empty term switches to the static list (drag off, see FilteredNoteList).
 export function SubjectNoteSidebar({
   subjectId,
   notes,
@@ -291,8 +280,7 @@ export function SubjectNoteSidebar({
 
   return (
     <>
-      {/* Desktop: persistent sidebar column. The layout's app-shell row (PageShell `fill` +
-          a 1fr grid track) bounds this cell to the viewport, so it just fills the row and
+      {/* The layout's app-shell row bounds this cell to the viewport, so it fills the row and
           scrolls its own list when long — the content pane and page stay put. */}
       <nav
         aria-label="Notes in this subject"
@@ -303,7 +291,6 @@ export function SubjectNoteSidebar({
         <FormError message={error} />
       </nav>
 
-      {/* Mobile: a trigger that opens the same list in a sheet. */}
       <div className="md:hidden">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>

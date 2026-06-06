@@ -13,9 +13,9 @@ import type { SubjectInputT } from '@/features/subjects/schemas'
 import type { SubjectT } from '@/types/subject'
 import type { ActionResultT } from '@/types/action'
 
-// `subject` present → edit (action needs the id); absent → create. Mirrors NoteForm's
-// union prop so TS narrows the action signature off `subject`'s truthiness. On success the
-// server action redirects (throws), so the form only ever sees the failure branch.
+// `subject` present → edit (action takes the id); absent → create. The union prop lets TS narrow
+// the action signature off `subject`'s truthiness. On success the action redirects (throws), so
+// the form only ever sees the failure branch.
 type SubjectFormPropsT =
   | { action: (input: SubjectInputT) => Promise<ActionResultT>; subject?: undefined }
   | { action: (id: string, input: SubjectInputT) => Promise<ActionResultT>; subject: SubjectT }

@@ -7,10 +7,8 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { MultiSelect, type MultiSelectOptionT } from '@/components/ui/multi-select'
 import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
-// Batch rapid toggles into one server round-trip: picking several subjects in a single popover
-// session re-queries the page's list once on the trailing edge, not once per click (mirrors
-// wykonczymy's FilterMultiSelect). The transition keeps the list interactive during the
-// re-query.
+// Batch rapid toggles into one server round-trip: a popover session re-queries on the trailing
+// edge, not once per click.
 const DEBOUNCE_MS = 400
 
 type SubjectFilterPropsT = {
@@ -19,14 +17,11 @@ type SubjectFilterPropsT = {
   selectedIds: string[]
 }
 
-// Shared subject ("topic") filter for any subject-filterable list (notes, memory-cards). Lives in
-// the subjects feature as the 2nd consumer promoted it out of notes; consuming pages compose it at
-// the route layer. Server-side: the selection lives in the URL and the page re-queries on change,
-// so the filter is shareable and scales past the loaded set. Two-mode selection avoids a desync:
-// while the popover is OPEN, `localSelected` drives so toggles feel instant and the debounce can
-// batch them; while CLOSED, it's null and selection derives straight from the URL prop — so
-// Back/Forward and external edits stay in sync without a second source of truth. Opening reseeds
-// from the URL; closing flushes any pending debounce immediately.
+// Shared subject ("topic") filter; selection lives in the URL so it's shareable and scales past
+// the loaded set. Two-mode selection avoids a desync: while OPEN, `localSelected` drives so
+// toggles feel instant and the debounce can batch them; while CLOSED, it's null and selection
+// derives straight from the URL prop — so Back/Forward and external edits stay in sync without a
+// second source of truth.
 export function SubjectFilter({ options, selectedIds }: SubjectFilterPropsT) {
   const router = useRouter()
   const pathname = usePathname()

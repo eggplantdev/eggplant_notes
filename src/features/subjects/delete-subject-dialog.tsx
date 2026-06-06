@@ -4,14 +4,9 @@ import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { deleteSubject } from '@/features/subjects/actions/delete-subject'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-// Controlled delete-confirmation dialog for a subject. `subjectId` non-null → open, confirming
-// that subject; null → closed. Controlled so a single instance can serve a whole list (one
-// dialog, not one Radix tree per row — see SubjectsList). Mirrors DeleteNoteDialog: a thin
-// wrapper over the shared ConfirmDeleteDialog owning the deleteSubject transition. Member notes
-// are DETACHED, not deleted (FK set null) — the copy says so explicitly. deleteSubject redirects
-// to /subjects on success (so the action only ever returns on failure), surfacing the success
-// toast via the post-redirect `?toast` flag; a returned failure shows inline + as a toast and
-// keeps the dialog open.
+// Controlled (`subjectId` non-null → open) so a single instance can serve a whole list, not one
+// Radix tree per row. deleteSubject redirects on success, so the action only ever returns on
+// failure (which keeps the dialog open + shows the error). Member notes are detached, not deleted.
 type DeleteSubjectDialogPropsT = {
   subjectId: string | null
   onOpenChange: (open: boolean) => void

@@ -9,12 +9,11 @@ import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
 import type { SubjectListItemT, SubjectNoteSummaryT } from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'
 
-// Read helpers mirror the notes feature: RLS scopes every row to the owner, and the
-// optional client is injectable so the isolation E2E can drive the same path with a
-// per-account supabase-js client.
+// RLS scopes every row to the owner; the optional client is injectable so the isolation E2E can
+// drive the same path with a per-account supabase-js client.
 
-// Full unpaginated set — 5 callers need it (the subject `<select>` on notes/new + notes/[id], the
-// memory-cards/notes filter options). The /subjects list page uses getSubjectsList instead.
+// Full unpaginated set — needed by the subject `<select>`s + filter options. The /subjects list
+// page uses getSubjectsList instead.
 export async function getSubjects(client?: SupabaseClient<Database>): Promise<SubjectT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
@@ -22,11 +21,9 @@ export async function getSubjects(client?: SupabaseClient<Database>): Promise<Su
   )
 }
 
-// Backs the /subjects list page: slim columns the list card renders, an optional `?q=` search
-// across title+description, paginated. Returns the page's rows + the full match `total` off one
-// `count: 'exact'` response (the getDueQueue precedent — hand-rolled, not via runTableQuery).
-// Separate from getSubjects, which must keep its full-set shape for its other callers. Injectable
-// client per the isolation rule.
+// Backs the /subjects list page: slim columns, optional `?q=` search, paginated. Hand-rolled (not
+// runTableQuery) to return the full match `total` off one `count: 'exact'` response. Separate from
+// getSubjects, which must keep its full-set shape for its other callers.
 export async function getSubjectsList(
   opts?: { q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
@@ -70,11 +67,9 @@ export async function getSubject(
   return data ?? undefined
 }
 
-// Lightweight list backing the docs-style sidebar nav (S-15): only id/title/position, never
-// `content` — the sidebar shows titles and the content pane fetches the active note's body
-// via getNote. Ordered by `position` (nulls last, created_at tie-break; members always have a
-// position, so nulls-last is defensive); mirrors getNotesForStats' lean read. RLS scopes rows
-// to the owner; injectable client per the isolation rule.
+// Lightweight list for the docs-style sidebar nav: id/title/position only, never `content`.
+// Ordered by `position` (nulls last, created_at tie-break; members always have a position, so
+// nulls-last is defensive).
 export async function getSubjectNoteSummaries(
   subjectId: string,
   client?: SupabaseClient<Database>,

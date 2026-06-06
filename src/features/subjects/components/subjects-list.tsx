@@ -7,13 +7,9 @@ import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
 import type { SubjectListItemT } from '@/features/subjects/types'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 
-// Thin client wrapper over the shared AnimatedCardList: supplies the subjects-specific href,
-// title, optional line-clamped description subtitle, and the per-card Edit/Delete actions.
-// Mirrors NotesList; data is fetched on the server (SubjectsPage) and passed in.
-//
-// Delete uses ONE shared DeleteSubjectDialog driven by the pending-delete id (not a Radix dialog
-// per card). `openId` derives from the pending id AND its presence in `subjects`, so once the
-// delete revalidates the list (the row drops out) the dialog closes on its own — no effect.
+// One shared DeleteSubjectDialog driven by the pending-delete id (not a Radix dialog per card).
+// `openId` derives from the pending id AND its presence in `subjects`, so once the delete
+// revalidates the list (the row drops out) the dialog closes on its own — no effect needed.
 export function SubjectsList({ subjects }: { subjects: SubjectListItemT[] }) {
   const { openId, requestDelete, onOpenChange } = useDeleteDialogState(subjects)
 

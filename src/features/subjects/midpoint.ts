@@ -1,8 +1,6 @@
-// Fractional midpoint for a note dropped between its new neighbors. Top → half the next
-// position (stays positive, below it); bottom → just above the last; middle → the average.
-// Used by the S-15 docs-view sidebar (SubjectNoteSidebar) reorder; kept as a standalone unit-
-// tested helper. Known degeneracy: repeated midpoints between two close values exhaust float
-// precision (no rebalance) — pre-existing, accepted.
+// Fractional midpoint for a note dropped between its new neighbors (no sequence rebalance).
+// Known degeneracy: repeated midpoints between two close values exhaust float precision —
+// accepted.
 export function midpoint(
   prev: number | undefined,
   next: number | undefined,

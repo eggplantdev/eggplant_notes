@@ -7,10 +7,9 @@ import { runTableAction } from '@/lib/supabase/run-table-action'
 import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
-// Delete a subject. Member notes are DETACHED, not deleted — the FK `on delete set null`
-// nulls their `subject_id` at the DB (their `position` is left stale but ignored once
-// unassigned; reassigning recomputes it). RLS scopes the delete to the owner. Revalidate
-// both /subjects and /notes, since detached notes resurface in the notes list.
+// Member notes are DETACHED, not deleted — the FK `on delete set null` nulls their `subject_id`
+// (stale `position` is ignored while unassigned; reassigning recomputes it). Revalidate /notes
+// too, since detached notes resurface in the notes list.
 export async function deleteSubject(id: string): Promise<ActionResultT> {
   const result = await runTableAction(subjectIdSchema, id, (supabase, validId) =>
     supabase.from('subjects').delete().eq('id', validId).select('id').single(),

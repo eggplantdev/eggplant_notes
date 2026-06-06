@@ -1,8 +1,6 @@
 import { z } from 'zod'
 
-// Subject = a grouping above notes. Title required at the app layer (DB column is
-// not null anyway); description is optional and normalized to undefined when blank
-// so the DB stores null rather than an empty string.
+// description is normalized to undefined when blank so the DB stores null, not an empty string.
 export const subjectTitleSchema = z
   .string()
   .trim()
