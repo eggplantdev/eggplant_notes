@@ -81,6 +81,13 @@ S-16 toasts + `useTransition`.
 - **Partial-failure rollback.** supabase-js multi-insert is not one transaction. If notes or
   cards insert fails after subjects landed, the action calls the clear path (delete where
   `is_seeded`) before returning the error, so a failed load never leaves a half-seeded account.
+  The shared clear path deletes ALL `is_seeded = true` rows; this is destruction-safe **only
+  because** `loadSampleData` guards on `isAccountEmpty()`, so no pre-existing seeded rows can be
+  collateral. If that guard is ever loosened, the rollback's blanket delete must be revisited.
+- **Half-seeded state self-heals via gating.** If a load fails AND its rollback also fails (both
+  best-effort), the account is left with seeded rows → `hasSeededData()` is true → the UI shows
+  **Clear**, so the user can clear and retry. This is intentional: the gating absorbs the
+  partial state without a dead-end.
 
 ## Phase 1: Marker migration
 
@@ -106,12 +113,11 @@ the whole row).
 
 #### 2. Regenerate types
 
-**File**: `src/lib/supabase/database.types.ts` (or wherever the generated `Database` type lives)
+**File**: `src/lib/supabase/types.ts` (the generated `Database` type)
 
 **Intent**: Reflect the new column in the typed client so inserts can set `is_seeded`.
 
-**Contract**: Run the project's Supabase type-gen after `db reset`; the three tables' Row/Insert
-types gain `is_seeded: boolean`.
+**Contract**: Run `pnpm db:types` (wraps `supabase gen types typescript --local > src/lib/supabase/types.ts`) after `db reset`; the three tables' Row/Insert types gain `is_seeded: boolean`.
 
 ### Success Criteria:
 
@@ -272,12 +278,17 @@ Surface Load/Clear in `/settings` and a Load CTA in the `/notes` empty state, wi
 **File**: `src/features/sample-data/components/sample-data-section.tsx`
 
 **Intent**: A settings card that shows **Load** when the account is empty and **Clear** when
-seeded rows exist. Buttons call the actions with `useTransition` pending + S-16 toast on result.
+seeded rows exist. Buttons fire the actions via `useActionTransition()` for pending state +
+toast on result.
 
 **Contract**: Client component receiving `isEmpty` / `hasSeeded` booleans (or a small server
 wrapper that reads the gating queries and passes them down). Mirrors the
-`DeleteAccountDialog`/`DailyGoalForm` interaction shape. Uses the standard toast helper on
-`ActionResultT`.
+`DeleteSubjectDialog`/`DailyGoalForm` interaction shape: use the existing
+`useActionTransition()` hook (`@/hooks/use-action-transition`) — `const { isPending, run } =
+useActionTransition()`, then `run(() => clearSampleData(), { successMessage: '…' })`. The hook
+already runs the action in a transition and drives the success/error toast via `toastResult`;
+do NOT hand-roll `useTransition` + a separate toast call. (Load/Clear do not redirect, so this
+is the in-place path, not `toastRedirect`.)
 
 #### 2. Mount in settings page
 
@@ -296,7 +307,7 @@ gating queries.
 beside the existing "Create a note" CTA. No change to the shared `EmptyState`.
 
 **Contract**: Reuse a small `load-sample-data-button.tsx` client component (button +
-`useTransition` + toast) rendered after `<EmptyState>` when `notes.length === 0 &&
+`useActionTransition()` + toast) rendered after `<EmptyState>` when `notes.length === 0 &&
 subjects.length === 0 && !isFiltered`.
 
 #### 4. Load button component
@@ -306,8 +317,8 @@ subjects.length === 0 && !isFiltered`.
 **Intent**: Shared Load trigger used by both the notes empty state and (optionally) the settings
 section.
 
-**Contract**: Client component; calls `loadSampleData`, shows pending + toast, no props beyond
-optional label/variant.
+**Contract**: Client component; fires `loadSampleData` via `useActionTransition()` (`run` +
+`isPending`), no props beyond optional label/variant.
 
 ### Success Criteria:
 
