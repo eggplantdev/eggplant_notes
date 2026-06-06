@@ -4,7 +4,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { updateSubject } from '@/features/subjects/actions/update-subject'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
-import { SubjectForm } from '@/features/subjects/subject-form'
+import { SubjectForm } from '@/features/subjects/components/subject-form'
 
 // `?edit` renders the inline subject edit form here (not the layout, which gets no searchParams).
 // Otherwise redirect to the first note so the content pane is never empty. `?toast` is forwarded

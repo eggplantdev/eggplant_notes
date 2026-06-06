@@ -6,7 +6,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { MutedText } from '@/components/ui/muted-text'
 import { Separator } from '@/components/ui/separator'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
-import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
+import { DeleteSubjectButton } from '@/features/subjects/components/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
 import { pluralize } from '@/lib/utils/pluralize'
 

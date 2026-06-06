@@ -3,7 +3,7 @@
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
 import { MutedText } from '@/components/ui/muted-text'
-import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
+import { DeleteSubjectDialog } from '@/features/subjects/components/delete-subject-dialog'
 import type { SubjectListItemT } from '@/features/subjects/types'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 

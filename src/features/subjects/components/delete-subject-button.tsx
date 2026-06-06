@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { DeleteSubjectDialog } from '@/features/subjects/delete-subject-dialog'
+import { DeleteSubjectDialog } from '@/features/subjects/components/delete-subject-dialog'
 
 type DeleteSubjectButtonPropsT = { id: string }
 

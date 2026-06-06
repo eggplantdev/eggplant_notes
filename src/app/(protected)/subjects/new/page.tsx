@@ -1,6 +1,6 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { createSubject } from '@/features/subjects/actions/create-subject'
-import { SubjectForm } from '@/features/subjects/subject-form'
+import { SubjectForm } from '@/features/subjects/components/subject-form'
 
 export default function NewSubjectPage() {
   return (

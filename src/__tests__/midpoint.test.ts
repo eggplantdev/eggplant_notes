@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { midpoint } from '@/features/subjects/midpoint'
+import { midpoint } from '@/features/subjects/utils/midpoint'
 
 // Guards the fractional-ordering math shared by the subject ToC + docs-view sidebar.
 describe('midpoint', () => {
