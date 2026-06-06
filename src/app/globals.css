@@ -205,6 +205,27 @@
   box-shadow: 0 0 12px color-mix(in oklch, white 90%, transparent);
 }
 
+/* red (mono, off the destructive token). */
+@utility neon-glow-red {
+  box-shadow: 0 0 6px color-mix(in oklch, var(--color-destructive) 70%, transparent);
+}
+@utility neon-glow-red-hit {
+  box-shadow: 0 0 12px color-mix(in oklch, var(--color-destructive) 90%, transparent);
+}
+
+/* white core + red halo (same core+halo shape as the fuchsia pair). White core uses the
+   heatmap's top --color-heat-4 token (the "More (16+)" cell), not pure white, to match it. */
+@utility neon-glow-white-red {
+  box-shadow:
+    0 0 12px color-mix(in oklch, var(--color-heat-4) 80%, transparent),
+    0 0 24px color-mix(in oklch, var(--color-destructive) 55%, transparent);
+}
+@utility neon-glow-white-red-hit {
+  box-shadow:
+    0 0 16px color-mix(in oklch, var(--color-heat-4) 92%, transparent),
+    0 0 32px color-mix(in oklch, var(--color-destructive) 70%, transparent);
+}
+
 /* SVG-path glow for chart rings: box-shadow doesn't apply to <path>, so use a drop-shadow
    filter instead. currentColor means each ring haloes in its own colour — the cards-overview
    radial charts set each sector's `color` to its fill, so neon rings glow neon, white glows

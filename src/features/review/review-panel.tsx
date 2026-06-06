@@ -22,7 +22,7 @@ export function ReviewPanel({ card, goal }: PropsT) {
         </p>
       ) : (
         <div className="flex flex-col gap-4">
-          <Card>
+          <Card className="neon-glow-white-red hover:neon-glow-white-red-hit transition-shadow">
             <CardHeader>
               <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
               {card.note_id && card.notes?.title && (
