@@ -72,5 +72,8 @@ export async function rateMemoryCard(
   })
 
   revalidatePath('/dashboard')
+  // Also refresh the standalone card page (memory-card-review-page) so it reflects the new schedule
+  // when rated outside the dashboard queue. Additive — the dashboard path is unaffected.
+  revalidatePath(`/memory-cards/${parsedId.data}`)
   return { success: true, celebrate }
 }

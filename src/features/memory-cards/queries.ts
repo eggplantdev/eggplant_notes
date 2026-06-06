@@ -119,6 +119,28 @@ export async function getMemoryCard(
   return data ?? undefined
 }
 
+// Single card by id in the exact DueCardT shape ReviewPanel consumes, so the standalone card page
+// (memory-card-review-page) reuses the dashboard review component verbatim. Mirrors getDueQueue's
+// `notes(title, subject_id)` embed — NOT getMemoryCard's `notes(id, title)`, which lacks subject_id
+// and so can't drive SourceNoteLink. Missing OR not-owned both resolve to `undefined` (caller 404s),
+// via `maybeSingle` — same contract as getMemoryCard. RLS scopes ownership. Injectable client.
+export async function getMemoryCardForReview(
+  id: string,
+  client?: SupabaseClient<Database>,
+): Promise<DueCardT | undefined> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('memory_cards')
+    .select('*, notes(title, subject_id)')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) {
+    console.error('[getMemoryCardForReview] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return data ?? undefined
+}
+
 // Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the
 // owner, so a note the caller doesn't own yields []. Injectable client (defaults to the server
 // client) so Playwright can call it with a signInWithPassword client per the isolation test.
