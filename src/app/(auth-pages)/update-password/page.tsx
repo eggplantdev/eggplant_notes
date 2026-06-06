@@ -6,7 +6,7 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { TitledCard } from '@/components/ui/titled-card'
 import { updatePassword } from '@/features/auth/actions/update-password'
 import { passwordSchema } from '@/features/auth/schemas'
 
@@ -23,38 +23,32 @@ export default function UpdatePasswordPage() {
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Set new password</CardTitle>
-        <CardDescription>Enter a new password for your account.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          className="grid gap-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            setFormError(undefined)
-            form.handleSubmit()
-          }}
+    <TitledCard title="Set new password" description="Enter a new password for your account.">
+      <form
+        className="grid gap-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          setFormError(undefined)
+          form.handleSubmit()
+        }}
+      >
+        <form.AppField
+          name="password"
+          validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
         >
-          <form.AppField
-            name="password"
-            validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
-          >
-            {(field) => (
-              <field.Input label="New password" type="password" autoComplete="new-password" />
-            )}
-          </form.AppField>
-          <FormError message={formError} />
-          <form.Subscribe selector={(s) => s.isSubmitting}>
-            {(isSubmitting) => (
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving…' : 'Save password'}
-              </Button>
-            )}
-          </form.Subscribe>
-        </form>
-      </CardContent>
-    </Card>
+          {(field) => (
+            <field.Input label="New password" type="password" autoComplete="new-password" />
+          )}
+        </form.AppField>
+        <FormError message={formError} />
+        <form.Subscribe selector={(s) => s.isSubmitting}>
+          {(isSubmitting) => (
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving…' : 'Save password'}
+            </Button>
+          )}
+        </form.Subscribe>
+      </form>
+    </TitledCard>
   )
 }

@@ -7,7 +7,7 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { TitledCard } from '@/components/ui/titled-card'
 import { resetPassword } from '@/features/auth/actions/reset-password'
 import { emailSchema } from '@/features/auth/schemas'
 
@@ -29,44 +29,38 @@ export default function ResetPasswordPage() {
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Reset password</CardTitle>
-        <CardDescription>We&apos;ll email you a link to set a new password.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {sent ? (
-          <p className="text-sm">
-            If an account exists for that email, you&apos;ll receive a password-reset link shortly.
-          </p>
-        ) : (
-          <form
-            className="grid gap-4"
-            onSubmit={(e) => {
-              e.preventDefault()
-              setFormError(undefined)
-              form.handleSubmit()
-            }}
-          >
-            <form.AppField name="email" validators={{ onBlur: emailSchema, onSubmit: emailSchema }}>
-              {(field) => <field.Input label="Email" type="email" autoComplete="email" />}
-            </form.AppField>
-            <FormError message={formError} />
-            <form.Subscribe selector={(s) => s.isSubmitting}>
-              {(isSubmitting) => (
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending…' : 'Send reset link'}
-                </Button>
-              )}
-            </form.Subscribe>
-          </form>
-        )}
-        <p className="text-muted-foreground mt-4 text-sm">
-          <Link href="/sign-in" className="underline">
-            Back to sign in
-          </Link>
+    <TitledCard title="Reset password" description="We'll email you a link to set a new password.">
+      {sent ? (
+        <p className="text-sm">
+          If an account exists for that email, you&apos;ll receive a password-reset link shortly.
         </p>
-      </CardContent>
-    </Card>
+      ) : (
+        <form
+          className="grid gap-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            setFormError(undefined)
+            form.handleSubmit()
+          }}
+        >
+          <form.AppField name="email" validators={{ onBlur: emailSchema, onSubmit: emailSchema }}>
+            {(field) => <field.Input label="Email" type="email" autoComplete="email" />}
+          </form.AppField>
+          <FormError message={formError} />
+          <form.Subscribe selector={(s) => s.isSubmitting}>
+            {(isSubmitting) => (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Sending…' : 'Send reset link'}
+              </Button>
+            )}
+          </form.Subscribe>
+        </form>
+      )}
+      <p className="text-muted-foreground mt-4 text-sm">
+        <Link href="/sign-in" className="underline">
+          Back to sign in
+        </Link>
+      </p>
+    </TitledCard>
   )
 }

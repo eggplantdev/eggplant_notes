@@ -11,6 +11,7 @@ import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
 import { SubjectRollup } from '@/features/dashboard/subject-rollup'
+import { TitledCard } from '@/components/ui/titled-card'
 import { formatInterval } from '@/features/review/format-interval'
 import { RatingButtons } from '@/features/review/rating-buttons'
 import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
@@ -101,14 +102,9 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Review activity — last 12 months</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ActivityHeatmap columns={columns} />
-        </CardContent>
-      </Card>
+      <TitledCard title="Review activity — last 12 months" className="w-full">
+        <ActivityHeatmap columns={columns} />
+      </TitledCard>
 
       {/* Embedded review session (relocated from the old /review route). Prose-width inside
           the full-width dashboard. ReviewCelebrationProvider wraps BOTH branches so the
@@ -179,32 +175,17 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Cards by state</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StateBreakdown counts={s.stateCounts} />
-          </CardContent>
-        </Card>
+        <TitledCard title="Cards by state">
+          <StateBreakdown counts={s.stateCounts} />
+        </TitledCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Needs attention</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <HardestCards cards={s.hardestCards} />
-          </CardContent>
-        </Card>
+        <TitledCard title="Needs attention">
+          <HardestCards cards={s.hardestCards} />
+        </TitledCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>By subject</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SubjectRollup rows={s.subjectRollup} />
-          </CardContent>
-        </Card>
+        <TitledCard title="By subject">
+          <SubjectRollup rows={s.subjectRollup} />
+        </TitledCard>
       </div>
     </PageShell>
   )
