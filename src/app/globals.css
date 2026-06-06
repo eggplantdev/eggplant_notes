@@ -224,13 +224,21 @@
   box-shadow: 0 0 7px color-mix(in oklch, var(--color-heat-4) 80%, transparent);
 }
 
+/* Code blocks blend into the card surface: Shiki sets the theme background inline on
+   `<pre class="shiki">` (github-light) and we'd otherwise swap it to --shiki-dark-bg under
+   `.dark`. Instead, override it with our own --card token — which resolves per theme, so one
+   rule covers both light and dark. Token colors still come from Shiki. */
+.shiki {
+  background-color: var(--card) !important;
+}
+
 /* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
-   app's class-based `.dark`, swap every token (and the code background) to the dark set.
-   See https://shiki.style/guide/dual-themes */
+   app's class-based `.dark`, swap every token to the dark set. Background is intentionally NOT
+   swapped here (handled by the --card rule above), and spans get no background so the card
+   surface shows through. See https://shiki.style/guide/dual-themes */
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
   font-style: var(--shiki-dark-font-style) !important;
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
