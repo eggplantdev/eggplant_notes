@@ -15,13 +15,14 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, ListIcon } from 'lucide-react'
+import { GripVertical, ListIcon, Search } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, type KeyboardEvent } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { reorderNote } from '@/features/subjects/actions/reorder-note'
 import { midpoint } from '@/features/subjects/midpoint'
@@ -41,6 +42,38 @@ function handleNoteLinkKeyNav(e: KeyboardEvent<HTMLAnchorElement>) {
   const i = links.indexOf(e.currentTarget)
   const next = e.key === 'ArrowDown' ? links[i + 1] : links[i - 1]
   next?.focus()
+}
+
+// The navigation link shared by the sortable row and the static (filtered) row — swaps the active
+// note via soft RSC navigation, highlights when active.
+function NoteNavLink({
+  subjectId,
+  id,
+  title,
+  isActive,
+  onNavigate,
+}: {
+  subjectId: string
+  id: string
+  title: string | null
+  isActive: boolean
+  onNavigate?: () => void
+}) {
+  return (
+    <Link
+      href={`/subjects/${subjectId}/${id}`}
+      aria-current={isActive ? 'page' : undefined}
+      onClick={onNavigate}
+      onKeyDown={handleNoteLinkKeyNav}
+      data-note-link
+      className={cn(
+        'focus-visible:ring-ring min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:outline-none',
+        isActive ? 'bg-muted font-medium' : 'hover:bg-muted',
+      )}
+    >
+      {title ?? 'Untitled'}
+    </Link>
+  )
 }
 
 // A single sidebar row: the body is a navigation Link (swap the active note); the grip is a
@@ -77,19 +110,13 @@ function SortableNoteRow({
       >
         <GripVertical className="size-5" />
       </button>
-      <Link
-        href={`/subjects/${subjectId}/${id}`}
-        aria-current={isActive ? 'page' : undefined}
-        onClick={onNavigate}
-        onKeyDown={handleNoteLinkKeyNav}
-        data-note-link
-        className={cn(
-          'focus-visible:ring-ring min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:outline-none',
-          isActive ? 'bg-muted font-medium' : 'hover:bg-muted',
-        )}
-      >
-        {title ?? 'Untitled'}
-      </Link>
+      <NoteNavLink
+        subjectId={subjectId}
+        id={id}
+        title={title}
+        isActive={isActive}
+        onNavigate={onNavigate}
+      />
     </li>
   )
 }
@@ -135,12 +162,65 @@ function SortableNoteList({
   )
 }
 
+// Static (non-draggable) list used while a title filter is active. Reorder is intentionally OFF
+// when filtering: dragging a filtered SUBSET would compute fractional positions against the wrong
+// neighbors (the hidden rows between two visible ones), so the only coherent options are
+// full-list-draggable OR filtered-static. The grip column is dropped; left padding keeps the links
+// aligned with the draggable view.
+function FilteredNoteList({
+  subjectId,
+  items,
+  activeNoteId,
+  onNavigate,
+}: {
+  subjectId: string
+  items: SubjectNoteSummaryT[]
+  activeNoteId: string | undefined
+  onNavigate?: () => void
+}) {
+  return (
+    <ul className="flex flex-col gap-0.5 pl-1">
+      {items.map((i) => (
+        <li key={i.id} className="flex items-center">
+          <NoteNavLink
+            subjectId={subjectId}
+            id={i.id}
+            title={i.title}
+            isActive={i.id === activeNoteId}
+            onNavigate={onNavigate}
+          />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function SidebarFilter({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+  return (
+    <div className="relative mb-2">
+      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+      <Input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Filter notes…"
+        className="h-8 w-full pl-8 text-sm"
+      />
+    </div>
+  )
+}
+
 // Docs-view sidebar (S-15): persistent list of a subject's notes — each row navigates (Link)
 // and reorders (grip handle). Desktop renders as a column; mobile collapses behind a sheet
 // trigger (mirrors the S-10 app-nav pattern). Optimistic `items` state is lifted here so the
 // desktop column and the mobile sheet share one source of truth; a drag writes the moved row's
 // new fractional position via reorderNote and reverts on failure. Always renders the list (even
 // for <2 notes) — it's a nav surface, not only a reorder control.
+//
+// Title filter (client-side, no URL): the full summary set is already loaded here, so filtering it
+// in-memory is instant and needs no server round-trip — and the host layout can't read searchParams
+// anyway. `term` drives a derived `visible` list; a non-empty term switches to the static list
+// (drag off, see FilteredNoteList).
 export function SubjectNoteSidebar({
   subjectId,
   notes,
@@ -150,10 +230,17 @@ export function SubjectNoteSidebar({
 }) {
   const [items, setItems] = useState(notes)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [term, setTerm] = useState('')
   const { error, run } = useActionTransition()
   const pathname = usePathname()
   const prefix = `/subjects/${subjectId}/`
   const activeNoteId = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : undefined
+
+  const trimmed = term.trim().toLowerCase()
+  const filtering = trimmed.length > 0
+  const visible = filtering
+    ? items.filter((i) => (i.title ?? '').toLowerCase().includes(trimmed))
+    : items
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -176,6 +263,32 @@ export function SubjectNoteSidebar({
     if (!result.success) setItems(previous)
   }
 
+  function renderList(dndId: string, onNavigate?: () => void) {
+    if (filtering) {
+      if (visible.length === 0) {
+        return <p className="text-muted-foreground px-2 py-1.5 text-sm">No notes match.</p>
+      }
+      return (
+        <FilteredNoteList
+          subjectId={subjectId}
+          items={visible}
+          activeNoteId={activeNoteId}
+          onNavigate={onNavigate}
+        />
+      )
+    }
+    return (
+      <SortableNoteList
+        dndId={dndId}
+        subjectId={subjectId}
+        items={items}
+        activeNoteId={activeNoteId}
+        onDragEnd={handleDragEnd}
+        onNavigate={onNavigate}
+      />
+    )
+  }
+
   return (
     <>
       {/* Desktop: persistent sidebar column. The layout's app-shell row (PageShell `fill` +
@@ -185,13 +298,8 @@ export function SubjectNoteSidebar({
         aria-label="Notes in this subject"
         className="hidden md:block md:min-h-0 md:overflow-y-auto"
       >
-        <SortableNoteList
-          dndId="subject-sidebar-desktop"
-          subjectId={subjectId}
-          items={items}
-          activeNoteId={activeNoteId}
-          onDragEnd={handleDragEnd}
-        />
+        <SidebarFilter value={term} onChange={setTerm} />
+        {renderList('subject-sidebar-desktop')}
         <FormError message={error} />
       </nav>
 
@@ -206,14 +314,8 @@ export function SubjectNoteSidebar({
           <SheetContent side="left" className="bg-background flex w-72 flex-col">
             <SheetTitle className="px-4 pt-4">Notes in this subject</SheetTitle>
             <nav aria-label="Notes in this subject" className="flex-1 overflow-y-auto p-4">
-              <SortableNoteList
-                dndId="subject-sidebar-mobile"
-                subjectId={subjectId}
-                items={items}
-                activeNoteId={activeNoteId}
-                onDragEnd={handleDragEnd}
-                onNavigate={() => setSheetOpen(false)}
-              />
+              <SidebarFilter value={term} onChange={setTerm} />
+              {renderList('subject-sidebar-mobile', () => setSheetOpen(false))}
               <FormError message={error} />
             </nav>
           </SheetContent>
