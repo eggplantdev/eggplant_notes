@@ -1,7 +1,6 @@
 import type { ZodType } from 'zod'
 
-// Safe-parse `data` against a Zod schema, flattening to the first error message.
-// Domain-agnostic input validation shared by feature action wrappers (auth, notes, …).
+// Safe-parse against a Zod schema, flattening to the first error message.
 export function validateInput<T>(
   schema: ZodType<T>,
   data: unknown,

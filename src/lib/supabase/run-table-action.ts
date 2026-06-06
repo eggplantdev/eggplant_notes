@@ -8,14 +8,10 @@ type SupabaseServerT = Awaited<ReturnType<typeof createClient>>
 
 export type TableActionResultT<T> = { success: true; data: T } | { success: false; error: string }
 
-// Shared table-mutation wrapper (promoted from notes' runNoteAction on its 2nd consumer,
-// per the feature-first promotion rule): validate input, create the server client, run the
-// PostgREST write, and normalize the `{ data, error }` envelope to a discriminated result.
-// Unlike runTableQuery (which THROWS so reads surface to an error boundary), mutations are
-// form-driven — a *returned* error lets the form render it inline, mirroring runAuthAction.
-// Writes end in `.select().single()` (→ PostgrestSingleResponse) so a successful call returns
-// the affected row, which create/update use for the post-write redirect/refresh. Not a Server
-// Action itself — kept out of a `'use server'` file deliberately.
+// Validates input, runs a PostgREST write, and normalizes `{ data, error }` to a discriminated
+// result. Unlike runTableQuery (which throws), mutations are form-driven — a *returned* error lets
+// the form render it inline. Writes end in `.select().single()` so success returns the affected row
+// for the post-write redirect/refresh. Deliberately kept out of a `'use server'` file.
 export async function runTableAction<TInput, TRow>(
   schema: ZodType<TInput>,
   input: unknown,

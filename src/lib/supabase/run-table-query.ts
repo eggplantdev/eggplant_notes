@@ -2,12 +2,8 @@ import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js'
 
 import type { Database } from '@/lib/supabase/types'
 
-// Table analogue of runAuthAction: centralizes the PostgREST `{ data, error }` →
-// typed-rows normalization. Takes an INJECTABLE typed client (defaulted to the
-// per-request server client by the feature read helpers) plus a query thunk, awaits
-// it, and returns typed rows or throws a normalized error. Reads return rows directly
-// rather than going through ActionResultT; a thrown error surfaces unexpected DB/RLS
-// failures to the caller's error boundary. Reusable for mutations when slices add them.
+// Normalizes a PostgREST `{ data, error }` read to typed rows. Reads throw (rather than return
+// ActionResultT) so an unexpected DB/RLS failure surfaces to the caller's error boundary.
 export async function runTableQuery<T>(
   client: SupabaseClient<Database>,
   query: (
@@ -15,9 +11,8 @@ export async function runTableQuery<T>(
   ) => PromiseLike<{ data: T | null; error: PostgrestError | null }>,
 ): Promise<T> {
   const { data, error } = await query(client)
-  // Log the full PostgrestError (code/details/hint) to the server logs, then throw.
-  // Surface error.message (parity with runAuthAction) but keep the original error on
-  // `cause` so a caller can branch on code/details/hint (e.g. RLS denial vs. constraint).
+  // Keep the original PostgrestError on `cause` so a caller can branch on code/details/hint
+  // (e.g. RLS denial vs. constraint).
   if (error) {
     console.error('[runTableQuery] PostgREST error', error)
     throw new Error(error.message, { cause: error })

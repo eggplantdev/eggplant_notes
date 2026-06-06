@@ -3,19 +3,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env'
 
-// Auth pages a signed-in user has no business on -> bounce them to the dashboard.
-// `/update-password` is deliberately NOT here: the recovery flow lands there WITH a
-// session, so bouncing it would trap the user off the page they need.
+// `/update-password` is deliberately NOT here: the recovery flow lands there WITH a session, so
+// bouncing a signed-in user off it would trap them on the page they need.
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password']
 
-// Exact match or a true subpath — NOT a bare prefix, so `/sign-in-evil` and
-// `/update-password-x` don't slip through the public-route check.
+// Exact match or true subpath — NOT a bare prefix, so `/sign-in-evil` can't slip through.
 function matchesPath(pathname: string, route: string) {
   return pathname === route || pathname.startsWith(route + '/')
 }
 
-// Redirect while preserving the cookies refreshed on `response`, so the session
-// survives the redirect (a bare NextResponse.redirect would drop them).
+// Carries over the cookies refreshed on `response` — a bare NextResponse.redirect would drop them
+// and kill the session.
 function redirectTo(pathname: string, request: NextRequest, response: NextResponse) {
   const url = request.nextUrl.clone()
   url.pathname = pathname
@@ -24,8 +22,8 @@ function redirectTo(pathname: string, request: NextRequest, response: NextRespon
   return redirect
 }
 
-// Next.js 16 renamed `middleware` -> `proxy`; runtime is nodejs (not configurable here).
-// Refreshes the Supabase session cookie on every matched request and gates protected paths.
+// Next.js 16 renamed `middleware` -> `proxy`. Refreshes the Supabase session cookie on every
+// matched request and gates protected paths.
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
@@ -52,13 +50,11 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const isAuthRoute = AUTH_ROUTES.some((route) => matchesPath(pathname, route))
-  // Public = auth pages + the email-link callback + update-password (reached via a
-  // recovery session, so it must not redirect to /sign-in either).
+  // update-password is reached via a recovery session, so it must stay public too.
   const isPublic =
     isAuthRoute || pathname.startsWith('/api/auth/') || matchesPath(pathname, '/update-password')
 
-  // Optimistic gate (the (protected) layout is the authoritative backstop):
-  // signed-out on a protected path -> sign-in; signed-in on an auth page -> dashboard.
+  // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)
   if (user && isAuthRoute) return redirectTo('/dashboard', request, response)
 
@@ -67,18 +63,9 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - image assets
-     *
-     * NOTE: /api IS intentionally included — the /api/auth/confirm callback must
-     * run through the proxy to propagate the session cookie it sets. Any future
-     * /api/* route therefore also runs here; add it to `isPublic` if it must be
-     * reachable while signed out.
-     */
+    // Matches everything except _next assets/images. /api IS intentionally included — the
+    // /api/auth/confirm callback must run through the proxy to propagate its session cookie, so
+    // any future /api/* route also runs here; add it to `isPublic` if it must work signed-out.
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

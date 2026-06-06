@@ -26,10 +26,8 @@ export async function createClient() {
   })
 }
 
-// Request-memoized auth read. getUser() validates the JWT over the network against Supabase
-// Auth, so calling it in both the (protected) layout (the gate) and a page (e.g. the dashboard
-// email) is two round-trips per request. React's cache() dedupes them within a single server
-// render: layout and page share one result, one network call.
+// getUser() validates the JWT over the network, and both the (protected) layout and the page call
+// it — React cache() dedupes them to one round-trip per render.
 export const getCurrentUser = cache(async () => {
   const supabase = await createClient()
   const {

@@ -1,6 +1,5 @@
-// Merges param overrides into the current query string and returns a full URL. An empty-string
-// value DELETES its key — this is how callers reset `page` (pass `{ page: '' }`) or clear `q`.
-// Ported from the wykonczymy reference.
+// Merges param overrides into the current query string. An empty-string value DELETES its key —
+// this is how callers reset `page` (pass `{ page: '' }`) or clear `q`.
 export function buildUrlWithParams(
   baseUrl: string,
   currentParams: string,
