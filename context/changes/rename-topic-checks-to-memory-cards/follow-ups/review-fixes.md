@@ -4,19 +4,22 @@ Review fan-out (2026-06-06) returned APPROVED / clean on all four checks. One de
 
 ## Deferred
 
-- **"check" → "card" vocabulary/copy drift** (surfaced by `/simplify` altitude + simplification
-  agents, 2026-06-06). The rename took the formal name to `memory_card` but left the casual "check"
-  in several places, including **user-facing copy that now contradicts the "Memory cards" headings**:
-  - `src/features/memory-cards/add-memory-card.tsx:22` — collapsed-state button reads **"Add check"**.
-  - `src/features/memory-cards/memory-card-form.tsx:48` — toasts **"Check saved" / "Check added"**.
-  - `src/features/memory-cards/delete-memory-card-button.tsx:35` — toast **"Check deleted"**.
+- **"check" → "card" vocabulary/copy drift** (surfaced by `/simplify`, 2026-06-06).
+
+  DONE (`e128ab5`) — user-facing copy in clean files:
+  - `add-memory-card.tsx` button "Add check" → **"Add card"**.
+  - `memory-card-form.tsx` toasts "Check saved/added" → **"Card saved/added"**.
+  - `delete-memory-card-button.tsx` toast "Check deleted" → **"Card deleted"**.
+  - e2e selectors (`helpers.ts`, `memory-cards`, `create-note-with-checks`, `notes`) + the
+    "Card added" assertion (`action-feedback-toasts`) updated to match.
+
+  STILL DEFERRED — internal identifiers in files the parallel session is actively editing:
   - `getChecksForStats` (`queries.ts:41`), `checks` prop on `MemoryCardsList`/`MemoryCardsSection`,
-    `checks` local in `memory-cards/page.tsx`, `editingCheck`.
+    `checks` local in `memory-cards/page.tsx` (DIRTY — parallel), `editingCheck`.
   - the `#check-<id>` deep-link anchor (`memory-cards-section.tsx` ↔ `memory-cards-list.tsx`) — a
-    card→note contract, E2E-asserted; rename both sides in one move.
+    card→note contract, E2E-asserted; connects to the dirty page.tsx prop, so rename all in one move.
   - SQL `tc` aliases in `seed.sql` + `generate-section-seed.mjs` (cosmetic).
-    Deferred — NOT applied — because these files overlap an actively-committing parallel session
-    (CardActions/ReviewPanel/moddatetime + a repo-wide `types/` reorg). Apply once that session lands.
+    Apply once the parallel session lands (overlaps `memory-cards/page.tsx` + the FSRS constants).
 
 - **`FSRS_STATE_LABELS` triplicated** (reuse agent). Same array in `dashboard/constants.ts:22`,
   `memory-cards/constants.ts` (a parallel-session file), and as `STATE_LABEL` in
