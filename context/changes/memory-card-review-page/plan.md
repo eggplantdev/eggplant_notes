@@ -174,17 +174,17 @@ One Playwright spec covering the new public surface: list → open card → reve
 
 #### Automated
 
-- [x] 1.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 Build passes: `pnpm build`
+- [x] 1.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck` — 738a4d0
+- [x] 1.2 Linting passes: `pnpm lint` — 738a4d0
+- [x] 1.3 Build passes: `pnpm build` — 738a4d0
 
 #### Manual
 
-- [x] 1.4 Clicking any card opens `/memory-cards/[id]` with the review panel
-- [x] 1.5 Reveal + rate records the review and refreshes in place, staying on the card
-- [x] 1.6 Linked card shows source-note link; standalone does not
-- [x] 1.7 Per-row Edit still opens the edit page; dashboard due-queue still works
-- [x] 1.8 Bogus/other-user id 404s
+- [x] 1.4 Clicking any card opens `/memory-cards/[id]` with the review panel — 738a4d0
+- [x] 1.5 Reveal + rate records the review and refreshes in place, staying on the card — 738a4d0
+- [x] 1.6 Linked card shows source-note link; standalone does not — 738a4d0
+- [x] 1.7 Per-row Edit still opens the edit page; dashboard due-queue still works — 738a4d0
+- [x] 1.8 Bogus/other-user id 404s — 738a4d0
 
 ### Phase 2: E2E coverage
 
