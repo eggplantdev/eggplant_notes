@@ -29,7 +29,7 @@ async function createAssignedNote(
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(title)
   if (content) await fillEditor(page, content)
-  await page.getByRole('combobox').click()
+  await page.getByRole('combobox', { name: 'Subject' }).click()
   await page.getByRole('option', { name: subjectTitle, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })

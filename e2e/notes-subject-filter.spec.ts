@@ -49,7 +49,7 @@ test('create note tied to a subject + filter the notes list by subject', async (
   // Create note B assigned to subject B via the note-form picker.
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(noteB)
-  await page.getByRole('combobox').click()
+  await page.getByRole('combobox', { name: 'Subject' }).click()
   await page.getByRole('option', { name: subjB, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })

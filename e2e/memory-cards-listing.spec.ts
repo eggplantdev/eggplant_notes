@@ -21,7 +21,7 @@ async function createSubject(page: Page, title: string): Promise<void> {
 async function createNoteInSubject(page: Page, title: string, subject: string): Promise<void> {
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(title)
-  await page.getByRole('combobox').click()
+  await page.getByRole('combobox', { name: 'Subject' }).click()
   await page.getByRole('option', { name: subject, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })

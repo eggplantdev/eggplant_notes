@@ -69,6 +69,7 @@ export function MultiSelect({
           variant="outline"
           size="sm"
           role="combobox"
+          aria-label={placeholder}
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn('justify-between', count === 0 && 'text-muted-foreground', className)}
