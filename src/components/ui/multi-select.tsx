@@ -31,6 +31,8 @@ type MultiSelectPropsT = {
   searchPlaceholder?: string
   emptyMessage?: string
   className?: string
+  // Forwarded to the trigger so callers can target it in E2E.
+  'data-testid'?: string
 }
 
 // Multi-select sibling of Combobox; trigger width drives popover width via the Radix CSS var.
@@ -45,6 +47,7 @@ export function MultiSelect({
   searchPlaceholder = 'Search…',
   emptyMessage = 'No results.',
   className,
+  'data-testid': dataTestId,
 }: MultiSelectPropsT) {
   const [openInternal, setOpenInternal] = useState(false)
   const open = openProp ?? openInternal
@@ -61,6 +64,7 @@ export function MultiSelect({
         <Button
           type="button"
           id={id}
+          data-testid={dataTestId}
           variant="outline"
           size="sm"
           role="combobox"
