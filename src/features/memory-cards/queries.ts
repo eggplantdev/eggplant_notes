@@ -120,10 +120,9 @@ export async function getMemoryCard(
 }
 
 // Single card by id in the exact DueCardT shape ReviewPanel consumes, so the standalone card page
-// (memory-card-review-page) reuses the dashboard review component verbatim. Mirrors getDueQueue's
-// `notes(title, subject_id)` embed — NOT getMemoryCard's `notes(id, title)`, which lacks subject_id
-// and so can't drive SourceNoteLink. Missing OR not-owned both resolve to `undefined` (caller 404s),
-// via `maybeSingle` — same contract as getMemoryCard. RLS scopes ownership. Injectable client.
+// reuses the dashboard review component verbatim. Embeds `notes(title, subject_id)` — NOT
+// getMemoryCard's `notes(id, title)`, which lacks the subject_id that SourceNoteLink needs. Missing
+// or not-owned → undefined (caller 404s), same contract as getMemoryCard.
 export async function getMemoryCardForReview(
   id: string,
   client?: SupabaseClient<Database>,
