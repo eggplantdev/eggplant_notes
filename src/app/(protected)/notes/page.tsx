@@ -18,7 +18,7 @@ export default async function NotesPage({
 }) {
   const { subjects: subjectsParam } = await searchParams
   const selectedIds = (subjectsParam ?? '').split(',').filter(Boolean)
-  const [subjects, notes] = await Promise.all([
+  const [subjects, { rows: notes }] = await Promise.all([
     getSubjects(),
     getNotes({ subjectIds: selectedIds }),
   ])

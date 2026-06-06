@@ -3,7 +3,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { TitledCard } from '@/components/ui/titled-card'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
-import { getMemoryCardsList } from '@/features/memory-cards/queries'
+import { getCardsForStats, getMemoryCardsList } from '@/features/memory-cards/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { pluralize } from '@/lib/utils/pluralize'
@@ -20,9 +20,10 @@ export default async function MemoryCardsPage({
 }) {
   const { subjects: subjectsParam } = await searchParams
   const selectedIds = (subjectsParam ?? '').split(',').filter(Boolean)
-  const [subjects, cards] = await Promise.all([
+  const [subjects, { rows: cards }, statsCards] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ subjectIds: selectedIds }),
+    getCardsForStats(),
   ])
   const isFiltered = selectedIds.length > 0
   const options = subjects.map((subject) => ({ value: subject.id, label: subject.title }))
@@ -49,7 +50,7 @@ export default async function MemoryCardsPage({
       ) : (
         <>
           <TitledCard title="Cards overview">
-            <CardsOverview cards={cards} />
+            <CardsOverview cards={statsCards} />
           </TitledCard>
           <MemoryCardsList cards={cards} />
         </>

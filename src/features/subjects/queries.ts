@@ -1,20 +1,54 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { runTableQuery } from '@/lib/supabase/run-table-query'
+import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import type { SubjectNoteSummaryT } from '@/features/subjects/types'
+import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
+import type { SubjectListItemT, SubjectNoteSummaryT } from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'
 
 // Read helpers mirror the notes feature: RLS scopes every row to the owner, and the
 // optional client is injectable so the isolation E2E can drive the same path with a
 // per-account supabase-js client.
 
+// Full unpaginated set — 5 callers need it (the subject `<select>` on notes/new + notes/[id], the
+// memory-cards/notes filter options). The /subjects list page uses getSubjectsList instead.
 export async function getSubjects(client?: SupabaseClient<Database>): Promise<SubjectT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
     c.from('subjects').select('*').order('created_at', { ascending: false }),
   )
+}
+
+// Backs the /subjects list page: slim columns the list card renders, an optional `?q=` search
+// across title+description, paginated. Returns the page's rows + the full match `total` off one
+// `count: 'exact'` response (the getDueQueue precedent — hand-rolled, not via runTableQuery).
+// Separate from getSubjects, which must keep its full-set shape for its other callers. Injectable
+// client per the isolation rule.
+export async function getSubjectsList(
+  opts?: { q?: string; page?: number; limit?: number },
+  client?: SupabaseClient<Database>,
+): Promise<{ rows: SubjectListItemT[]; total: number }> {
+  const supabase = client ?? (await createClient())
+  const page = opts?.page ?? 1
+  const limit = opts?.limit ?? DEFAULT_LIMIT
+  const offset = (page - 1) * limit
+
+  let query = supabase.from('subjects').select('id, title, description, created_at', {
+    count: 'exact',
+  })
+  const orFilter = opts?.q ? searchOr(['title', 'description'], opts.q) : null
+  if (orFilter) query = query.or(orFilter)
+
+  const { data, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+  if (error) {
+    console.error('[getSubjectsList] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return { rows: data ?? [], total: count ?? 0 }
 }
 
 // Single subject by id. Missing OR not-owned both resolve to `undefined` (caller

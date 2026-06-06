@@ -2,8 +2,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { DueCardT, MemoryCardListItemT, MemoryCardT } from '@/features/memory-cards/types'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
+import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
 
 // The due-review queue for the dashboard review panel: the single soonest-due card plus the total due count, in
 // one round-trip. RLS scopes rows to the owner. The `(user_id, due_at)` btree index backs the
@@ -33,37 +35,57 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
-// Lean read backing the dashboard stats: every owned card, but only the columns the
-// aggregation needs. RLS scopes rows to the owner. Returns the full set so counts/buckets are
-// computed in TS — PostgREST can't group by the APP_TIME_ZONE-shifted due date in a plain
-// select (same constraint as getReviewActivity). Personal-scale data, so fetching all rows is
-// fine. Injectable client per the isolation rule.
+// Lean read backing the dashboard stats AND the /memory-cards "cards overview" charts: every
+// owned card, but only the columns the aggregation needs. RLS scopes rows to the owner. Returns
+// the full set so counts/buckets are computed in TS — PostgREST can't group by the
+// APP_TIME_ZONE-shifted due date in a plain select (same constraint as getReviewActivity), and a
+// lean fetch-all is sub-ms at personal scale. `state` is here for the cards-overview FSRS
+// state-mix chart (it reads the entire deck, decoupled from the paginated list). Personal-scale
+// data, so fetching all rows is fine. Injectable client per the isolation rule.
 export async function getCardsForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
-    c.from('memory_cards').select('id, prompt, note_id, due_at, stability, lapses'),
+    c.from('memory_cards').select('id, prompt, note_id, due_at, state, stability, lapses'),
   )
 }
 
-// Backs the /memory-cards listing: every owned card with its source-note title + subject,
-// optionally narrowed to selected subjects, ordered soonest-due first so the list doubles as a
-// study-readiness view. RLS scopes rows to the owner. `notes!inner` is load-bearing — subject
-// filtering applies `.in('notes.subject_id', …)` on the embedded table, which PostgREST can only
-// filter through an inner join (a plain `notes(...)` embed is an outer join and won't filter the
-// parent). Personal-scale data, so fetching the full set is fine (same assumption as
-// getCardsForStats). Injectable client per the isolation rule.
+// Backs the /memory-cards listing: each owned card with its source-note title + subject, selecting
+// only the columns the card renders (never the `example`/`code_context` answer text), optionally
+// narrowed to selected subjects and/or a `?q=` search across the prompt+answer columns, ordered
+// soonest-due first so the list doubles as a study-readiness view. RLS scopes rows to the owner.
+// `notes!inner` is load-bearing — subject filtering applies `.in('notes.subject_id', …)` on the
+// embedded table, which PostgREST can only filter through an inner join (a plain `notes(...)`
+// embed is an outer join and won't filter the parent). Paginated: returns the page's rows + the
+// full match `total` off one `count: 'exact'` response (the getDueQueue precedent — hand-rolled,
+// not via runTableQuery). Injectable client per the isolation rule.
 export async function getMemoryCardsList(
-  opts?: { subjectIds?: string[] },
+  opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
-): Promise<MemoryCardListItemT[]> {
+): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) => {
-    let query = c.from('memory_cards').select('*, notes!inner(title, subjects(title))')
-    if (opts?.subjectIds && opts.subjectIds.length > 0) {
-      query = query.in('notes.subject_id', opts.subjectIds)
-    }
-    return query.order('due_at', { ascending: true })
-  })
+  const page = opts?.page ?? 1
+  const limit = opts?.limit ?? DEFAULT_LIMIT
+  const offset = (page - 1) * limit
+
+  let query = supabase
+    .from('memory_cards')
+    .select('id, prompt, note_id, due_at, state, notes!inner(title, subjects(title))', {
+      count: 'exact',
+    })
+  if (opts?.subjectIds && opts.subjectIds.length > 0) {
+    query = query.in('notes.subject_id', opts.subjectIds)
+  }
+  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
+  if (orFilter) query = query.or(orFilter)
+
+  const { data, count, error } = await query
+    .order('due_at', { ascending: true })
+    .range(offset, offset + limit - 1)
+  if (error) {
+    console.error('[getMemoryCardsList] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return { rows: data ?? [], total: count ?? 0 }
 }
 
 // Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the

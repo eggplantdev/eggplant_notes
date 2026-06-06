@@ -2,14 +2,14 @@ import { InfoTip } from '@/components/ui/info-tip'
 import { CardsByMaturityChart } from '@/features/memory-cards/components/cards-by-maturity-chart'
 import { CardsByStateChart } from '@/features/memory-cards/components/cards-by-state-chart'
 import { MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
-import type { MemoryCardListItemT } from '@/features/memory-cards/types'
+import type { MemoryCardT } from '@/features/memory-cards/types'
 
-type PropsT = { cards: MemoryCardListItemT[] }
+type PropsT = { cards: Pick<MemoryCardT, 'state' | 'stability'>[] }
 
-// Aggregate view over the (subject-filtered) card set rendered on this page. Two distinct axes,
-// each its own radial chart: the FSRS state mix (New/Learning/Review/Relearning) and the
-// maturity split (stability ≥ MATURE_STABILITY_DAYS). Reflects the active filter, since `cards`
-// is the post-filter list.
+// Aggregate view over the user's ENTIRE deck (sourced from getCardsForStats, not the paginated
+// list — so it ignores `?q`/`?page`/`?subjects` and stays a stable "whole deck" dashboard). Two
+// distinct axes, each its own radial chart: the FSRS state mix (New/Learning/Review/Relearning)
+// and the maturity split (stability ≥ MATURE_STABILITY_DAYS).
 export function CardsOverview({ cards }: PropsT) {
   const stateCounts = [0, 0, 0, 0]
   let mature = 0
