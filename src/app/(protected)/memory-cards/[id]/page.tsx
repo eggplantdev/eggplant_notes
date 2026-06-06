@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation'
 
 import { PageShell } from '@/components/layout/page-shell'
+import { CardActions } from '@/components/ui/card-actions'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
 import { getMemoryCardForReview } from '@/features/memory-cards/queries'
+import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { ReviewPanel } from '@/features/review/review-panel'
 import { getDailyGoal } from '@/features/settings/queries'
 
@@ -20,7 +23,26 @@ export default async function MemoryCardReviewPage({
   if (!card) notFound()
 
   return (
-    <PageShell title="Review card" backHref="/memory-cards" backLabel="Memory cards">
+    <PageShell
+      title="Review card"
+      width="prose"
+      backHref="/memory-cards"
+      backLabel="Memory cards"
+      actions={
+        <CardActions
+          editHref={memoryCardEditHref(card.id)}
+          // Deleting from the card's own page must navigate away — the route would otherwise 404 on
+          // the deleted row (list rows just vanish via revalidate, so they pass no redirect).
+          deleteControl={
+            <DeleteMemoryCardButton
+              id={card.id}
+              noteId={card.note_id ?? undefined}
+              redirectTo="/memory-cards"
+            />
+          }
+        />
+      }
+    >
       <ReviewPanel card={card} goal={goal} />
     </PageShell>
   )
