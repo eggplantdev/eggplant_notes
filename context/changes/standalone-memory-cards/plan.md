@@ -365,24 +365,24 @@ Negligible. The `subject_id` index supports the list filter; the bulk move is a 
 
 #### Automated
 
-- [x] 2.1 New routes typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [x] 2.2 Lint passes: `pnpm lint`
-- [x] 2.3 Build passes: `pnpm build`
+- [x] 2.1 New routes typegen + typecheck: `pnpm exec next typegen && pnpm typecheck` — 25a25e8
+- [x] 2.2 Lint passes: `pnpm lint` — 25a25e8
+- [x] 2.3 Build passes: `pnpm build` — 25a25e8
 
 #### Manual
 
-- [ ] 2.4 `/memory-cards/new` creates a card (with/without subject), lands on `/memory-cards`, no phantom note
-- [ ] 2.5 `/memory-cards/[id]/edit` edits content + subject for standalone AND linked cards
-- [ ] 2.6 Editing a linked card shows source note + Unlink; Unlink drops `note_id`, card survives
-- [ ] 2.7 In-note add still works; note page has no inline card-edit mode
+- [x] 2.4 `/memory-cards/new` creates a card (with/without subject), lands on `/memory-cards`, no phantom note — 25a25e8
+- [x] 2.5 `/memory-cards/[id]/edit` edits content + subject for standalone AND linked cards — 25a25e8
+- [x] 2.6 Editing a linked card shows source note + Unlink; Unlink drops `note_id`, card survives — 25a25e8
+- [x] 2.7 In-note add still works; note page has no inline card-edit mode — 25a25e8
 
 ### Phase 3: Entry points + null-note UI handling
 
 #### Automated
 
-- [ ] 3.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [ ] 3.2 Lint passes: `pnpm lint`
-- [ ] 3.3 Build passes: `pnpm build`
+- [x] 3.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
+- [x] 3.2 Lint passes: `pnpm lint`
+- [x] 3.3 Build passes: `pnpm build`
 
 #### Manual
 

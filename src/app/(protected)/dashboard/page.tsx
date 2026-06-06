@@ -45,7 +45,14 @@ export default async function DashboardPage() {
     <PageShell
       title="Dashboard"
       subtitle={`Signed in as ${user?.email}`}
-      actions={<ButtonLink href="/notes/new">New note</ButtonLink>}
+      actions={
+        <div className="flex items-center gap-2">
+          <ButtonLink href="/notes/new">New note</ButtonLink>
+          <ButtonLink href="/memory-cards/new" variant="outline">
+            New card
+          </ButtonLink>
+        </div>
+      }
     >
       {/* Card-less hero stat: borrows the StatCard label/value type scale without the chrome. */}
       <div>

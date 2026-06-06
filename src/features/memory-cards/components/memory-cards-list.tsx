@@ -18,17 +18,18 @@ export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
       gridLayout
       items={cards}
       getKey={(card) => card.id}
-      getHref={(card) => `/notes/${card.note_id}#card-${card.id}`}
-      renderAction={(card) =>
-        // Phase 1: every card still has a note, so guarding on note_id is behavior-preserving and
-        // narrows the now-nullable column to string. Phase 2/3 repoint edit + handle note-less cards.
-        card.note_id ? (
-          <CardActions
-            editHref={memoryCardEditHref(card.id)}
-            deleteControl={<DeleteMemoryCardButton noteId={card.note_id} id={card.id} />}
-          />
-        ) : null
+      // A linked card deep-links to its source note (`#card-<id>`); a standalone card has no note,
+      // so the whole card opens its own edit page instead.
+      getHref={(card) =>
+        card.note_id ? `/notes/${card.note_id}#card-${card.id}` : memoryCardEditHref(card.id)
       }
+      // Edit + Delete render for EVERY card (route-based edit; delete works with or without a note).
+      renderAction={(card) => (
+        <CardActions
+          editHref={memoryCardEditHref(card.id)}
+          deleteControl={<DeleteMemoryCardButton id={card.id} noteId={card.note_id ?? undefined} />}
+        />
+      )}
       renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
       renderEyebrow={(card) => (
         <span className="text-muted-foreground text-xs">{formatReviewStatus(card)}</span>

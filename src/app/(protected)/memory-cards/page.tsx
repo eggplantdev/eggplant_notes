@@ -1,4 +1,5 @@
 import { PageShell } from '@/components/layout/page-shell'
+import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
@@ -12,12 +13,12 @@ import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
 
 // Memory cards list. Server Component — RLS scopes the reads to the signed-in user; the (protected)
-// layout already gates auth. Mirrors NotesPage: reads `?subjects=` (filter, joined through notes),
-// `?q=` (search across prompt+answer text), and `?page=`; the list query composes them and returns
-// one slim paginated page + the full match `total`. The "Cards overview" chart is the ONE exception
-// to the filtered/paginated view — it reads the ENTIRE deck via getCardsForStats (ignores
-// q/page/subjects), so it stays a stable whole-deck dashboard. Empty state keys off `total === 0`.
-// No "new" action — cards are created from a note's detail view.
+// layout already gates auth. Mirrors NotesPage: reads `?subjects=` (filter on the card's own
+// subject_id), `?q=` (search across prompt+answer text), and `?page=`; the list query composes them
+// and returns one slim paginated page + the full match `total`. The "Cards overview" chart is the
+// ONE exception to the filtered/paginated view — it reads the ENTIRE deck via getCardsForStats
+// (ignores q/page/subjects), so it stays a stable whole-deck dashboard. Empty state keys off
+// `total === 0`. "New card" opens the standalone create route (cards can also be added from a note).
 export default async function MemoryCardsPage({
   searchParams,
 }: {
@@ -42,6 +43,7 @@ export default async function MemoryCardsPage({
       subtitle={pluralize(total, 'memory card')}
       // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
       width="full"
+      actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >
       {statsCards.length > 0 && (
         <TitledCard title="Cards overview">
@@ -61,9 +63,9 @@ export default async function MemoryCardsPage({
           message={
             isFiltered
               ? 'No memory cards match your search.'
-              : 'No memory cards yet. Add one from a note to start building your recall set.'
+              : 'No memory cards yet. Create one to start building your recall set.'
           }
-          action={isFiltered ? undefined : { label: 'Go to notes', href: '/notes' }}
+          action={isFiltered ? undefined : { label: 'New card', href: '/memory-cards/new' }}
         />
       ) : (
         <>

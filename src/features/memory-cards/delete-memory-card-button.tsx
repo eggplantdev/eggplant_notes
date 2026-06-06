@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { deleteMemoryCard } from '@/features/memory-cards/actions/delete-memory-card'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-type DeleteMemoryCardButtonPropsT = { noteId: string; id: string }
+type DeleteMemoryCardButtonPropsT = { id: string; noteId?: string }
 
 // Destructive control per row (FR-014). Owns its own trigger Button + open state (the shared
 // ConfirmDeleteDialog is controlled-only, no built-in trigger), then fires the deleteMemoryCard
@@ -15,7 +15,7 @@ type DeleteMemoryCardButtonPropsT = { noteId: string; id: string }
 // the row disappears and the dialog unmounts with it; a returned failure is surfaced inline and
 // the dialog stays open (the shared dialog suppresses close while pending). The card's
 // review_events cascade at the DB.
-export function DeleteMemoryCardButton({ noteId, id }: DeleteMemoryCardButtonPropsT) {
+export function DeleteMemoryCardButton({ id, noteId }: DeleteMemoryCardButtonPropsT) {
   const [open, setOpen] = useState(false)
   const { error, isPending, run } = useActionTransition()
 
@@ -32,7 +32,7 @@ export function DeleteMemoryCardButton({ noteId, id }: DeleteMemoryCardButtonPro
         isPending={isPending}
         error={error}
         onConfirm={() =>
-          run(() => deleteMemoryCard(noteId, id), { successMessage: 'Card deleted' })
+          run(() => deleteMemoryCard(id, noteId), { successMessage: 'Card deleted' })
         }
       />
     </>
