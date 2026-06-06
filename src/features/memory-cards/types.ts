@@ -11,7 +11,7 @@ export type DueCardT = MemoryCardT & {
   notes: { title: string | null; subject_id: string | null } | null
 }
 
-// A check as shown on the /memory-cards listing: the row plus the joined source-note title (the
+// A card as shown on the /memory-cards listing: the row plus the joined source-note title (the
 // card→note link uses the row's own note_id) and subject title (the card's context chip). The
 // embed types via the memory_cards→notes→subjects FK chain. Subject filtering keys off
 // notes.subject_id in the query, but that column isn't projected here — the card doesn't need it.

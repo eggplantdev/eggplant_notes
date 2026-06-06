@@ -13,7 +13,7 @@ type DeleteMemoryCardButtonPropsT = { noteId: string; id: string }
 // ConfirmDeleteDialog is controlled-only, no built-in trigger), then fires the deleteMemoryCard
 // Server Action inside a transition. The action revalidates the note's detail path, so on success
 // the row disappears and the dialog unmounts with it; a returned failure is surfaced inline and
-// the dialog stays open (the shared dialog suppresses close while pending). The check's
+// the dialog stays open (the shared dialog suppresses close while pending). The card's
 // review_events cascade at the DB.
 export function DeleteMemoryCardButton({ noteId, id }: DeleteMemoryCardButtonPropsT) {
   const [open, setOpen] = useState(false)

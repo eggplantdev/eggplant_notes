@@ -187,7 +187,7 @@ export function NoteForm(props: NoteFormPropsT) {
                   size="sm"
                   onClick={() => checksField.pushValue(EMPTY_CHECK)}
                 >
-                  Add check
+                  Add card
                 </Button>
               </div>
 
@@ -217,9 +217,9 @@ export function NoteForm(props: NoteFormPropsT) {
                   <form.Field name={`checks[${i}].example`}>
                     {(field) => (
                       <div className="grid gap-2">
-                        <Label htmlFor={`check-${i}-example`}>Example (optional)</Label>
+                        <Label htmlFor={`card-${i}-example`}>Example (optional)</Label>
                         <Textarea
-                          id={`check-${i}-example`}
+                          id={`card-${i}-example`}
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}
