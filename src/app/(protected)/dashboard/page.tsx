@@ -2,7 +2,6 @@ import Link from 'next/link'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityHeatmap } from '@/features/dashboard/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
@@ -11,11 +10,7 @@ import { StatCard } from '@/features/dashboard/stat-card'
 import { StateBreakdown } from '@/features/dashboard/state-breakdown'
 import { SubjectRollup } from '@/features/dashboard/subject-rollup'
 import { TitledCard } from '@/components/ui/titled-card'
-import { formatInterval } from '@/features/review/format-interval'
-import { RatingButtons } from '@/features/review/rating-buttons'
-import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
-import { previewIntervals } from '@/features/review/scheduling'
-import { RenderMarkdown } from '@/components/markdown/render-markdown'
+import { ReviewPanel } from '@/features/review/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 import { getDashboardPageData } from './loader'
 
@@ -43,19 +38,6 @@ export default async function DashboardPage() {
     today: todayInZone(APP_TIME_ZONE),
     weeks: 53,
   })
-
-  // Interval previews for the embedded review card's four rating buttons — computed
-  // server-side exactly as the old /review page did, mapping each grade's next due_at to a
-  // human label. Empty when nothing is due.
-  const now = new Date()
-  const previews: Record<number, string> = card
-    ? Object.fromEntries(
-        Object.entries(previewIntervals(card, now)).map(([grade, due]) => [
-          grade,
-          formatInterval(now, due),
-        ]),
-      )
-    : {}
 
   // Scalar stats rendered as a uniform StatCard grid. Cull a line to drop the card.
   const scalars = [
@@ -104,50 +86,10 @@ export default async function DashboardPage() {
         <ActivityHeatmap columns={columns} />
       </TitledCard>
 
-      {/* Embedded review session (relocated from the old /review route). Prose-width inside
-          the full-width dashboard. ReviewCelebrationProvider wraps BOTH branches so the
-          goal-celebration dialog survives RatingButtons unmounting when the last card is rated
-          (lessons.md:119-124). Advance is server-driven: rateMemoryCard revalidates /dashboard. */}
+      {/* Embedded review session (relocated from the old /review route). Prose-width inside the
+          full-width dashboard; the panel itself owns the card/empty branch + server-side previews. */}
       <div className="mx-auto w-full max-w-2xl">
-        <ReviewCelebrationProvider>
-          {!card ? (
-            <p className="text-muted-foreground text-center text-sm">
-              All caught up 🎉 — no memory cards are due right now.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base font-medium">Recall</CardTitle>
-                  {card.notes?.title && (
-                    <Link
-                      href={`/notes/${card.note_id}`}
-                      className="text-muted-foreground hover:text-foreground text-sm"
-                    >
-                      From: {card.notes.title}
-                    </Link>
-                  )}
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4">
-                  <RenderMarkdown content={card.prompt} />
-                  {(card.example || card.code_context) && (
-                    <details className="border-t pt-3">
-                      <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
-                        Show answer
-                      </summary>
-                      <div className="mt-3 flex flex-col gap-3">
-                        {card.example && <RenderMarkdown content={card.example} />}
-                        {card.code_context && <RenderMarkdown content={card.code_context} />}
-                      </div>
-                    </details>
-                  )}
-                </CardContent>
-              </Card>
-
-              <RatingButtons memoryCardId={card.id} previews={previews} goal={dailyGoal} />
-            </div>
-          )}
-        </ReviewCelebrationProvider>
+        <ReviewPanel card={card} goal={dailyGoal} />
       </div>
 
       {/* Featured: today's actionable numbers */}
