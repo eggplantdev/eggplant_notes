@@ -445,8 +445,8 @@ None — no schema change.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — 8878f6d
+- [x] 1.2 Linting passes: `pnpm lint` — 8878f6d
 
 #### Manual
 
@@ -458,8 +458,8 @@ None — no schema change.
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
+- [x] 2.1 Type checking passes: `pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
 
 #### Manual
 
