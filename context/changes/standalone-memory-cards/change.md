@@ -1,7 +1,7 @@
 ---
 change_id: standalone-memory-cards
 title: Create memory cards directly without first authoring a note
-status: implementing
+status: implemented
 created: 2026-06-06
 updated: 2026-06-06
 archived_at: null

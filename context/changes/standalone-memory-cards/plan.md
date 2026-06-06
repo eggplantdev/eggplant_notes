@@ -398,13 +398,13 @@ Negligible. The `subject_id` index supports the list filter; the bulk move is a 
 
 #### Automated
 
-- [x] 4.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [x] 4.2 Lint passes: `pnpm lint`
-- [x] 4.3 Build passes: `pnpm build`
+- [x] 4.1 Typegen + typecheck: `pnpm exec next typegen && pnpm typecheck` — 1bc28e4
+- [x] 4.2 Lint passes: `pnpm lint` — 1bc28e4
+- [x] 4.3 Build passes: `pnpm build` — 1bc28e4
 
 #### Manual
 
-- [x] 4.4 Note subject change with linked cards → per-card dialog; Move follows the new subject (stays linked), Unlink keeps old subject (detaches)
-- [x] 4.5 Plain title/content edit → no prompt
-- [x] 4.6 Per-card Unlink in the note section drops `note_id`; card survives in `/memory-cards`
-- [x] 4.7 Editing a LINKED card's subject → "this will unlink" confirm; on confirm the card takes the new subject and detaches (invariant)
+- [x] 4.4 Note subject change with linked cards → per-card dialog; Move follows the new subject (stays linked), Unlink keeps old subject (detaches) — 1bc28e4
+- [x] 4.5 Plain title/content edit → no prompt — 1bc28e4
+- [x] 4.6 Per-card Unlink in the note section drops `note_id`; card survives in `/memory-cards` — 1bc28e4
+- [x] 4.7 Editing a LINKED card's subject → "this will unlink" confirm; on confirm the card takes the new subject and detaches (invariant) — 1bc28e4
