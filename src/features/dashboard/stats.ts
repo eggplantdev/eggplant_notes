@@ -1,4 +1,3 @@
-import { MATURE_STABILITY_DAYS } from '@/features/dashboard/constants'
 import { getLongestStreak } from '@/features/review-events/streak'
 import type {
   CheckStatRowT,
@@ -35,19 +34,12 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
 
   const todayStr = toISODate(today.getTime())
 
-  const stateCounts = { new: 0, learning: 0, review: 0, relearning: 0 }
-  const stateKeys = ['new', 'learning', 'review', 'relearning'] as const
   const cardsByNote = new Map<string, number>()
   const dueByNote = new Map<string, number>()
   let overdue = 0
-  let matureCards = 0
-  let totalLapses = 0
 
   for (const c of checks) {
-    if (c.state >= 0 && c.state < stateKeys.length) stateCounts[stateKeys[c.state]] += 1
     cardsByNote.set(c.note_id, (cardsByNote.get(c.note_id) ?? 0) + 1)
-    if (c.stability >= MATURE_STABILITY_DAYS) matureCards += 1
-    totalLapses += c.lapses
 
     const dueStr = isoDateInZone(new Date(c.due_at), APP_TIME_ZONE)
     if (dueStr <= todayStr) {
@@ -60,31 +52,21 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
 
   const subjectRollup = buildSubjectRollup(subjects, notes, cardsByNote, dueByNote)
 
-  // Review-quality stats over the fetched window — one pass for good/again/this-week.
+  // Review-quality stats over the fetched window — one pass for good + this-week.
   const total = ratings.length
   const weekStartStr = toISODate(today.getTime() - 6 * MS_PER_DAY)
   let good = 0
-  let again = 0
   let reviewsThisWeek = 0
   for (const r of ratings) {
     if (r.rating >= 3) good += 1
-    if (r.rating === 1) again += 1
     if (isoDateInZone(new Date(r.reviewed_at), APP_TIME_ZONE) >= weekStartStr) reviewsThisWeek += 1
   }
 
   return {
-    totalCards: checks.length,
-    totalNotes: notes.length,
-    totalSubjects: subjects.length,
-    stateCounts,
     overdue,
-    matureCards,
-    youngCards: checks.length - matureCards,
-    totalLapses,
     reviewsInWindow: total,
     reviewsThisWeek,
     retention: total > 0 ? good / total : null,
-    lapseRate: total > 0 ? again / total : null,
     longestStreak: getLongestStreak(activity),
     hardestCards,
     subjectRollup,

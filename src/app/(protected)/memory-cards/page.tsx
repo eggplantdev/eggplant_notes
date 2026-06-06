@@ -1,5 +1,7 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { EmptyState } from '@/components/ui/empty-state'
+import { TitledCard } from '@/components/ui/titled-card'
+import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
 import { getMemoryCardsList } from '@/features/memory-cards/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
@@ -45,7 +47,12 @@ export default async function MemoryCardsPage({
           action={isFiltered ? undefined : { label: 'Go to notes', href: '/notes' }}
         />
       ) : (
-        <MemoryCardsList checks={checks} />
+        <>
+          <TitledCard title="Cards overview">
+            <CardsOverview cards={checks} />
+          </TitledCard>
+          <MemoryCardsList checks={checks} />
+        </>
       )}
     </PageShell>
   )

@@ -19,16 +19,12 @@ export type CheckStatRowT = {
   id: string
   prompt: string
   note_id: string
-  state: number
   due_at: string
   stability: number
   lapses: number
 }
 export type NoteStatRowT = { id: string; title: string | null; subject_id: string | null }
 export type RatingStatRowT = { rating: number; reviewed_at: string }
-
-// Counts of cards in each FSRS state (index = FSRS_STATE_LABELS index).
-export type StateCountsT = { new: number; learning: number; review: number; relearning: number }
 
 // A frequently-failed card, for the "needs attention" list. Links to its source note.
 export type HardestCardT = {
@@ -50,18 +46,10 @@ export type SubjectRollupT = {
 }
 
 export type DashboardStatsT = {
-  totalCards: number
-  totalNotes: number
-  totalSubjects: number
-  stateCounts: StateCountsT
   overdue: number
-  matureCards: number
-  youngCards: number
-  totalLapses: number
   reviewsInWindow: number
   reviewsThisWeek: number
   retention: number | null // fraction 0–1 of reviews rated ≥3 in the window; null if none
-  lapseRate: number | null // fraction 0–1 of reviews rated 1 (Again) in the window
   longestStreak: number
   hardestCards: HardestCardT[]
   subjectRollup: SubjectRollupT[]

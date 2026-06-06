@@ -41,7 +41,7 @@ export async function getDueQueue(
 export async function getChecksForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
-    c.from('memory_cards').select('id, prompt, note_id, state, due_at, stability, lapses'),
+    c.from('memory_cards').select('id, prompt, note_id, due_at, stability, lapses'),
   )
 }
 
