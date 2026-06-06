@@ -24,7 +24,7 @@ export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
         // narrows the now-nullable column to string. Phase 2/3 repoint edit + handle note-less cards.
         card.note_id ? (
           <CardActions
-            editHref={memoryCardEditHref(card.note_id, card.id)}
+            editHref={memoryCardEditHref(card.id)}
             deleteControl={<DeleteMemoryCardButton noteId={card.note_id} id={card.id} />}
           />
         ) : null

@@ -16,9 +16,9 @@ import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
 // `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
-// 404. `?edit` carries two mutually exclusive meanings: `note` swaps the body+subject into
-// NoteForm in place (the old /notes/[id]/edit route, now inline); `<cardId>` drives the
-// memory-card edit form. Both are server-rendered (no client edit state) — forced because
+// 404. `?edit=note` swaps the body+subject into NoteForm in place (the old /notes/[id]/edit
+// route, now inline); editing a card lives at the unified /memory-cards/[id]/edit route
+// (standalone-memory-cards). Server-rendered (no client edit state) — forced because
 // RenderMarkdown is an async server-only Shiki component.
 export default async function NotePage({
   params,
@@ -89,14 +89,7 @@ export default async function NotePage({
 
       <Separator />
 
-      {/* `note` is the body-edit sentinel — never a card id. Forwarding it as editId would
-          trip MemoryCardsSection's stale-?edit guard (no card has id `note`) and bounce the
-          user out of body-edit, so suppress it while editing the body. */}
-      <MemoryCardsSection
-        noteId={note.id}
-        cards={memoryCards}
-        editId={isEditingNote ? undefined : edit}
-      />
+      <MemoryCardsSection noteId={note.id} cards={memoryCards} />
     </PageShell>
   )
 }

@@ -2,6 +2,13 @@ import type { Database } from '@/lib/supabase/types'
 
 export type MemoryCardT = Database['public']['Tables']['memory_cards']['Row']
 
+// One card plus its source note (id + title) for the unified edit page: the form seeds its fields
+// from the card and renders an Unlink affordance against `notes` when the card is linked. `notes`
+// is null for a standalone card (outer join via the memory_cards→notes FK).
+export type MemoryCardWithSourceT = MemoryCardT & {
+  notes: { id: string; title: string | null } | null
+}
+
 // A due-review card plus its source note's title + subject_id, for the card→note link (S-08).
 // The `notes(title, subject_id)` embed types via the memory_cards→notes FK; `title` is nullable
 // at the DB level (the app enforces it via Zod) and `subject_id` is null for unassigned notes

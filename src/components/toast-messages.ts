@@ -11,6 +11,8 @@
 export const TOAST_MESSAGES = {
   'note-saved': 'Note saved',
   'note-deleted': 'Note deleted',
+  'card-created': 'Card created',
+  'card-saved': 'Card saved',
   'subject-saved': 'Subject saved',
   'subject-deleted': 'Subject deleted',
   'signed-in': 'Welcome back',

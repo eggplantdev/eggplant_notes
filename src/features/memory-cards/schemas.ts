@@ -19,6 +19,14 @@ export const memoryCardInputSchema = z.object({
   code_context: optionalText,
 })
 
+// The standalone create + unified edit form's payload: the card fields plus the card's OWN
+// subject. `subject_id` is optional (a card may be unfiled) and validated SHAPE-only with
+// z.guid() per the id lesson — RLS owns existence/ownership. The in-note add form still uses the
+// subject-less memoryCardInputSchema (it seeds the subject from the note server-side).
+export const cardWithSubjectSchema = memoryCardInputSchema.extend({
+  subject_id: z.guid('Invalid subject id').nullable(),
+})
+
 // Validates the note this card is attached to (written as `note_id`) and a card's own id.
 // These are opaque, server-trusted ids that arrive straight from the DB, so validate SHAPE only
 // (z.guid), NOT RFC-4122 version/variant (z.uuid). Postgres `uuid` accepts any 128-bit value;
@@ -29,3 +37,4 @@ export const noteIdSchema = z.guid('Invalid note id')
 export const memoryCardIdSchema = z.guid('Invalid memory card id')
 
 export type MemoryCardInputT = z.infer<typeof memoryCardInputSchema>
+export type CardWithSubjectInputT = z.infer<typeof cardWithSubjectSchema>

@@ -1,6 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { DueCardT, MemoryCardListItemT, MemoryCardT } from '@/features/memory-cards/types'
+import type {
+  DueCardT,
+  MemoryCardListItemT,
+  MemoryCardT,
+  MemoryCardWithSourceT,
+} from '@/features/memory-cards/types'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
@@ -91,6 +96,27 @@ export async function getMemoryCardsList(
       .range(offset, offset + limit - 1),
     () => filtered(true),
   )
+}
+
+// Single card by id for the unified edit page (standalone-memory-cards), with its source note
+// (id + title) embedded for the Unlink row. Missing OR not-owned both resolve to `undefined`
+// (caller decides 404), via `maybeSingle` — same contract as getSubject/getNote. The note embed
+// is an outer join, so a standalone card returns `notes: null`. Injectable client per the rule.
+export async function getMemoryCard(
+  id: string,
+  client?: SupabaseClient<Database>,
+): Promise<MemoryCardWithSourceT | undefined> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('memory_cards')
+    .select('*, notes(id, title)')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) {
+    console.error('[getMemoryCard] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return data ?? undefined
 }
 
 // Returns all memory cards attached to one note, oldest first (FR-015). RLS scopes rows to the

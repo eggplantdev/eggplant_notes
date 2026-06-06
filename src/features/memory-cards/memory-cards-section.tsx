@@ -1,40 +1,26 @@
-import { redirect } from 'next/navigation'
-
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { ButtonLink } from '@/components/ui/button-link'
 import { AddMemoryCard } from '@/features/memory-cards/add-memory-card'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
-import { MemoryCardForm } from '@/features/memory-cards/memory-card-form'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 
 type MemoryCardsSectionPropsT = {
   noteId: string
   cards: MemoryCardT[]
-  editId?: string
 }
 
-// Server Component (async — renders the server-only Shiki RenderMarkdown). Owns the "all
-// cards on a note" view (FR-015). Edit state is the URL `?edit=<id>` param (editId), so
-// there's no client list state: an Edit link re-renders this on the server with the form
-// seeded for that card (`key` forces the client form to remount when the edit target
-// changes). When NOT editing, the add form is deferred behind <AddMemoryCard> so a read view
-// mounts no CodeMirror. Optional example/code_context render only when present.
-export async function MemoryCardsSection({ noteId, cards, editId }: MemoryCardsSectionPropsT) {
-  const editingCard = editId ? cards.find((c) => c.id === editId) : undefined
-  // Stale ?edit (card deleted or never owned): drop the param so the URL matches the
-  // add-mode form it would fall back to, instead of claiming edit of a row that isn't there.
-  if (editId && !editingCard) redirect(`/notes/${noteId}`)
-
+// Server Component (async — renders the server-only Shiki RenderMarkdown). Owns the "all cards on
+// a note" view (FR-015). Editing a card now lives at the unified /memory-cards/[id]/edit route
+// (standalone-memory-cards), so this section only ADDS cards: the add form is deferred behind
+// <AddMemoryCard> so a read view mounts no CodeMirror. Optional example/code_context render only
+// when present.
+export async function MemoryCardsSection({ noteId, cards }: MemoryCardsSectionPropsT) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold">Memory cards</h2>
 
-      {editingCard ? (
-        <MemoryCardForm key={editId} noteId={noteId} card={editingCard} />
-      ) : (
-        <AddMemoryCard noteId={noteId} />
-      )}
+      <AddMemoryCard noteId={noteId} />
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">
@@ -53,11 +39,7 @@ export async function MemoryCardsSection({ noteId, cards, editId }: MemoryCardsS
               <div className="flex items-start justify-between gap-4">
                 <p className="font-medium">{card.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
-                  <ButtonLink
-                    href={memoryCardEditHref(noteId, card.id)}
-                    variant="outline"
-                    size="sm"
-                  >
+                  <ButtonLink href={memoryCardEditHref(card.id)} variant="outline" size="sm">
                     Edit
                   </ButtonLink>
                   <DeleteMemoryCardButton noteId={noteId} id={card.id} />

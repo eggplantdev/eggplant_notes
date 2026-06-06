@@ -349,25 +349,25 @@ Negligible. The `subject_id` index supports the list filter; the bulk move is a 
 
 #### Automated
 
-- [x] 1.1 Migration + reseed applies cleanly: `supabase db reset`
-- [x] 1.2 Supabase types regenerated and committed
-- [x] 1.3 Type check passes: `pnpm exec next typegen && pnpm typecheck`
-- [x] 1.4 Lint passes: `pnpm lint`
-- [x] 1.5 Build passes: `pnpm build`
+- [x] 1.1 Migration + reseed applies cleanly: `supabase db reset` — 7cbac47
+- [x] 1.2 Supabase types regenerated and committed — 7cbac47
+- [x] 1.3 Type check passes: `pnpm exec next typegen && pnpm typecheck` — 7cbac47
+- [x] 1.4 Lint passes: `pnpm lint` — 7cbac47
+- [x] 1.5 Build passes: `pnpm build` — 7cbac47
 
 #### Manual
 
-- [ ] 1.6 `/memory-cards` list renders seeded cards with subject + note title
-- [ ] 1.7 In-note add seeds the card's subject from the note
-- [ ] 1.8 Subject filter keys off `memory_cards.subject_id`
+- [x] 1.6 `/memory-cards` list renders seeded cards with subject + note title — 7cbac47
+- [x] 1.7 In-note add seeds the card's subject from the note — 7cbac47
+- [x] 1.8 Subject filter keys off `memory_cards.subject_id` — 7cbac47
 
 ### Phase 2: Unified create + edit surface
 
 #### Automated
 
-- [ ] 2.1 New routes typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
-- [ ] 2.2 Lint passes: `pnpm lint`
-- [ ] 2.3 Build passes: `pnpm build`
+- [x] 2.1 New routes typegen + typecheck: `pnpm exec next typegen && pnpm typecheck`
+- [x] 2.2 Lint passes: `pnpm lint`
+- [x] 2.3 Build passes: `pnpm build`
 
 #### Manual
 
