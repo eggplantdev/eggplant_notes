@@ -1,4 +1,3 @@
-import { getLongestStreak } from '@/features/review-events/streak'
 import type {
   CheckStatRowT,
   DashboardStatsT,
@@ -7,7 +6,6 @@ import type {
   RatingStatRowT,
 } from '@/features/dashboard/types'
 import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY, toISODate } from '@/lib/utils'
-import type { ActivityDayT } from '@/types/activity'
 
 // Pure aggregation for the dashboard's expanded stats. Kept synchronous and Supabase-free
 // (mirrors streak.ts) so it stays unit-testable in isolation — the data layer fetches the
@@ -21,15 +19,13 @@ type InputT = {
   checks: CheckStatRowT[]
   notes: NoteStatRowT[]
   ratings: RatingStatRowT[]
-  activity: ActivityDayT[]
-  dailyGoal: number
   today: Date
 }
 
 const HARDEST_LIMIT = 5
 
 export function computeDashboardStats(input: InputT): DashboardStatsT {
-  const { checks, notes, ratings, activity, dailyGoal, today } = input
+  const { checks, notes, ratings, today } = input
 
   const todayStr = toISODate(today.getTime())
 
@@ -56,7 +52,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     reviewsInWindow: total,
     reviewsThisWeek,
     retention: total > 0 ? good / total : null,
-    longestStreak: getLongestStreak(activity, dailyGoal),
     hardestCards,
   }
 }

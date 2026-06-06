@@ -38,8 +38,6 @@ export async function getDashboardData(dailyGoalPromise: Promise<number>): Promi
     checks,
     notes,
     ratings,
-    activity,
-    dailyGoal,
     today: todayInZone(APP_TIME_ZONE),
   })
   return { dueToday, reviewedToday, currentStreak, dailyGoal, activity, stats }

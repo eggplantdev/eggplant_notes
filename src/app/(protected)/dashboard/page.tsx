@@ -47,6 +47,20 @@ export default async function DashboardPage() {
       subtitle={`Signed in as ${user?.email}`}
       actions={<ButtonLink href="/notes/new">New note</ButtonLink>}
     >
+      {/* Card-less hero stat: borrows the StatCard label/value type scale without the chrome. */}
+      <div>
+        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+          Current streak
+        </p>
+        <p className="text-foreground mt-1 flex items-baseline gap-2 text-4xl font-bold">
+          <span>🔥</span>
+          <span className="tabular-nums">{currentStreak}</span>
+          <span className="text-muted-foreground text-base font-medium">
+            {currentStreak === 1 ? 'day' : 'days'} hitting your daily goal
+          </span>
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Flip variant to switch palettes: 'aurora' | 'fuchsia' | 'mono' | 'white'. */}
         <GoalProgressBar
@@ -64,11 +78,9 @@ export default async function DashboardPage() {
           goalHitText="Weekly goal hit 🚀"
         />
       </div>
-
       <TitledCard title="Review activity — last 12 months" className="w-full">
         <ActivityHeatmap columns={columns} />
       </TitledCard>
-
       {/* Review session beside its key numbers — stacked on small screens, side-by-side on lg. */}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ReviewPanel card={card} goal={dailyGoal} />
@@ -78,21 +90,6 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard
-          label="Current streak"
-          value={
-            <>
-              🔥 {currentStreak}{' '}
-              <span className="text-muted-foreground text-lg font-medium">days</span>
-            </>
-          }
-          sub="consecutive days with ≥1 review"
-        />
-        <StatCard label="Longest streak" value={s.longestStreak} sub="best consecutive-day run" />
-      </div>
-
       {/* Surfaced only once there's a real backlog of lapsing cards — a single struggler isn't
           worth a callout. */}
       {s.hardestCards.length > 1 && (

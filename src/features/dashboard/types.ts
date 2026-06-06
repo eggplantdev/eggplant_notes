@@ -42,7 +42,6 @@ export type DashboardStatsT = {
   reviewsInWindow: number
   reviewsThisWeek: number
   retention: number | null // fraction 0–1 of reviews rated ≥3 in the window; null if none
-  longestStreak: number
   hardestCards: HardestCardT[]
 }
 
