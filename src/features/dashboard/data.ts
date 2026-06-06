@@ -21,7 +21,7 @@ import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 // goal fetch parallel with everything else AND keeps features/dashboard free of a
 // features/settings import (the cross-feature wiring lives in the app-layer loader).
 export async function getDashboardData(dailyGoalPromise: Promise<number>): Promise<DashboardDataT> {
-  const [activity, checks, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
+  const [activity, cards, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
     getReviewActivity(),
     getCardsForStats(),
     getNotesForStats(),
@@ -29,13 +29,13 @@ export async function getDashboardData(dailyGoalPromise: Promise<number>): Promi
     getReviewedTodayCount(),
     dailyGoalPromise,
   ])
-  // "Due now" = the same `due_at <= now()` rule getDueQueue uses, derived from the checks
+  // "Due now" = the same `due_at <= now()` rule getDueQueue uses, derived from the cards
   // already in memory instead of a separate count query.
   const nowIso = new Date().toISOString()
-  const dueToday = checks.filter((c) => c.due_at <= nowIso).length
+  const dueToday = cards.filter((c) => c.due_at <= nowIso).length
   const currentStreak = getCurrentStreak(activity, dailyGoal)
   const stats = computeDashboardStats({
-    checks,
+    cards,
     notes,
     ratings,
     today: todayInZone(APP_TIME_ZONE),

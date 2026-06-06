@@ -17,7 +17,7 @@ import { formatLocaleDateTime } from '@/lib/utils/date'
 // Note detail. Server Component — first dynamic route in the repo (Next 16 `params` and
 // `searchParams` are Promises). getNote() is RLS-scoped, so a missing OR not-owned id both
 // 404. `?edit` carries two mutually exclusive meanings: `note` swaps the body+subject into
-// NoteForm in place (the old /notes/[id]/edit route, now inline); `<checkId>` drives the
+// NoteForm in place (the old /notes/[id]/edit route, now inline); `<cardId>` drives the
 // memory-card edit form. Both are server-rendered (no client edit state) — forced because
 // RenderMarkdown is an async server-only Shiki component.
 export default async function NotePage({

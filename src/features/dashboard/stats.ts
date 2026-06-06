@@ -1,5 +1,5 @@
 import type {
-  CheckStatRowT,
+  CardStatRowT,
   DashboardStatsT,
   HardestCardT,
   NoteStatRowT,
@@ -16,7 +16,7 @@ import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY, toISODate } from '@/lib/utils
 // before comparing. ISO YYYY-MM-DD strings compare correctly with `<`/`===`.
 
 type InputT = {
-  checks: CheckStatRowT[]
+  cards: CardStatRowT[]
   notes: NoteStatRowT[]
   ratings: RatingStatRowT[]
   today: Date
@@ -25,17 +25,17 @@ type InputT = {
 const HARDEST_LIMIT = 5
 
 export function computeDashboardStats(input: InputT): DashboardStatsT {
-  const { checks, notes, ratings, today } = input
+  const { cards, notes, ratings, today } = input
 
   const todayStr = toISODate(today.getTime())
 
   let overdue = 0
-  for (const c of checks) {
+  for (const c of cards) {
     const dueStr = isoDateInZone(new Date(c.due_at), APP_TIME_ZONE)
     if (dueStr < todayStr) overdue += 1
   }
 
-  const hardestCards = buildHardest(checks, notes)
+  const hardestCards = buildHardest(cards, notes)
 
   // Review-quality stats over the fetched window — one pass for good + this-week.
   const total = ratings.length
@@ -57,9 +57,9 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
 }
 
 // Top cards by lapse count (ties broken by lower stability = shakier), titled via the note map.
-function buildHardest(checks: CheckStatRowT[], notes: NoteStatRowT[]): HardestCardT[] {
+function buildHardest(cards: CardStatRowT[], notes: NoteStatRowT[]): HardestCardT[] {
   const titleByNote = new Map(notes.map((n) => [n.id, n.title ?? 'Untitled']))
-  return checks
+  return cards
     .filter((c) => c.lapses > 0)
     .sort((a, b) => b.lapses - a.lapses || a.stability - b.stability)
     .slice(0, HARDEST_LIMIT)

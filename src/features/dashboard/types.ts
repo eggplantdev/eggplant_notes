@@ -16,7 +16,7 @@ export type DashboardDataT = {
 // Structural row shapes the pure stats computation reads. Defined here (not imported from
 // each feature's queries) so computeDashboardStats stays free of cross-feature type imports —
 // the feature read helpers return rows that are structurally assignable to these.
-export type CheckStatRowT = {
+export type CardStatRowT = {
   id: string
   prompt: string
   note_id: string

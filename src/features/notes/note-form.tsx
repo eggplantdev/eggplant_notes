@@ -194,7 +194,7 @@ export function NoteForm(props: NoteFormPropsT) {
               {checksField.state.value.map((_, i) => (
                 <div key={i} className="flex flex-col gap-3 rounded-lg border p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">Check {i + 1}</span>
+                    <span className="text-sm font-medium">Card {i + 1}</span>
                     <Button
                       type="button"
                       variant="ghost"
