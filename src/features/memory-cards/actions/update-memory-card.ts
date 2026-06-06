@@ -20,12 +20,7 @@ export async function updateMemoryCard(
   if (!parsedId.success) return parsedId
 
   const result = await runTableAction(memoryCardInputSchema, input, (supabase, data) =>
-    supabase
-      .from('memory_cards')
-      .update({ ...data, updated_at: new Date().toISOString() })
-      .eq('id', parsedId.data)
-      .select('id')
-      .single(),
+    supabase.from('memory_cards').update(data).eq('id', parsedId.data).select('id').single(),
   )
   if (!result.success) return result
 

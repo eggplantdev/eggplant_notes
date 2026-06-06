@@ -124,6 +124,20 @@
 - **Meta-rule**: a locator going stale on a label rename is noise; pay the copy-coupling tax once, deliberately, via an explicit `toHaveText` only where the copy is load-bearing. Targeting and verification are separate jobs — find by testid, verify by assertion.
 - **Applies to**: /10x-implement, /10x-impl-review, /simplify, any Playwright E2E or component author choosing a selector
 
+## `updated_at` is DB-owned via a `moddatetime` trigger — never hand-stamp it in app code
+
+- **Context**: Any Server Action that UPDATEs a row with an `updated_at timestamptz` column (`notes`, `subjects`, `memory_cards`, `user_settings`). The columns default `now()` on INSERT only.
+- **Problem**: The original update actions each set `updated_at: new Date().toISOString()` by hand (4 sites). That's duplicated, **forgettable** (a new update action that omits it silently stops bumping the column), and uses the **app server's wall-clock** (Vercel `fra1`) instead of the DB clock the INSERT default uses — two clocks that can disagree. It was already inconsistent: the FSRS rate RPC bumped `memory_cards.updated_at = now()` in-DB while `update-memory-card` did it in JS.
+- **Rule**: Own `updated_at` at the DB. Migration `20260606083954_auto_bump_updated_at.sql` installs `moddatetime` (`extensions` schema) + a `before update … handle_updated_at` trigger on all four tables; the app sets nothing. A new table with `updated_at` must add the same trigger, not an app-side stamp. Note an **upsert** is covered: `INSERT … ON CONFLICT DO UPDATE` fires `BEFORE UPDATE` triggers on the conflict path (the INSERT path uses the column default) — so `update-daily-goal`'s upsert needs no manual stamp. `review_events` is append-only (no `updated_at`) → no trigger. Verify with a forced past value + a real UPDATE (`information_schema.triggers` lists the trigger; the column should reset to `now()`).
+- **Applies to**: /10x-implement, /10x-impl-review, /simplify, any new table or update action with an `updated_at` column
+
+## `supabase db reset` failing with `supabase_migrations.seed_files does not exist` is CLI/stack version skew — `stop && start`, not a SQL bug
+
+- **Context**: Running `supabase db reset` (e.g. to apply a new migration) against the local stack.
+- **Problem**: Reset aborted at "Initialising schema… error running container: exit 1". `--debug` showed every migration **parsed fine**; the real error was `relation "supabase_migrations.seed_files" does not exist` (42P01) in the CLI's seed-tracking step. That table is created by a newer CLI than the one that last initialised the running containers — the pinned binary (`mise` `supabase = 2.101.0`) and the running stack had drifted (CLI nags to upgrade to 2.105). It is **not** a fault in your migration SQL.
+- **Rule**: When `db reset` fails on a `supabase_migrations.*` relation (not on your own `Applying migration …` line), re-sync the stack: `supabase stop && supabase start` (re-inits the migration-history schema with the current binary), then `db reset` again. Confirm the failure is environmental first via `--debug` — if your migration's `Applying …` line has no `ErrorResponse` after it, the SQL is innocent.
+- **Applies to**: /10x-implement, any local migration apply / `db reset`
+
 ## Post-mutation dialog/celebration state must live ABOVE the branch that `revalidatePath` can unmount
 
 - **Context**: Any feature that shows a dialog/toast/confetti _in response to a Server Action_ whose `revalidatePath` re-renders the page into a different branch — e.g. the `/review` goal-hit congrats dialog: rating a card calls `rateMemoryCard` → `revalidatePath('/review')`, and rating the **last** due card flips the page from the card branch to the "All caught up" branch.

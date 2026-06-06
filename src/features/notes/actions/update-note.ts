@@ -21,7 +21,6 @@ export async function updateNote(id: string, input: unknown): Promise<ActionResu
     const patch: Database['public']['Tables']['notes']['Update'] = {
       title: data.title,
       content: data.content,
-      updated_at: new Date().toISOString(),
     }
     // Assignment is optional on update. Only (re)derive `position` when the subject
     // actually changes — Date.now() appends to the new subject's end, null clears it on

@@ -15,12 +15,7 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
   if (!parsedId.success) return parsedId
 
   const result = await runTableAction(subjectInputSchema, input, (supabase, data) =>
-    supabase
-      .from('subjects')
-      .update({ ...data, updated_at: new Date().toISOString() })
-      .eq('id', parsedId.data)
-      .select('id')
-      .single(),
+    supabase.from('subjects').update(data).eq('id', parsedId.data).select('id').single(),
   )
   if (!result.success) return result
 

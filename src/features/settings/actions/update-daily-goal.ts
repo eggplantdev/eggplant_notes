@@ -20,12 +20,9 @@ export async function updateDailyGoal(input: DailyGoalInputT): Promise<ActionRes
   const result = await runTableAction(dailyGoalSchema, input, (supabase, data) =>
     supabase
       .from('user_settings')
-      // updated_at is set by hand: there is no moddatetime trigger on user_settings, so without
-      // this the column would only ever hold its insert-time default. Do not strip it.
-      .upsert(
-        { user_id: user.id, daily_goal: data.dailyGoal, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' },
-      )
+      // updated_at is handled by the moddatetime trigger: the ON CONFLICT DO UPDATE path fires
+      // BEFORE UPDATE (bumping it), and the insert path uses the column's `default now()`.
+      .upsert({ user_id: user.id, daily_goal: data.dailyGoal }, { onConflict: 'user_id' })
       .select('daily_goal')
       .single(),
   )
