@@ -1,11 +1,9 @@
-import Link from 'next/link'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MutedText } from '@/components/ui/muted-text'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { buildPreviews } from '@/features/review/build-previews'
 import { RatingButtons } from '@/features/review/rating-buttons'
 import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
+import { SourceNoteLink } from '@/features/notes/components/source-note-link'
 import type { DueCardT } from '@/features/memory-cards/types'
 
 type PropsT = { card: DueCardT | undefined; goal: number }
@@ -26,11 +24,13 @@ export function ReviewPanel({ card, goal }: PropsT) {
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base font-medium">Recall</CardTitle>
+              <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
               {card.notes?.title && (
-                <MutedText asChild interactive>
-                  <Link href={`/notes/${card.note_id}`}>From: {card.notes.title}</Link>
-                </MutedText>
+                <SourceNoteLink
+                  noteId={card.note_id}
+                  subjectId={card.notes.subject_id}
+                  title={card.notes.title}
+                />
               )}
             </CardHeader>
             <CardContent className="flex flex-col gap-4">

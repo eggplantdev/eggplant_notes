@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { ButtonLink } from '@/components/ui/button-link'
+import { ContextLink } from '@/components/ui/context-link'
 import { Separator } from '@/components/ui/separator'
 import { updateNote } from '@/features/notes/actions/update-note'
 import { DeleteNoteButton } from '@/features/notes/delete-note-button'
@@ -38,6 +39,9 @@ export default async function NotePage({
   if (!note) notFound()
 
   const isEditingNote = edit === 'note'
+  // The note's surrounding subject (if assigned) — drives the "open in subject" context link.
+  // Resolved from the already-fetched subjects list, so no extra round-trip.
+  const subject = note.subject_id ? subjects.find((s) => s.id === note.subject_id) : undefined
 
   return (
     <PageShell
@@ -71,9 +75,16 @@ export default async function NotePage({
       {isEditingNote ? (
         <NoteForm action={updateNote} note={note} subjects={subjects} />
       ) : (
-        // Read view: subject is shown/changed only in edit mode (NoteForm's Combobox), so the
-        // read branch is just the rendered body — no inline subject picker.
-        <RenderMarkdown content={note.content} />
+        // Read view: subject is changed only in edit mode (NoteForm's Combobox). When the note is
+        // assigned, surface a link that opens it inside its subject context (the sidebar pane).
+        <div className="flex flex-col gap-4">
+          {subject && (
+            <ContextLink href={`/subjects/${subject.id}/${note.id}`}>
+              Open in {subject.title}
+            </ContextLink>
+          )}
+          <RenderMarkdown content={note.content} />
+        </div>
       )}
 
       <Separator />
