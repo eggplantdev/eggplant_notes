@@ -442,21 +442,21 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [x] 2.1 Dump runs against a reset local DB: `pnpm seed:dump-fixture`
-- [x] 2.2 Generated file imports + type-checks: `pnpm typecheck`
-- [x] 2.3 Linting passes: `pnpm lint`
+- [x] 2.1 Dump runs against a reset local DB: `pnpm seed:dump-fixture` — 115a9aa
+- [x] 2.2 Generated file imports + type-checks: `pnpm typecheck` — 115a9aa
+- [x] 2.3 Linting passes: `pnpm lint` — 115a9aa
 
 #### Manual
 
-- [x] 2.4 Fixture contains expected subjects/notes-with-code/cards, counts ≈ corpus
+- [x] 2.4 Fixture contains expected subjects/notes-with-code/cards, counts ≈ corpus — 115a9aa
 
 ### Phase 3: Gating queries + Server Actions
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass: `pnpm test`
-- [ ] 3.2 Type checking passes: `pnpm typecheck`
-- [ ] 3.3 Linting passes: `pnpm lint`
+- [x] 3.1 Unit tests pass: `pnpm test`
+- [x] 3.2 Type checking passes: `pnpm typecheck`
+- [x] 3.3 Linting passes: `pnpm lint`
 
 #### Manual
 
