@@ -430,13 +430,13 @@ to (re)produce the fixture from the now-current local corpus.
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `supabase db reset`
-- [ ] 1.2 Type checking passes: `pnpm typecheck`
-- [ ] 1.3 Linting passes: `pnpm lint`
+- [x] 1.1 Migration applies cleanly: `supabase db reset`
+- [x] 1.2 Type checking passes: `pnpm typecheck`
+- [x] 1.3 Linting passes: `pnpm lint`
 
 #### Manual
 
-- [ ] 1.4 `is_seeded boolean not null default false` present on subjects, notes, memory_cards
+- [x] 1.4 `is_seeded boolean not null default false` present on subjects, notes, memory_cards
 
 ### Phase 2: Fixture generator + committed fixture
 

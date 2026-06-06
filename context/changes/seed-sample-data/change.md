@@ -1,7 +1,7 @@
 ---
 change_id: seed-sample-data
 title: Load / Clear sample data — one-click demo populate + reset (S-12)
-status: planned
+status: implementing
 created: 2026-06-06
 updated: 2026-06-06
 archived_at: null

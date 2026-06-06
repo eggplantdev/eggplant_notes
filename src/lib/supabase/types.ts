@@ -37,6 +37,7 @@ export type Database = {
           elapsed_days: number
           example: string | null
           id: string
+          is_seeded: boolean
           lapses: number
           last_review: string | null
           learning_steps: number
@@ -57,6 +58,7 @@ export type Database = {
           elapsed_days?: number
           example?: string | null
           id?: string
+          is_seeded?: boolean
           lapses?: number
           last_review?: string | null
           learning_steps?: number
@@ -77,6 +79,7 @@ export type Database = {
           elapsed_days?: number
           example?: string | null
           id?: string
+          is_seeded?: boolean
           lapses?: number
           last_review?: string | null
           learning_steps?: number
@@ -104,6 +107,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_seeded: boolean
           position: number | null
           subject_id: string | null
           title: string | null
@@ -114,6 +118,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_seeded?: boolean
           position?: number | null
           subject_id?: string | null
           title?: string | null
@@ -124,6 +129,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_seeded?: boolean
           position?: number | null
           subject_id?: string | null
           title?: string | null
@@ -177,6 +183,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_seeded: boolean
           title: string
           updated_at: string
           user_id: string
@@ -185,6 +192,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_seeded?: boolean
           title: string
           updated_at?: string
           user_id?: string
@@ -193,6 +201,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_seeded?: boolean
           title?: string
           updated_at?: string
           user_id?: string

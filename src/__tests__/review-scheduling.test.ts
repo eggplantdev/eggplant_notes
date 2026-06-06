@@ -28,6 +28,7 @@ function freshRow(now: Date): MemoryCardT {
     due_at: now.toISOString(),
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
+    is_seeded: false,
   }
 }
 
