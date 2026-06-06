@@ -21,40 +21,37 @@ export function ReviewPanel({ card, goal }: PropsT) {
           All caught up 🎉 — no memory cards are due right now.
         </p>
       ) : (
-        <div className="flex flex-col gap-4">
-          <Card className="neon-glow-white-red hover:neon-glow-white-red-hit transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
-              {card.note_id && card.notes?.title && (
-                <SourceNoteLink
-                  noteId={card.note_id}
-                  subjectId={card.notes.subject_id}
-                  title={card.notes.title}
-                />
-              )}
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <RenderMarkdown content={card.prompt} />
-              {(card.example || card.code_context) && (
-                <details className="border-t pt-3">
-                  <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
-                    Show answer
-                  </summary>
-                  <div className="mt-3 flex flex-col gap-3">
-                    {card.example && <RenderMarkdown content={card.example} />}
-                    {card.code_context && <RenderMarkdown content={card.code_context} />}
-                  </div>
-                </details>
-              )}
-            </CardContent>
-          </Card>
-
-          <RatingButtons
-            memoryCardId={card.id}
-            previews={buildPreviews(card, new Date())}
-            goal={goal}
-          />
-        </div>
+        <Card className="gradient-border ring-0">
+          <CardHeader>
+            <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
+            {card.note_id && card.notes?.title && (
+              <SourceNoteLink
+                noteId={card.note_id}
+                subjectId={card.notes.subject_id}
+                title={card.notes.title}
+              />
+            )}
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <RenderMarkdown content={card.prompt} />
+            {(card.example || card.code_context) && (
+              <details className="border-t pt-3">
+                <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
+                  Show answer
+                </summary>
+                <div className="mt-3 flex flex-col gap-3">
+                  {card.example && <RenderMarkdown content={card.example} />}
+                  {card.code_context && <RenderMarkdown content={card.code_context} />}
+                </div>
+              </details>
+            )}
+            <RatingButtons
+              memoryCardId={card.id}
+              previews={buildPreviews(card, new Date())}
+              goal={goal}
+            />
+          </CardContent>
+        </Card>
       )}
     </ReviewCelebrationProvider>
   )

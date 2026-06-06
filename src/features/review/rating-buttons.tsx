@@ -2,6 +2,7 @@
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { rateMemoryCard } from '@/features/review/actions/rate-memory-card'
 import { GRADES } from '@/features/review/grades'
 import { useReviewCelebration } from '@/features/review/review-celebration-context'
@@ -34,7 +35,10 @@ export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
                 if (result.success && result.celebrate) celebrate(result.celebrate)
               })
             }
-            className="h-auto flex-col gap-0.5 py-2"
+            className={cn(
+              'h-auto flex-col gap-0.5 py-2',
+              grade === 4 && 'neon-glow-green hover:neon-glow-green-hit transition-shadow',
+            )}
           >
             <span className="font-semibold">{label}</span>
             <span className="text-xs opacity-80">{previews[grade]}</span>

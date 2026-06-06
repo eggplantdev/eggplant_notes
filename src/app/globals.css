@@ -205,25 +205,25 @@
   box-shadow: 0 0 12px color-mix(in oklch, white 90%, transparent);
 }
 
-/* red (mono, off the destructive token). */
+/* Red glow for the `glowy-red` button variant. Matched 1:1 to neon-glow-green's params (6px/70%
+   base, 12px/90% hit) so red and green buttons differ only in hue — red at 85% read wider/more
+   aggressive than the green Easy button. Pure red hue (oklch 0.63 0.26 27). */
 @utility neon-glow-red {
-  box-shadow: 0 0 6px color-mix(in oklch, var(--color-destructive) 70%, transparent);
+  box-shadow: 0 0 6px color-mix(in oklch, oklch(0.63 0.26 27) 70%, transparent);
 }
 @utility neon-glow-red-hit {
-  box-shadow: 0 0 12px color-mix(in oklch, var(--color-destructive) 90%, transparent);
+  box-shadow: 0 0 12px color-mix(in oklch, oklch(0.63 0.26 27) 90%, transparent);
 }
 
-/* white core + red halo (same core+halo shape as the fuchsia pair). White core uses the
-   heatmap's top --color-heat-4 token (the "More (16+)" cell), not pure white, to match it. */
-@utility neon-glow-white-red {
-  box-shadow:
-    0 0 12px color-mix(in oklch, var(--color-heat-4) 80%, transparent),
-    0 0 24px color-mix(in oklch, var(--color-destructive) 55%, transparent);
-}
-@utility neon-glow-white-red-hit {
-  box-shadow:
-    0 0 16px color-mix(in oklch, var(--color-heat-4) 92%, transparent),
-    0 0 32px color-mix(in oklch, var(--color-destructive) 70%, transparent);
+/* Aurora gradient border (green→cyan — the progress bar's `aurora` hues). Two-layer trick: a
+   solid --card layer clipped to the padding box sits over a gradient layer clipped to the border
+   box, so the transparent 1px border reveals the gradient. Pair with `ring-0` to drop the Card's
+   default ring. */
+@utility gradient-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(to right, var(--color-neon-green), var(--color-neon-cyan)) border-box;
 }
 
 /* SVG-path glow for chart rings: box-shadow doesn't apply to <path>, so use a drop-shadow
