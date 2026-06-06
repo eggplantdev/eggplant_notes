@@ -3,11 +3,9 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
-// Per-navigation animation for the content pane. A template (unlike a layout) re-mounts on
-// every navigation, so switching to a different note remounts this wrapper and replays the
-// enter transition — a fade+slide that masks the server-segment swap. Mirrors PageShell's
-// motion treatment and honors prefers-reduced-motion (opacity-only). No loading.tsx skeleton:
-// without one the previous note stays visible during the swap, then animates over.
+// A template (unlike a layout) re-mounts on every navigation, so switching notes replays the
+// fade+slide that masks the server-segment swap. No loading.tsx skeleton, so the previous note
+// stays visible during the swap then animates over. Honors prefers-reduced-motion (opacity-only).
 export default function SubjectReadNoteTemplate({ children }: { children: ReactNode }) {
   const shouldReduceMotion = useReducedMotion()
 

@@ -19,7 +19,7 @@ export default function ResetPasswordPage() {
     defaultValues: { email: '' },
     onSubmit: async ({ value }) => {
       const result = await resetPassword(value)
-      // Error toasts; success keeps its inline "check your email" confirmation (no success toast).
+      // Unlike the other auth flows, success doesn't redirect — it keeps the inline "check your email" confirmation.
       if (!toastActionResult(result)) {
         setFormError(result.error)
         return

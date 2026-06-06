@@ -12,13 +12,8 @@ import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
 
-// Memory cards list. Server Component — RLS scopes the reads to the signed-in user; the (protected)
-// layout already gates auth. Mirrors NotesPage: reads `?subjects=` (filter on the card's own
-// subject_id), `?q=` (search across prompt+answer text), and `?page=`; the list query composes them
-// and returns one slim paginated page + the full match `total`. The "Cards overview" chart is the
-// ONE exception to the filtered/paginated view — it reads the ENTIRE deck via getCardsForStats
-// (ignores q/page/subjects), so it stays a stable whole-deck dashboard. Empty state keys off
-// `total === 0`. "New card" opens the standalone create route (cards can also be added from a note).
+// The "Cards overview" chart is the ONE exception to the filtered/paginated view — it reads the
+// ENTIRE deck via getCardsForStats (ignores q/page/subjects), so it stays a stable whole-deck stat.
 export default async function MemoryCardsPage({
   searchParams,
 }: {
@@ -41,7 +36,7 @@ export default async function MemoryCardsPage({
     <PageShell
       title="Memory cards"
       subtitle={pluralize(total, 'memory card')}
-      // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
+      // 'full' so the card grid can fan out to three columns on wide screens.
       width="full"
       actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >

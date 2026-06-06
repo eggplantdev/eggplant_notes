@@ -10,13 +10,10 @@ import { DeleteSubjectButton } from '@/features/subjects/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
 import { pluralize } from '@/lib/utils/pluralize'
 
-// Docs-style single-pane subject view (S-15) — now THE subject view (replaced the continuous
-// "subject-as-document" page). This layout holds the persistent shell + subject header/actions
-// + sidebar; the nested [noteId] segment server-renders just the active note's read-only body,
-// so clicking a sidebar link is a soft RSC navigation that streams only the content pane (the
-// layout, and thus the sidebar, never re-render). The layout+segment split is forced by
-// RenderMarkdown being async/server-only — a client `?note=` swap can't call it. Subject editing
-// (?edit) lives in the index page (page.tsx) since layouts don't receive searchParams.
+// This layout holds the persistent shell + header/sidebar; the nested [noteId] segment renders
+// the active note's body, so a sidebar click is a soft RSC navigation that streams only the
+// content pane. The layout+segment split is forced by RenderMarkdown being async/server-only — a
+// client swap can't call it. Subject editing (?edit) lives in page.tsx since layouts get no searchParams.
 export default async function SubjectLayout({
   children,
   params,
@@ -55,11 +52,9 @@ export default async function SubjectLayout({
         </>
       }
     >
-      {/* Separates the subject header (title + description) from the note grid below. */}
       <Separator className="my-2" />
 
-      {/* App-shell row (desktop): fills the bounded <main> (PageShell `fill`) and gives the grid
-          a single 1fr track, so the sidebar column and the content pane each scroll on their own
+      {/* Single 1fr track so the sidebar and content pane each scroll on their own
           (md:overflow-y-auto below) while the page itself never scrolls. */}
       <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[15rem_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
         <SubjectNoteSidebar subjectId={id} notes={summaries} />

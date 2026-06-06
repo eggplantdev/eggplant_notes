@@ -5,8 +5,6 @@ import { SampleDataSection } from '@/features/sample-data/components/sample-data
 import { DailyGoalForm } from '@/features/settings/daily-goal-form'
 import { getDailyGoal } from '@/features/settings/queries'
 
-// Settings surface: review preferences (daily goal) + sample data + the account Danger zone.
-// Gated by (protected)/layout.tsx. Other slices can extend it.
 export default async function SettingsPage() {
   const dailyGoal = await getDailyGoal()
 

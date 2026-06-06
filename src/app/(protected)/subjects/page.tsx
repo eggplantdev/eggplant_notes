@@ -8,11 +8,7 @@ import { getSubjectsList } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
 
-// Subjects list. Server Component — RLS scopes getSubjectsList() to the signed-in user; the
-// (protected) layout gates auth. Reads `?q=` (search across title+description) and `?page=`; the
-// query returns one slim paginated page + the full match `total`. Mirrors NotesPage; the list rows
-// are rendered by the SubjectsList client island so they can animate. Empty state keys off
-// `total === 0` so an out-of-range deep page still renders the footer.
+// Empty state keys off `total === 0` so an out-of-range deep page still renders the footer.
 export default async function SubjectsPage({
   searchParams,
 }: {

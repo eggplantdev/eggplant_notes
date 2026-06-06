@@ -17,7 +17,7 @@ export default function UpdatePasswordPage() {
     defaultValues: { password: '' },
     onSubmit: async ({ value }) => {
       const result = await updatePassword(value)
-      // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
+      // Success redirects (throws), so this branch only sees failure.
       if (!toastActionResult(result)) setFormError(result.error)
     },
   })

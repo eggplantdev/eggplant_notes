@@ -8,8 +8,8 @@ import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { ReviewPanel } from '@/features/review/review-panel'
 import { getDailyGoal } from '@/features/settings/queries'
 
-// On-demand single-card review: reuses the dashboard's ReviewPanel so the user can review ANY card
-// they pick, not just the soonest-due one the queue hands them. Next 16 `params` is a Promise.
+// On-demand single-card review: reuses ReviewPanel so any picked card can be reviewed, not just
+// the soonest-due one. Next 16 `params` is a Promise.
 export default async function MemoryCardReviewPage({
   params,
 }: {

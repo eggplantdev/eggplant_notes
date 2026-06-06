@@ -11,12 +11,8 @@ import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
 
-// Notes list. Server Component — RLS scopes both reads to the signed-in user; the (protected)
-// layout already gates auth. Reads `?subjects=a,b` (filter), `?q=` (search across title+content),
-// and `?page=` from the URL; the query composes them server-side and returns one slim paginated
-// page + the full match `total`. The subtitle count and the footer both read `total`, not the page
-// length. Empty state keys off `total === 0` so an out-of-range deep page still renders the footer
-// to navigate back.
+// `total` is the full match count (subtitle + footer), not the page length; empty state keys off
+// `total === 0` so an out-of-range deep page still renders the footer to navigate back.
 export default async function NotesPage({
   searchParams,
 }: {
@@ -38,7 +34,7 @@ export default async function NotesPage({
     <PageShell
       title="Notes"
       subtitle={pluralize(total, 'note')}
-      // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
+      // 'full' so the card grid can fan out to three columns on wide screens.
       width="full"
       actions={<ButtonLink href="/notes/new">New note</ButtonLink>}
     >
@@ -57,8 +53,7 @@ export default async function NotesPage({
             }
             action={isFiltered ? undefined : { label: 'Create a note', href: '/notes/new' }}
           />
-          {/* Brand-new account (no notes AND no subjects, unfiltered): offer the demo dataset
-              beside the create CTA. Hidden once any subject exists or a filter is active. */}
+          {/* Brand-new account only: offer the demo dataset beside the create CTA. */}
           {!isFiltered && subjects.length === 0 && <LoadSampleDataButton variant="outline" />}
         </div>
       ) : (

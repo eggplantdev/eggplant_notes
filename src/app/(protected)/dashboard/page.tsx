@@ -10,12 +10,10 @@ import { ReviewPanel } from '@/features/review/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 import { getDashboardPageData } from './loader'
 
-// Format a 0–1 fraction as a whole-percent string; em-dash when there's no data yet.
+// em-dash when there's no data yet (null fraction).
 const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%`)
 
 export default async function DashboardPage() {
-  // One route-level fan-out: getDashboardPageData (./loader) composes every read this page
-  // needs in a single Promise.all and does the cross-feature join.
   const {
     user,
     stats: s,
@@ -32,8 +30,7 @@ export default async function DashboardPage() {
     weeks: 53,
   })
 
-  // Compact tiles flanking the review panel: today's actionable numbers + the 30-day quality
-  // pair. Rendered as a 2×2 grid of small StatCards. Cull a line to drop a tile.
+  // Rendered as a 2×2 grid; cull a line to drop a tile.
   const tiles = [
     { label: 'Due today', value: dueToday, sub: 'memory cards ready to review' },
     { label: 'Overdue', value: s.overdue, sub: 'cards past their due date' },
@@ -54,7 +51,7 @@ export default async function DashboardPage() {
         </div>
       }
     >
-      {/* Card-less hero stat: borrows the StatCard label/value type scale without the chrome. */}
+      {/* Card-less hero stat: StatCard's type scale without the chrome. */}
       <div>
         <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           Current streak
@@ -88,7 +85,6 @@ export default async function DashboardPage() {
       <TitledCard title="Review activity — last 12 months" className="w-full">
         <ActivityHeatmap columns={columns} variant="neon-cyan" />
       </TitledCard>
-      {/* Review session beside its key numbers — stacked on small screens, side-by-side on lg. */}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ReviewPanel card={card} goal={dailyGoal} />
         <div className="grid grid-cols-2 gap-4">
@@ -97,8 +93,7 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
-      {/* Surfaced only once there's a real backlog of lapsing cards — a single struggler isn't
-          worth a callout. */}
+      {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
       {s.hardestCards.length > 1 && (
         <TitledCard title="Needs attention">
           <HardestCards cards={s.hardestCards} />

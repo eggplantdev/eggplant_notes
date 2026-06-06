@@ -18,7 +18,7 @@ export default function SignUpPage() {
     defaultValues: { email: '', password: '' },
     onSubmit: async ({ value }) => {
       const result = await signUp(value)
-      // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
+      // Success redirects (throws), so this branch only sees failure.
       if (!toastActionResult(result)) setFormError(result.error)
     },
   })

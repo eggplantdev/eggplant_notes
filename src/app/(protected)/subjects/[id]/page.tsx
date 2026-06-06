@@ -6,12 +6,9 @@ import { updateSubject } from '@/features/subjects/actions/update-subject'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
 import { SubjectForm } from '@/features/subjects/subject-form'
 
-// Index of the subject view. `?edit` renders the inline subject edit form (carried over from
-// S-14 — layouts can't read searchParams, so it lives here, not the layout). Otherwise: with
-// notes, redirect to the first (by position) so the content pane is never empty; with none, an
-// empty prompt. Subject existence is also enforced by the layout (404s). `?toast` is forwarded
-// onto the first-note redirect so a post-delete/-save toast survives this hop; on the empty/edit
-// branches it stays in the URL for the global <ActionToast> mounted in the root layout.
+// `?edit` renders the inline subject edit form here (not the layout, which gets no searchParams).
+// Otherwise redirect to the first note so the content pane is never empty. `?toast` is forwarded
+// onto that redirect so a post-delete/-save toast survives the hop.
 export default async function SubjectPage({
   params,
   searchParams,
