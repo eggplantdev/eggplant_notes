@@ -45,7 +45,7 @@ export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT)
       const result = check
         ? await updateMemoryCard(noteId, check.id, value)
         : await createMemoryCard(noteId, value)
-      if (!toastActionResult(result, { successMessage: check ? 'Check saved' : 'Check added' })) {
+      if (!toastActionResult(result, { successMessage: check ? 'Card saved' : 'Card added' })) {
         setFormError(result.error)
         return
       }

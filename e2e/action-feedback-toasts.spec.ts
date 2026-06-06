@@ -37,7 +37,7 @@ test('post-redirect toasts: create shows "Note saved", refresh does not re-toast
   await expect(page.getByText('Note deleted')).toBeVisible()
 })
 
-test('silent-success form: adding a memory card toasts "Check added"', async ({ page }) => {
+test('silent-success form: adding a memory card toasts "Card added"', async ({ page }) => {
   await signUp(page, uniqueEmail('toast-check'))
 
   await page.goto('/notes/new')
@@ -48,5 +48,5 @@ test('silent-success form: adding a memory card toasts "Check added"', async ({ 
   // The add-check form returns {success:true} with no redirect — previously a silent success.
   await page.getByLabel('Question').fill('What does first-class function mean?')
   await page.getByRole('button', { name: 'Add memory card' }).click()
-  await expect(page.getByText('Check added')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText('Card added')).toBeVisible({ timeout: 15_000 })
 })

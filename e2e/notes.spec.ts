@@ -127,7 +127,7 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   await expect(page.getByRole('heading', { name: 'Memory cards' })).toBeVisible()
 
   // Edit the body in place → save → redirected off the ?edit URL with the new content rendered.
-  // Since S-17 the add-check form is deferred (collapsed behind "Add check"), so edit mode now
+  // Since S-17 the add-check form is deferred (collapsed behind "Add card"), so edit mode now
   // mounts only NoteForm's body editor — a single CodeMirror. `.first()` is kept defensively (it
   // would still disambiguate if someone opened the add form), but the page is single-editor here.
   const marker = `inline-body-${Date.now()}`

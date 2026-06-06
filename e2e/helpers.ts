@@ -38,11 +38,11 @@ export async function createNote(page: Page, title: string) {
 }
 
 // Attach a question-only memory card on the current note detail page and wait for it to list.
-// The add form is deferred behind an "Add check" toggle (S-17), so reveal it first; it
+// The add form is deferred behind an "Add card" toggle (S-17), so reveal it first; it
 // collapses again after a successful add, so each call re-reveals. (Specs exercising the
 // optional example/code_context fields add their checks inline instead.)
 export async function attachCheck(page: Page, prompt: string) {
-  await page.getByRole('button', { name: 'Add check' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByLabel('Question').fill(prompt)
   await page.getByRole('button', { name: 'Add memory card' }).click()
   await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })

@@ -23,9 +23,9 @@ test('create a note with two memory cards inline, saved together', async ({ page
 
   // Stage two checks, plus a third we then remove — proving removed rows aren't persisted (and
   // that removal works: an un-removed empty row would block the save on the prompt validator).
-  await page.getByRole('button', { name: 'Add check' }).click()
-  await page.getByRole('button', { name: 'Add check' }).click()
-  await page.getByRole('button', { name: 'Add check' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByLabel('Question').nth(0).fill(q1)
   await page.getByLabel('Question').nth(1).fill(q2)
   await page.getByLabel('Example (optional)').nth(0).fill('It runs as the calling user.')
@@ -60,7 +60,7 @@ test('a staged check with an empty question blocks the save', async ({ page }) =
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(`Blocked ${Date.now()}`)
   // Add a check but leave its question empty.
-  await page.getByRole('button', { name: 'Add check' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
 
   // Save is blocked: inline error shows and we stay on /notes/new (no redirect, no row written).

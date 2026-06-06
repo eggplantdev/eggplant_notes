@@ -32,7 +32,7 @@ export function DeleteMemoryCardButton({ noteId, id }: DeleteMemoryCardButtonPro
         isPending={isPending}
         error={error}
         onConfirm={() =>
-          run(() => deleteMemoryCard(noteId, id), { successMessage: 'Check deleted' })
+          run(() => deleteMemoryCard(noteId, id), { successMessage: 'Card deleted' })
         }
       />
     </>

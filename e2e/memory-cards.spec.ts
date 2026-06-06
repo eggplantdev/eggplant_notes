@@ -13,10 +13,10 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   // A note to attach checks to (title only — keeps the only code block on the page the check's).
   await createNote(page, `TC host note ${Date.now()}`)
 
-  // Empty state, then reveal the deferred add form (S-17: collapsed behind "Add check") and add.
+  // Empty state, then reveal the deferred add form (S-17: collapsed behind "Add card") and add.
   await expect(page.getByText('No memory cards yet.')).toBeVisible()
   await expect(page.getByLabel('Question')).toBeHidden()
-  await page.getByRole('button', { name: 'Add check' }).click()
+  await page.getByRole('button', { name: 'Add card' }).click()
   const prompt = `What does sum do? ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)
   await page.getByLabel('Example (optional)').fill('sum(2, 3) === 5')
@@ -44,7 +44,7 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })
 })
 
-// S-17: the add-check form (and its CodeMirror island) is deferred behind an "Add check" toggle,
+// S-17: the add-check form (and its CodeMirror island) is deferred behind an "Add card" toggle,
 // so a read view mounts no editor. Reveal on click, collapse on "Hide", collapse after a
 // successful add. `.cm-content` count is the observable proxy for the editor being mounted (the
 // CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 1 while the form is open.
@@ -57,7 +57,7 @@ test('add-check form is deferred: no editor on read, reveals, hides, collapses a
   // Read view: no editor mounted, form collapsed behind the toggle.
   await expect(page.locator('.cm-content')).toHaveCount(0)
   await expect(page.getByLabel('Question')).toBeHidden()
-  const addCheck = page.getByRole('button', { name: 'Add check' })
+  const addCheck = page.getByRole('button', { name: 'Add card' })
   await expect(addCheck).toBeVisible()
 
   // Reveal → form + exactly one CodeMirror island mounts.
