@@ -11,10 +11,8 @@ type CelebrationContextT = { celebrate: (payload: GoalCelebrationT) => void }
 
 const ReviewCelebrationContext = createContext<CelebrationContextT | undefined>(undefined)
 
-// Owns the goal-celebration state ABOVE the dashboard review panel's `card ? ... : empty`
-// branch, so the dialog survives RatingButtons unmounting when the last due card is rated (which
-// is exactly when the goal is most often crossed). `celebrate` is event-driven — confetti + open
-// in one call, no useEffect.
+// Holds celebration state ABOVE the panel's `card ? ... : empty` branch so the dialog survives
+// RatingButtons unmounting when the last due card is rated — exactly when the goal is most often crossed.
 export function ReviewCelebrationProvider({ children }: { children: ReactNode }) {
   const [celebration, setCelebration] = useState<GoalCelebrationT | undefined>(undefined)
 

@@ -10,11 +10,6 @@ import { useActionTransition } from '@/hooks/use-action-transition'
 
 type PropsT = { memoryCardId: string; previews: Record<number, string>; goal: number }
 
-// Four rating buttons, each showing its predicted next interval (server-formatted). Clicking
-// fires rateMemoryCard via useActionTransition (pending/disabled state + inline error); the
-// action revalidates /dashboard (next due card streams in) and the standalone card page (it
-// refreshes with the new schedule) — no client queue state, no useEffect. Buttons stack two-up
-// on narrow widths (~360px), four-up from sm.
 export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()
   const { celebrate } = useReviewCelebration()

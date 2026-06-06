@@ -1,9 +1,7 @@
 import type { GoalCelebrationT } from '@/features/review/types'
 
-// Pure crossing detector. A goal is "crossed" by this rating when the count went from below
-// the goal to at/above it (before < goal <= after) — so it fires exactly once and never on a
-// re-review that leaves the distinct-card count flat. weeklyGoal is dailyGoal * 7 (matches the
-// dashboard weekly bar). Returns undefined when nothing crossed so the action omits `celebrate`.
+// Crossed = count went `before < goal <= after`, so it fires exactly once and never on a flat
+// re-review. weeklyGoal is dailyGoal * 7. Returns undefined when nothing crossed.
 export function detectGoalCrossing(input: {
   dailyBefore: number
   dailyAfter: number

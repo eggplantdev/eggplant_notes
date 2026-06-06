@@ -14,14 +14,12 @@ import type { GoalCelebrationT } from '@/features/review/types'
 
 type PropsT = { celebration: GoalCelebrationT | undefined; onClose: () => void }
 
-// Which goal(s) crossed → the headline.
 function title(c: GoalCelebrationT): string {
   if (c.daily && c.weekly) return 'Daily + weekly goal hit!'
   if (c.weekly) return 'Weekly goal hit!'
   return 'Daily goal hit!'
 }
 
-// The count line under the headline.
 function detail(c: GoalCelebrationT): string {
   const daily = `${c.dailyCount}/${c.dailyGoal} today`
   const weekly = `${c.weeklyCount}/${c.weeklyGoal} this week`
@@ -30,8 +28,6 @@ function detail(c: GoalCelebrationT): string {
   return daily
 }
 
-// Presentational congrats dialog. Controlled by the celebration payload from the provider; the
-// provider fires confetti and owns open/close. neon-cyan title matches the dashboard goal bar.
 export function GoalCelebrationDialog({ celebration, onClose }: PropsT) {
   return (
     <Dialog

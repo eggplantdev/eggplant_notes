@@ -9,8 +9,7 @@ import type { Database } from '@/lib/supabase/types'
 import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
 
-// Review history for one memory card, newest first. RLS scopes rows to the owner, so a
-// caller can never read another user's review events even with a known memory_card_id.
+// RLS scopes rows to the owner, so a known memory_card_id can't read another user's events.
 export async function getReviewEvents(
   memoryCardId: string,
   client?: SupabaseClient<Database>,
@@ -25,14 +24,10 @@ export async function getReviewEvents(
   )
 }
 
-// Per-day DISTINCT-card counts for the dashboard activity heatmap, bucketed in APP_TIME_ZONE
-// (not UTC). `count` is distinct cards reviewed that day, not raw review events — the same unit
-// the daily-goal bar (getReviewedTodayCount) and the goal-relative streak use, so re-reviewing
-// one card N times can't inflate a day. PostgREST can't group by a timezone-shifted date in a
-// plain select, so we fetch the rows (RLS scopes them to the owner) and bucket in TS. The read
-// is bounded to the last ~400 days — the 53-week heatmap window (371d) plus streak slack — so it
-// can't grow unbounded as all-time history accumulates. Injectable client per the isolation rule
-// (Playwright passes a signInWithPassword client). Shape reuses the shared ActivityDayT.
+// Per-day DISTINCT-card counts (bucketed in APP_TIME_ZONE, not UTC) so re-reviewing one card N
+// times can't inflate a day — the same unit the goal bar and streak use. PostgREST can't group by
+// a timezone-shifted date, so we fetch and bucket in TS. Bounded to ~400 days (371d heatmap window
+// + streak slack) so it can't grow unbounded as history accumulates.
 export async function getReviewActivity(
   client?: SupabaseClient<Database>,
 ): Promise<ActivityDayT[]> {
@@ -52,12 +47,9 @@ export async function getReviewActivity(
   return [...cardsByDay].map(([date, cards]) => ({ date, count: cards.size }))
 }
 
-// Distinct cards reviewed *today* (in APP_TIME_ZONE), for the dashboard daily-goal bar. We
-// fetch a ~2-day buffer rather than `>= utcMidnight`: APP_TIME_ZONE is UTC+1/+2, so a review
-// late in the local evening can sit just before UTC midnight — a naive UTC-midnight cutoff
-// would drop it from "today." We over-fetch, then keep only rows whose zone-bucketed date is
-// today, and count distinct memory_card_id (the same card reviewed twice counts once).
-// Injectable client per the isolation rule.
+// Distinct cards reviewed today (APP_TIME_ZONE). Over-fetches a ~2-day buffer instead of
+// `>= utcMidnight`: APP_TIME_ZONE is UTC+1/+2, so a late-evening review sits just before UTC
+// midnight and a naive UTC cutoff would drop it from "today"; we keep only rows bucketed to today.
 export async function getReviewedTodayCount(client?: SupabaseClient<Database>): Promise<number> {
   const supabase = client ?? (await createClient())
   const since = new Date(Date.now() - 2 * MS_PER_DAY).toISOString()
@@ -67,12 +59,8 @@ export async function getReviewedTodayCount(client?: SupabaseClient<Database>): 
   return countDistinctReviewedOn(rows, isoDateInZone(new Date(), APP_TIME_ZONE))
 }
 
-// Total review events in the trailing 7 days (today − 6d, zone-bucketed) — the same window the
-// dashboard's weekly goal bar uses (stats.ts reviewsThisWeek). Over-fetches an 8-day buffer to
-// dodge the UTC-vs-Warsaw midnight skew, then delegates the zone-bucketed event tally to the pure
-// countReviewsInWeek helper (mirrors how getReviewedTodayCount delegates to countDistinctReviewedOn,
-// keeping the window logic unit-testable apart from the query). Injectable client per the isolation
-// rule. RLS scopes rows to the owner.
+// Total review events in the trailing 7 days (today − 6d, zone-bucketed). Over-fetches an 8-day
+// buffer to dodge the UTC-vs-Warsaw midnight skew; tally lives in pure countReviewsInWeek.
 export async function getReviewsThisWeekCount(client?: SupabaseClient<Database>): Promise<number> {
   const supabase = client ?? (await createClient())
   const since = new Date(Date.now() - 8 * MS_PER_DAY).toISOString()
@@ -83,11 +71,8 @@ export async function getReviewsThisWeekCount(client?: SupabaseClient<Database>)
   return countReviewsInWeek(rows, weekStart)
 }
 
-// Rating + timestamp of every review in the trailing `windowDays`, backing the dashboard's
-// retention / lapse-rate / review-volume stats (the heatmap's getReviewActivity drops the
-// rating, so this is a separate read). The window is the caller's policy (the dashboard owns
-// it) — kept a required arg so this feature doesn't import dashboard constants. Aggregation
-// happens in TS. RLS scopes rows to the owner; injectable client per the rule.
+// Separate from getReviewActivity, which drops the rating. `windowDays` is a required arg (not a
+// constant) so this feature doesn't import dashboard constants.
 export async function getRecentRatings(windowDays: number, client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   const since = new Date(Date.now() - windowDays * MS_PER_DAY).toISOString()

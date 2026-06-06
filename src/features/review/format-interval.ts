@@ -1,6 +1,5 @@
-// Anki-style relative interval for a rating-button preview: "1m", "10m", "4h", "3d", "2mo",
-// "1y". Pre-formatted server-side so the client island ships no date math. Rounds to the
-// coarsest unit that fits; clamps the minimum to "1m" so an imminent due never reads "0m".
+// Anki-style relative interval ("1m", "4h", "3d", "2mo", "1y"), coarsest unit that fits.
+// Clamped to a minimum of "1m" so an imminent due never reads "0m".
 export function formatInterval(from: Date, to: Date): string {
   const minutes = Math.round((to.getTime() - from.getTime()) / 60_000)
   if (minutes < 60) return `${Math.max(minutes, 1)}m`

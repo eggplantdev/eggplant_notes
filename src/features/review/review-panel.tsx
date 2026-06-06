@@ -8,11 +8,9 @@ import type { DueCardT } from '@/features/memory-cards/types'
 
 type PropsT = { card: DueCardT | undefined; goal: number }
 
-// The embedded review session (relocated from the old /review route). Server Component: it owns
-// the server-side interval previews (previewIntervals runs only when a card is actually due) so
-// the route stays pure composition. ReviewCelebrationProvider wraps BOTH branches so the
-// goal-celebration dialog survives RatingButtons unmounting when the last card is rated
-// (lessons.md:119-124). Advance is server-driven: rateMemoryCard revalidates /dashboard.
+// Server Component: owns the interval previews (computed only when a card is due). The Provider
+// wraps BOTH branches so the celebration dialog survives RatingButtons unmounting when the last
+// card is rated (lessons.md:119-124).
 export function ReviewPanel({ card, goal }: PropsT) {
   return (
     <ReviewCelebrationProvider>

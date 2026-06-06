@@ -11,15 +11,11 @@ import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
 
-// The one mutation that closes the recall loop (FR-016–018). Server-trusted: the client island
-// sends only { memoryCardId, rating }. We re-fetch the card row (RLS scopes it to the owner),
-// compute the next FSRS state HERE — never trust a client-supplied schedule — and persist
-// atomically via the record_review RPC (one transaction: update memory_cards + insert
-// review_events; its update-first ownership guard self-enforces the card<->caller link).
-// `user_id` is never sent (DB defaults auth.uid()). Deliberately does NOT use runTableAction:
-// that wrapper is single-schema → single PostgREST write → .select().single(); this has two
-// inputs (id + rating), an intermediate server-side read + FSRS compute, and an RPC that
-// returns void — so the {success}/error envelope is mirrored by hand here instead.
+// Server-trusted: the client sends only { memoryCardId, rating }; we compute the next FSRS state
+// HERE (never trust a client-supplied schedule) and persist atomically via the record_review RPC
+// (update memory_cards + insert review_events in one transaction, ownership self-enforced).
+// Not runTableAction — that wrapper is single-schema/single-write; this has two inputs, an
+// intermediate read + FSRS compute, and a void RPC, so the {success}/error envelope is hand-mirrored.
 export async function rateMemoryCard(
   memoryCardId: string,
   rating: unknown,
@@ -32,8 +28,7 @@ export async function rateMemoryCard(
   if (!parsedRating.success) return parsedRating
 
   const supabase = await createClient()
-  // Goal is cosmetic (gates the congrats dialog), so a bad value must never fail the rating —
-  // fall back to 0, which makes detectGoalCrossing return undefined (no celebration).
+  // Goal is cosmetic (gates the dialog), so a bad value must never fail the rating — 0 makes detectGoalCrossing return undefined.
   const goalParsed = goalSchema.safeParse(goal)
   const dailyGoal = goalParsed.success ? goalParsed.data : 0
 
@@ -72,8 +67,7 @@ export async function rateMemoryCard(
   })
 
   revalidatePath('/dashboard')
-  // Also refresh the standalone card page (memory-card-review-page) so it reflects the new schedule
-  // when rated outside the dashboard queue. Additive — the dashboard path is unaffected.
+  // Refresh the standalone card page too, for when it's rated outside the dashboard queue.
   revalidatePath(`/memory-cards/${parsedId.data}`)
   return { success: true, celebrate }
 }

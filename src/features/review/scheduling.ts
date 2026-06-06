@@ -3,9 +3,8 @@ import { type Card, fsrs, type Grade, type State } from 'ts-fsrs'
 import { GRADES } from '@/features/review/grades'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 
-// Single home for all ts-fsrs interaction: the algorithm choice is swappable here and the
-// row<->Card serialization seam (Postgres ISO strings <-> Date) lives in one place, unit-tested.
-// A single shared scheduler instance (default FSRS parameters) avoids re-init per call.
+// Single home for all ts-fsrs interaction (algorithm swap + the row<->Card ISO<->Date seam).
+// One shared scheduler instance (default FSRS params) avoids re-init per call.
 const scheduler = fsrs()
 
 // The shape record_review's `p_card` jsonb expects: Dates emitted as ISO strings.
