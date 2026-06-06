@@ -20,6 +20,9 @@
      :root indirection, since they don't theme-swap. */
   --color-neon-green: #10ffaa;
   --color-neon-cyan: #00e5ff;
+  /* Violet sits between cyan and fuchsia on the same ramp — the 4th stop the cards-overview
+     radial chart needs (New→Learning→Review→Relearning). */
+  --color-neon-violet: #a855f7;
   --color-neon-fuchsia: #d946ef;
   --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
@@ -200,6 +203,14 @@
 }
 @utility neon-glow-white-hit {
   box-shadow: 0 0 12px color-mix(in oklch, white 90%, transparent);
+}
+
+/* SVG-path glow for chart rings: box-shadow doesn't apply to <path>, so use a drop-shadow
+   filter instead. currentColor means each ring haloes in its own colour — the cards-overview
+   radial charts set each sector's `color` to its fill, so neon rings glow neon, white glows
+   white. Toggled by RadialCountChart's `glow` prop. */
+@utility ring-glow {
+  filter: drop-shadow(0 0 5px currentColor);
 }
 
 /* Activity-heatmap cell glow — same color-mix box-shadow idea as the progress-bar glow, applied

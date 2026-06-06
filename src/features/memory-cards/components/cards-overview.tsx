@@ -1,27 +1,15 @@
-import { FSRS_STATE_LABELS, MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
+import { InfoTip } from '@/components/ui/info-tip'
+import { CardsByMaturityChart } from '@/features/memory-cards/components/cards-by-maturity-chart'
+import { CardsByStateChart } from '@/features/memory-cards/components/cards-by-state-chart'
+import { MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
 import type { MemoryCardListItemT } from '@/features/memory-cards/types'
 
 type PropsT = { cards: MemoryCardListItemT[] }
 
-type TileT = { label: string; value: number }
-
-function Tiles({ tiles }: { tiles: TileT[] }) {
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {tiles.map((t) => (
-        <div key={t.label} className="bg-muted/40 rounded-lg p-3 text-center">
-          <p className="text-foreground text-2xl font-bold tabular-nums">{t.value}</p>
-          <p className="text-muted-foreground mt-1 text-xs">{t.label}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 // Aggregate view over the (subject-filtered) card set rendered on this page. Two distinct axes,
-// kept in separate rows so their tiles aren't read as one total: the FSRS state mix
-// (New/Learning/Review/Relearning) and the maturity split (stability ≥ MATURE_STABILITY_DAYS).
-// Reflects the active filter, since `cards` is the post-filter list.
+// each its own radial chart: the FSRS state mix (New/Learning/Review/Relearning) and the
+// maturity split (stability ≥ MATURE_STABILITY_DAYS). Reflects the active filter, since `cards`
+// is the post-filter list.
 export function CardsOverview({ cards }: PropsT) {
   const stateCounts = [0, 0, 0, 0]
   let mature = 0
@@ -31,23 +19,29 @@ export function CardsOverview({ cards }: PropsT) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           By state
         </p>
-        <Tiles tiles={FSRS_STATE_LABELS.map((label, i) => ({ label, value: stateCounts[i] }))} />
+        <CardsByStateChart stateCounts={stateCounts} />
       </div>
       <div className="space-y-2">
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+        <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
           By maturity
+          <InfoTip label="What do Mature and Young mean?">
+            <span className="flex flex-col gap-1 font-normal normal-case">
+              <span>How well each card has stuck in your memory:</span>
+              <span>
+                <strong>Young</strong> — still learning it, so it comes back often.
+              </span>
+              <span>
+                <strong>Mature</strong> — you know it well, so it only returns every few weeks.
+              </span>
+            </span>
+          </InfoTip>
         </p>
-        <Tiles
-          tiles={[
-            { label: 'Mature', value: mature },
-            { label: 'Young', value: cards.length - mature },
-          ]}
-        />
+        <CardsByMaturityChart mature={mature} young={cards.length - mature} />
       </div>
     </div>
   )
