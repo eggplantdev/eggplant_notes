@@ -7,7 +7,7 @@ import { attachCheck, signUp, uniqueEmail } from './helpers'
 //     source-note title.
 //  2. The Subjects multiselect filters the list server-side (?subjects=<id> in the URL),
 //     committed on popover close (the debounce's flush-on-close) — joining through notes.
-//  3. Clicking a card deep-links to its parent note at the exact check (#check-<id>).
+//  3. Clicking a card deep-links to its parent note at the exact card (#card-<id>).
 // Shared auth/check helpers live in ./helpers.
 
 async function createSubject(page: Page, title: string): Promise<void> {
@@ -64,8 +64,8 @@ test('memory-cards listing: lists checks, filters by subject, card deep-links to
   await expect(page.getByRole('link').filter({ hasText: promptA })).toBeVisible()
   await expect(page.getByRole('link').filter({ hasText: promptB })).toHaveCount(0)
 
-  // (3) Click the card → its parent note, deep-linked to the exact check.
+  // (3) Click the card → its parent note, deep-linked to the exact card.
   await page.getByRole('link').filter({ hasText: promptA }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+#check-[0-9a-f-]+$/, { timeout: 15_000 })
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+#card-[0-9a-f-]+$/, { timeout: 15_000 })
   await expect(page.locator('li', { hasText: promptA })).toBeVisible()
 })

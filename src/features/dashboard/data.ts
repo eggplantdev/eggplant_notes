@@ -8,7 +8,7 @@ import {
   getReviewedTodayCount,
 } from '@/features/review-events/queries'
 import { getCurrentStreak } from '@/features/review-events/streak'
-import { getChecksForStats } from '@/features/memory-cards/queries'
+import { getCardsForStats } from '@/features/memory-cards/queries'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
 // Composes the dashboard's per-user reads (S-03 data wiring, expanded for the stats panel).
@@ -23,7 +23,7 @@ import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 export async function getDashboardData(dailyGoalPromise: Promise<number>): Promise<DashboardDataT> {
   const [activity, checks, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
     getReviewActivity(),
-    getChecksForStats(),
+    getCardsForStats(),
     getNotesForStats(),
     getRecentRatings(STATS_WINDOW_DAYS),
     getReviewedTodayCount(),

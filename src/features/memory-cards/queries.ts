@@ -22,7 +22,7 @@ export async function getDueQueue(
   const now = new Date().toISOString()
   const { data, count, error } = await supabase
     .from('memory_cards')
-    .select('*, notes(title)', { count: 'exact' })
+    .select('*, notes(title, subject_id)', { count: 'exact' })
     .lte('due_at', now)
     .order('due_at', { ascending: true })
     .limit(1)
@@ -38,7 +38,7 @@ export async function getDueQueue(
 // computed in TS — PostgREST can't group by the APP_TIME_ZONE-shifted due date in a plain
 // select (same constraint as getReviewActivity). Personal-scale data, so fetching all rows is
 // fine. Injectable client per the isolation rule.
-export async function getChecksForStats(client?: SupabaseClient<Database>) {
+export async function getCardsForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
     c.from('memory_cards').select('id, prompt, note_id, due_at, stability, lapses'),
@@ -51,7 +51,7 @@ export async function getChecksForStats(client?: SupabaseClient<Database>) {
 // filtering applies `.in('notes.subject_id', …)` on the embedded table, which PostgREST can only
 // filter through an inner join (a plain `notes(...)` embed is an outer join and won't filter the
 // parent). Personal-scale data, so fetching the full set is fine (same assumption as
-// getChecksForStats). Injectable client per the isolation rule.
+// getCardsForStats). Injectable client per the isolation rule.
 export async function getMemoryCardsList(
   opts?: { subjectIds?: string[] },
   client?: SupabaseClient<Database>,

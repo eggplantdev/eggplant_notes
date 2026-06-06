@@ -10,65 +10,65 @@ import { memoryCardEditHref } from '@/features/memory-cards/utils'
 
 type MemoryCardsSectionPropsT = {
   noteId: string
-  checks: MemoryCardT[]
+  cards: MemoryCardT[]
   editId?: string
 }
 
 // Server Component (async — renders the server-only Shiki RenderMarkdown). Owns the "all
-// checks on a note" view (FR-015). Edit state is the URL `?edit=<id>` param (editId), so
+// cards on a note" view (FR-015). Edit state is the URL `?edit=<id>` param (editId), so
 // there's no client list state: an Edit link re-renders this on the server with the form
-// seeded for that check (`key` forces the client form to remount when the edit target
+// seeded for that card (`key` forces the client form to remount when the edit target
 // changes). When NOT editing, the add form is deferred behind <AddMemoryCard> so a read view
 // mounts no CodeMirror. Optional example/code_context render only when present.
-export async function MemoryCardsSection({ noteId, checks, editId }: MemoryCardsSectionPropsT) {
-  const editingCheck = editId ? checks.find((c) => c.id === editId) : undefined
-  // Stale ?edit (check deleted or never owned): drop the param so the URL matches the
+export async function MemoryCardsSection({ noteId, cards, editId }: MemoryCardsSectionPropsT) {
+  const editingCard = editId ? cards.find((c) => c.id === editId) : undefined
+  // Stale ?edit (card deleted or never owned): drop the param so the URL matches the
   // add-mode form it would fall back to, instead of claiming edit of a row that isn't there.
-  if (editId && !editingCheck) redirect(`/notes/${noteId}`)
+  if (editId && !editingCard) redirect(`/notes/${noteId}`)
 
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold">Memory cards</h2>
 
-      {editingCheck ? (
-        <MemoryCardForm key={editId} noteId={noteId} check={editingCheck} />
+      {editingCard ? (
+        <MemoryCardForm key={editId} noteId={noteId} card={editingCard} />
       ) : (
         <AddMemoryCard noteId={noteId} />
       )}
 
-      {checks.length === 0 ? (
+      {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">
           No memory cards yet. Add one above to start building your recall set.
         </p>
       ) : (
         <ul className="flex flex-col gap-4">
-          {checks.map((check) => (
+          {cards.map((card) => (
             // id + scroll-mt make this a scroll target for the /memory-cards card→note deep link
-            // (`/notes/[id]#check-<id>`); scroll-mt keeps the sticky nav from covering it.
+            // (`/notes/[id]#card-<id>`); scroll-mt keeps the sticky nav from covering it.
             <li
-              key={check.id}
-              id={`check-${check.id}`}
+              key={card.id}
+              id={`card-${card.id}`}
               className="flex scroll-mt-24 flex-col gap-2 rounded-lg border p-4"
             >
               <div className="flex items-start justify-between gap-4">
-                <p className="font-medium">{check.prompt}</p>
+                <p className="font-medium">{card.prompt}</p>
                 <div className="flex shrink-0 items-center gap-2">
                   <ButtonLink
-                    href={memoryCardEditHref(noteId, check.id)}
+                    href={memoryCardEditHref(noteId, card.id)}
                     variant="outline"
                     size="sm"
                   >
                     Edit
                   </ButtonLink>
-                  <DeleteMemoryCardButton noteId={noteId} id={check.id} />
+                  <DeleteMemoryCardButton noteId={noteId} id={card.id} />
                 </div>
               </div>
-              {check.example && (
+              {card.example && (
                 <div className="text-sm">
-                  <RenderMarkdown content={check.example} />
+                  <RenderMarkdown content={card.example} />
                 </div>
               )}
-              {check.code_context && <RenderMarkdown content={check.code_context} />}
+              {card.code_context && <RenderMarkdown content={card.code_context} />}
             </li>
           ))}
         </ul>

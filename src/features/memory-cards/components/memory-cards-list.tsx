@@ -10,33 +10,33 @@ import { formatReviewStatus, memoryCardEditHref } from '@/features/memory-cards/
 // prompt as the title, a review-status eyebrow, and a subtitle of the subject ("topic") chip +
 // source-note title. Data is fetched on the server (MemoryCardsPage) and passed in; this stays a
 // client component only so it can hand render functions to the list. Unlike NotesList there are no
-// per-card actions — editing/deleting a check lives on the note detail. The card→note href deep-
-// links to the exact check (`#check-<id>`), the card→note differentiator.
-export function MemoryCardsList({ checks }: { checks: MemoryCardListItemT[] }) {
+// per-card actions — editing/deleting a card lives on the note detail. The card→note href deep-
+// links to the exact card (`#card-<id>`), the card→note differentiator.
+export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
   return (
     <AnimatedCardList
       gridLayout
-      items={checks}
-      getKey={(check) => check.id}
-      getHref={(check) => `/notes/${check.note_id}#check-${check.id}`}
-      renderAction={(check) => (
+      items={cards}
+      getKey={(card) => card.id}
+      getHref={(card) => `/notes/${card.note_id}#card-${card.id}`}
+      renderAction={(card) => (
         <CardActions
-          editHref={memoryCardEditHref(check.note_id, check.id)}
-          deleteControl={<DeleteMemoryCardButton noteId={check.note_id} id={check.id} />}
+          editHref={memoryCardEditHref(card.note_id, card.id)}
+          deleteControl={<DeleteMemoryCardButton noteId={card.note_id} id={card.id} />}
         />
       )}
-      renderTitle={(check) => <span className="line-clamp-2">{check.prompt}</span>}
-      renderEyebrow={(check) => (
-        <span className="text-muted-foreground text-xs">{formatReviewStatus(check)}</span>
+      renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
+      renderEyebrow={(card) => (
+        <span className="text-muted-foreground text-xs">{formatReviewStatus(card)}</span>
       )}
-      renderSubtitle={(check) => (
+      renderSubtitle={(card) => (
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-          {check.notes?.subjects?.title && (
+          {card.notes?.subjects?.title && (
             <span className="bg-muted text-foreground line-clamp-1 max-w-full rounded px-1.5 py-0.5 font-medium">
-              {check.notes.subjects.title}
+              {card.notes.subjects.title}
             </span>
           )}
-          {check.notes?.title && <span className="line-clamp-1">{check.notes.title}</span>}
+          {card.notes?.title && <span className="line-clamp-1">{card.notes.title}</span>}
         </div>
       )}
     />

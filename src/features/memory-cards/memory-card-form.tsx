@@ -18,7 +18,7 @@ import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 
-// `check` present → edit (seeds defaults, calls updateMemoryCard); absent → create. Edit
+// `card` present → edit (seeds defaults, calls updateMemoryCard); absent → create. Edit
 // state is carried in the URL (`?edit=<id>`), so on a successful edit we navigate back to the
 // bare note path to leave edit mode; on a successful create we reset for the next add and call
 // `onClose` so the add-mode caller (AddMemoryCard) can collapse the form — which unmounts the
@@ -27,29 +27,29 @@ import type { MemoryCardT } from '@/features/memory-cards/types'
 // Only one CodeMirror island (code_context) ever mounts while the form is open.
 type MemoryCardFormPropsT = {
   noteId: string
-  check?: MemoryCardT
+  card?: MemoryCardT
   onClose?: () => void
 }
 
-export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT) {
+export function MemoryCardForm({ noteId, card, onClose }: MemoryCardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
 
   const form = useAppForm({
     defaultValues: {
-      prompt: check?.prompt ?? '',
-      example: check?.example ?? '',
-      code_context: check?.code_context ?? '',
+      prompt: card?.prompt ?? '',
+      example: card?.example ?? '',
+      code_context: card?.code_context ?? '',
     },
     onSubmit: async ({ value }) => {
-      const result = check
-        ? await updateMemoryCard(noteId, check.id, value)
+      const result = card
+        ? await updateMemoryCard(noteId, card.id, value)
         : await createMemoryCard(noteId, value)
-      if (!toastActionResult(result, { successMessage: check ? 'Card saved' : 'Card added' })) {
+      if (!toastActionResult(result, { successMessage: card ? 'Card saved' : 'Card added' })) {
         setFormError(result.error)
         return
       }
-      if (check) {
+      if (card) {
         router.push(`/notes/${noteId}`)
       } else {
         form.reset()
@@ -69,8 +69,8 @@ export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT)
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-medium">{check ? 'Edit memory card' : 'Add a memory card'}</h3>
-        {!check && onClose && (
+        <h3 className="font-medium">{card ? 'Edit memory card' : 'Add a memory card'}</h3>
+        {!card && onClose && (
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Hide
           </Button>
@@ -119,11 +119,11 @@ export function MemoryCardForm({ noteId, check, onClose }: MemoryCardFormPropsT)
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : check ? 'Save changes' : 'Add memory card'}
+              {isSubmitting ? 'Saving…' : card ? 'Save changes' : 'Add memory card'}
             </Button>
           )}
         </form.Subscribe>
-        {check && (
+        {card && (
           <ButtonLink href={`/notes/${noteId}`} variant="ghost">
             Cancel
           </ButtonLink>

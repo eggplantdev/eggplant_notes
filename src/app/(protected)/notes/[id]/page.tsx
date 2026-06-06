@@ -29,7 +29,7 @@ export default async function NotePage({
   const { id } = await params
   const { edit } = await searchParams
   // Independent RLS-scoped reads — run them concurrently rather than paying two
-  // round-trips in series (the wasted checks query on a 404 is one rare extra query).
+  // round-trips in series (the wasted cards query on a 404 is one rare extra query).
   const [note, memoryCards, subjects] = await Promise.all([
     getNote(id),
     getMemoryCardsForNote(id),
@@ -78,12 +78,12 @@ export default async function NotePage({
 
       <Separator />
 
-      {/* `note` is the body-edit sentinel — never a check id. Forwarding it as editId would
-          trip MemoryCardsSection's stale-?edit guard (no check has id `note`) and bounce the
+      {/* `note` is the body-edit sentinel — never a card id. Forwarding it as editId would
+          trip MemoryCardsSection's stale-?edit guard (no card has id `note`) and bounce the
           user out of body-edit, so suppress it while editing the body. */}
       <MemoryCardsSection
         noteId={note.id}
-        checks={memoryCards}
+        cards={memoryCards}
         editId={isEditingNote ? undefined : edit}
       />
     </PageShell>

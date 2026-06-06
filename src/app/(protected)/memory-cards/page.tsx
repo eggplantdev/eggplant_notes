@@ -11,8 +11,8 @@ import { pluralize } from '@/lib/utils/pluralize'
 // Memory cards list. Server Component — RLS scopes both reads to the signed-in user; the
 // (protected) layout already gates auth. Mirrors NotesPage: `?subjects=a,b` filters server-side by
 // subject (joining through notes — see getMemoryCardsList), and the subject set feeds the filter's
-// options. Soonest-due first, with empty states for "no checks at all" and "none match the filter".
-// No "new" action — checks are created from a note's detail view.
+// options. Soonest-due first, with empty states for "no cards at all" and "none match the filter".
+// No "new" action — cards are created from a note's detail view.
 export default async function MemoryCardsPage({
   searchParams,
 }: {
@@ -20,7 +20,7 @@ export default async function MemoryCardsPage({
 }) {
   const { subjects: subjectsParam } = await searchParams
   const selectedIds = (subjectsParam ?? '').split(',').filter(Boolean)
-  const [subjects, checks] = await Promise.all([
+  const [subjects, cards] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ subjectIds: selectedIds }),
   ])
@@ -30,14 +30,14 @@ export default async function MemoryCardsPage({
   return (
     <PageShell
       title="Memory cards"
-      // Count reflects the post-filter result set (`checks` is already filtered by `?subjects=`).
-      subtitle={pluralize(checks.length, 'memory card')}
+      // Count reflects the post-filter result set (`cards` is already filtered by `?subjects=`).
+      subtitle={pluralize(cards.length, 'memory card')}
       // 'full' (the dashboard's width) so the card grid can fan out to three columns on wide screens.
       width="full"
     >
       {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
 
-      {checks.length === 0 ? (
+      {cards.length === 0 ? (
         <EmptyState
           message={
             isFiltered
@@ -49,9 +49,9 @@ export default async function MemoryCardsPage({
       ) : (
         <>
           <TitledCard title="Cards overview">
-            <CardsOverview cards={checks} />
+            <CardsOverview cards={cards} />
           </TitledCard>
-          <MemoryCardsList checks={checks} />
+          <MemoryCardsList cards={cards} />
         </>
       )}
     </PageShell>
