@@ -1,9 +1,49 @@
 # Simplification & Dedup Proposals
 
-> Read-only audit, 2026-06-06. **No code was changed.** Findings come from a parallel
-> scan of `src/` across five clusters: delete/dialog patterns, the forms + action-wrapper
-> layer, queries/types/promotion, module cohesion, and list/page scaffolding. Every item
-> below quotes real code and proposes where the extracted piece should live.
+> Audit started 2026-06-06 (parallel scan of `src/` across five clusters: delete/dialog
+> patterns, forms + action-wrappers, queries/types/promotion, module cohesion, list/page
+> scaffolding). **Section A is partially implemented** — see Handoff. Every item quotes real
+> code; **line numbers predate the implemented changes and may be stale — re-grep before trusting them.**
+
+## Handoff — next session
+
+**Shipped so far (all `pnpm typecheck` + `lint` green; E2E not run — needs local Supabase):**
+
+- **A1 `CardActions`** ✅ `4201c90`. Went further than proposed: the three `*-card-actions.tsx`
+  wrappers were **inlined into their lists and deleted** (not kept as 4-line wrappers). `CardActions`
+  lives in `components/ui/`; lists call it directly in `renderAction`. Memory-cards passes
+  `deleteControl` instead of `onRequestDelete`.
+- **A2 `useDeleteDialogState`** ✅ `4201c90`. Hook at `src/hooks/use-delete-dialog-state.ts`; notes +
+  subjects lists use it.
+- **A5 `EmptyState`** ✅ `d49bf7c` (committed by a parallel session). `components/ui/empty-state.tsx`;
+  applied to notes/subjects/memory-cards/subject-detail pages.
+- **`MutedText`** ✅ `bd1d08d` — _not in the original findings_; emerged mid-session. Shared muted
+  secondary-text primitive (`components/ui/muted-text.tsx`) for subjects list/detail, the review
+  card's "From:" link, and the dashboard "needs attention" rows. `asChild` merges onto a `<Link>`;
+  self-nullifies on empty content.
+- **Comment discipline** ✅ `1451a89` + global rule. Stripped redundant doc-headers from the type
+  files; added a comment rule to `~/.claude/rules/general.md` (Code Changes) — comment only
+  non-derivable info; redundant comments may be removed. (The rule file is outside this repo.)
+
+**Decisions made (carry forward):**
+
+- **Single-consumer pass-through wrappers get inlined, not kept.** That's why A1's wrappers were
+  deleted. Apply the same lens to **A3** (the two delete-dialog wrappers) and **A4** — prefer
+  inlining/sharing over a named wrapper unless a 2nd real consumer exists.
+- A2 + the inline decision make **A4** (delete-button unification) the natural next delete-path step,
+  but A4 touches account-delete's type-to-confirm gate → medium risk, test it.
+
+**Environment hazard (important):** multiple agent sessions run against this one working tree and
+**share the git identity (`ex-Plant`)**. Always stage by **explicit path**, never `git add -A`. As of
+this writing a `CardsOverview` / `state-breakdown` refactor is in-flight uncommitted by another
+session — leave it alone.
+
+**Suggested next pickups:** remaining quick-wins — **D1** (split toast layer), **B3** (`useFormSubmit`),
+**C1** (`runTableSingleQuery`), **D2** (split `heatmap-view.ts`). All S/Low. Then A3/A4 per the
+inline-over-wrap decision. Defer B1→B2 (action-wrapper unification, test-heavy); confirm intent on
+C2 before demoting `ActivityDayT`.
+
+---
 
 ## How to read this
 
@@ -15,7 +55,9 @@
 
 ## A. Component & UI duplication (highest leverage, lowest risk)
 
-### A1. Card-action button pairs are ~95% identical → extract `CardActions`
+### A1. Card-action button pairs are ~95% identical → extract `CardActions` ✅ DONE (`4201c90`)
+
+> Implemented and went further: wrappers inlined into the lists and deleted. See Handoff.
 
 **Files:** `features/notes/components/note-card-actions.tsx:16-29`,
 `features/subjects/components/subject-card-actions.tsx:17-34`,
@@ -43,7 +85,7 @@ type CardActionsPropsT = {
 Each feature keeps a 4-line wrapper that only supplies its href + delete callback.
 **Effort:** S · **Risk:** Low.
 
-### A2. Per-list pending-delete state is duplicated verbatim → extract `useDeleteDialogState`
+### A2. Per-list pending-delete state is duplicated verbatim → extract `useDeleteDialogState` ✅ DONE (`4201c90`)
 
 **Files:** `features/notes/components/notes-list.tsx:20-22,46-50`,
 `features/subjects/components/subjects-list.tsx:17-46`
@@ -87,7 +129,7 @@ After A3's `useDeleteConfirm` exists, fold the inline pair into it (account keep
 type-to-confirm gate as a prop).
 **Effort:** M · **Risk:** Medium (touches account-delete; test the confirm gate).
 
-### A5. Empty-state markup repeated across pages → extract `EmptyState`
+### A5. Empty-state markup repeated across pages → extract `EmptyState` ✅ DONE (`d49bf7c`)
 
 **Files:** `app/(protected)/notes/page.tsx:44-56`, `subjects/page.tsx:26-35`,
 `memory-cards/page.tsx:40-52`, `subjects/[id]/page.tsx:45-50`
@@ -118,6 +160,13 @@ so the note-detail and global views share row markup + empty copy.
   is a mild win; lower priority since `PageShell` already carries the weight. **S / low.**
 - **`PanelGrid`** for the dashboard's four `TitledCard`s (`dashboard/page.tsx:85-129`) —
   marginal; the page is already readable. **Skip unless it grows.**
+
+### A8. `MutedText` muted-secondary-text primitive ✅ DONE (`bd1d08d`)
+
+Not in the original findings; surfaced mid-session. The `text-muted-foreground` + size +
+clamp/truncate treatment was hand-rolled (and drifting) across the subjects list/detail, the
+review card's "From:" link, and the dashboard "needs attention" rows. Extracted to
+`components/ui/muted-text.tsx` (`asChild` to merge onto a `<Link>`; self-nullifies on empty).
 
 ---
 
@@ -256,16 +305,17 @@ document why the barrel shields the `utils/` layout. **S / low.**
 
 ## Ranked quick-wins (do these first)
 
-| #   | Item                            | Effort | Risk  | Why first                                |
-| --- | ------------------------------- | ------ | ----- | ---------------------------------------- |
-| 1   | A1 `CardActions` component      | S      | Low   | 3 files, immediate, zero behavior change |
-| 2   | A2 `useDeleteDialogState` hook  | S      | V.Low | Pure state extraction, 2 lists           |
-| 3   | A5 `EmptyState` component       | S      | Low   | Unblocks page cleanup, 4 pages           |
-| 4   | D1 split toast layer            | S      | Low   | Clears the most-cited cohesion smell     |
-| 5   | B3 `useFormSubmit` hook         | S–M    | Low   | 4 forms, removes submit boilerplate      |
-| 6   | A3 share delete-dialog wrappers | S      | Low   | Pairs with A2                            |
-| 7   | C1 `runTableSingleQuery`        | M      | Low   | Removes read-path dup                    |
-| 8   | D2 split `heatmap-view.ts`      | S      | Low   | Trivial cohesion fix                     |
+| #   | Item                            | Effort | Risk  | Status / why                               |
+| --- | ------------------------------- | ------ | ----- | ------------------------------------------ |
+| 1   | A1 `CardActions` component      | S      | Low   | ✅ done `4201c90` (wrappers inlined)       |
+| 2   | A2 `useDeleteDialogState` hook  | S      | V.Low | ✅ done `4201c90`                          |
+| 3   | A5 `EmptyState` component       | S      | Low   | ✅ done `d49bf7c`                          |
+| —   | A8 `MutedText` (bonus)          | S      | Low   | ✅ done `bd1d08d`                          |
+| 4   | D1 split toast layer            | S      | Low   | next — most-cited cohesion smell           |
+| 5   | B3 `useFormSubmit` hook         | S–M    | Low   | next — 4 forms, removes submit boilerplate |
+| 6   | A3 share delete-dialog wrappers | S      | Low   | next — but see inline-over-wrap decision   |
+| 7   | C1 `runTableSingleQuery`        | M      | Low   | next — removes read-path dup               |
+| 8   | D2 split `heatmap-view.ts`      | S      | Low   | next — trivial cohesion fix                |
 
 **Defer / judgment-call:** B1 (unify action wrappers — documented split, test-heavy),
 B2 (`runRpcAction` — do after B1), A4 (delete-button unification — touches account delete),
