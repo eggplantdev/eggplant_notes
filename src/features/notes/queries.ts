@@ -30,11 +30,11 @@ export async function getNotes(
 }
 
 // Lean read backing the dashboard stats: every owned note, only the columns coverage stats
-// need (id / title / subject_id) — avoids pulling note `content` into the dashboard. RLS
-// scopes rows to the owner. Injectable client per the isolation rule.
+// need (id / title) — avoids pulling note `content` into the dashboard. RLS scopes rows to
+// the owner. Injectable client per the isolation rule.
 export async function getNotesForStats(client?: SupabaseClient<Database>) {
   const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) => c.from('notes').select('id, title, subject_id'))
+  return runTableQuery(supabase, (c) => c.from('notes').select('id, title'))
 }
 
 // Fetch a single note by id. RLS already scopes to the owner, so a missing OR

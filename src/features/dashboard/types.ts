@@ -23,7 +23,7 @@ export type CheckStatRowT = {
   stability: number
   lapses: number
 }
-export type NoteStatRowT = { id: string; title: string | null; subject_id: string | null }
+export type NoteStatRowT = { id: string; title: string | null }
 export type RatingStatRowT = { rating: number; reviewed_at: string }
 
 // A frequently-failed card, for the "needs attention" list. Links to its source note.
@@ -36,15 +36,6 @@ export type HardestCardT = {
   stability: number
 }
 
-// Per-subject rollup row. `id`/`title` are null for the synthetic "No subject" bucket.
-export type SubjectRollupT = {
-  id: string | null
-  title: string
-  notes: number
-  cards: number
-  due: number
-}
-
 export type DashboardStatsT = {
   overdue: number
   reviewsInWindow: number
@@ -52,7 +43,6 @@ export type DashboardStatsT = {
   retention: number | null // fraction 0–1 of reviews rated ≥3 in the window; null if none
   longestStreak: number
   hardestCards: HardestCardT[]
-  subjectRollup: SubjectRollupT[]
 }
 
 // One grid cell. `date` is null for padding (outside the window / after today).

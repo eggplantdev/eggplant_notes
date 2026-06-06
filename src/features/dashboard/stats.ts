@@ -5,7 +5,6 @@ import type {
   HardestCardT,
   NoteStatRowT,
   RatingStatRowT,
-  SubjectRollupT,
 } from '@/features/dashboard/types'
 import { APP_TIME_ZONE, isoDateInZone, MS_PER_DAY, toISODate } from '@/lib/utils'
 import type { ActivityDayT } from '@/types/activity'
@@ -21,7 +20,6 @@ import type { ActivityDayT } from '@/types/activity'
 type InputT = {
   checks: CheckStatRowT[]
   notes: NoteStatRowT[]
-  subjects: { id: string; title: string }[]
   ratings: RatingStatRowT[]
   activity: ActivityDayT[]
   today: Date
@@ -30,27 +28,17 @@ type InputT = {
 const HARDEST_LIMIT = 5
 
 export function computeDashboardStats(input: InputT): DashboardStatsT {
-  const { checks, notes, subjects, ratings, activity, today } = input
+  const { checks, notes, ratings, activity, today } = input
 
   const todayStr = toISODate(today.getTime())
 
-  const cardsByNote = new Map<string, number>()
-  const dueByNote = new Map<string, number>()
   let overdue = 0
-
   for (const c of checks) {
-    cardsByNote.set(c.note_id, (cardsByNote.get(c.note_id) ?? 0) + 1)
-
     const dueStr = isoDateInZone(new Date(c.due_at), APP_TIME_ZONE)
-    if (dueStr <= todayStr) {
-      overdue += dueStr < todayStr ? 1 : 0
-      dueByNote.set(c.note_id, (dueByNote.get(c.note_id) ?? 0) + 1)
-    }
+    if (dueStr < todayStr) overdue += 1
   }
 
   const hardestCards = buildHardest(checks, notes)
-
-  const subjectRollup = buildSubjectRollup(subjects, notes, cardsByNote, dueByNote)
 
   // Review-quality stats over the fetched window — one pass for good + this-week.
   const total = ratings.length
@@ -69,7 +57,6 @@ export function computeDashboardStats(input: InputT): DashboardStatsT {
     retention: total > 0 ? good / total : null,
     longestStreak: getLongestStreak(activity),
     hardestCards,
-    subjectRollup,
   }
 }
 
@@ -88,36 +75,4 @@ function buildHardest(checks: CheckStatRowT[], notes: NoteStatRowT[]): HardestCa
       lapses: c.lapses,
       stability: c.stability,
     }))
-}
-
-// Per-subject note/card/due counts, plus a synthetic "No subject" bucket for unassigned notes.
-// Notes are grouped by subject once (null key = unassigned) so each subject's tally is a Map
-// lookup, not an O(subjects×notes) re-scan of the whole note set.
-function buildSubjectRollup(
-  subjects: { id: string; title: string }[],
-  notes: NoteStatRowT[],
-  cardsByNote: Map<string, number>,
-  dueByNote: Map<string, number>,
-): SubjectRollupT[] {
-  const notesBySubject = new Map<string | null, NoteStatRowT[]>()
-  for (const n of notes) {
-    const list = notesBySubject.get(n.subject_id)
-    if (list) list.push(n)
-    else notesBySubject.set(n.subject_id, [n])
-  }
-
-  const tally = (id: string | null, title: string): SubjectRollupT => {
-    const members = notesBySubject.get(id) ?? []
-    let cards = 0
-    let due = 0
-    for (const n of members) {
-      cards += cardsByNote.get(n.id) ?? 0
-      due += dueByNote.get(n.id) ?? 0
-    }
-    return { id, title, notes: members.length, cards, due }
-  }
-
-  const rows = subjects.map((s) => tally(s.id, s.title))
-  const orphan = tally(null, 'No subject')
-  return orphan.notes > 0 ? [...rows, orphan] : rows
 }

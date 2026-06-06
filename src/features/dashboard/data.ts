@@ -8,7 +8,6 @@ import {
   getReviewedTodayCount,
 } from '@/features/review-events/queries'
 import { getCurrentStreak } from '@/features/review-events/streak'
-import { getSubjects } from '@/features/subjects/queries'
 import { getChecksForStats } from '@/features/memory-cards/queries'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
@@ -17,11 +16,10 @@ import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 // count — are derived purely from the already-fetched rows (no extra query). Shape is
 // DashboardDataT.
 export async function getDashboardData(): Promise<DashboardDataT> {
-  const [activity, checks, notes, subjects, ratings, reviewedToday] = await Promise.all([
+  const [activity, checks, notes, ratings, reviewedToday] = await Promise.all([
     getReviewActivity(),
     getChecksForStats(),
     getNotesForStats(),
-    getSubjects(),
     getRecentRatings(STATS_WINDOW_DAYS),
     getReviewedTodayCount(),
   ])
@@ -33,7 +31,6 @@ export async function getDashboardData(): Promise<DashboardDataT> {
   const stats = computeDashboardStats({
     checks,
     notes,
-    subjects,
     ratings,
     activity,
     today: todayInZone(APP_TIME_ZONE),

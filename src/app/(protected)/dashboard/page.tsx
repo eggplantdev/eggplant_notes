@@ -5,7 +5,6 @@ import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { HardestCards } from '@/features/dashboard/hardest-cards'
 import { StatCard } from '@/features/dashboard/stat-card'
-import { SubjectRollup } from '@/features/dashboard/subject-rollup'
 import { TitledCard } from '@/components/ui/titled-card'
 import { ReviewPanel } from '@/features/review/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
@@ -14,9 +13,6 @@ import { getDashboardPageData } from './loader'
 // Format a 0–1 fraction as a whole-percent string; em-dash when there's no data yet.
 const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%`)
 
-// S-04 activity dashboard, wired to real per-user data by S-03 (features/dashboard/data.ts),
-// expanded with the full stats panel. NOTE: this renders every available stat at once for the
-// cull pass — trim the cards/sections you don't want, then their fields in computeDashboardStats.
 export default async function DashboardPage() {
   // One route-level fan-out: getDashboardPageData (./loader) composes every read this page
   // needs in a single Promise.all and does the cross-feature join.
@@ -72,8 +68,6 @@ export default async function DashboardPage() {
         <ActivityHeatmap columns={columns} />
       </TitledCard>
 
-      {/* Embedded review session (relocated from the old /review route). Prose-width inside the
-          full-width dashboard; the panel itself owns the card/empty branch + server-side previews. */}
       <div className="mx-auto w-full max-w-2xl">
         <ReviewPanel card={card} goal={dailyGoal} />
       </div>
@@ -100,19 +94,13 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Surfaced only once there's a real backlog of lapsing cards — a single struggler isn't
-            worth a callout. */}
-        {s.hardestCards.length > 1 && (
-          <TitledCard title="Needs attention">
-            <HardestCards cards={s.hardestCards} />
-          </TitledCard>
-        )}
-
-        <TitledCard title="By subject">
-          <SubjectRollup rows={s.subjectRollup} />
+      {/* Surfaced only once there's a real backlog of lapsing cards — a single struggler isn't
+          worth a callout. */}
+      {s.hardestCards.length > 1 && (
+        <TitledCard title="Needs attention">
+          <HardestCards cards={s.hardestCards} />
         </TitledCard>
-      </div>
+      )}
     </PageShell>
   )
 }
