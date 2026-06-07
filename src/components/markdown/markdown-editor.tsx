@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 // component (Next 16). Dynamic import keeps the whole CodeMirror dep graph off the server bundle and ships it only on editor routes.
 const CodeMirrorEditor = dynamic(() => import('@/components/markdown/code-mirror-editor'), {
   ssr: false,
-  loading: () => <div className="bg-muted h-80 animate-pulse rounded-lg" />,
+  loading: () => <div className="bg-muted min-h-80 animate-pulse rounded-lg" />,
 })
 
 type MarkdownEditorPropsT = {

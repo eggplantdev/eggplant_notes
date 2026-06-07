@@ -263,12 +263,24 @@
   box-shadow: 0 0 11px color-mix(in oklch, currentColor 90%, transparent);
 }
 
-/* Code blocks blend into the card surface: Shiki sets the theme background inline on
+/* Code surfaces share the shell background so the editor, the live preview, and the saved
+   detail view all read as one near-black surface. Shiki sets the theme background inline on
    `<pre class="shiki">` (github-light) and we'd otherwise swap it to --shiki-dark-bg under
-   `.dark`. Instead, override it with our own --card token — which resolves per theme, so one
-   rule covers both light and dark. Token colors still come from Shiki. */
-.shiki {
-  background-color: var(--card) !important;
+   `.dark`; instead we pin it to --background (resolves per theme). Token colors still come
+   from Shiki. The CodeMirror editor (.cm-editor) is pinned to the same token below — its
+   built-in oneDark theme hardcodes #282c34 and ignores our tokens, so a global override is
+   the reliable lever (matching extension precedence does not win against oneDark). */
+.shiki,
+.cm-editor,
+.cm-editor .cm-gutters {
+  background-color: var(--background) !important;
+}
+
+/* Breathing room inside the editor surface — CodeMirror's content sits flush to the border by
+   default. !important for the same reason as the background above: the injected theme styles win
+   otherwise. Matches the preview pane's p-4 (1rem). */
+.cm-editor .cm-content {
+  padding: 1rem !important;
 }
 
 /* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
