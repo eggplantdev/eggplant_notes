@@ -1,19 +1,26 @@
 'use client'
 
-import { useDeferredValue, useMemo } from 'react'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { useDeferredValue } from 'react'
+import Markdown, { MarkdownHooks } from 'react-markdown'
+
+import { REHYPE_PLUGINS, REMARK_PLUGINS } from './markdown-plugins'
 
 type MarkdownPreviewPropsT = { content: string }
 
-// Plain react-markdown, no Shiki, to keep highlighting bytes off the client (the detail view is the highlighted render).
-// useDeferredValue + useMemo defer the non-trivial remark parse to a typing pause so the editor stays responsive.
+// Live preview. `MarkdownHooks` runs the same async Shiki pipeline as the server detail view, so the
+// preview and the saved view highlight identically. The `fallback` renders the SAME content with plain
+// (sync) `Markdown` — no Shiki — so on first paint the content is visible immediately and only the code
+// fences upgrade from plain to highlighted; nothing flashes empty. useDeferredValue keeps typing snappy.
 export function MarkdownPreview({ content }: MarkdownPreviewPropsT) {
   const deferred = useDeferredValue(content)
-  return useMemo(
-    () => (
-      <Markdown remarkPlugins={[remarkGfm]}>{deferred || '*Nothing to preview yet.*'}</Markdown>
-    ),
-    [deferred],
+  const source = deferred || '*Nothing to preview yet.*'
+  return (
+    <MarkdownHooks
+      remarkPlugins={REMARK_PLUGINS}
+      rehypePlugins={REHYPE_PLUGINS}
+      fallback={<Markdown remarkPlugins={REMARK_PLUGINS}>{source}</Markdown>}
+    >
+      {source}
+    </MarkdownHooks>
   )
 }
