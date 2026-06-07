@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { importNotes } from '@/features/import/actions/import-notes'
 import { MAX_IMPORT_BYTES, MAX_IMPORT_NOTES } from '@/features/import/constants'
 import { NotePreviewList } from '@/features/import/components/note-preview-list'
@@ -18,6 +19,7 @@ import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import type { SubjectOptionT } from '@/features/subjects/types'
+import { MutedText } from '@/components/ui/muted-text'
 
 const LEVELS: SplitLevelT[] = [1, 2, 3]
 type SubjectModeT = 'existing' | 'new'
@@ -150,25 +152,64 @@ export function ImportPanel({
         <p>Either way, you can edit, rename, or skip notes before saving.</p>
       </div>
 
+      <div className="flex flex-col gap-3">
+        <Label>Select subject</Label>
+        <ToggleGroup
+          type="single"
+          variant="outline"
+          size="sm"
+          value={subjectMode}
+          onValueChange={(v) => v && setSubjectMode(v as SubjectModeT)}
+        >
+          <ToggleGroupItem value="new" data-testid="import-subject-new-mode">
+            New subject
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="existing"
+            data-testid="import-subject-existing-mode"
+            disabled={subjects.length === 0}
+          >
+            Existing subject
+          </ToggleGroupItem>
+        </ToggleGroup>
+        {subjectMode === 'new' ? (
+          <Input
+            data-testid="import-subject-title"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="New subject name"
+            className="sm:w-72"
+          />
+        ) : (
+          <Combobox
+            value={subjectId}
+            onChange={setSubjectId}
+            options={subjects.map((s) => ({ value: s.id, label: s.title }))}
+            searchPlaceholder="Search subject…"
+            emptyMessage="No subject found."
+            className="w-full sm:w-72"
+          />
+        )}
+      </div>
+
       <SourceInput value={text} onChange={handleSource} />
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">Split on heading level:</span>
-          <div className="flex gap-2" role="group">
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            value={String(level)}
+            onValueChange={(v) => v && handleLevel(Number(v) as SplitLevelT)}
+          >
             {LEVELS.map((l) => (
-              <Button
-                key={l}
-                type="button"
-                size="sm"
-                variant={level === l ? 'default' : 'outline'}
-                data-testid={`import-level-h${l}`}
-                onClick={() => handleLevel(l)}
-              >
+              <ToggleGroupItem key={l} value={String(l)} data-testid={`import-level-h${l}`}>
                 {`H${l}`}
-              </Button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
           <GenerateDialog<GeneratedNoteT>
             connected={aiEnabled}
             defaultModel={defaultModel}
@@ -182,11 +223,11 @@ export function ImportPanel({
           />
         </div>
 
-        <p className="text-muted-foreground text-sm">
+        <MutedText>
           Each H{level} heading becomes a note titled from that heading; deeper headings stay in its
           body. Text before the first H{level} heading becomes an “Untitled” note you can rename or
           skip.
-        </p>
+        </MutedText>
       </div>
 
       {drafts.length > 0 && (
@@ -200,49 +241,6 @@ export function ImportPanel({
               the split level re-splits and discards these edits.
             </p>
             <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
-          </div>
-
-          <div className="flex flex-col gap-3 border-t pt-4">
-            <Label>Import into</Label>
-            <div className="flex gap-2" role="group">
-              <Button
-                type="button"
-                size="sm"
-                variant={subjectMode === 'new' ? 'default' : 'outline'}
-                data-testid="import-subject-new-mode"
-                onClick={() => setSubjectMode('new')}
-              >
-                New subject
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={subjectMode === 'existing' ? 'default' : 'outline'}
-                data-testid="import-subject-existing-mode"
-                disabled={subjects.length === 0}
-                onClick={() => setSubjectMode('existing')}
-              >
-                Existing subject
-              </Button>
-            </div>
-            {subjectMode === 'new' ? (
-              <Input
-                data-testid="import-subject-title"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="New subject name"
-                className="sm:w-72"
-              />
-            ) : (
-              <Combobox
-                value={subjectId}
-                onChange={setSubjectId}
-                options={subjects.map((s) => ({ value: s.id, label: s.title }))}
-                searchPlaceholder="Search subject…"
-                emptyMessage="No subject found."
-                className="w-full sm:w-72"
-              />
-            )}
           </div>
 
           <FormError message={formError} />
