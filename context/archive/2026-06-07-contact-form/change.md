@@ -1,10 +1,10 @@
 ---
 change_id: contact-form
 title: Authenticated-only contact form with footer trigger and nodemailer SMTP
-status: implementing
+status: archived
 created: 2026-06-07
 updated: 2026-06-07
-archived_at: null
+archived_at: 2026-06-07T17:02:31Z
 ---
 
 ## Notes
