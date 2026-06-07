@@ -1,7 +1,5 @@
-import { Sparkles } from 'lucide-react'
-
-import { connectOpenRouter } from '@/features/openrouter/actions/connect'
 import { disconnectOpenRouter } from '@/features/openrouter/actions/disconnect'
+import { ConnectOpenRouterButton } from '@/features/openrouter/components/connect-openrouter-button'
 import { SettingsModelSelect } from '@/features/openrouter/components/settings-model-select'
 import { Button } from '@/components/ui/button'
 
@@ -44,12 +42,7 @@ export function ConnectCard({
       <p className="text-muted-foreground text-sm" data-testid="openrouter-status">
         Connect your OpenRouter account to generate notes and cards with AI (uses your own key).
       </p>
-      <form action={connectOpenRouter}>
-        <Button type="submit" variant="ai" size="sm" data-testid="openrouter-connect">
-          <Sparkles />
-          Connect OpenRouter
-        </Button>
-      </form>
+      <ConnectOpenRouterButton testId="openrouter-connect" />
     </div>
   )
 }

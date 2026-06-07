@@ -16,7 +16,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { previewPrompt, type PreviewInputT } from '@/features/openrouter/actions/preview-prompt'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
-import { useAiGate } from '@/features/openrouter/components/use-ai-gate'
+import { useAiGate } from '@/features/openrouter/use-ai-gate'
 import type { GenerateDebugT, GenerateResultT } from '@/features/openrouter/types'
 import type { PromptT } from '@/features/openrouter/prompts'
 

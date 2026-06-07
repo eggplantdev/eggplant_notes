@@ -12,8 +12,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import { connectOpenRouter } from '@/features/openrouter/actions/connect'
+import { ConnectOpenRouterButton } from '@/features/openrouter/components/connect-openrouter-button'
 
 // Shown when an AI feature is used while OpenRouter is not connected. "Connect" submits the same
 // connect Server Action used on /settings (redirects to OpenRouter's OAuth page); "Cancel" dismisses.
@@ -39,12 +38,7 @@ export function ConnectGateDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
-          <form action={connectOpenRouter}>
-            <Button type="submit" variant="ai" size="sm" data-testid="ai-gate-connect">
-              <Sparkles />
-              Connect OpenRouter
-            </Button>
-          </form>
+          <ConnectOpenRouterButton testId="ai-gate-connect" />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
