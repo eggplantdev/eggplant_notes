@@ -1,11 +1,11 @@
 ---
 change_id: import-markdown-to-notes
 title: Import a markdown file into notes — deterministic heading-split + preview, optional AI card generation
-status: implemented
+status: archived
 created: 2026-06-06
 updated: 2026-06-07
 iteration_2_planned: 2026-06-07
-archived_at: null
+archived_at: 2026-06-07T21:12:26Z
 ---
 
 ## Scope reshape — AI-assisted authoring (2026-06-07, planning session)
