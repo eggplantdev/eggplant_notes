@@ -42,9 +42,9 @@ test('memory-cards: State + Maturity filters narrow server-side and AND-compose'
   await expect(row(reviewMature)).toBeVisible()
   await expect(row(reviewYoung)).toBeVisible()
 
-  // State = Review narrows to the two Review-state cards; the New card drops.
+  // State = Review (value 2) narrows to the two Review-state cards; the New card drops.
   await page.getByTestId('filter-state').click()
-  await page.getByRole('option', { name: 'Review', exact: true }).click()
+  await page.getByTestId('filter-state-option-2').click()
   await page.keyboard.press('Escape')
   await expect(page).toHaveURL(/[?&]state=2(&|$)/, { timeout: 15_000 })
   await expect(row(reviewMature)).toBeVisible()
@@ -53,7 +53,7 @@ test('memory-cards: State + Maturity filters narrow server-side and AND-compose'
 
   // Adding Maturity = Mature composes (AND) with State: only the mature Review card survives.
   await page.getByTestId('filter-maturity').click()
-  await page.getByRole('option', { name: 'Mature', exact: true }).click()
+  await page.getByTestId('filter-maturity-option-mature').click()
   await page.keyboard.press('Escape')
   await expect(page).toHaveURL(/[?&]maturity=mature(&|$)/, { timeout: 15_000 })
   await expect(row(reviewMature)).toBeVisible()

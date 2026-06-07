@@ -7,12 +7,9 @@ import { TitledCard } from '@/components/ui/titled-card'
 import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
-import {
-  FSRS_STATE_LABELS,
-  MATURITY_OPTIONS,
-  type MaturityT,
-} from '@/features/memory-cards/constants'
+import { FSRS_STATE_LABELS, MATURITY_OPTIONS } from '@/features/memory-cards/constants'
 import { getCardsForStats, getMemoryCardsList } from '@/features/memory-cards/queries'
+import { parseCardFilters } from '@/features/memory-cards/utils'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
@@ -34,15 +31,7 @@ export default async function MemoryCardsPage({
   const sp = await searchParams
   const selectedIds = (sp.subjects ?? '').split(',').filter(Boolean)
   const q = sp.q ?? ''
-  // Drop junk: keep only the four valid FSRS state integers (0–3) and the two maturity buckets.
-  const states = (sp.state ?? '')
-    .split(',')
-    .filter(Boolean)
-    .map(Number)
-    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 3)
-  const maturity = (sp.maturity ?? '')
-    .split(',')
-    .filter((v): v is MaturityT => MATURITY_OPTIONS.some((option) => option.value === v))
+  const { states, maturity } = parseCardFilters(sp)
   const { page, limit } = parsePagination(sp)
   const [subjects, { rows: cards, total }, statsCards] = await Promise.all([
     getSubjects(),

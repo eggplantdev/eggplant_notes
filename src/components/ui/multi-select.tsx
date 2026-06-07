@@ -88,6 +88,9 @@ export function MultiSelect({
                   key={option.value}
                   value={option.value}
                   keywords={[option.label]}
+                  // Per-option E2E hook, derived from the trigger testid so the primitive stays
+                  // generic and option targeting doesn't couple to visible copy.
+                  data-testid={dataTestId ? `${dataTestId}-option-${option.value}` : undefined}
                   data-checked={values.includes(option.value)}
                   onSelect={() => toggle(option.value)}
                 >
