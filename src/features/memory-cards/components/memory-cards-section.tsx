@@ -13,20 +13,24 @@ import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delet
 import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card-button'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
+import { GenerateCardsButton } from '@/features/openrouter/components/generate-cards-button'
 
 type MemoryCardsSectionPropsT = {
   noteId: string
   cards: MemoryCardT[]
+  // OpenRouter connected → show the AI card-generation entry point (#1).
+  aiEnabled: boolean
 }
 
 // Server Component (renders the server-only Shiki RenderMarkdown). This section only ADDS cards —
 // editing lives at the /memory-cards/[id]/edit route.
-export async function MemoryCardsSection({ noteId, cards }: MemoryCardsSectionPropsT) {
+export async function MemoryCardsSection({ noteId, cards, aiEnabled }: MemoryCardsSectionPropsT) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
       <AddMemoryCard noteId={noteId} />
+      {aiEnabled && <GenerateCardsButton noteId={noteId} />}
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">

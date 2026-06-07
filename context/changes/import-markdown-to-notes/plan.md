@@ -475,10 +475,10 @@ for edit → existing create path.
 
 #### Automated
 
-- [x] 2.1 `aes-gcm.ts` round-trip + tamper test passes
-- [x] 2.2 Migration applies; `openrouter_credentials` RLS own-only verified
-- [x] 2.3 `delete_account()` removes the credential row (cascade) verified
-- [x] 2.4 Type/lint/build pass
+- [x] 2.1 `aes-gcm.ts` round-trip + tamper test passes — 2f9679f
+- [x] 2.2 Migration applies; `openrouter_credentials` RLS own-only verified — 2f9679f
+- [x] 2.3 `delete_account()` removes the credential row (cascade) verified — 2f9679f
+- [x] 2.4 Type/lint/build pass — 2f9679f
 
 #### Manual
 
@@ -490,10 +490,10 @@ for edit → existing create path.
 
 #### Automated
 
-- [ ] 3.1 ai-schema validation unit test passes
-- [ ] 3.2 Generated cards insert via existing validated paths
-- [ ] 3.3 Type/lint/build pass
-- [ ] 3.4 E2E: generate from a note → preview → accept → persist linked to note
+- [x] 3.1 ai-schema validation unit test passes
+- [x] 3.2 Generated cards insert via existing validated paths
+- [x] 3.3 Type/lint/build pass
+- [ ] 3.4 E2E: generate from a note → preview → accept → persist linked to note (deferred to manual — needs a mocked OpenRouter server in the prod build; live AI call can't run deterministically in E2E)
 
 #### Manual
 
