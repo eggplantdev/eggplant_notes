@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { DeleteNoteDialog } from '@/features/notes/delete-note-dialog'
+import { DeleteNoteDialog } from '@/features/notes/components/delete-note-dialog'
 
 type DeleteNoteButtonPropsT = { id: string; redirectTo?: string }
 

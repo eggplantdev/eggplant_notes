@@ -1,6 +1,6 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { MutedText } from '@/components/ui/muted-text'
-import { CardForm } from '@/features/memory-cards/card-form'
+import { CardForm } from '@/features/memory-cards/components/card-form'
 import { getSubjects } from '@/features/subjects/queries'
 
 // `wide` matches the New Note editor — the code-context editor + preview render side by side.

@@ -2,7 +2,7 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
-import { DeleteNoteDialog } from '@/features/notes/delete-note-dialog'
+import { DeleteNoteDialog } from '@/features/notes/components/delete-note-dialog'
 import type { NoteListItemT } from '@/features/notes/types'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
 import { formatLocaleDate } from '@/lib/utils/date'

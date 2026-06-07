@@ -8,8 +8,8 @@ import {
   HEAT_VARIANTS,
   type HeatVariantT,
 } from '@/features/dashboard/constants'
-import { HeatmapCell } from '@/features/dashboard/heatmap-cell'
-import { HeatmapTooltip } from '@/features/dashboard/heatmap-tooltip'
+import { HeatmapCell } from '@/features/dashboard/components/heatmap-cell'
+import { HeatmapTooltip } from '@/features/dashboard/components/heatmap-tooltip'
 import { CELL, formatCellLabel, GAP } from '@/features/dashboard/heatmap-view'
 import type { HeatmapCellT, HeatmapColumnT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'

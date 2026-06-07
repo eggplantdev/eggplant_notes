@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { PageShell } from '@/components/layout/page-shell'
-import { CardForm } from '@/features/memory-cards/card-form'
+import { CardForm } from '@/features/memory-cards/components/card-form'
 import { getMemoryCard } from '@/features/memory-cards/queries'
 import { getSubjects } from '@/features/subjects/queries'
 

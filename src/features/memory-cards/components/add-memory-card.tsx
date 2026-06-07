@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { MemoryCardForm } from '@/features/memory-cards/memory-card-form'
+import { MemoryCardForm } from '@/features/memory-cards/components/memory-card-form'
 
 // Defers the add-card form (and its CodeMirror island) until "Add card" is clicked, so a plain
 // note view loads no CodeMirror chunk. A successful add and "Hide" both fire `onClose`, collapsing

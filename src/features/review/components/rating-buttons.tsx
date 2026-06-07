@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { rateMemoryCard } from '@/features/review/actions/rate-memory-card'
 import { GRADES } from '@/features/review/grades'
-import { useReviewCelebration } from '@/features/review/review-celebration-context'
+import { useReviewCelebration } from '@/features/review/components/review-celebration-context'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
 type PropsT = { memoryCardId: string; previews: Record<number, string>; goal: number }

@@ -2,10 +2,10 @@ import { notFound } from 'next/navigation'
 
 import { PageShell } from '@/components/layout/page-shell'
 import { CardActions } from '@/components/ui/card-actions'
-import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import { getMemoryCardForReview } from '@/features/memory-cards/queries'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
-import { ReviewPanel } from '@/features/review/review-panel'
+import { ReviewPanel } from '@/features/review/components/review-panel'
 import { getDailyGoal } from '@/features/settings/queries'
 
 // On-demand single-card review: reuses ReviewPanel so any picked card can be reviewed, not just

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { ButtonLink } from '@/components/ui/button-link'
-import { DeleteNoteButton } from '@/features/notes/delete-note-button'
+import { DeleteNoteButton } from '@/features/notes/components/delete-note-button'
 import { getNote } from '@/features/notes/queries'
 
 // getNote is RLS-scoped so a missing/not-owned id 404s; the subject_id guard also 404s a note

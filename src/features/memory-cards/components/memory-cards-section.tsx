@@ -8,9 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { AddMemoryCard } from '@/features/memory-cards/add-memory-card'
-import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
-import { UnlinkCardButton } from '@/features/memory-cards/unlink-card-button'
+import { AddMemoryCard } from '@/features/memory-cards/components/add-memory-card'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
+import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card-button'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 

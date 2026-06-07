@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { buildPreviews } from '@/features/review/build-previews'
-import { RatingButtons } from '@/features/review/rating-buttons'
-import { ReviewCelebrationProvider } from '@/features/review/review-celebration-context'
+import { RatingButtons } from '@/features/review/components/rating-buttons'
+import { ReviewCelebrationProvider } from '@/features/review/components/review-celebration-context'
 import { SourceNoteLink } from '@/features/notes/components/source-note-link'
 import type { DueCardT } from '@/features/memory-cards/types'
 

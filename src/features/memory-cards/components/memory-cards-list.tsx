@@ -2,7 +2,7 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
-import { DeleteMemoryCardButton } from '@/features/memory-cards/delete-memory-card-button'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import type { MemoryCardListItemT } from '@/features/memory-cards/types'
 import {
   formatReviewStatus,

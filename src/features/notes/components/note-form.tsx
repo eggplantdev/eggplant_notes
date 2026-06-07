@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { MoveLinkedCardsDialog, type LinkedCardT } from '@/features/notes/move-linked-cards-dialog'
+import {
+  MoveLinkedCardsDialog,
+  type LinkedCardT,
+} from '@/features/notes/components/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
 import { promptSchema } from '@/features/memory-cards/schemas'

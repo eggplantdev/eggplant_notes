@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { ReactNode } from 'react'
 import confetti from 'canvas-confetti'
 
-import { GoalCelebrationDialog } from '@/features/review/goal-celebration-dialog'
+import { GoalCelebrationDialog } from '@/features/review/components/goal-celebration-dialog'
 import type { GoalCelebrationT } from '@/features/review/types'
 
 type CelebrationContextT = { celebrate: (payload: GoalCelebrationT) => void }
