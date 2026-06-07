@@ -6,18 +6,22 @@ import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
-import type { SubjectListItemT, SubjectNoteSummaryT } from '@/features/subjects/types'
+import type {
+  SubjectListItemT,
+  SubjectNoteSummaryT,
+  SubjectOptionT,
+} from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'
 
 // RLS scopes every row to the owner; the optional client is injectable so the isolation E2E can
 // drive the same path with a per-account supabase-js client.
 
-// Full unpaginated set — needed by the subject `<select>`s + filter options. The /subjects list
-// page uses getSubjectsList instead.
-export async function getSubjects(client?: SupabaseClient<Database>): Promise<SubjectT[]> {
+// Full unpaginated set for the subject `<select>`s + filter options — id/title only (every consumer
+// maps to {value, label}, never reads other columns). The /subjects list page uses getSubjectsList.
+export async function getSubjects(client?: SupabaseClient<Database>): Promise<SubjectOptionT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
-    c.from('subjects').select('*').order('created_at', { ascending: false }),
+    c.from('subjects').select('id, title').order('created_at', { ascending: false }),
   )
 }
 

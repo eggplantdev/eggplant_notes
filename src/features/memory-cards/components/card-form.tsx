@@ -27,8 +27,8 @@ import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
+import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
-import type { SubjectT } from '@/types/subject'
 
 // Combobox needs a concrete option value; unfiled card ↔ this sentinel ↔ null on the way out.
 const NO_SUBJECT = 'none'
@@ -37,7 +37,7 @@ const NO_SUBJECT = 'none'
 // redirect on success (redirect throws), so the form only ever observes the failure branch.
 // `sourceNote` (edit of a linked card) renders a source-note row + an Unlink action.
 type CardFormPropsT = {
-  subjects: SubjectT[]
+  subjects: SubjectOptionT[]
   card?: MemoryCardT
   sourceNote?: { id: string; title: string | null }
 }

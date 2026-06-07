@@ -17,8 +17,8 @@ import {
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
 import { promptSchema } from '@/features/memory-cards/schemas'
+import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
-import type { SubjectT } from '@/types/subject'
 import type { ActionResultT } from '@/types/action'
 
 // Combobox needs a concrete option value; unassigned note ↔ this sentinel ↔ null on the way out.
@@ -32,7 +32,7 @@ const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: 
 type NoteFormPropsT =
   | {
       action: (input: CreateNoteWithChecksT) => Promise<ActionResultT>
-      subjects: SubjectT[]
+      subjects: SubjectOptionT[]
       defaultSubjectId?: string
       note?: undefined
     }
@@ -42,7 +42,7 @@ type NoteFormPropsT =
         input: NoteInputT,
         cardActions?: { move: string[]; unlink: string[] },
       ) => Promise<ActionResultT>
-      subjects: SubjectT[]
+      subjects: SubjectOptionT[]
       note: NoteT
       linkedCards: LinkedCardT[]
     }
