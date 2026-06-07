@@ -21,7 +21,7 @@ export function DeleteMemoryCardButton({ id, noteId, redirectTo }: DeleteMemoryC
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="glowy-red" size="sm" onClick={() => setOpen(true)}>
         Delete
       </Button>
       <ConfirmDeleteDialog

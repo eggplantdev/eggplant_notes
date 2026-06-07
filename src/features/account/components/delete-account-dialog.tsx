@@ -25,7 +25,7 @@ export function DeleteAccountDialog() {
 
   return (
     <>
-      <Button variant="destructive" onClick={() => setOpen(true)}>
+      <Button variant="glowy-red" onClick={() => setOpen(true)}>
         Delete account
       </Button>
       <ConfirmDeleteDialog

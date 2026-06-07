@@ -21,6 +21,10 @@ const buttonVariants = cva(
         // bg-black repeated across states so destructive's dark:/hover: fills can't win via twMerge precedence.
         'glowy-red':
           'neon-glow-red hover:neon-glow-red-hit text-destructive bg-black hover:bg-black dark:bg-black dark:hover:bg-black transition-shadow focus-visible:border-destructive/40 focus-visible:ring-destructive/20',
+        // The review-card "Easy" look promoted to a variant: ghost surface + green halo (mono-green
+        // glow). Not bg-black like glowy-red — Easy reads as a calm transparent affordance, not an alarm.
+        'glowy-green':
+          'neon-glow-green hover:neon-glow-green-hit transition-shadow hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

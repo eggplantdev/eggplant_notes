@@ -14,7 +14,7 @@ export function DeleteNoteButton({ id, redirectTo }: DeleteNoteButtonPropsT) {
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="glowy-red" size="sm" onClick={() => setOpen(true)}>
         Delete
       </Button>
       <DeleteNoteDialog noteId={open ? id : null} onOpenChange={setOpen} redirectTo={redirectTo} />

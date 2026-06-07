@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 
 // Per-card Edit + Delete controls. For delete, pass either `onRequestDelete` (renders the default
-// destructive button) or a custom `deleteControl` node (e.g. memory-cards' self-contained button).
+// glowy-red button) or a custom `deleteControl` node (e.g. memory-cards' self-contained button).
 type CardActionsPropsT = {
   editHref: string
   onRequestDelete?: () => void
@@ -23,7 +23,7 @@ export function CardActions({ editHref, onRequestDelete, deleteControl }: CardAc
       </Button>
       {deleteControl ??
         (onRequestDelete && (
-          <Button variant="destructive" size="sm" onClick={onRequestDelete}>
+          <Button variant="glowy-red" size="sm" onClick={onRequestDelete}>
             Delete
           </Button>
         ))}

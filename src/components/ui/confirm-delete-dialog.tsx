@@ -59,7 +59,7 @@ export function ConfirmDeleteDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant="glowy-red"
             disabled={isPending || confirmDisabled}
             onClick={(e) => {
               e.preventDefault()
