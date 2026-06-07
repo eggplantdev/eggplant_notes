@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-import { PASSWORD, signUp, uniqueEmail } from './helpers'
+import { expectDashboard, PASSWORD, signUp, uniqueEmail } from './helpers'
 
 // Mailpit is the local SMTP catcher exposed by `supabase start` (see `supabase status`).
 const MAILPIT = 'http://127.0.0.1:54324'
@@ -33,20 +33,20 @@ async function getResetLink(page: Page, email: string): Promise<string> {
 test('3.5 sign-up creates a session and lands on the dashboard', async ({ page }) => {
   const email = uniqueEmail()
   await signUp(page, email)
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
   await expect(page.getByText(`Signed in as ${email}`)).toBeVisible()
 })
 
 test('3.6 sign-out returns to sign-in, then sign-in lands on the dashboard', async ({ page }) => {
   const email = uniqueEmail()
   await signUp(page, email)
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page).toHaveURL('/sign-in')
 
   await signIn(page, email)
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
   await expect(page.getByText(`Signed in as ${email}`)).toBeVisible()
 })
 
@@ -67,10 +67,10 @@ test('4.4 unauthenticated /dashboard redirects to /sign-in', async ({ page }) =>
 test('4.5 authenticated user hitting /sign-in is redirected to /dashboard', async ({ page }) => {
   const email = uniqueEmail()
   await signUp(page, email)
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 
   await page.goto('/sign-in')
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 })
 
 test('3.7 password reset round trip via Mailpit', async ({ page }) => {
@@ -89,10 +89,10 @@ test('3.7 password reset round trip via Mailpit', async ({ page }) => {
 
   await page.getByLabel('New password').fill(NEW_PASSWORD)
   await page.getByRole('button', { name: 'Save password' }).click()
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 
   // The new password works on a fresh sign-in.
   await page.getByRole('button', { name: 'Sign out' }).click()
   await signIn(page, email, NEW_PASSWORD)
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 })
