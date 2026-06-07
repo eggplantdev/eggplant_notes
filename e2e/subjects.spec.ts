@@ -95,7 +95,12 @@ test('docs view: open → first note, sidebar nav, handle reorder, delete-detach
   await expect(reordered.nth(1)).toHaveText(titleA)
 
   // Delete the subject (header action) → redirects to /subjects; member notes survive, unassigned.
-  await page.getByRole('button', { name: 'Delete' }).click()
+  // Scope to the subject header — the open note's pane (article) also renders a Delete.
+  await page
+    .locator('header')
+    .filter({ hasText: `Subject ${stamp}` })
+    .getByRole('button', { name: 'Delete' })
+    .click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
 

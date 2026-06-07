@@ -34,17 +34,23 @@ test('create note tied to a subject + filter the notes list by subject', async (
 
   // (1) Create note A from subject A's detail page → pre-tied to A (no manual picker step).
   await page.goto(subjAUrl)
-  await page.getByRole('link', { name: 'New note' }).click()
+  // The subject detail page renders two "New note" links (PageShell action + CTA), both
+  // pointing at /notes/new?subject=<id>; either reaches the goal, so take the first.
+  await page.getByRole('link', { name: 'New note' }).first().click()
   await expect(page).toHaveURL(/\/notes\/new\?subject=[0-9a-f-]+$/)
   await page.getByLabel('Title').fill(noteA)
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 
-  // Pre-tie proof: note A renders as a section in subject A's document view.
+  // Pre-tie proof: opening the subject redirects to its first note (master-detail list+content
+  // view) and lists note A in the "Notes in this subject" sidebar.
   await page.goto(subjAUrl)
-  await expect(page.locator('main section h2 a', { hasText: noteA })).toBeVisible({
-    timeout: 15_000,
-  })
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+\/[0-9a-f-]+/, { timeout: 15_000 })
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Notes in this subject' })
+      .getByRole('link', { name: noteA }),
+  ).toBeVisible({ timeout: 15_000 })
 
   // Create note B assigned to subject B via the note-form picker.
   await page.goto('/notes/new')
