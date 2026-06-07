@@ -44,7 +44,14 @@ export function ContactDialog() {
       <Button variant="ghost" size="sm" data-testid="contact-trigger" onClick={() => setOpen(true)}>
         Contact me
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          // Clear a prior send error on close so reopening doesn't show a stale message.
+          if (!next) setFormError(undefined)
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Contact me</DialogTitle>

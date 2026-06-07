@@ -6,6 +6,7 @@ import { contactSchema, type ContactInputT } from '@/features/contact/schemas'
 import { EMAIL_USER } from '@/lib/env'
 import { serverEnv } from '@/lib/env.server'
 import { getCurrentUser } from '@/lib/supabase/server'
+import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
 // Module-scope transport — reused across invocations under Fluid Compute. Port 465 + secure (SMTPS),
@@ -23,8 +24,8 @@ export async function sendContactMessage(input: ContactInputT): Promise<ActionRe
   const user = await getCurrentUser()
   if (!user?.email) return { success: false, error: 'Not authenticated' }
 
-  const parsed = contactSchema.safeParse(input)
-  if (!parsed.success) return { success: false, error: 'Invalid message' }
+  const parsed = validateInput(contactSchema, input)
+  if (!parsed.success) return parsed
 
   try {
     await transport.sendMail({
