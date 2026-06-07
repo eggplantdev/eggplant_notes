@@ -50,6 +50,8 @@ Scripts: `@package.json`. Run `mise install` once (Node 24 + pnpm + the Supabase
 
 Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under `e2e/**/*.spec.ts` (`pnpm test:e2e`) — requires the local Supabase stack (`supabase start`) up; the config auto-runs a **production build** (`pnpm build && pnpm start`, not `next dev` — avoids hydration races) and uses **system Chrome** (`channel: 'chrome'`, no bundled browser). Commands in `@package.json`.
 
+**Mutation gate (Stryker) is ad hoc and vitest-only.** It drives the **vitest** runner, so behaviour covered only by Playwright E2E is invisible to it. Never run a bare `stryker run` over `src/**/*.ts` — most of the app would report `No coverage` (a misleading 0, not a quality signal). The `mutate` glob in `stryker.config.json` is deliberately scoped to unit-covered pure-logic modules; add new such modules there, narrow per-risk with `--mutate <file>`. How-to + triage rules → `@context/foundation/test-plan.md` §6.7.
+
 **E2E always builds a fresh server, never reuses one** — `reuseExistingServer: false`, isolated port (3100) + build dir (`NEXT_DIST_DIR=.next-e2e`) so it can't hijack a running `next dev`. Don't set it `true` for speed. Why this is load-bearing → `@context/foundation/lessons.md`.
 
 ### Local data: two orthogonal lanes

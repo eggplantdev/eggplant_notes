@@ -94,14 +94,15 @@ Phase 6 is **out-of-band regression coverage**, registered post-hoc for an alrea
 The classic test base for this project. AI-native tools carry a `checked:`
 date so future readers can see which lines need re-verification.
 
-| Layer                | Tool                                 | Version | Notes                                                                                                                                               |
-| -------------------- | ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| unit + integration   | Vitest                               | ^4.0.18 | 14 specs in `src/__tests__/`; pure-logic + schema coverage today                                                                                    |
-| e2e                  | Playwright                           | ^1.60.0 | 17 specs in `e2e/`; system Chrome, production build on port 3100, no DB reset (self-seeding via real sign-up)                                       |
-| API mocking          | none yet                             | —       | No MSW. Integration tests run against the local Supabase stack, not mocked HTTP                                                                     |
-| accessibility        | none yet                             | —       | No axe-core wired; not gating any current risk                                                                                                      |
-| scheduling engine    | ts-fsrs                              | ^5.4.1  | Library under integration (R2) — test our integration, not its internal math (§7)                                                                   |
-| (optional) AI-native | Playwright MCP — checked: 2026-06-06 | n/a     | Exploratory/multimodal e2e on the AI preview UI (Phase 4). When NOT to use: any flow a deterministic schema/integration test already covers cheaply |
+| Layer                | Tool                                          | Version | Notes                                                                                                                                                                                                                                         |
+| -------------------- | --------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| unit + integration   | Vitest                                        | ^4.0.18 | 14 specs in `src/__tests__/`; pure-logic + schema coverage today                                                                                                                                                                              |
+| e2e                  | Playwright                                    | ^1.60.0 | 17 specs in `e2e/`; system Chrome, production build on port 3100, no DB reset (self-seeding via real sign-up)                                                                                                                                 |
+| API mocking          | none yet                                      | —       | No MSW. Integration tests run against the local Supabase stack, not mocked HTTP                                                                                                                                                               |
+| accessibility        | none yet                                      | —       | No axe-core wired; not gating any current risk                                                                                                                                                                                                |
+| scheduling engine    | ts-fsrs                                       | ^5.4.1  | Library under integration (R2) — test our integration, not its internal math (§7)                                                                                                                                                             |
+| (optional) AI-native | Playwright MCP — checked: 2026-06-06          | n/a     | Exploratory/multimodal e2e on the AI preview UI (Phase 4). When NOT to use: any flow a deterministic schema/integration test already covers cheaply                                                                                           |
+| mutation gate        | Stryker + vitest-runner — checked: 2026-06-07 | ^9.6.1  | Ad-hoc, not CI. Drives the vitest runner only, so E2E coverage is invisible to it; `mutate` glob in `stryker.config.json` is scoped to unit-covered pure-logic modules. `pnpm install` then `npx stryker run` (or `--mutate <file>` per risk) |
 
 **Stack grounding tools (current session):**
 
@@ -129,7 +130,9 @@ phase lands; before that, the gate is `planned`.
 
 CI today is Vercel's GitHub integration (preview on push, prod on merge); there is no `.github/workflows/*`. Gates marked "CI" become enforceable when a CI runner is wired — that wiring is owned by M1 L5 / M2 L5, not this plan.
 
-Mutation-verification is the discipline of confirming a test actually fails when the code it guards is broken (it catches assertion-mirrors and the oracle problem). Scope it to changed files only (e.g. a mutation runner like Stryker on the diff); a full-suite mutation run is too slow to gate on. Tooling and exact invocation are decided when Phase 1 lands — this row names the discipline, not the config.
+Mutation-verification is the discipline of confirming a test actually fails when the code it guards is broken (it catches assertion-mirrors and the oracle problem). Scope it to changed files only (e.g. a mutation runner like Stryker on the diff); a full-suite mutation run is too slow to gate on.
+
+**Tooling (wired 2026-06-07):** Stryker + `@stryker-mutator/vitest-runner`, config in `stryker.config.json`. It stays **ad hoc** — run it on a risk-critical module before a merge, never on every commit. Load-bearing constraint: Stryker drives **one** test runner (vitest), so anything covered only by Playwright E2E is invisible to it. A bare `stryker run` over `src/**/*.ts` would report most of the app as `No coverage` — a misleading 0, not a quality signal. The `mutate` glob is therefore scoped to the pure-logic modules unit tests actually cover; per-risk runs narrow further with `--mutate <file>`. Don't chase 100%: survived mutants are a triage list ("would this bug hurt a user?"), and equivalent mutants (perf-only, cosmetic) are left consciously. See §6.7.
 
 ## 6. Cookbook Patterns
 
@@ -166,6 +169,13 @@ the relevant rollout phase ships; before that, it reads "TBD — see §3 Phase N
 ### 6.6 Per-rollout-phase notes
 
 (Optional. After each phase lands, `/10x-implement` appends a 2–3 line note here capturing anything surprising the phase taught.)
+
+### 6.7 Running the mutation gate (Stryker)
+
+- **When**: ad hoc on a risk-critical module before a merge — not per commit.
+- **Run**: `pnpm install` (deps live in `package.json`), then `npx stryker run` (whole scoped glob) or `npx stryker run --mutate "src/<path>.ts"` (one risk). Report: `reports/mutation/mutation.html` (gitignored).
+- **Scope rule**: only mutate modules a **unit test** covers. Stryker uses the vitest runner; E2E-covered code shows as `No coverage` and drags the score for no reason. Add new pure-logic modules to the `mutate` list in `stryker.config.json`; do **not** widen it to `src/**/*.ts`.
+- **Triage, don't chase the score**: for each survived mutant ask "would this bug hurt a user?" Real gap → add a behavioural assertion (not a mirror of the impl). Equivalent/cosmetic (perf-only, message strings, option objects) → leave consciously.
 
 ## 7. What We Deliberately Don't Test
 
