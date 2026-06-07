@@ -70,3 +70,7 @@ next-env.d.ts
 
 # Personal idea/TODO scratchpad — local only, never committed to the public repo
 /.notes
+
+# Stryker mutation testing output
+reports/
+.stryker-tmp/

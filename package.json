@@ -55,6 +55,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
     "@types/canvas-confetti": "^1.9.0",

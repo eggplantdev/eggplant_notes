@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "comment": "Stryker drives ONE runner (vitest). Only mutate pure-logic modules that UNIT tests cover. The app's behavioral coverage is Playwright E2E (19 specs) which this runner cannot see, so a bare src/**/*.ts glob would flood the report with misleading 'No coverage' mutants. Per-risk runs should still narrow further with --mutate <file>.",
+  "mutate": [
+    "src/features/review/scheduling.ts",
+    "src/features/review/detect-goal-crossing.ts",
+    "src/features/review-events/streak.ts",
+    "src/features/review-events/today-count.ts",
+    "src/features/review-events/week-count.ts",
+    "src/features/dashboard/build-heatmap-matrix.ts",
+    "src/features/sample-data/remap.ts",
+    "src/features/subjects/utils/midpoint.ts",
+    "src/features/memory-cards/utils/format-review-status.ts",
+    "src/features/memory-cards/utils/parse-card-filters.ts",
+    "src/features/auth/schemas.ts",
+    "src/features/memory-cards/schemas.ts",
+    "src/features/notes/schemas.ts",
+    "src/lib/utils/build-url-with-params.ts",
+    "src/lib/utils/date.ts",
+    "src/lib/utils/pagination.ts",
+    "src/lib/validate.ts",
+    "src/components/forms/toast-result.ts",
+    "src/components/toast-messages.ts"
+  ],
+  "reporters": ["progress", "clear-text", "html"],
+  "concurrency": 4,
+  "thresholds": { "high": 80, "low": 60, "break": null }
+}
