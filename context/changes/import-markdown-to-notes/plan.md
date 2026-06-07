@@ -457,12 +457,12 @@ for edit → existing create path.
 
 #### Automated
 
-- [x] 1.1 Splitter unit tests pass (fence-aware; H1/H2/H3; pre-heading; empty)
-- [x] 1.2 Migration applies cleanly (`supabase db reset`)
-- [x] 1.3 Type checking passes (after `next typegen`)
-- [x] 1.4 Linting passes
-- [x] 1.5 E2E import (upload + paste) passes
-- [x] 1.6 Build passes
+- [x] 1.1 Splitter unit tests pass (fence-aware; H1/H2/H3; pre-heading; empty) — 4650dfc
+- [x] 1.2 Migration applies cleanly (`supabase db reset`) — 4650dfc
+- [x] 1.3 Type checking passes (after `next typegen`) — 4650dfc
+- [x] 1.4 Linting passes — 4650dfc
+- [x] 1.5 E2E import (upload + paste) passes — 4650dfc
+- [x] 1.6 Build passes — 4650dfc
 
 #### Manual
 
@@ -475,10 +475,10 @@ for edit → existing create path.
 
 #### Automated
 
-- [ ] 2.1 `aes-gcm.ts` round-trip + tamper test passes
-- [ ] 2.2 Migration applies; `openrouter_credentials` RLS own-only verified
-- [ ] 2.3 `delete_account()` removes the credential row (cascade) verified
-- [ ] 2.4 Type/lint/build pass
+- [x] 2.1 `aes-gcm.ts` round-trip + tamper test passes
+- [x] 2.2 Migration applies; `openrouter_credentials` RLS own-only verified
+- [x] 2.3 `delete_account()` removes the credential row (cascade) verified
+- [x] 2.4 Type/lint/build pass
 
 #### Manual
 
