@@ -1,7 +1,7 @@
 ---
 change_id: import-markdown-to-notes
 title: Import a markdown file into notes — deterministic heading-split + preview, optional AI card generation
-status: implementing
+status: implemented
 created: 2026-06-06
 updated: 2026-06-07
 iteration_2_planned: 2026-06-07

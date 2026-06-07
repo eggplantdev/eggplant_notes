@@ -859,7 +859,7 @@ Claude Haiku class id — resolve a dated id from the catalog, never the `~…-l
 
 #### Automated
 
-- [ ] 5.1 `previewPrompt` output matches the action's sent prompt per task (shared-builder test)
+- [x] 5.1 `previewPrompt` output matches the action's sent prompt per task (shared-builder test) — 641e2cd (`prompts.test.ts`: previewPrompt mirrors each builder per variant)
 - [ ] 5.2 Off-list `modelId`: ignored by `getOpenRouterModel` (falls back to default); rejected by `setOpenRouterModel`
 - [ ] 5.3 `setOpenRouterModel` persists `credential.model`; `getOpenRouterDefaultModel` reads it back
 - [x] 5.4 Type/lint/build pass
@@ -903,9 +903,9 @@ Claude Haiku class id — resolve a dated id from the catalog, never the `~…-l
 
 #### Automated
 
-- [ ] 8.1 `filter='file'` returns only models whose `inputModalities` include `'file'`
+- [x] 8.1 `filter='file'` returns only models whose `inputModalities` include `'file'` — 67c240f (`openrouter-models.test.ts`: `filterModels('file')` keeps only image/file-capable ids)
 - [ ] 8.2 PDF action builds a correct AI SDK v6 file part (`mediaType: 'application/pdf'`) and validates against the notes schema
-- [ ] 8.3 Type/lint/build pass
+- [x] 8.3 Type/lint/build pass — 641e2cd (typecheck + lint + `pnpm build` green; full E2E 44 passed / 0 failed)
 
 #### Manual
 
