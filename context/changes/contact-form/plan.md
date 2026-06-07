@@ -267,26 +267,26 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 
 #### Automated
 
-- [x] 0.1 `pnpm typecheck` passes
-- [x] 0.2 `pnpm lint` passes
-- [x] 0.3 `pnpm build` passes with all env vars set
-- [x] 0.4 Unsetting a required `NEXT_PUBLIC_*` var fails `pnpm build`
-- [x] 0.5 Unsetting a required `EMAIL_*` var fails `pnpm build`
-- [x] 0.6 jiti present in devDependencies + lockfile
+- [x] 0.1 `pnpm typecheck` passes — 728be10
+- [x] 0.2 `pnpm lint` passes — 728be10
+- [x] 0.3 `pnpm build` passes with all env vars set — 728be10
+- [x] 0.4 Unsetting a required `NEXT_PUBLIC_*` var fails `pnpm build` — 728be10
+- [x] 0.5 Unsetting a required `EMAIL_*` var fails `pnpm build` — 728be10
+- [x] 0.6 jiti present in devDependencies + lockfile — 728be10
 
 #### Manual
 
-- [x] 0.7 Client import of `@/lib/env.server` fails the build with a server-only error
-- [x] 0.8 The 6 existing `@/lib/env` importers still resolve; `/dashboard` loads
+- [x] 0.7 Client import of `@/lib/env.server` fails the build with a server-only error — 728be10
+- [x] 0.8 The 6 existing `@/lib/env` importers still resolve; `/dashboard` loads — 728be10
 
 ### Phase 1: Contact schema + send action
 
 #### Automated
 
-- [ ] 1.1 `pnpm typecheck` passes
-- [ ] 1.2 `pnpm lint` passes
-- [ ] 1.3 `pnpm build` passes
-- [ ] 1.4 nodemailer + `@types/nodemailer` present in `package.json` + lockfile
+- [x] 1.1 `pnpm typecheck` passes
+- [x] 1.2 `pnpm lint` passes
+- [x] 1.3 `pnpm build` passes
+- [x] 1.4 nodemailer + `@types/nodemailer` present in `package.json` + lockfile
 
 #### Manual
 
