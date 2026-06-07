@@ -12,8 +12,8 @@ import { SegmentedToggle } from '@/components/ui/segmented-toggle'
 import { importNotes } from '@/features/import/actions/import-notes'
 import { MAX_IMPORT_BYTES, MAX_IMPORT_NOTES } from '@/features/import/constants'
 import { NotePreviewList } from '@/features/import/components/note-preview-list'
-import { SourceInput, type PdfSourceT } from '@/features/import/components/source-input'
-import type { ImportDraftT } from '@/features/import/types'
+import { SourceInput } from '@/features/import/components/source-input'
+import type { ImportDraftT, PdfSourceT } from '@/features/import/types'
 import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-markdown'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/models'
@@ -227,6 +227,15 @@ export function ImportPanel({
               />
             </>
           )}
+          {/*
+            PDF path: the base64 file rides the Server Action request body, which Next caps at
+            `experimental.serverActions.bodySizeLimit` (set to 14mb in next.config.ts — default is
+            1 MB). The action's own Zod cap is 10 MB raw (~13.4 MB base64), so the config limit must
+            stay above it. If we ever need larger PDFs (or streaming/progress), the body-limit ceiling
+            is the signal to move this upload to a dedicated Route Handler under src/app/api/ instead
+            of a Server Action — Route Handlers parse the request stream themselves and aren't bound
+            by serverActions.bodySizeLimit.
+          */}
           <GenerateDialog<GeneratedNoteT>
             connected={aiEnabled}
             defaultModel={pdf ? DEFAULT_OPENROUTER_FILE_MODEL : defaultModel}

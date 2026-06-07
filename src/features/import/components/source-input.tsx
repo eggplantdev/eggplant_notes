@@ -3,9 +3,8 @@
 import { Label } from '@/components/ui/label'
 import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
+import type { PdfSourceT } from '@/features/import/types'
 import { isPdfFile, readFileAsBase64 } from '@/features/import/utils/read-file-base64'
-
-export type PdfSourceT = { dataBase64: string; filename: string }
 
 // Three read sources feeding the import pipeline: a markdown/txt file (read client-side as text via
 // the File API — no storage bucket), a paste textarea, and a PDF (read as base64 and handed to a
