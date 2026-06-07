@@ -9,25 +9,21 @@ import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
+import { MemoryCardsField } from '@/features/notes/components/memory-cards-field'
 import {
   MoveLinkedCardsDialog,
   type LinkedCardT,
 } from '@/features/notes/components/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
-import { promptSchema } from '@/features/memory-cards/schemas'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
 import type { ActionResultT } from '@/types/action'
 
 // Combobox needs a concrete option value; unassigned note ↔ this sentinel ↔ null on the way out.
 const NO_SUBJECT = 'none'
-
-// Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.
-const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: '' }
 
 // `note` present discriminates edit (action takes the id) from create. Create saves the note +
 // staged checks atomically; edit is note-only plus optional per-card move/unlink actions.
@@ -130,7 +126,9 @@ export function NoteForm(props: NoteFormPropsT) {
           task="notes"
           connected={props.aiEnabled ?? false}
           defaultModel={props.defaultModel}
-          action={(topic, modelId) => generateNotes({ topic, modelId })}
+          action={(topic, modelId, promptOverride) =>
+            generateNotes({ topic, modelId, promptOverride })
+          }
           onResult={(genNote) => {
             form.setFieldValue('title', genNote.title)
             form.setFieldValue('content', genNote.content)
@@ -164,82 +162,7 @@ export function NoteForm(props: NoteFormPropsT) {
       </form.Field>
 
       {/* Inline memory-card staging — create mode only; edit manages cards on the detail page. */}
-      {!note && (
-        <form.Field name="checks" mode="array">
-          {(checksField) => (
-            <div className="flex flex-col gap-4 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex flex-col">
-                  <Label>Memory cards (optional)</Label>
-                  <span className="text-muted-foreground text-sm">
-                    Add recall questions to save alongside this note.
-                  </span>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => checksField.pushValue(EMPTY_CHECK)}
-                >
-                  Add card
-                </Button>
-              </div>
-
-              {checksField.state.value.map((_, i) => (
-                <div key={i} className="flex flex-col gap-3 rounded-lg border p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">Card {i + 1}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => checksField.removeValue(i)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-
-                  <form.AppField
-                    name={`checks[${i}].prompt`}
-                    validators={{ onBlur: promptSchema, onSubmit: promptSchema }}
-                  >
-                    {(field) => (
-                      <field.Input label="Question" placeholder="What should you recall?" />
-                    )}
-                  </form.AppField>
-
-                  <form.Field name={`checks[${i}].example`}>
-                    {(field) => (
-                      <div className="grid gap-2">
-                        <Label htmlFor={`card-${i}-example`}>Example (optional)</Label>
-                        <Textarea
-                          id={`card-${i}-example`}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="A worked example or expected answer"
-                        />
-                      </div>
-                    )}
-                  </form.Field>
-
-                  <form.Field name={`checks[${i}].code_context`}>
-                    {(field) => (
-                      <div className="flex flex-col gap-2">
-                        <Label>Code context (optional)</Label>
-                        <EditorWithPreview
-                          value={field.state.value}
-                          onChange={field.handleChange}
-                        />
-                      </div>
-                    )}
-                  </form.Field>
-                </div>
-              ))}
-            </div>
-          )}
-        </form.Field>
-      )}
+      {!note && <MemoryCardsField form={form} />}
 
       <FormError message={formError} />
 

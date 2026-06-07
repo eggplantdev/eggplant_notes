@@ -4,7 +4,7 @@ import { FormInput } from '@/components/forms/form-components/form-input'
 
 const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts()
 
-const { useAppForm } = createFormHook({
+const { useAppForm, withForm } = createFormHook({
   fieldComponents: {
     Input: FormInput,
   },
@@ -13,4 +13,12 @@ const { useAppForm } = createFormHook({
   formContext,
 })
 
-export { fieldContext, formContext, useFieldContext, useFormContext, useStore, useAppForm }
+export {
+  fieldContext,
+  formContext,
+  useFieldContext,
+  useFormContext,
+  useStore,
+  useAppForm,
+  withForm,
+}
