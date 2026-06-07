@@ -37,7 +37,16 @@ export async function AppNav() {
       </header>
 
       <CurrentPageLabel />
-      <MobileNav connected={connected} />
+      <MobileNav
+        connected={connected}
+        credits={
+          connected ? (
+            <Suspense fallback={null}>
+              <NavCredits className="mt-2 w-full justify-start" />
+            </Suspense>
+          ) : null
+        }
+      />
     </>
   )
 }
