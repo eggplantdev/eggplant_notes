@@ -875,10 +875,10 @@ Claude Haiku class id — resolve a dated id from the catalog, never the `~…-l
 
 #### Automated
 
-- [ ] 6.1 `listOpenRouterModels` returns a normalized, cached catalog (cache hit on 2nd call)
-- [ ] 6.2 Off-list `modelId` rejected by `setOpenRouterModel`, ignored by `getOpenRouterModel` (against live list)
-- [ ] 6.3 Combobox renders Recommended group + searchable list; `filter='file'` yields only file-capable ids
-- [ ] 6.4 Type/lint/build pass
+- [x] 6.1 `listOpenRouterModels` returns a normalized, cached catalog (cache hit on 2nd call) — 6a99f7e (normalize unit-tested 67c240f; cache is `unstable_cache`, server-only → manual)
+- [ ] 6.2 Off-list `modelId` rejected by `setOpenRouterModel`, ignored by `getOpenRouterModel` (against live list) — logic landed 6a99f7e; no unit test (catalog import is `server-only`, can't drive in vitest) → verify under 6.5
+- [x] 6.3 Combobox renders Recommended group + searchable list; `filter='file'` yields only file-capable ids — 6a99f7e (`filterModels` unit-tested 67c240f)
+- [x] 6.4 Type/lint/build pass — 6a99f7e
 
 #### Manual
 
