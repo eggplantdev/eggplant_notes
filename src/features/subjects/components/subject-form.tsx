@@ -6,8 +6,6 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { subjectTitleSchema } from '@/features/subjects/schemas'
 import type { SubjectInputT } from '@/features/subjects/schemas'
 import type { SubjectT } from '@/types/subject'
@@ -53,21 +51,11 @@ export function SubjectForm(props: SubjectFormPropsT) {
         )}
       </form.AppField>
 
-      <form.Field name="description">
+      <form.AppField name="description">
         {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor={field.name}>Description (optional)</Label>
-            <Textarea
-              id={field.name}
-              name={field.name}
-              placeholder="What this subject covers"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-            />
-          </div>
+          <field.Textarea label="Description (optional)" placeholder="What this subject covers" />
         )}
-      </form.Field>
+      </form.AppField>
 
       <FormError message={formError} />
 

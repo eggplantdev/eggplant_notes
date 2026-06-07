@@ -4,7 +4,6 @@ import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { withForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { StagedCheckInputT } from '@/features/notes/schemas'
 
@@ -69,20 +68,14 @@ export const MemoryCardsField = withForm({
                   )}
                 </form.AppField>
 
-                <form.Field name={`checks[${i}].example`}>
+                <form.AppField name={`checks[${i}].example`}>
                   {(field) => (
-                    <div className="grid gap-2">
-                      <Label htmlFor={`card-${i}-example`}>Example (optional)</Label>
-                      <Textarea
-                        id={`card-${i}-example`}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="A worked example or expected answer"
-                      />
-                    </div>
+                    <field.Textarea
+                      label="Example (optional)"
+                      placeholder="A worked example or expected answer"
+                    />
                   )}
-                </form.Field>
+                </form.AppField>
 
                 <form.Field name={`checks[${i}].code_context`}>
                   {(field) => (

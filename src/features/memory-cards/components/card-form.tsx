@@ -21,7 +21,6 @@ import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
@@ -154,21 +153,15 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
         {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
       </form.AppField>
 
-      <form.Field name="example">
+      <form.AppField name="example">
         {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor="card-example">Example (optional)</Label>
-            <Textarea
-              id="card-example"
-              data-testid="card-form-example"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="A worked example or expected answer"
-            />
-          </div>
+          <field.Textarea
+            label="Example (optional)"
+            placeholder="A worked example or expected answer"
+            testId="card-form-example"
+          />
         )}
-      </form.Field>
+      </form.AppField>
 
       <form.Field name="code_context">
         {(field) => (
