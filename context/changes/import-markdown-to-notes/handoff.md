@@ -1,7 +1,63 @@
 # S-19 AI-Assisted Authoring — Session Handoff (2026-06-07)
 
+> **Session 2 update (2026-06-07) — Phase 5 added. Read this block first; the original Phase 1–4
+> handoff follows unchanged below.**
+>
+> ### What happened this session
+>
+> - **Phase 5 (per-generate model select + always-on prompt/token debug) was planned, implemented,
+>   reviewed, and `/simplify`'d.** Plan: `plan.md` "## Phase 5" + design doc
+>   `model-select-and-prompt-debug-design.md`. Capabilities: a model `<Select>` in the generate
+>   **dialog** (per-generate override) + in **/settings** (persisted default); the exact prompt shown
+>   pre-generate; token counts after; an always-on debug log (`console` + best-effort `.ai-debug/*.jsonl|md`).
+>   Model resolution: per-generate override → `credential.model` (settings) → `DEFAULT`.
+> - **A stopped agent's AI-button/gate stream was folded in** (always-render AI triggers + connect-gate-
+>   on-click, nav connect button, `ai` Button variant). Its review doc: `follow-ups/ai-button-gate-review.md`.
+> - **Review gate ran on the combined slice:** 4-check fan-out → triage → `/simplify`. Findings applied:
+>   AG-1/2/3 (shared `ConnectOpenRouterButton`, hook moved to feature root, nested-form guard), F1/F2/F3,
+>   and accepted proposals AG-5 (one `getOpenRouterStatus()` per page), ALT-2 (log dir → stable
+>   `.ai-debug/`), ALT-3/EFF-F2 (preview is pure in `prompts.ts`, `preview-prompt` action deleted,
+>   redundant `getNote` + `openrouter→notes` edge removed). Deferred: ALT-1/4 (owner folding into incoming
+>   work), F3/F5/AG-8 in `follow-ups/review-fixes.md`.
+>
+> ### Phase 5 commits — ⚠️ LOCAL ONLY, NOT PUSHED (3 ahead of origin)
+>
+> ```
+> 337b807 refactor: Phase 5 review-gate cleanup (simplify + findings)
+> 10c699d refactor: apply AI-button-gate review findings AG-1/2/3
+> de77700 feat: model select + prompt/token visibility + always-render connect gate (p5)
+> ```
+>
+> PR #1 still shows only up to `32ab1ff`. **First resume step: `git push` (in the worktree) so the PR
+> reflects Phase 5 and the work is safe.** (Not pushed this session — push wasn't requested.)
+>
+> ### Gate status: review ✅ → simplify ✅ → committed ✅ → **tests + archive HELD**
+>
+> Held deliberately — owner has "many more changes incoming" to this slice, so the test layer waits
+> until the code settles (writing specs now would lock in code about to move).
+>
+> ### Phase 5 resume checklist (when incoming changes land)
+>
+> 1. `git push` the 3 commits (do this first regardless).
+> 2. Land the owner's incoming changes (see `iteration-2-braindump.md` — owner's notes, hands-off this session).
+> 3. Author tests `5.1–5.3` (plan Progress): shared-builder preview==sent, off-list model (ignored by
+>    `getOpenRouterModel`, rejected by `setOpenRouterModel`), `setOpenRouterModel` persist/read round-trip.
+> 4. Manual `5.5–5.8` (model picker persists; 4 dialogs pre-select tagged default + show prompt+tokens;
+>    `.ai-debug` logs accrue; AI surfaces render-when-disconnected and open the connect gate — NOTE the
+>    addendum AG-4 reversal of the old "hidden when disconnected" criteria).
+> 5. Full suite → `/10x-archive` → then the Phase 1–4 merge/Linear steps below.
+>
+> ### Phase 5 verification done this session
+>
+> typecheck + lint + build green on every commit. NOT manually verified end-to-end on a connected
+> account (Playwright seed account isn't OpenRouter-connected; owner verifying on their own session).
+> Phase-5 unit tests not yet written (held).
+>
+> ---
+
 Resume point for a fresh session. All 4 phases are **implemented, committed, and automated-verified**;
 the slice is **on a branch in a PR, not merged**. This doc is the source of truth for what's left.
+(The Phase 1–4 content below predates Phase 5 — still accurate for those phases.)
 
 ## Where the work lives
 
