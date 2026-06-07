@@ -890,13 +890,13 @@ Claude Haiku class id — resolve a dated id from the catalog, never the `~…-l
 #### Automated
 
 - [ ] 7.1 With `promptOverride` set, the action sends + logs exactly the edited `{system, prompt}` (not the builder output)
-- [ ] 7.2 Type/lint/build pass
+- [x] 7.2 Type/lint/build pass — d859d09
 
 #### Manual
 
 - [ ] 7.3 Dialog is wide enough to read the full prompt; editing it changes output + debug log; "Reset to default" restores it
 - [ ] 7.4 Topic generation (#2/#5) input is a `<textarea>` inside the dialog; `TopicGenerator` is just a trigger
-- [ ] 7.5 Import page leads with help copy under the heading; Split vs Decompose read as two separate paths
+- [x] 7.5 Import page leads with help copy under the heading; Split vs Decompose read as two separate paths — cda9100
 - [ ] 7.6 Headingless prose paste no longer silently shows a meaningless "Preview — 1 note"
 
 ### Phase 8: PDF import via vision

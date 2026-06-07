@@ -1,5 +1,69 @@
 # S-19 AI-Assisted Authoring — Session Handoff (2026-06-07)
 
+> **Session 3 update (2026-06-07) — Phase 6 done + Phase 7 mostly done, ON A NEW BRANCH IN THE MAIN
+> CHECKOUT. Read this block first; Session 2 (Phase 5) and the original Phase 1–4 handoff follow below.**
+>
+> ### ⚠️ Topology changed — work left the worktree
+>
+> - Work moved OFF the worktree (`feat/ai-assisted-authoring`, PR #1) onto **`feat/ai-authoring-iter2`
+>   in the MAIN checkout** (`/Users/konradantonik/workspace/10x_devs`). Resume there with a plain
+>   `git`/`cd` — do NOT use the worktree for this work anymore. The worktree still exists (plan-author
+>   branch); leave it.
+> - `feat/ai-authoring-iter2` was branched off `feat/ai-assisted-authoring` HEAD (so it has phases 1–5
+>   - the iteration-2 plan `b613864`). **It has DIVERGED from PR #1** — reconcile later (merge iter2
+>     into the PR branch, or repoint the PR). Not yet decided.
+> - **Shared branch:** a parallel agent is also committing to `feat/ai-authoring-iter2` (a
+>   `MemoryCardsField`/`SettingsSection` extraction — commits `5246218`, `4a595d0`). Their note-form
+>   refactor landed AND carried my `promptOverride` one-liner. Check `git log` before assuming a file
+>   is yours; stage by explicit path only.
+> - **Env:** the main checkout's `.env.local` now has `OPENROUTER_ENC_KEY` (appended from the worktree).
+> - The `w-fit` file-input fix exists twice: `f8bc9be` on `main` (Phase-1 import) and again in `cda9100`
+>   on this branch — both intentional; this branch never had the main-only fix.
+>
+> ### What shipped this session (all on `feat/ai-authoring-iter2`, green: typecheck/lint/build)
+>
+> - **Phase 6 — Live model catalog (DONE):** `6a99f7e` (catalog + searchable combobox + pricing),
+>   `67c240f` (unit test: normalize/filter), `1b597e0` (picker full-width + alphabetical), `9ad6884`
+>   (progress). New: `catalog.ts` (server-only `unstable_cache` `/models` fetch + curated fallback +
+>   async `isAllowedModel`), `actions/list-models.ts` (client bridge), reworked `models.ts`
+>   (`RECOMMENDED_MODELS`, pure `normalizeModels`/`filterModels`/`formatPricePerM`), combobox
+>   `model-select.tsx` (lazy fetch-on-open, `filter='text'|'file'` for Phase 8). `server-client.ts`/
+>   `set-model.ts` validate against the live catalog (async).
+> - **Phase 7 #1+#2 — editable dialog (DONE):** `d859d09`. `promptOverrideSchema` in `prompts.ts`;
+>   `generateCards`/`generateNotes` take optional `promptOverride` (replaces the built prompt + grounded
+>   re-fetch; sent+logged verbatim). Dialog widened (`sm:max-w-3xl`), read-only `<pre>` → editable
+>   System+Prompt `<Textarea>`s + "Reset to default"; sends override ONLY when edited. Signature
+>   `(modelId, promptOverride?)` threaded through topic-generator/generate-cards-button/card-form/
+>   note-form/import-panel.
+> - **Phase 7 #4 — import UX + nav (DONE):** `cda9100`. Explanation moved under the header + rewritten
+>   as a plain two-path summary; file-input `w-fit`; **Import removed from nav** → outline buttons on
+>   the Notes and Subjects pages (both link `/import`).
+>
+> ### What's NOT done
+>
+> - **Phase 7 #3 — topic input INTO the dialog** (collapse `TopicGenerator` to a trigger; dialog owns
+>   the source `<textarea>`, Shape A). DEFERRED for a note-form collision that has since CLEARED — now
+>   unblocked. This is the only remaining Phase 7 item; it's an optional unification (topic-gen already
+>   works). Plan rows 7.4 still open.
+> - **Phase 8 — PDF via vision.** Untouched. (Phase 6 already shipped the `filter='file'` hook it needs.)
+> - **Manual verification:** 6.2 (off-list guard — no unit test, `catalog.ts` is server-only; verify
+>   with a live catalog + key), 6.5/6.6 (settings picker searchable/priced/persists; catalog is current),
+>   7.1/7.3 (edited prompt is sent+logged; reset works), 7.6 (headingless paste still auto-shows a
+>   "Preview — 1 note" — NOT changed; operator didn't ask, revisit if wanted).
+> - **Tests:** only `src/__tests__/openrouter-models.test.ts` added. No new E2E. Phase 5 unit tests
+>   (5.1–5.3) from the prior handoff are still unwritten.
+>
+> ### Resume checklist
+>
+> 1. `cd /Users/konradantonik/workspace/10x_devs`, `git checkout feat/ai-authoring-iter2` (it may be
+>    current). Confirm `.env.local` has `OPENROUTER_ENC_KEY`.
+> 2. Decide: do Phase 7 #3, then Phase 8 — or reconcile `feat/ai-authoring-iter2` ↔ PR #1 first.
+> 3. Plan Progress updated for Phase 6 (6.1/6.3/6.4) + Phase 7 (7.2/7.5) on this branch; flip the rest
+>    as they verify.
+> 4. Then the full slice gate (review → simplify → tests → archive) and the deferred merge/Linear steps.
+>
+> ---
+
 > **Session 2 update (2026-06-07) — Phase 5 added. Read this block first; the original Phase 1–4
 > handoff follows unchanged below.**
 >
