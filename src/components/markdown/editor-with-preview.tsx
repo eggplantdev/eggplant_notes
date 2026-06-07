@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { MarkdownEditor } from '@/components/markdown/markdown-editor'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { SegmentedToggle } from '@/components/ui/segmented-toggle'
 import { cn } from '@/lib/utils'
 
 // Preview is hidden by default (Write pane), so defer its Shiki bundle until the user toggles to it.
@@ -36,20 +36,18 @@ export function EditorWithPreview({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         {pane === 'write' && <CodeBlockInserter value={value} onChange={onChange} />}
-        <ToggleGroup
-          type="single"
-          variant="outline"
+        {/* Preview segment prefetches the lazy Shiki chunk on hover/focus so the toggle rarely shows a loader. */}
+        <SegmentedToggle
           size="sm"
-          value={pane}
-          onValueChange={(v) => v && setPane(v as PaneT)}
+          ariaLabel="Editor pane"
           className="ml-auto"
-        >
-          <ToggleGroupItem value="write">Write</ToggleGroupItem>
-          {/* Prefetch the lazy Shiki preview chunk on intent so the toggle rarely shows a loader. */}
-          <ToggleGroupItem value="preview" onMouseEnter={importPreview} onFocus={importPreview}>
-            Preview
-          </ToggleGroupItem>
-        </ToggleGroup>
+          value={pane}
+          onChange={setPane}
+          options={[
+            { value: 'write', label: 'Write' },
+            { value: 'preview', label: 'Preview', onPrefetch: importPreview },
+          ]}
+        />
       </div>
 
       <div className={cn('min-w-0', pane === 'write' ? 'block' : 'hidden')}>

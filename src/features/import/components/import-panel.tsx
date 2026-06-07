@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { SegmentedToggle } from '@/components/ui/segmented-toggle'
 import { importNotes } from '@/features/import/actions/import-notes'
 import { MAX_IMPORT_BYTES, MAX_IMPORT_NOTES } from '@/features/import/constants'
 import { NotePreviewList } from '@/features/import/components/note-preview-list'
@@ -168,24 +168,21 @@ export function ImportPanel({
 
       <div className="flex flex-col gap-3">
         <Label>Select subject</Label>
-        <ToggleGroup
-          type="single"
-          variant="outline"
+        <SegmentedToggle
           size="sm"
+          ariaLabel="Subject mode"
           value={subjectMode}
-          onValueChange={(v) => v && setSubjectMode(v as SubjectModeT)}
-        >
-          <ToggleGroupItem value="new" data-testid="import-subject-new-mode">
-            New subject
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="existing"
-            data-testid="import-subject-existing-mode"
-            disabled={subjects.length === 0}
-          >
-            Existing subject
-          </ToggleGroupItem>
-        </ToggleGroup>
+          onChange={setSubjectMode}
+          options={[
+            { value: 'new', label: 'New subject', testId: 'import-subject-new-mode' },
+            {
+              value: 'existing',
+              label: 'Existing subject',
+              testId: 'import-subject-existing-mode',
+              disabled: subjects.length === 0,
+            },
+          ]}
+        />
         {subjectMode === 'new' ? (
           <Input
             data-testid="import-subject-title"
@@ -201,7 +198,10 @@ export function ImportPanel({
             options={subjects.map((s) => ({ value: s.id, label: s.title }))}
             searchPlaceholder="Search subject…"
             emptyMessage="No subject found."
-            className="w-full sm:w-72"
+            // Match the New-subject Input exactly so toggling modes doesn't shift the field: the
+            // trigger is a Button size="sm" (h-7, text-[0.8rem], font-medium) but the Input is
+            // h-8 / text-base md:text-sm / normal weight. twMerge lets these override the sm preset.
+            className="h-8 w-full rounded-lg text-base font-normal sm:w-72 md:text-sm"
           />
         )}
       </div>
@@ -214,19 +214,17 @@ export function ImportPanel({
           {!pdf && (
             <>
               <span className="text-muted-foreground text-sm">Split on heading level:</span>
-              <ToggleGroup
-                type="single"
-                variant="outline"
+              <SegmentedToggle
                 size="sm"
+                ariaLabel="Split heading level"
                 value={String(level)}
-                onValueChange={(v) => v && handleLevel(Number(v) as SplitLevelT)}
-              >
-                {LEVELS.map((l) => (
-                  <ToggleGroupItem key={l} value={String(l)} data-testid={`import-level-h${l}`}>
-                    {`H${l}`}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onChange={(v) => handleLevel(Number(v) as SplitLevelT)}
+                options={LEVELS.map((l) => ({
+                  value: String(l),
+                  label: `H${l}`,
+                  testId: `import-level-h${l}`,
+                }))}
+              />
             </>
           )}
           <GenerateDialog<GeneratedNoteT>
