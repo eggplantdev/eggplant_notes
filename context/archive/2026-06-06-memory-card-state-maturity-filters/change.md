@@ -3,8 +3,8 @@ change_id: memory-card-state-maturity-filters
 title: Server-side filtering of memory cards by FSRS state and maturity
 created: 2026-06-06
 updated: 2026-06-07
-status: impl_reviewed
-archived_at: null
+status: archived
+archived_at: 2026-06-07T09:38:16Z
 ---
 
 ## Notes
