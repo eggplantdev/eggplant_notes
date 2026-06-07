@@ -283,10 +283,10 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 
 #### Automated
 
-- [x] 1.1 `pnpm typecheck` passes
-- [x] 1.2 `pnpm lint` passes
-- [x] 1.3 `pnpm build` passes
-- [x] 1.4 nodemailer + `@types/nodemailer` present in `package.json` + lockfile
+- [x] 1.1 `pnpm typecheck` passes — d33ff7a
+- [x] 1.2 `pnpm lint` passes — d33ff7a
+- [x] 1.3 `pnpm build` passes — d33ff7a
+- [x] 1.4 nodemailer + `@types/nodemailer` present in `package.json` + lockfile — d33ff7a
 
 #### Manual
 
@@ -297,9 +297,9 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck` passes
-- [ ] 2.2 `pnpm lint` passes
-- [ ] 2.3 `pnpm build` passes
+- [x] 2.1 `pnpm typecheck` passes
+- [x] 2.2 `pnpm lint` passes
+- [x] 2.3 `pnpm build` passes
 
 #### Manual
 
