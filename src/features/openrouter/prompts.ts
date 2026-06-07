@@ -53,3 +53,17 @@ export function buildNotesPrompt(source: { text: string } | { topic: string }): 
   }
   return { system: NOTES_TOPIC_SYSTEM, prompt: `Write a study note about: ${source.topic}` }
 }
+
+// What the generate dialog previews BEFORE generating — the exact prompt the matching action will
+// send, built from the SAME builders so the two can't drift. Pure: the caller passes material it
+// already has (the grounded-cards caller passes the note it already loaded), so there's no DB fetch
+// and no LLM cost; the note fetch lives only in the action (its RLS trust boundary).
+export type PreviewInputT =
+  | { task: 'cards'; material: string }
+  | { task: 'notes'; text: string }
+  | { task: 'notes'; topic: string }
+
+export function previewPrompt(input: PreviewInputT): PromptT {
+  if (input.task === 'cards') return buildCardsPrompt(input.material)
+  return buildNotesPrompt('text' in input ? { text: input.text } : { topic: input.topic })
+}

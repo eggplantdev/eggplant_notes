@@ -13,16 +13,23 @@ import { createCardsForNote } from '@/features/memory-cards/actions/create-cards
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
+import { cardsMaterialFromNote } from '@/features/openrouter/prompts'
 
 // #1 grounded gen-cards: generate recall cards from the note's prose via the shared GenerateDialog
 // (model select + prompt preview + tokens; also handles the connect gate), then preview/edit them
 // before committing. The candidate list is the second gate — nothing persists until the user saves.
+// noteTitle/noteContent are the already-loaded note text, passed in so the prompt preview needs no
+// extra fetch; generateCards still re-fetches server-side for its RLS trust boundary.
 export function GenerateCardsButton({
   noteId,
+  noteTitle,
+  noteContent,
   connected,
   defaultModel,
 }: {
   noteId: string
+  noteTitle: string | null
+  noteContent: string
   connected: boolean
   defaultModel: string
 }) {
@@ -62,7 +69,10 @@ export function GenerateCardsButton({
           <GenerateDialog<GeneratedCardT>
             connected={connected}
             defaultModel={defaultModel}
-            previewInput={{ task: 'cards', noteId }}
+            previewInput={{
+              task: 'cards',
+              material: cardsMaterialFromNote({ title: noteTitle, content: noteContent }),
+            }}
             action={(modelId) => generateCards({ noteId, modelId })}
             onResult={(data) => setCandidates(data)}
             triggerLabel="Generate cards with AI"

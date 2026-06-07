@@ -12,7 +12,7 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
-import { getOpenRouterDefaultModel, isOpenRouterConnected } from '@/features/openrouter/queries'
+import { getOpenRouterStatus } from '@/features/openrouter/queries'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Next 16 `params`/`searchParams` are Promises. getNote() is RLS-scoped, so a missing OR
@@ -28,12 +28,11 @@ export default async function NotePage({
   const { id } = await params
   const { edit } = await searchParams
   // Independent RLS-scoped reads run concurrently to avoid serial round-trips.
-  const [note, memoryCards, subjects, aiEnabled, defaultModel] = await Promise.all([
+  const [note, memoryCards, subjects, { connected: aiEnabled, defaultModel }] = await Promise.all([
     getNote(id),
     getMemoryCardsForNote(id),
     getSubjects(),
-    isOpenRouterConnected(),
-    getOpenRouterDefaultModel(),
+    getOpenRouterStatus(),
   ])
   if (!note) notFound()
 
@@ -92,6 +91,8 @@ export default async function NotePage({
 
       <MemoryCardsSection
         noteId={note.id}
+        noteTitle={note.title}
+        noteContent={note.content ?? ''}
         cards={memoryCards}
         aiEnabled={aiEnabled}
         defaultModel={defaultModel}

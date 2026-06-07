@@ -14,13 +14,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { previewPrompt, type PreviewInputT } from '@/features/openrouter/actions/preview-prompt'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
 import type { GenerateDebugT, GenerateResultT } from '@/features/openrouter/types'
-import type { PromptT } from '@/features/openrouter/prompts'
-
-type ButtonVariantT = 'ai' | 'outline' | 'default'
+import { previewPrompt, type PreviewInputT } from '@/features/openrouter/prompts'
 
 // The single two-step entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible
 // trigger, the connect gate (via useAiGate), per-generate model selection, a live preview of the
@@ -35,7 +32,6 @@ export function GenerateDialog<T>({
   triggerLabel,
   triggerTestId,
   validate,
-  triggerVariant = 'ai',
   dialogTitle,
 }: {
   connected: boolean
@@ -48,22 +44,24 @@ export function GenerateDialog<T>({
   // Runs on trigger click; return a message to show beside the button instead of opening (e.g. the
   // source text / topic is empty). The trigger stays enabled so the click always gives feedback.
   validate?: () => string | undefined
-  triggerVariant?: ButtonVariantT
   dialogTitle: string
 }) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
   const [model, setModel] = useState(defaultModel)
-  const [preview, setPreview] = useState<PromptT | undefined>(undefined)
-  const [debug, setDebug] = useState<GenerateDebugT | undefined>(undefined)
-  const [pending, setPending] = useState<T[] | undefined>(undefined)
+  // One slot for the generation outcome (data + token/prompt debug) — both are set and cleared
+  // together, so a single state can't desync the token readout from the data Apply commits.
+  const [result, setResult] = useState<{ data: T[]; debug: GenerateDebugT } | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
   const [triggerError, setTriggerError] = useState<string | undefined>(undefined)
-  const [isPreviewing, startPreview] = useTransition()
   const [isGenerating, startGenerate] = useTransition()
 
+  // previewPrompt is pure (no DB / no LLM) — derive the shown prompt from the current input rather
+  // than fetching it into state on open.
+  const preview = previewPrompt(previewInput)
+
   // Trigger click: validate input first (feedback beside the button if missing), then gate on the
-  // connection, then open. Opening is an event — load the prompt preview here, not in an effect.
+  // connection, then open.
   function handleTrigger() {
     const message = validate?.()
     setTriggerError(message)
@@ -73,38 +71,31 @@ export function GenerateDialog<T>({
 
   function openConfig() {
     setError(undefined)
-    setDebug(undefined)
-    setPending(undefined)
-    setModel(defaultModel)
-    setPreview(undefined)
+    setResult(undefined)
+    setModel(defaultModel) // re-seed from the default in case a prior open changed it
     setOpen(true)
-    startPreview(async () => setPreview(await previewPrompt(previewInput)))
   }
 
   function generate() {
     setError(undefined)
     startGenerate(async () => {
-      const result = await action(model)
-      if (result.success) {
-        setPending(result.data)
-        setDebug(result.debug)
-      } else {
-        setError(result.error)
-      }
+      const outcome = await action(model)
+      if (outcome.success) setResult({ data: outcome.data, debug: outcome.debug })
+      else setError(outcome.error)
     })
   }
 
   function apply() {
-    if (pending) onResult(pending)
+    if (result) onResult(result.data)
     setOpen(false)
   }
 
   return (
     <>
-      <div className="grid gap-1">
+      <div className="grid justify-items-start gap-1">
         <Button
           type="button"
-          variant={triggerVariant}
+          variant="ai"
           size="sm"
           data-testid={triggerTestId}
           onClick={handleTrigger}
@@ -142,18 +133,15 @@ export function GenerateDialog<T>({
                 data-testid="generate-prompt-preview"
                 className="bg-muted max-h-56 overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap"
               >
-                {isPreviewing
-                  ? 'Loading…'
-                  : preview
-                    ? `${preview.system}\n\n---\n\n${preview.prompt}`
-                    : ''}
+                {`${preview.system}\n\n---\n\n${preview.prompt}`}
               </pre>
             </div>
 
-            {debug && (
+            {result && (
               <p data-testid="generate-token-usage" className="text-muted-foreground text-sm">
-                Tokens — in {debug.usage.inputTokens ?? '?'} / out {debug.usage.outputTokens ?? '?'}{' '}
-                / total {debug.usage.totalTokens ?? '?'} · model {debug.model}
+                Tokens — in {result.debug.usage.inputTokens ?? '?'} / out{' '}
+                {result.debug.usage.outputTokens ?? '?'} / total{' '}
+                {result.debug.usage.totalTokens ?? '?'} · model {result.debug.model}
               </p>
             )}
 
@@ -161,7 +149,7 @@ export function GenerateDialog<T>({
           </div>
 
           <DialogFooter>
-            {pending ? (
+            {result ? (
               <>
                 <Button type="button" variant="outline" size="sm" onClick={generate}>
                   Generate again

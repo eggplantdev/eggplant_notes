@@ -24,3 +24,16 @@ here for a later change.
 - **Why deferred:** Cross-cutting — fix both sites together (the new action mirrors the inherited
   pattern). Add `if (!note) return { success: false, error: 'Note not found.' }` after the note read
   in both.
+
+## AG-8 — Invert the `openrouter → notes` dependency if that edge grows
+
+- **Where:** `src/features/openrouter/actions/preview-prompt.ts:10`, `actions/generate-cards.ts` (both
+  import `getNote` from `features/notes/queries`).
+- **What:** `openrouter` actions import `getNote` from `features/notes` — a cross-feature edge (public
+  query surface, no cycle, mirrors the pre-existing `generateCards` pattern, so not a violation today).
+- **Why deferred:** Clean for now. If `openrouter` grows more `features/notes` touchpoints, invert:
+  have the caller (which already owns the note) pass `Pick<NoteT,'title'|'content'>` into
+  `previewPrompt`/`generateCards` so `openrouter` depends only on the shared `NoteT` type, never on
+  `features/notes`. `prompts.ts:cardsMaterialFromNote` is already shaped for this. (The action layer
+  still re-fetches server-side for the RLS trust boundary — only the display-only `previewPrompt` can
+  fully sever the edge.) Surfaced by the Phase 5 feature-first-structure review.

@@ -2,17 +2,14 @@ import { PageShell } from '@/components/layout/page-shell'
 import { MutedText } from '@/components/ui/muted-text'
 import { DeleteAccountDialog } from '@/features/account/components/delete-account-dialog'
 import { ConnectCard } from '@/features/openrouter/components/connect-card'
-import { getOpenRouterDefaultModel, isOpenRouterConnected } from '@/features/openrouter/queries'
+import { getOpenRouterStatus } from '@/features/openrouter/queries'
 import { SampleDataSection } from '@/features/sample-data/components/sample-data-section'
 import { DailyGoalForm } from '@/features/settings/components/daily-goal-form'
 import { getDailyGoal } from '@/features/settings/queries'
 
 export default async function SettingsPage() {
-  const [dailyGoal, openRouterConnected, openRouterModel] = await Promise.all([
-    getDailyGoal(),
-    isOpenRouterConnected(),
-    getOpenRouterDefaultModel(),
-  ])
+  const [dailyGoal, { connected: openRouterConnected, defaultModel: openRouterModel }] =
+    await Promise.all([getDailyGoal(), getOpenRouterStatus()])
 
   return (
     <PageShell title="Settings" width="prose">

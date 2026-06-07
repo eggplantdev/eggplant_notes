@@ -17,6 +17,10 @@ import { GenerateCardsButton } from '@/features/memory-cards/components/generate
 
 type MemoryCardsSectionPropsT = {
   noteId: string
+  // The note's already-loaded text, forwarded to the AI card generator so its prompt preview needs
+  // no extra fetch.
+  noteTitle: string | null
+  noteContent: string
   cards: MemoryCardT[]
   // Whether OpenRouter is connected. The AI card-generation entry point (#1) always shows; when not
   // connected, the button opens the connect dialog instead of generating.
@@ -29,6 +33,8 @@ type MemoryCardsSectionPropsT = {
 // editing lives at the /memory-cards/[id]/edit route.
 export async function MemoryCardsSection({
   noteId,
+  noteTitle,
+  noteContent,
   cards,
   aiEnabled,
   defaultModel,
@@ -38,7 +44,13 @@ export async function MemoryCardsSection({
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
       <AddMemoryCard noteId={noteId} />
-      <GenerateCardsButton noteId={noteId} connected={aiEnabled} defaultModel={defaultModel} />
+      <GenerateCardsButton
+        noteId={noteId}
+        noteTitle={noteTitle}
+        noteContent={noteContent}
+        connected={aiEnabled}
+        defaultModel={defaultModel}
+      />
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">

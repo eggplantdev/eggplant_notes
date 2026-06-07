@@ -22,6 +22,9 @@ import type { SubjectOptionT } from '@/features/subjects/types'
 const LEVELS: SplitLevelT[] = [1, 2, 3]
 type SubjectModeT = 'existing' | 'new'
 
+// Shown by both source-consuming controls (split buttons + AI decompose) when there's no text yet.
+const NO_SOURCE_MSG = 'Paste or upload some text first.'
+
 function toDraft(section: { title: string; content: string }): ImportDraftT {
   return { id: crypto.randomUUID(), title: section.title, content: section.content, skip: false }
 }
@@ -88,7 +91,7 @@ export function ImportPanel({
     // Clicking a level with no source is the same dead-end as the AI trigger — give feedback rather
     // than silently doing nothing.
     if (!text.trim()) {
-      setFormError('Paste or upload some text first.')
+      setFormError(NO_SOURCE_MSG)
       return
     }
     regenerate(text, next)
@@ -156,9 +159,7 @@ export function ImportPanel({
             onResult={applyDecomposition}
             triggerLabel="Decompose with AI"
             triggerTestId="import-decompose-ai"
-            validate={() =>
-              text.trim().length === 0 ? 'Paste or upload some text first.' : undefined
-            }
+            validate={() => (text.trim().length === 0 ? NO_SOURCE_MSG : undefined)}
             dialogTitle="Decompose into notes with AI"
           />
         </div>

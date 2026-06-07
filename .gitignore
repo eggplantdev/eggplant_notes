@@ -76,4 +76,4 @@ reports/
 .stryker-tmp/
 
 # AI generation debug logs (Phase 5 — best-effort local prompt-refinement trail)
-context/changes/import-markdown-to-notes/ai-debug/
+.ai-debug/

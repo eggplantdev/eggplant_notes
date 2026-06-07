@@ -1,13 +1,12 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { ImportPanel } from '@/features/import/components/import-panel'
-import { getOpenRouterDefaultModel, isOpenRouterConnected } from '@/features/openrouter/queries'
+import { getOpenRouterStatus } from '@/features/openrouter/queries'
 import { getSubjects } from '@/features/subjects/queries'
 
 export default async function ImportPage() {
-  const [subjects, aiEnabled, defaultModel] = await Promise.all([
+  const [subjects, { connected: aiEnabled, defaultModel }] = await Promise.all([
     getSubjects(),
-    isOpenRouterConnected(),
-    getOpenRouterDefaultModel(),
+    getOpenRouterStatus(),
   ])
   return (
     <PageShell

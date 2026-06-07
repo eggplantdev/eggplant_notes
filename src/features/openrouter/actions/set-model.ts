@@ -25,9 +25,12 @@ export async function setOpenRouterModel(input: unknown): Promise<ActionResultT>
       .update({ model: data.modelId })
       .eq('user_id', user.id)
       .select('model')
-      .single(),
+      // maybeSingle (not single): a model save with no credential row is a "connect first" case,
+      // not a 500. The picker only renders when connected, so this is a latent guard.
+      .maybeSingle(),
   )
   if (!result.success) return result
+  if (!result.data) return { success: false, error: 'Connect OpenRouter first.' }
 
   revalidatePath('/settings')
   return { success: true }

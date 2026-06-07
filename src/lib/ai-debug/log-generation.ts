@@ -2,13 +2,16 @@ import { appendFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
 import type { UsageT } from '@/features/openrouter/types'
+import { toISODate } from '@/lib/utils'
 
 // Always-on generation log for prompt refinement (no NODE_ENV gate). Two channels:
 //   1. console.log — structured, works everywhere (visible in `vercel logs`).
 //   2. file append (jsonl + md) — best-effort. The serverless FS is read-only outside /tmp, so the
 //      write throws in prod; we swallow it. Locally it accumulates one entry per generation under a
 //      gitignored dir, giving a diffable history across prompt revisions.
-const LOG_DIR = path.join(process.cwd(), 'context/changes/import-markdown-to-notes/ai-debug')
+// Lives at a stable top-level `.ai-debug/`, NOT under the change folder — that folder becomes
+// immutable when the slice is archived, which would silently kill the file channel.
+const LOG_DIR = path.join(process.cwd(), '.ai-debug')
 
 export type GenerationLogT = {
   task: 'cards' | 'notes'
@@ -30,7 +33,7 @@ export async function logGeneration(entry: GenerationLogT): Promise<void> {
   })
 
   try {
-    const day = new Date().toISOString().slice(0, 10)
+    const day = toISODate(Date.now())
     await mkdir(LOG_DIR, { recursive: true })
     await appendFile(
       path.join(LOG_DIR, `${day}.jsonl`),

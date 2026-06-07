@@ -484,7 +484,8 @@ Route all four entry points through it: `TopicGenerator` (#2, #5), the import **
 #### Automated Verification:
 
 - `previewPrompt` output for each task equals the prompt the matching action sends (shared-builder test).
-- Off-list `modelId` is rejected by both `getOpenRouterModel` and `setOpenRouterModel`.
+- Off-list `modelId`: the per-generate override is **ignored** (falls back to the user's default —
+  sound under BYOK, and the dialog can only emit allowlisted ids); `setOpenRouterModel` **rejects** it.
 - `setOpenRouterModel` persists `credential.model`; `getOpenRouterDefaultModel` reads it back.
 - Type/lint/build pass.
 
@@ -609,7 +610,7 @@ E2E that asserts "AI button absent when disconnected" must instead assert the ga
 
 - [ ] 3.5 `#1` cards on-topic and answerable from the note
 - [ ] 3.6 `#2` topic card sensible; hallucination caught at preview
-- [ ] 3.7 Button hidden when not connected
+- [ ] 3.7 Button renders when not connected; click opens the connect gate (see addendum AG-4)
 
 ### Phase 4: gen-notes (#3 + #5)
 
@@ -624,14 +625,14 @@ E2E that asserts "AI button absent when disconnected" must instead assert the ga
 
 - [ ] 4.5 Real unstructured doc decomposes into sensible multiple notes
 - [ ] 4.6 `#5` topic note coherent; editable before save
-- [ ] 4.7 Both hidden when not connected
+- [ ] 4.7 Both render when not connected; click opens the connect gate (see addendum AG-4)
 
 ### Phase 5: model select + prompt/token visibility
 
 #### Automated
 
 - [ ] 5.1 `previewPrompt` output matches the action's sent prompt per task (shared-builder test)
-- [ ] 5.2 Off-list `modelId` rejected by `getOpenRouterModel` + `setOpenRouterModel`
+- [ ] 5.2 Off-list `modelId`: ignored by `getOpenRouterModel` (falls back to default); rejected by `setOpenRouterModel`
 - [ ] 5.3 `setOpenRouterModel` persists `credential.model`; `getOpenRouterDefaultModel` reads it back
 - [x] 5.4 Type/lint/build pass
 
