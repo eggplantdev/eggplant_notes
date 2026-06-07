@@ -45,7 +45,9 @@ test('silent-success form: adding a memory card toasts "Card added"', async ({ p
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 
-  // The add-check form returns {success:true} with no redirect — previously a silent success.
+  // The add-card form is deferred behind an "Add card" toggle (S-17) — reveal it first. It returns
+  // {success:true} with no redirect — previously a silent success.
+  await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByLabel('Question').fill('What does first-class function mean?')
   await page.getByRole('button', { name: 'Add memory card' }).click()
   await expect(page.getByText('Card added')).toBeVisible({ timeout: 15_000 })
