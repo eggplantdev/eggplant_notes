@@ -28,7 +28,9 @@ export function RadialCountChart({
         <RadialBarChart data={data} innerRadius={30} outerRadius={110}>
           <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel nameKey="key" />} />
           <PolarGrid gridType="circle" />
-          <RadialBar dataKey="value">
+          {/* Fixed barSize so each ring is the same thickness across charts regardless of ring
+              count — otherwise the band is split N ways and a 2-ring chart looks twice as thick. */}
+          <RadialBar dataKey="value" barSize={16}>
             {data.map((d) => {
               // style.color = fill so the ring-glow filter's currentColor matches each ring.
               const fill = `var(--color-${d.key})`
