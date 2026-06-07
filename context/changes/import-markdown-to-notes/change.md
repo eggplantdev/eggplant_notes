@@ -4,6 +4,7 @@ title: Import a markdown file into notes — deterministic heading-split + previ
 status: implementing
 created: 2026-06-06
 updated: 2026-06-07
+iteration_2_planned: 2026-06-07
 archived_at: null
 ---
 

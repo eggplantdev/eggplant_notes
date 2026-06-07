@@ -93,3 +93,45 @@ are two read-strategies of one importer, sharing the preview/commit/subject pipe
 - A structured `.md` and pasted text both import into correct multi-note sets under a chosen subject.
 - A user connects OpenRouter once; the key is stored only as ciphertext and removed on disconnect/delete.
 - Each of the five capabilities produces an editable preview that commits to correctly-linked notes/cards.
+
+---
+
+## Iteration 2 (2026-06-07) — Phases 6–8
+
+> Design source: `iteration-2-braindump.md` (all forks resolved). Builds on the now-green Phase 5 stream.
+
+### What & Why
+
+The AI half shipped, but three gaps remain: the model picker is a static 6-item `<Select>` (every user
+silently on one model, no pricing, no choice at scale), the prompt is view-only (can't refine it), and
+the import page is "super confusing" (operator) — plus PDFs can't be imported at all.
+
+### Key Decisions Made
+
+| Decision             | Choice                                             | Why (1 sentence)                                                             | Source |
+| -------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------- | ------ |
+| Model source         | Live `/models` fetch (cached), searchable combobox | Public + free + carries pricing; combobox makes 300+ models usable           | Plan   |
+| Model list UX        | Pinned "Recommended" group + full searchable list  | Zero-search happy path, full catalog when needed                             | Plan   |
+| Extraction/gen split | None — per-generate override is the quality lever  | The override already lets you switch models on bad output; no slots needed   | Plan   |
+| Prompt editing       | Full `{system, prompt}` editable                   | Operator is actively refining prompts; schema + preview gate are safety net  | Plan   |
+| Dialog scope         | Shape A — dialog generates, host view commits      | Modal fits configure-and-fire; multi-item review needs page width            | Plan   |
+| Import scope         | Notes-only, grounded-only; UX restructure          | "Organize text" already works (#3) — the gap was presentation, not feature   | Plan   |
+| PDF                  | In, via multimodal vision (single call → notes)    | Operator wants it; ref repo did it; reopens S01E04 (scope-led, not date-led) | Plan   |
+
+### Phases at a Glance
+
+| Phase                                  | What it delivers                                           | Key risk                                                |
+| -------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------- |
+| 6. Live model catalog                  | Cached `/models` + searchable combobox w/ pricing + filter | Cache strategy; validating ids against live list        |
+| 7. Unified editable dialog + import UX | Wider dialog, editable prompt, topic-in-dialog, import fix | Touches dialog + both forms + import panel at once      |
+| 8. PDF via vision                      | PDF upload → vision `generateObject` → notes               | AI SDK v6 file-part contract; scanned-PDF failure modes |
+
+**Prerequisites:** operator commits the green Phase-5 stream as a checkpoint before Phase 6.
+**Estimated effort:** ~3 sessions (one per phase), each through the review→simplify→test→archive gate.
+
+### Open Risks & Assumptions
+
+- AI SDK v6 file-part contract verified at `ai@6.0.0-beta.128` (pre-GA) — re-verify at v6 stable.
+- Phase-7 "import confusion" fix assumes the operator's unfinished "why" = the auto-split "Preview — 1
+  note" on headingless paste; revisit if they meant otherwise.
+- Scanned PDFs (no text layer) are out — vision handles layout but OCR-grade scans may degrade.

@@ -512,6 +512,234 @@ E2E that asserts "AI button absent when disconnected" must instead assert the ga
 
 ---
 
+## Iteration 2 (2026-06-07) — live model catalog, unified editable dialog, PDF vision
+
+Design source: `iteration-2-braindump.md` (all forks resolved there). Phases 6–8 build **on top of the
+now-green Phase 5 stream**.
+
+**Prerequisite (operator):** the Phase-5 model-select + AI-gate work is green but uncommitted — it is
+committed as a checkpoint BEFORE Phase 6 starts. Iteration-2 then replaces the curated `<Select>` with
+the live-fetch combobox.
+
+Scope deltas vs Phase 5: model source becomes a **live OpenRouter `/models` fetch** (public, free) in a
+**searchable combobox with pricing**; the prompt preview becomes **fully editable**; the topic input
+**moves into the dialog**; the import page is **restructured for clarity**; and **PDF** is read via a
+**multimodal vision** call (reopens S01E04, accepted — this iteration is scope-led, not deadline-led).
+
+---
+
+## Phase 6: Live model catalog — searchable combobox + pricing
+
+### Overview
+
+Replace the curated 6-model `<Select>` (Phase 5) with a server-cached live `/models` fetch behind a
+searchable combobox that shows per-model input/output pricing, pins a "Recommended" group (the current
+curated ids) on top, and accepts a per-surface candidate filter (all-text vs file-capable) so Phase 8's
+PDF surface can scope to vision models. Foundation for Phase 8.
+
+### Changes Required:
+
+#### 1. Live model catalog + server cache
+
+**File**: `src/features/openrouter/models.ts` (extend) + a fetch/cache helper (e.g. `queries.ts` or `actions/list-models.ts`)
+
+**Intent**: Fetch the OpenRouter catalog once and cache it server-side so every picker reads a current
+list without per-render network cost. Keep the existing curated ids as the "Recommended" set and keep
+`DEFAULT_OPENROUTER_MODEL`.
+
+**Contract**: `listOpenRouterModels(): Promise<OpenRouterModelT[]>` where
+`OpenRouterModelT = { id, label, inputPrice: number, outputPrice: number, inputModalities: string[] }`.
+Source `GET https://openrouter.ai/api/v1/models` (no auth). Normalize from `data[]`: `id`, `name`→label,
+`parseFloat(pricing.prompt)`/`parseFloat(pricing.completion)` (per-token USD), `architecture.input_modalities`.
+Cache ~daily (Next `fetch` `next: { revalidate }` or `unstable_cache`). Recommended set = existing
+`OPENROUTER_MODELS` ids.
+
+#### 2. Validate against the live cache, not the static six
+
+**File**: `src/features/openrouter/server-client.ts`, `actions/set-model.ts`
+
+**Intent**: `getOpenRouterModel(override)` and `setOpenRouterModel` validate ids against the cached live
+list instead of the hardcoded array, preserving allowlist semantics (reject unknown ids — cheap guard
+under BYOK).
+
+**Contract**: `isAllowedModel(id)` becomes a membership check over the cached catalog ids (async or
+cache-backed). Resolution order unchanged: `override ?? credential.model ?? DEFAULT`.
+
+#### 3. Searchable combobox picker with pricing + Recommended group
+
+**File**: `src/features/openrouter/components/model-select.tsx` (rework)
+
+**Intent**: Swap the `<Select>` for the existing `components/ui/combobox` (already used for subjects).
+Rows show label + input/output price (× 1e6 → "/1M" display). A pinned "Recommended" group renders on
+top; the full live list is searchable below. Accept a `filter: 'text' | 'file'` prop scoping candidates
+via `inputModalities`. Settings + dialog both consume it.
+
+**Contract**: props `{ value, onChange, defaultModelId?, filter?: 'text' | 'file', disabled?, testId? }`.
+Pricing format: `$${(price * 1e6).toFixed(2)}/1M`.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `listOpenRouterModels` returns a normalized, cached list (cache hit on second call).
+- Off-list `modelId` rejected by `setOpenRouterModel` and ignored by `getOpenRouterModel` against the live list.
+- Combobox renders the Recommended group + searchable list; `filter='file'` yields only file-capable ids.
+- Type/lint/build pass.
+
+#### Manual Verification:
+
+- Settings picker is searchable, shows prices, lists Recommended on top; selection persists across reload.
+- Catalog reflects current OpenRouter models (not just the old six).
+
+---
+
+## Phase 7: Unified editable dialog + import UX restructure
+
+### Overview
+
+Make the dialog the single AI-authoring surface: wider, with a **fully editable `{system, prompt}`**, the
+**topic input moved inside it** as a `<textarea>`, and the **import page restructured** so the AI-from-prose
+path is first-class and the help copy leads. Notes-only, grounded-only on import (no card/topic creep).
+
+### Changes Required:
+
+#### 1. Editable prompt threaded through preview + actions
+
+**File**: `actions/preview-prompt.ts`, `actions/generate-cards.ts`, `actions/generate-notes.ts`, `prompts.ts`, `types.ts`
+
+**Intent**: The textarea-edited prompt becomes what is sent and logged, not just previewed. Actions accept
+an optional override and use it instead of the builder; the edited blob feeds `log-generation.ts`.
+
+**Contract**: actions accept optional `promptOverride: { system: string; prompt: string }`; when present,
+skip `buildXPrompt` and call `generateObject({ system, prompt, schema })` with it. Validate non-empty +
+length cap. `previewPrompt` return seeds the textarea.
+
+#### 2. Dialog: wider + editable textarea + reset
+
+**File**: `src/features/openrouter/components/generate-dialog.tsx`
+
+**Intent**: Widen `DialogContent` so the prompt is readable (no horizontal overflow); render the prompt
+as an editable `<Textarea>` seeded from `previewPrompt`, with a "Reset to default" affordance; send the
+current (possibly-edited) prompt on Generate.
+
+**Contract**: `DialogContent` → `max-w-3xl` (or similar); local `prompt`/`system` state seeded on open;
+"Reset to default" re-runs `previewPrompt`. Edited values pass to the action as `promptOverride`.
+
+#### 3. Topic input moves into the dialog
+
+**File**: `src/features/openrouter/components/topic-generator.tsx`, `memory-cards/.../card-form.tsx`, `notes/.../note-form.tsx`
+
+**Intent**: The source/topic field lives inside the dialog (as a `<textarea>`, per operator), so `TopicGenerator`
+collapses to a trigger button; forms just mount the trigger.
+
+**Contract**: dialog owns the source `<Textarea>` and threads its value into `action`. Single-line `<Input>`
+→ `<Textarea>`.
+
+#### 4. Import panel restructure (the "super confusing" fix)
+
+**File**: `src/features/import/components/import-panel.tsx`, `source-input.tsx`
+
+**Intent**: Move the help paragraphs directly under the **"Import notes"** heading (intro, before controls);
+visually separate "structured doc → **Split**" from "messy prose → **Decompose with AI**" as two distinct
+paths rather than one flush button row; stop the deterministic split from silently auto-emitting a single
+"Untitled" note for headingless prose (steer such input toward Decompose, or split only on explicit action).
+
+**Contract**: help copy renders above `SourceInput`; the split (H1/H2/H3) and AI-decompose controls are
+grouped as separate, labeled paths. (ASSUMPTION, operator's "why" left unfinished: the confusion is the
+auto-split "Preview — 1 note" on headingless paste — resolve per above; revisit if operator meant otherwise.)
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- With `promptOverride` set, the action sends exactly the edited `{system, prompt}` (and logs it) — not the builder output.
+- Type/lint/build pass.
+
+#### Manual Verification:
+
+- Dialog is wide enough to read the full prompt; editing the prompt changes the generated output and the debug log; "Reset to default" restores it.
+- Topic generation (#2/#5) input is a `<textarea>` inside the dialog; `TopicGenerator` is just a trigger.
+- Import page leads with the help copy under the heading; Split vs Decompose read as two clearly separate paths.
+- Pasting headingless prose no longer silently shows a meaningless "Preview — 1 note".
+
+---
+
+## Phase 8: PDF import via vision
+
+### Overview
+
+Add PDF as an import source, read by a multimodal vision model in a single `generateObject` call → notes.
+Net-new capability; reopens S01E04 (accepted). Depends on Phase 6's file-capable filter and Phase 7's
+in-dialog source.
+
+### Changes Required:
+
+#### 1. Accept PDF on the import source
+
+**File**: `src/features/import/components/source-input.tsx`
+
+**Intent**: Allow PDF upload and read it as binary (not `.text()`); surface the allowed types in the UI copy.
+
+**Contract**: `accept` += `.pdf,application/pdf`; PDF read via `arrayBuffer()` → `Buffer`/base64; md/txt path unchanged.
+
+#### 2. `generateNotes` file path → vision call
+
+**File**: `src/features/openrouter/actions/generate-notes.ts`
+
+**Intent**: A PDF input variant sends the file to a vision model as a `file` content part and extracts the
+notes schema in one shot.
+
+**Contract**: input union gains a PDF/file variant. Build `messages` with a text instruction + a file part
+(AI SDK v6 shape — `mediaType`, NOT `mimeType`), pass the existing notes `schema`:
+
+```ts
+messages: [
+  {
+    role: 'user',
+    content: [
+      { type: 'text', text: '<decompose instruction>' },
+      { type: 'file', data: pdfBuffer, mediaType: 'application/pdf', filename },
+    ],
+  },
+]
+```
+
+Model resolved via the file-capable default. Capture `usage` as in the text path.
+
+#### 3. Vision-filtered picker on the import surface
+
+**File**: import surface wiring + `model-select.tsx` (`filter='file'`)
+
+**Intent**: When the source is a PDF, the model picker lists only file-capable models, defaulting to a
+cheap file-capable model.
+
+**Contract**: pass `filter='file'`; default to a concrete dated file-capable id (e.g. a Gemini Flash /
+Claude Haiku class id — resolve a dated id from the catalog, never the `~…-latest` alias).
+
+#### 4. Error handling for unreadable PDFs
+
+**File**: `generate-notes.ts` / import panel
+
+**Intent**: Scanned/empty/garbage PDFs (no extractable content) return a clear message, not a crash or silent empty.
+
+**Contract**: empty/failed extraction → user-facing error; size cap enforced.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `filter='file'` returns only models whose `inputModalities` include `'file'`.
+- The PDF action builds a correct AI SDK v6 file part (`mediaType: 'application/pdf'`) and validates against the notes schema.
+- Type/lint/build pass.
+
+#### Manual Verification:
+
+- A real (digital) PDF uploads → vision decompose → sensible multiple notes in preview → commit + persist.
+- A scanned/garbage PDF shows a clear error, no crash.
+- The PDF surface's picker lists only file-capable models with a sane default.
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests
@@ -642,3 +870,45 @@ E2E that asserts "AI button absent when disconnected" must instead assert the ga
 - [ ] 5.6 Each of the 4 dialogs pre-selects the tagged default, shows the exact prompt + token counts; override is per-generate only
 - [ ] 5.7 `ai-debug/*.jsonl` + `*.md` accumulate one entry per generation; `console.log` shows usage
 - [ ] 5.8 All 4 AI surfaces render when not connected and open the connect gate on click (supersedes the original "hidden when not connected" — see addendum AG-4)
+
+### Phase 6: Live model catalog — combobox + pricing
+
+#### Automated
+
+- [ ] 6.1 `listOpenRouterModels` returns a normalized, cached catalog (cache hit on 2nd call)
+- [ ] 6.2 Off-list `modelId` rejected by `setOpenRouterModel`, ignored by `getOpenRouterModel` (against live list)
+- [ ] 6.3 Combobox renders Recommended group + searchable list; `filter='file'` yields only file-capable ids
+- [ ] 6.4 Type/lint/build pass
+
+#### Manual
+
+- [ ] 6.5 Settings picker is searchable, shows input/output prices, Recommended on top; selection persists across reload
+- [ ] 6.6 Catalog reflects current OpenRouter models, not just the old six
+
+### Phase 7: Unified editable dialog + import UX restructure
+
+#### Automated
+
+- [ ] 7.1 With `promptOverride` set, the action sends + logs exactly the edited `{system, prompt}` (not the builder output)
+- [ ] 7.2 Type/lint/build pass
+
+#### Manual
+
+- [ ] 7.3 Dialog is wide enough to read the full prompt; editing it changes output + debug log; "Reset to default" restores it
+- [ ] 7.4 Topic generation (#2/#5) input is a `<textarea>` inside the dialog; `TopicGenerator` is just a trigger
+- [ ] 7.5 Import page leads with help copy under the heading; Split vs Decompose read as two separate paths
+- [ ] 7.6 Headingless prose paste no longer silently shows a meaningless "Preview — 1 note"
+
+### Phase 8: PDF import via vision
+
+#### Automated
+
+- [ ] 8.1 `filter='file'` returns only models whose `inputModalities` include `'file'`
+- [ ] 8.2 PDF action builds a correct AI SDK v6 file part (`mediaType: 'application/pdf'`) and validates against the notes schema
+- [ ] 8.3 Type/lint/build pass
+
+#### Manual
+
+- [ ] 8.4 A real digital PDF uploads → vision decompose → sensible multiple notes → commit + persist
+- [ ] 8.5 A scanned/garbage PDF shows a clear error, no crash
+- [ ] 8.6 PDF surface's picker lists only file-capable models with a sane default
