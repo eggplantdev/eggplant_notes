@@ -224,26 +224,26 @@ One Playwright spec proving the new filter surface end-to-end against a fresh pr
 
 #### Automated
 
-- [x] 2.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Build passes: `pnpm build`
+- [x] 2.1 Typegen + typecheck pass: `pnpm exec next typegen && pnpm typecheck` — 34fd528
+- [x] 2.2 Linting passes: `pnpm lint` — 34fd528
+- [x] 2.3 Build passes: `pnpm build` — 34fd528
 
 #### Manual
 
-- [x] 2.4 State filter narrows the list; count/footer reflect filtered total
-- [x] 2.5 Maturity Mature/Young/both behave correctly (Young incl. new)
-- [x] 2.6 State + Maturity + Subjects + search compose (AND); filter change resets to page 1
-- [x] 2.7 Back/Forward + deep-link pre-filtered load work
-- [x] 2.8 Zero-match empty-state copy shows
+- [x] 2.4 State filter narrows the list; count/footer reflect filtered total — 34fd528
+- [x] 2.5 Maturity Mature/Young/both behave correctly (Young incl. new) — 34fd528
+- [x] 2.6 State + Maturity + Subjects + search compose (AND); filter change resets to page 1 — 34fd528
+- [x] 2.7 Back/Forward + deep-link pre-filtered load work — 34fd528
+- [x] 2.8 Zero-match empty-state copy shows — 34fd528
 
 ### Phase 3: E2E coverage
 
 #### Automated
 
-- [ ] 3.1 New spec passes: `pnpm test:e2e`
-- [ ] 3.2 Full unit suite passes: `pnpm test`
-- [ ] 3.3 Typecheck + lint + build green
+- [x] 3.1 New spec passes: `pnpm test:e2e`
+- [x] 3.2 Full unit suite passes: `pnpm test`
+- [x] 3.3 Typecheck + lint + build green
 
 #### Manual
 
-- [ ] 3.4 Reverting a Phase 2 predicate makes the spec fail (negative sanity check)
+- [x] 3.4 Reverting a Phase 2 predicate makes the spec fail (negative sanity check)
