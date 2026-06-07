@@ -14,6 +14,7 @@ import { NotePreviewList } from '@/features/import/components/note-preview-list'
 import { SourceInput } from '@/features/import/components/source-input'
 import type { ImportDraftT } from '@/features/import/types'
 import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-markdown'
+import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import type { SubjectOptionT } from '@/features/subjects/types'
 
 const LEVELS: SplitLevelT[] = [1, 2, 3]
@@ -27,7 +28,14 @@ function toDraft(section: { title: string; content: string }): ImportDraftT {
 // preview → commit under a subject. Re-splitting is an explicit event (source change / level change),
 // never a derived effect, so it can't fight the user's edits mid-keystroke — changing the level
 // rebuilds the preview and discards edits by design.
-export function ImportPanel({ subjects }: { subjects: SubjectOptionT[] }) {
+export function ImportPanel({
+  subjects,
+  aiEnabled = false,
+}: {
+  subjects: SubjectOptionT[]
+  // OpenRouter connected → offer the AI decomposition read-strategy (#3) alongside the split (#4).
+  aiEnabled?: boolean
+}) {
   const [text, setText] = useState('')
   const [level, setLevel] = useState<SplitLevelT>(1)
   const [drafts, setDrafts] = useState<ImportDraftT[]>([])
@@ -36,6 +44,19 @@ export function ImportPanel({ subjects }: { subjects: SubjectOptionT[] }) {
   const [newTitle, setNewTitle] = useState('')
   const [formError, setFormError] = useState<string | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
+  const [isDecomposing, startDecompose] = useTransition()
+
+  // #3: AI decomposes the same source text into multiple notes, feeding the SAME preview/commit
+  // pipeline as the deterministic split — the two read-strategies converge here.
+  function decomposeWithAi() {
+    setFormError(undefined)
+    if (!text.trim()) return
+    startDecompose(async () => {
+      const result = await generateNotes({ text })
+      if (result.success) setDrafts(result.data.map(toDraft))
+      else setFormError(result.error)
+    })
+  }
 
   function regenerate(source: string, splitLevel: SplitLevelT) {
     setFormError(undefined)
@@ -120,6 +141,18 @@ export function ImportPanel({ subjects }: { subjects: SubjectOptionT[] }) {
             </Button>
           ))}
         </div>
+        {aiEnabled && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            data-testid="import-decompose-ai"
+            disabled={isDecomposing || text.trim().length === 0}
+            onClick={decomposeWithAi}
+          >
+            {isDecomposing ? 'Decomposing…' : 'Decompose with AI'}
+          </Button>
+        )}
       </div>
 
       {drafts.length > 0 && (

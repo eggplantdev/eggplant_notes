@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
@@ -8,8 +8,10 @@ import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import {
   MoveLinkedCardsDialog,
   type LinkedCardT,
@@ -35,6 +37,8 @@ type NoteFormPropsT =
       subjects: SubjectOptionT[]
       defaultSubjectId?: string
       note?: undefined
+      // OpenRouter connected → offer the AI "generate a note from a topic" filler (#5).
+      aiEnabled?: boolean
     }
   | {
       action: (
@@ -53,6 +57,12 @@ export function NoteForm(props: NoteFormPropsT) {
   const [formError, setFormError] = useState<string | undefined>(undefined)
   // Holds the edit input while the move/unlink dialog is open; the dialog's choices resume submit.
   const [pendingInput, setPendingInput] = useState<NoteInputT | undefined>(undefined)
+  // #5 ungrounded gen-notes: a topic → AI fills the title/content fields below for the user to edit
+  // before saving. Create mode only.
+  const canUseAi = props.note ? false : (props.aiEnabled ?? false)
+  const [topic, setTopic] = useState('')
+  const [aiError, setAiError] = useState<string | undefined>(undefined)
+  const [isGenerating, startGenerate] = useTransition()
 
   // Memoized so the form's frequent re-renders (typing) don't re-allocate the option list.
   const subjectOptions = useMemo(
@@ -103,6 +113,21 @@ export function NoteForm(props: NoteFormPropsT) {
     if (!toastActionResult(result)) setFormError(result.error)
   }
 
+  function generateFromTopic() {
+    setAiError(undefined)
+    startGenerate(async () => {
+      const result = await generateNotes({ topic })
+      if (result.success && result.data[0]) {
+        form.setFieldValue('title', result.data[0].title)
+        form.setFieldValue('content', result.data[0].content)
+      } else if (!result.success) {
+        setAiError(result.error)
+      } else {
+        setAiError('No note was generated. Try a more specific topic.')
+      }
+    })
+  }
+
   return (
     <form
       className="flex flex-col gap-4"
@@ -112,6 +137,32 @@ export function NoteForm(props: NoteFormPropsT) {
         form.handleSubmit()
       }}
     >
+      {canUseAi && (
+        <div className="grid gap-2 rounded-lg border p-3">
+          <Label htmlFor="note-ai-topic">Generate a note from a topic (AI)</Label>
+          <div className="flex flex-wrap gap-2">
+            <Input
+              id="note-ai-topic"
+              data-testid="note-ai-topic"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g. The actor model of concurrency"
+              className="sm:w-96"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              data-testid="note-ai-generate"
+              disabled={isGenerating || topic.trim().length === 0}
+              onClick={generateFromTopic}
+            >
+              {isGenerating ? 'Generating…' : 'Generate'}
+            </Button>
+          </div>
+          <FormError message={aiError} />
+        </div>
+      )}
+
       <form.AppField name="title" validators={{ onBlur: titleSchema, onSubmit: titleSchema }}>
         {(field) => <field.Input label="Title" placeholder="Note title" />}
       </form.AppField>

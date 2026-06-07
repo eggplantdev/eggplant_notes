@@ -490,9 +490,9 @@ for edit → existing create path.
 
 #### Automated
 
-- [x] 3.1 ai-schema validation unit test passes
-- [x] 3.2 Generated cards insert via existing validated paths
-- [x] 3.3 Type/lint/build pass
+- [x] 3.1 ai-schema validation unit test passes — 618614f
+- [x] 3.2 Generated cards insert via existing validated paths — 618614f
+- [x] 3.3 Type/lint/build pass — 618614f
 - [ ] 3.4 E2E: generate from a note → preview → accept → persist linked to note (deferred to manual — needs a mocked OpenRouter server in the prod build; live AI call can't run deterministically in E2E)
 
 #### Manual
@@ -505,10 +505,10 @@ for edit → existing create path.
 
 #### Automated
 
-- [ ] 4.1 ai-schema note-shape unit test passes
-- [ ] 4.2 `#3` commits through Phase-1 RPC; `#5` through create path
-- [ ] 4.3 Type/lint/build pass
-- [ ] 4.4 E2E: paste prose → decompose → preview >1 note → commit → persist
+- [x] 4.1 ai-schema note-shape unit test passes
+- [x] 4.2 `#3` commits through Phase-1 RPC; `#5` through create path
+- [x] 4.3 Type/lint/build pass
+- [ ] 4.4 E2E: paste prose → decompose → preview >1 note → commit → persist (deferred to manual — needs a mocked OpenRouter server; live AI call can't run deterministically in E2E)
 
 #### Manual
 
