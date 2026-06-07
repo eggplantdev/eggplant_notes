@@ -227,7 +227,8 @@ Build the contact dialog, the footer that triggers it, and mount the footer in t
 
 ### Unit Tests:
 
-- Per `context/foundation/test-plan.md`, author the unit/E2E layer at the post-`/simplify` review gate, not during implementation. Candidate unit target: `contactSchema` boundary validation. The send action is I/O-bound (SMTP) — verify manually/E2E. The env layer is verified by the build-fail criteria, not unit tests.
+- Per `context/foundation/test-plan.md`, author the unit/E2E layer at the post-`/simplify` review gate, not during implementation. Candidate unit target: `contactSchema` boundary validation. The send action is I/O-bound (SMTP) — verify manually/E2E.
+- **Deferred (later TODO, portable env kit):** a Vitest spec over `env-schema.ts` asserting `clientSchema`/`serverSchema` accept valid and reject missing/malformed shapes — travels repo-to-repo with the schema file (no project-specific deps). The build-time guarantees ("build fails on a missing var"; "client import of `env.server.ts` fails the build") are **not** unit-testable — they need a build-assertion script (unset a var → assert `next build` exits non-zero), which travels with CI config, not Vitest.
 
 ### Manual Testing Steps:
 
