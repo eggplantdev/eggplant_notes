@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
@@ -162,6 +163,11 @@ export function GenerateDialog<T>({
                 filter={modelFilter}
                 modal
               />
+              {modelFilter === 'file' && (
+                <MutedText>
+                  Only models that can read files (vision) are listed — a PDF needs one.
+                </MutedText>
+              )}
             </div>
 
             <div className="grid gap-2">
