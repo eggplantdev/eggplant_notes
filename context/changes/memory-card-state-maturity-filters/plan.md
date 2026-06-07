@@ -240,10 +240,10 @@ One Playwright spec proving the new filter surface end-to-end against a fresh pr
 
 #### Automated
 
-- [x] 3.1 New spec passes: `pnpm test:e2e`
-- [x] 3.2 Full unit suite passes: `pnpm test`
-- [x] 3.3 Typecheck + lint + build green
+- [x] 3.1 New spec passes: `pnpm test:e2e` — a892b23
+- [x] 3.2 Full unit suite passes: `pnpm test` — a892b23
+- [x] 3.3 Typecheck + lint + build green — a892b23
 
 #### Manual
 
-- [x] 3.4 Reverting a Phase 2 predicate makes the spec fail (negative sanity check)
+- [x] 3.4 Reverting a Phase 2 predicate makes the spec fail (negative sanity check) — a892b23
