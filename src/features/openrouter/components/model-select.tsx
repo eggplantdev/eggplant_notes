@@ -70,7 +70,11 @@ export function ModelSelect({
 
   const models = filterModels(catalog, filter)
   const recommended = models.filter((m) => RECOMMENDED_MODEL_IDS.includes(m.id))
-  const rest = models.filter((m) => !RECOMMENDED_MODEL_IDS.includes(m.id))
+  // Recommended keeps its curated cost-order (cheap→strong); the long "All models" list is sorted
+  // alphabetically by label for findability. cmdk re-ranks by relevance once the user types a query.
+  const rest = models
+    .filter((m) => !RECOMMENDED_MODEL_IDS.includes(m.id))
+    .sort((a, b) => a.label.localeCompare(b.label))
   const selectedLabel = catalog.find((m) => m.id === value)?.label ?? value
 
   function renderItem(m: OpenRouterModelT) {
@@ -112,7 +116,7 @@ export function ModelSelect({
           aria-expanded={open}
           disabled={disabled}
           data-testid={testId}
-          className="w-full justify-between sm:w-80"
+          className="w-full justify-between"
         >
           {selectedLabel}
           <ChevronsUpDown className="size-3.5 opacity-50" />
