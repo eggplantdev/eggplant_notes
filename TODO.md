@@ -20,7 +20,6 @@ _App currently has no name/logo/footer._
 ## Cluster 4 — Performance (= roadmap S-11, already scoped)
 
 - [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation).
-- [x] Stop over-fetching: select only needed columns. Notes list was already slimmed (commit `8878f6d`, never selects `content`); audit found `getSubjects()` still selected `*` for id/title-only consumers — narrowed to `select('id, title')` (2026-06-07). Audit: `context/changes/query-performance-audit/audit.md`. Remaining items (un-indexed search `ILIKE`, fetch-all stats reads) are informational/scale-only — see audit F3–F5.
 
 ## Cluster 6 — Later (explicitly deferred)
 
@@ -49,10 +48,14 @@ check on mobile
 create notes out of markdown file or any file
 create notes by asking ai
 
-edit note view must have same editor like subject notes listing
-
 update note by agent via webhook?
 
 Adding notes instruction
 
 Na kiedyś
+
+ai
+
+- instructions everywhere
+- open router connect button visible all the time conditionally when not connected
+-
