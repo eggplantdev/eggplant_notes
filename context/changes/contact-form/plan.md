@@ -267,17 +267,17 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 
 #### Automated
 
-- [ ] 0.1 `pnpm typecheck` passes
-- [ ] 0.2 `pnpm lint` passes
-- [ ] 0.3 `pnpm build` passes with all env vars set
-- [ ] 0.4 Unsetting a required `NEXT_PUBLIC_*` var fails `pnpm build`
-- [ ] 0.5 Unsetting a required `EMAIL_*` var fails `pnpm build`
-- [ ] 0.6 jiti present in devDependencies + lockfile
+- [x] 0.1 `pnpm typecheck` passes
+- [x] 0.2 `pnpm lint` passes
+- [x] 0.3 `pnpm build` passes with all env vars set
+- [x] 0.4 Unsetting a required `NEXT_PUBLIC_*` var fails `pnpm build`
+- [x] 0.5 Unsetting a required `EMAIL_*` var fails `pnpm build`
+- [x] 0.6 jiti present in devDependencies + lockfile
 
 #### Manual
 
-- [ ] 0.7 Client import of `@/lib/env.server` fails the build with a server-only error
-- [ ] 0.8 The 6 existing `@/lib/env` importers still resolve; `/dashboard` loads
+- [x] 0.7 Client import of `@/lib/env.server` fails the build with a server-only error
+- [x] 0.8 The 6 existing `@/lib/env` importers still resolve; `/dashboard` loads
 
 ### Phase 1: Contact schema + send action
 
