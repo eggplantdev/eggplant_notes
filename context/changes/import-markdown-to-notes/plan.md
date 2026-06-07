@@ -505,9 +505,9 @@ for edit → existing create path.
 
 #### Automated
 
-- [x] 4.1 ai-schema note-shape unit test passes
-- [x] 4.2 `#3` commits through Phase-1 RPC; `#5` through create path
-- [x] 4.3 Type/lint/build pass
+- [x] 4.1 ai-schema note-shape unit test passes — 3dda271
+- [x] 4.2 `#3` commits through Phase-1 RPC; `#5` through create path — 3dda271
+- [x] 4.3 Type/lint/build pass — 3dda271
 - [ ] 4.4 E2E: paste prose → decompose → preview >1 note → commit → persist (deferred to manual — needs a mocked OpenRouter server; live AI call can't run deterministically in E2E)
 
 #### Manual
