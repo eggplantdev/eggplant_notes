@@ -3,7 +3,7 @@ project: 'Coding Learning Companion'
 version: 2
 status: draft
 created: 2026-06-01
-updated: 2026-06-06
+updated: 2026-06-07
 prd_version: 2
 main_goal: speed
 top_blocker: time
@@ -418,6 +418,7 @@ Carried from v1 (out-of-MVP):
 
 ## Done
 
+- **(ad-hoc, not a PRD slice) Authenticated contact form: a footer "Contact me" dialog (subject + message) emails the owner via standalone `nodemailer` SMTP; the sender's identity is the session user (set as `Reply-To`), and the auth gate is the spam control.** — Archived 2026-06-07 → `context/archive/2026-06-07-contact-form/`. Shipped alongside a build-time-validated, server-isolated **env layer** (`env-schema.ts` + `env.ts` + `env.server.ts` + jiti validation in `next.config.ts`) — `next build` now fails on a missing/invalid client or server var, incl. the SMTP `EMAIL_*` set. Reviews APPROVED/PASS; `/simplify` 1 fix (shared `validateInput` reuse); unit test on `contactSchema`; **E2E + real email-send deferred to manual** (typecheck/lint/unit/build green). No Linear issue (off-plan). Lesson: build-time env validation needs a 3-file split + jiti.
 - **S-12: one-click Load sample data into an empty account (the `test@gmail.com` seed corpus re-scoped to the current user — fresh ids, `is_seeded` marker, RLS-safe per-user inserts, no service-role) + paired Clear; controls in `/settings` and the `/notes` empty state.** — Archived 2026-06-06 → `context/archive/2026-06-06-seed-sample-data/`. Generated/committed fixture (`sample-data.ts`, dumped from the local DB so prod has no template account); pure unit-tested remap; rollback-on-failure via a shared `is_seeded` delete guarded by `isAccountEmpty`. **On-demand redesign (operator):** dropped the eager gating queries — settings renders both buttons, the actions self-correct (zero queries on render). Built alongside the parallel `list-search-pagination` session (staged by explicit path). Manual 4.5/5.6 deferred; happy-path round-trip covered by a green E2E. Lesson: —.
 - **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
 - **F-02: (foundation) first migration creates `notes`, `memory_cards`, `review_events` with Row-Level Security policies scoping every row by `auth.uid()`, plus minimal typed client query helpers; verified by a two-account isolation test.** — Archived 2026-06-03 → `context/archive/2026-06-02-persistence-and-isolation/`. Lesson: —.
