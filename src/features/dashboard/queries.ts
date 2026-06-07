@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { STATS_WINDOW_DAYS } from '@/features/dashboard/constants'
+import { cardStatsSchema } from '@/features/dashboard/schemas'
 import type { CardStatsT } from '@/features/dashboard/types'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { createClient } from '@/lib/supabase/server'
@@ -16,5 +17,5 @@ export async function getCardStats(client?: SupabaseClient<Database>): Promise<C
   const data = await runRpc('getCardStats', () =>
     supabase.rpc('card_stats', { p_time_zone: APP_TIME_ZONE, p_window_days: STATS_WINDOW_DAYS }),
   )
-  return data as unknown as CardStatsT
+  return cardStatsSchema.parse(data)
 }

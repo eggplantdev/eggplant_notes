@@ -8,6 +8,7 @@ import type {
   MemoryCardT,
   MemoryCardWithSourceT,
 } from '@/features/memory-cards/types'
+import { cardOverviewSchema } from '@/features/memory-cards/schemas'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
@@ -47,7 +48,7 @@ export async function getCardOverview(client?: SupabaseClient<Database>): Promis
   const data = await runRpc('getCardOverview', () =>
     supabase.rpc('card_overview', { p_mature_stability: MATURE_STABILITY_DAYS }),
   )
-  return data as unknown as CardOverviewT
+  return cardOverviewSchema.parse(data)
 }
 
 // Backs the /memory-cards listing, ordered soonest-due first. Selects only the columns the card
