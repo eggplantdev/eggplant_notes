@@ -12,10 +12,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { importNotes } from '@/features/import/actions/import-notes'
 import { MAX_IMPORT_BYTES, MAX_IMPORT_NOTES } from '@/features/import/constants'
 import { NotePreviewList } from '@/features/import/components/note-preview-list'
-import { SourceInput } from '@/features/import/components/source-input'
+import { SourceInput, type PdfSourceT } from '@/features/import/components/source-input'
 import type { ImportDraftT } from '@/features/import/types'
 import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-markdown'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
+import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/models'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import type { SubjectOptionT } from '@/features/subjects/types'
@@ -48,6 +49,9 @@ export function ImportPanel({
   defaultModel: string
 }) {
   const [text, setText] = useState('')
+  // A PDF source is mutually exclusive with text: it has no markdown to split, so it routes ONLY
+  // through AI vision decompose (the split controls hide while it's set).
+  const [pdf, setPdf] = useState<PdfSourceT | undefined>(undefined)
   const [level, setLevel] = useState<SplitLevelT>(1)
   const [drafts, setDrafts] = useState<ImportDraftT[]>([])
   const [subjectMode, setSubjectMode] = useState<SubjectModeT>('new')
@@ -85,7 +89,17 @@ export function ImportPanel({
 
   function handleSource(source: string) {
     setText(source)
+    setPdf(undefined) // typing/pasting text supersedes any chosen PDF
     regenerate(source, level)
+  }
+
+  // A PDF replaces the text source: clear text + any deterministic-split preview; the only path
+  // forward is the AI decompose trigger (which sends the file to a vision model).
+  function handlePdf(next: PdfSourceT) {
+    setPdf(next)
+    setText('')
+    setDrafts([])
+    setFormError(undefined)
   }
 
   function handleLevel(next: SplitLevelT) {
@@ -192,42 +206,63 @@ export function ImportPanel({
         )}
       </div>
 
-      <SourceInput value={text} onChange={handleSource} />
+      <SourceInput value={text} onChange={handleSource} onPdf={handlePdf} pdfName={pdf?.filename} />
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground text-sm">Split on heading level:</span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={String(level)}
-            onValueChange={(v) => v && handleLevel(Number(v) as SplitLevelT)}
-          >
-            {LEVELS.map((l) => (
-              <ToggleGroupItem key={l} value={String(l)} data-testid={`import-level-h${l}`}>
-                {`H${l}`}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          {/* The deterministic split needs markdown text — hidden for a PDF, which only AI can read. */}
+          {!pdf && (
+            <>
+              <span className="text-muted-foreground text-sm">Split on heading level:</span>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                value={String(level)}
+                onValueChange={(v) => v && handleLevel(Number(v) as SplitLevelT)}
+              >
+                {LEVELS.map((l) => (
+                  <ToggleGroupItem key={l} value={String(l)} data-testid={`import-level-h${l}`}>
+                    {`H${l}`}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </>
+          )}
           <GenerateDialog<GeneratedNoteT>
             connected={aiEnabled}
-            defaultModel={defaultModel}
-            previewInput={{ task: 'notes', text }}
-            action={(modelId, promptOverride) => generateNotes({ text, modelId, promptOverride })}
+            defaultModel={pdf ? DEFAULT_OPENROUTER_FILE_MODEL : defaultModel}
+            modelFilter={pdf ? 'file' : 'text'}
+            previewInput={pdf ? { task: 'notes', file: true } : { task: 'notes', text }}
+            action={(modelId, promptOverride) =>
+              pdf
+                ? generateNotes({
+                    file: { ...pdf, mediaType: 'application/pdf' },
+                    modelId,
+                    promptOverride,
+                  })
+                : generateNotes({ text, modelId, promptOverride })
+            }
             onResult={applyDecomposition}
             triggerLabel="Decompose with AI"
             triggerTestId="import-decompose-ai"
-            validate={() => (text.trim().length === 0 ? NO_SOURCE_MSG : undefined)}
+            validate={() => (pdf || text.trim().length > 0 ? undefined : NO_SOURCE_MSG)}
             dialogTitle="Decompose into notes with AI"
           />
         </div>
 
-        <MutedText>
-          Each H{level} heading becomes a note titled from that heading; deeper headings stay in its
-          body. Text before the first H{level} heading becomes an “Untitled” note you can rename or
-          skip.
-        </MutedText>
+        {pdf ? (
+          <MutedText>
+            A vision model reads the PDF and groups it into notes by topic. Pick the model in the
+            dialog.
+          </MutedText>
+        ) : (
+          <MutedText>
+            Each H{level} heading becomes a note titled from that heading; deeper headings stay in
+            its body. Text before the first H{level} heading becomes an “Untitled” note you can
+            rename or skip.
+          </MutedText>
+        )}
       </div>
 
       {drafts.length > 0 && (

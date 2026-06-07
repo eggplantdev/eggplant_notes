@@ -38,6 +38,7 @@ export function GenerateDialog<T>({
   dialogTitle,
   children,
   canGenerate = true,
+  modelFilter = 'text',
 }: {
   connected: boolean
   defaultModel: string
@@ -56,6 +57,8 @@ export function GenerateDialog<T>({
   // Gates the Generate button. The topic flow sets it false while its in-dialog source is empty;
   // the import flow (source validated before open) leaves it at the default.
   canGenerate?: boolean
+  // Scopes the model picker: 'file' restricts to vision/file-capable models (PDF import, Phase 8).
+  modelFilter?: 'text' | 'file'
 }) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
@@ -156,6 +159,7 @@ export function GenerateDialog<T>({
                 onChange={setModel}
                 defaultModelId={defaultModel}
                 testId="generate-model"
+                filter={modelFilter}
                 modal
               />
             </div>
