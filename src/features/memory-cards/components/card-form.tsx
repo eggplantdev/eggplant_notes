@@ -140,7 +140,9 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
           task="cards"
           connected={aiEnabled ?? false}
           defaultModel={defaultModel ?? DEFAULT_OPENROUTER_MODEL}
-          action={(topic, modelId) => generateCards({ topic, modelId })}
+          action={(topic, modelId, promptOverride) =>
+            generateCards({ topic, modelId, promptOverride })
+          }
           onResult={(genCard) => {
             form.setFieldValue('prompt', genCard.prompt)
             form.setFieldValue('example', genCard.example)

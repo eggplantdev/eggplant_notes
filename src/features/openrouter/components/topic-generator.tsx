@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import { cardsMaterialFromTopic } from '@/features/openrouter/prompts'
+import { cardsMaterialFromTopic, type PromptT } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
 
 // Shared ungrounded "generate from a topic" control (#2 card / #5 note). Owns the topic input; the
@@ -30,7 +30,11 @@ export function TopicGenerator<T>({
   task: 'cards' | 'notes'
   connected: boolean
   defaultModel: string
-  action: (topic: string, modelId: string) => Promise<GenerateResultT<T[]>>
+  action: (
+    topic: string,
+    modelId: string,
+    promptOverride?: PromptT,
+  ) => Promise<GenerateResultT<T[]>>
   onResult: (item: T) => void
 }) {
   const [topic, setTopic] = useState('')
@@ -55,7 +59,7 @@ export function TopicGenerator<T>({
               ? { task: 'cards', material: cardsMaterialFromTopic(topic) }
               : { task: 'notes', topic }
           }
-          action={(modelId) => action(topic, modelId)}
+          action={(modelId, promptOverride) => action(topic, modelId, promptOverride)}
           onResult={(data) => data[0] && onResult(data[0])}
           triggerLabel="Generate"
           triggerTestId={`${testIdPrefix}-generate`}

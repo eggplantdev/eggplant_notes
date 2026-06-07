@@ -155,7 +155,7 @@ export function ImportPanel({
             connected={aiEnabled}
             defaultModel={defaultModel}
             previewInput={{ task: 'notes', text }}
-            action={(modelId) => generateNotes({ text, modelId })}
+            action={(modelId, promptOverride) => generateNotes({ text, modelId, promptOverride })}
             onResult={applyDecomposition}
             triggerLabel="Decompose with AI"
             triggerTestId="import-decompose-ai"

@@ -14,15 +14,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
 import type { GenerateDebugT, GenerateResultT } from '@/features/openrouter/types'
-import { previewPrompt, type PreviewInputT } from '@/features/openrouter/prompts'
+import { previewPrompt, type PreviewInputT, type PromptT } from '@/features/openrouter/prompts'
 
 // The single two-step entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible
-// trigger, the connect gate (via useAiGate), per-generate model selection, a live preview of the
-// EXACT prompt that will be sent (no LLM cost), and the token readout after generating. On Apply it
-// hands the data to the caller's own preview/edit surface (form fields / candidate list).
+// trigger, the connect gate (via useAiGate), per-generate model selection, an EDITABLE view of the
+// exact prompt that will be sent (no LLM cost to preview), and the token readout after generating.
+// Editing the prompt sends it verbatim (promptOverride) so the user can refine freely; an unedited
+// prompt sends nothing and the action builds it server-side. On Apply it hands the data to the
+// caller's own preview/edit surface (form fields / candidate list).
 export function GenerateDialog<T>({
   connected,
   defaultModel,
@@ -37,7 +40,7 @@ export function GenerateDialog<T>({
   connected: boolean
   defaultModel: string
   previewInput: PreviewInputT
-  action: (modelId: string) => Promise<GenerateResultT<T[]>>
+  action: (modelId: string, promptOverride?: PromptT) => Promise<GenerateResultT<T[]>>
   onResult: (data: T[]) => void
   triggerLabel: string
   triggerTestId: string
@@ -55,10 +58,14 @@ export function GenerateDialog<T>({
   const [error, setError] = useState<string | undefined>(undefined)
   const [triggerError, setTriggerError] = useState<string | undefined>(undefined)
   const [isGenerating, startGenerate] = useTransition()
+  // The editable prompt. Seeded from previewPrompt on open; compared against that default to decide
+  // whether to send a promptOverride (only when the user actually edited it).
+  const [system, setSystem] = useState('')
+  const [prompt, setPrompt] = useState('')
 
-  // previewPrompt is pure (no DB / no LLM) — derive the shown prompt from the current input rather
-  // than fetching it into state on open.
-  const preview = previewPrompt(previewInput)
+  // previewPrompt is pure (no DB / no LLM) — the default the textareas seed from and "Reset" restores.
+  const defaults = previewPrompt(previewInput)
+  const isEdited = system !== defaults.system || prompt !== defaults.prompt
 
   // Trigger click: validate input first (feedback beside the button if missing), then gate on the
   // connection, then open.
@@ -73,13 +80,21 @@ export function GenerateDialog<T>({
     setError(undefined)
     setResult(undefined)
     setModel(defaultModel) // re-seed from the default in case a prior open changed it
+    resetPrompt()
     setOpen(true)
+  }
+
+  function resetPrompt() {
+    setSystem(defaults.system)
+    setPrompt(defaults.prompt)
   }
 
   function generate() {
     setError(undefined)
     startGenerate(async () => {
-      const outcome = await action(model)
+      // Send the edited prompt only when changed; an unedited prompt lets the action build it
+      // server-side (and re-fetch grounded source under its own RLS trust boundary).
+      const outcome = await action(model, isEdited ? { system, prompt } : undefined)
       if (outcome.success) setResult({ data: outcome.data, debug: outcome.debug })
       else setError(outcome.error)
     })
@@ -107,11 +122,11 @@ export function GenerateDialog<T>({
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent data-testid="generate-dialog">
+        <DialogContent data-testid="generate-dialog" className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>
-              Pick a model and review the exact prompt before generating. The result is editable
+              Pick a model and edit the exact prompt before generating. The result is editable
               before it is saved.
             </DialogDescription>
           </DialogHeader>
@@ -127,14 +142,39 @@ export function GenerateDialog<T>({
               />
             </div>
 
-            <div className="grid gap-1">
-              <Label>Prompt</Label>
-              <pre
-                data-testid="generate-prompt-preview"
-                className="bg-muted max-h-56 overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap"
-              >
-                {`${preview.system}\n\n---\n\n${preview.prompt}`}
-              </pre>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="generate-system">System prompt</Label>
+                {isEdited && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-testid="generate-prompt-reset"
+                    onClick={resetPrompt}
+                  >
+                    Reset to default
+                  </Button>
+                )}
+              </div>
+              <Textarea
+                id="generate-system"
+                data-testid="generate-system"
+                value={system}
+                onChange={(e) => setSystem(e.target.value)}
+                className="max-h-32 font-mono text-xs"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="generate-prompt">Prompt</Label>
+              <Textarea
+                id="generate-prompt"
+                data-testid="generate-prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="max-h-72 min-h-40 font-mono text-xs"
+              />
             </div>
 
             {result && (

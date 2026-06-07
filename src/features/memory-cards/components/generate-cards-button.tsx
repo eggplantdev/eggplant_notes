@@ -73,7 +73,7 @@ export function GenerateCardsButton({
               task: 'cards',
               material: cardsMaterialFromNote({ title: noteTitle, content: noteContent }),
             }}
-            action={(modelId) => generateCards({ noteId, modelId })}
+            action={(modelId, promptOverride) => generateCards({ noteId, modelId, promptOverride })}
             onResult={(data) => setCandidates(data)}
             triggerLabel="Generate cards with AI"
             triggerTestId="cards-generate-ai"

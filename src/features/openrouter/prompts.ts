@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type { NoteT } from '@/types/note'
 
 // Single source for every AI prompt: the actions send these and `previewPrompt` displays these, so
@@ -6,6 +8,19 @@ import type { NoteT } from '@/types/note'
 // This is the one file to edit when refining prompts.
 
 export type PromptT = { system: string; prompt: string }
+
+// Cap on a user-edited prompt. The auto-built prompt embeds the source text (notes decompose allows
+// up to 50k chars) plus instructions, so the ceiling is generous — it only guards against pathological
+// payloads, not normal refinement.
+const MAX_PROMPT_CHARS = 100_000
+
+// Validates the dialog's editable prompt before it reaches `generateObject` (Phase 7): both halves
+// must be non-empty after trim and within the cap. `generateObject`'s Zod schema still constrains the
+// OUTPUT regardless of how the input prompt is edited — this only sanity-checks the input blob.
+export const promptOverrideSchema = z.object({
+  system: z.string().trim().min(1, 'System prompt is empty').max(MAX_PROMPT_CHARS),
+  prompt: z.string().trim().min(1, 'Prompt is empty').max(MAX_PROMPT_CHARS),
+})
 
 // gen-cards #1 grounded source assembly. Note is already fetched (the IO stays in the caller); this
 // keeps material assembly identical between the action and the preview.

@@ -8,6 +8,7 @@ import {
   buildCardsPrompt,
   cardsMaterialFromNote,
   cardsMaterialFromTopic,
+  promptOverrideSchema,
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
@@ -17,11 +18,18 @@ import { validateInput } from '@/lib/validate'
 
 // gen-cards source: grounded on a saved note (#1) or ungrounded on a topic string (#2). Optional
 // `modelId` overrides the settings default for this generation only (validated server-side).
+// Optional `promptOverride`: the dialog's edited {system,prompt} — when present it REPLACES the built
+// prompt (and the note fetch), so the user's refinement is exactly what's sent and logged (Phase 7).
 const sourceSchema = z.union([
-  z.object({ noteId: z.guid('Invalid note id'), modelId: z.string().optional() }),
+  z.object({
+    noteId: z.guid('Invalid note id'),
+    modelId: z.string().optional(),
+    promptOverride: promptOverrideSchema.optional(),
+  }),
   z.object({
     topic: z.string().trim().min(1, 'Enter a topic').max(200),
     modelId: z.string().optional(),
+    promptOverride: promptOverrideSchema.optional(),
   }),
 ])
 
@@ -36,16 +44,23 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
     const bound = await getOpenRouterModel(source.modelId)
     if (!bound) return { success: false, error: 'Connect OpenRouter in Settings first.' }
 
-    let material: string
-    if ('noteId' in source) {
-      const note = await getNote(source.noteId)
-      if (!note) return { success: false, error: 'Note not found.' }
-      material = cardsMaterialFromNote(note)
+    let system: string
+    let prompt: string
+    if (source.promptOverride) {
+      // The edited prompt already carries the note material (the dialog seeded it from previewPrompt),
+      // so we send it verbatim and skip the note fetch entirely.
+      ;({ system, prompt } = source.promptOverride)
     } else {
-      material = cardsMaterialFromTopic(source.topic)
+      let material: string
+      if ('noteId' in source) {
+        const note = await getNote(source.noteId)
+        if (!note) return { success: false, error: 'Note not found.' }
+        material = cardsMaterialFromNote(note)
+      } else {
+        material = cardsMaterialFromTopic(source.topic)
+      }
+      ;({ system, prompt } = buildCardsPrompt(material))
     }
-
-    const { system, prompt } = buildCardsPrompt(material)
     const startedAt = Date.now()
     const { object, usage } = await generateObject({
       model: bound.model,
