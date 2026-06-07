@@ -2,10 +2,12 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
+import { cn } from '@/lib/utils'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import type { MemoryCardListItemT } from '@/features/memory-cards/types'
 import {
   formatReviewStatus,
+  isCardOverdue,
   memoryCardEditHref,
   memoryCardHref,
 } from '@/features/memory-cards/utils'
@@ -27,7 +29,15 @@ export function MemoryCardsList({ cards }: { cards: MemoryCardListItemT[] }) {
       )}
       renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
       renderEyebrow={(card) => (
-        <span className="text-muted-foreground text-xs">{formatReviewStatus(card)}</span>
+        // Overdue cards color just the status text red as a gentle "act now" cue.
+        <span
+          className={cn(
+            'text-xs',
+            isCardOverdue(card) ? 'text-destructive' : 'text-muted-foreground',
+          )}
+        >
+          {formatReviewStatus(card)}
+        </span>
       )}
       renderSubtitle={(card) => (
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
