@@ -4,11 +4,10 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 
 import { generatedCardsSchema, type GeneratedCardT } from '@/features/openrouter/ai-schemas'
+import type { GenerateResultT } from '@/features/openrouter/types'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
 import { getNote } from '@/features/notes/queries'
 import { validateInput } from '@/lib/validate'
-
-export type GenerateResultT<T> = { success: true; data: T } | { success: false; error: string }
 
 // gen-cards source: grounded on a saved note (#1) or ungrounded on a topic string (#2).
 const sourceSchema = z.union([
@@ -30,19 +29,21 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
   if (!parsed.success) return parsed
   const source = parsed.data
 
-  const model = await getOpenRouterModel()
-  if (!model) return { success: false, error: 'Connect OpenRouter in Settings first.' }
-
-  let material: string
-  if ('noteId' in source) {
-    const note = await getNote(source.noteId)
-    if (!note) return { success: false, error: 'Note not found.' }
-    material = `Note title: ${note.title ?? 'Untitled'}\n\n${note.content}`
-  } else {
-    material = `Topic: ${source.topic}`
-  }
-
+  // getOpenRouterModel decrypts the stored key, so it can throw on a tampered row or a rotated
+  // OPENROUTER_ENC_KEY — keep it inside the try so that surfaces as a graceful error, not a 500.
   try {
+    const model = await getOpenRouterModel()
+    if (!model) return { success: false, error: 'Connect OpenRouter in Settings first.' }
+
+    let material: string
+    if ('noteId' in source) {
+      const note = await getNote(source.noteId)
+      if (!note) return { success: false, error: 'Note not found.' }
+      material = `Note title: ${note.title ?? 'Untitled'}\n\n${note.content}`
+    } else {
+      material = `Topic: ${source.topic}`
+    }
+
     const { object } = await generateObject({
       model,
       schema: generatedCardsSchema,
@@ -51,7 +52,7 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
     })
     return { success: true, data: object.cards }
   } catch (error) {
-    console.error('[generateCards] generateObject failed', error)
+    console.error('[generateCards] generation failed', error)
     return { success: false, error: 'AI generation failed. Try again.' }
   }
 }

@@ -13,7 +13,7 @@ import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delet
 import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card-button'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
-import { GenerateCardsButton } from '@/features/openrouter/components/generate-cards-button'
+import { GenerateCardsButton } from '@/features/memory-cards/components/generate-cards-button'
 
 type MemoryCardsSectionPropsT = {
   noteId: string

@@ -1,14 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
-import { Input } from '@/components/ui/input'
-import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +27,8 @@ import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
+import { generateCards } from '@/features/openrouter/actions/generate-cards'
+import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
@@ -56,11 +56,6 @@ type CardFormValuesT = {
 export function CardForm({ subjects, card, sourceNote, aiEnabled }: CardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
-  // #2 ungrounded gen-cards: a topic → AI fills the prompt/example fields below for the user to edit
-  // before saving. Create mode only; the preview IS this editable form.
-  const [topic, setTopic] = useState('')
-  const [aiError, setAiError] = useState<string | undefined>(undefined)
-  const [isGenerating, startGenerate] = useTransition()
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
   // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
@@ -104,21 +99,6 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled }: CardFormProp
     if (!toastActionResult(result)) setFormError(result.error)
   }
 
-  function generateFromTopic() {
-    setAiError(undefined)
-    startGenerate(async () => {
-      const result = await generateCards({ topic })
-      if (result.success && result.data[0]) {
-        form.setFieldValue('prompt', result.data[0].prompt)
-        form.setFieldValue('example', result.data[0].example)
-      } else if (!result.success) {
-        setAiError(result.error)
-      } else {
-        setAiError('No card was generated. Try a more specific topic.')
-      }
-    })
-  }
-
   return (
     <form
       className="flex flex-col gap-4"
@@ -147,29 +127,17 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled }: CardFormProp
       </form.Field>
 
       {!card && aiEnabled && (
-        <div className="grid gap-2 rounded-lg border p-3">
-          <Label htmlFor="card-ai-topic">Generate from a topic (AI)</Label>
-          <div className="flex flex-wrap gap-2">
-            <Input
-              id="card-ai-topic"
-              data-testid="card-ai-topic"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g. JavaScript closures"
-              className="sm:w-72"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              data-testid="card-ai-generate"
-              disabled={isGenerating || topic.trim().length === 0}
-              onClick={generateFromTopic}
-            >
-              {isGenerating ? 'Generating…' : 'Generate'}
-            </Button>
-          </div>
-          <FormError message={aiError} />
-        </div>
+        <TopicGenerator
+          label="Generate from a topic (AI)"
+          placeholder="e.g. JavaScript closures"
+          testIdPrefix="card-ai"
+          inputClassName="sm:w-72"
+          action={(topic) => generateCards({ topic })}
+          onResult={(genCard) => {
+            form.setFieldValue('prompt', genCard.prompt)
+            form.setFieldValue('example', genCard.example)
+          }}
+        />
       )}
 
       <form.AppField name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>

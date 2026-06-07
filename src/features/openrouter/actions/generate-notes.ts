@@ -4,7 +4,7 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 
 import { generatedNotesSchema, type GeneratedNoteT } from '@/features/openrouter/ai-schemas'
-import { type GenerateResultT } from '@/features/openrouter/actions/generate-cards'
+import type { GenerateResultT } from '@/features/openrouter/types'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
 import { validateInput } from '@/lib/validate'
 
@@ -34,11 +34,13 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
   if (!parsed.success) return parsed
   const source = parsed.data
 
-  const model = await getOpenRouterModel()
-  if (!model) return { success: false, error: 'Connect OpenRouter in Settings first.' }
-
   const decompose = 'text' in source
+  // getOpenRouterModel decrypts the stored key (can throw on a tampered row / rotated key) — keep it
+  // inside the try so it surfaces as a graceful error, not a 500.
   try {
+    const model = await getOpenRouterModel()
+    if (!model) return { success: false, error: 'Connect OpenRouter in Settings first.' }
+
     const { object } = await generateObject({
       model,
       schema: generatedNotesSchema,
@@ -49,7 +51,7 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
     })
     return { success: true, data: object.notes }
   } catch (error) {
-    console.error('[generateNotes] generateObject failed', error)
+    console.error('[generateNotes] generation failed', error)
     return { success: false, error: 'AI generation failed. Try again.' }
   }
 }
