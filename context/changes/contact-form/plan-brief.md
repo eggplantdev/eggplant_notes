@@ -46,7 +46,7 @@ No footer, no email infra, `nodemailer` not installed. `src/lib/env.ts` validate
 | 1. Action    | nodemailer dep, contact schema, send action                          | SMTP creds must exist for a real send                                         |
 | 2. UI        | Contact dialog, footer, mount                                        | Footer edge-alignment / responsive overflow                                   |
 
-**Prerequisites:** local Supabase up; the 4 `EMAIL_*` vars (custom SMTP) in `.env.local` — required for a green build once Phase 0 lands; `vercel env add` them before deploying.
+**Prerequisites:** local Supabase up; the portfolio-mirrored SMTP vars `EMAIL_HOST` / `NEXT_PUBLIC_EMAIL_USER` / `EMAIL_PASS` / `EMAIL_TO` in `.env.local` — required for a green build once Phase 0 lands; `vercel env add` them before deploying.
 **Estimated effort:** ~1–2 sessions, 3 phases.
 
 ## Open Risks & Assumptions

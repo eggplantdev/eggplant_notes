@@ -75,7 +75,7 @@ Refactor env handling so both client and server vars fail the build when invalid
 
 **Intent**: Single source of the zod shapes, free of side effects and `server-only`, so both the client/server entries and `next.config` can import it.
 
-**Contract**: Export `clientSchema` = `z.object({ NEXT_PUBLIC_SUPABASE_URL: z.url(), NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1), NEXT_PUBLIC_SITE_URL: z.url().default('http://127.0.0.1:3000') })` and `serverSchema` = `z.object({ EMAIL_HOST: z.string().min(1), EMAIL_USER: z.email(), EMAIL_PASS: z.string().min(1), EMAIL_TO: z.email() })`. No `parse` call here.
+**Contract**: Mirror the portfolio repo's exact var names so existing SMTP values copy over 1:1. The sender/from address is public there (`NEXT_PUBLIC_EMAIL_USER`), only host/pass/to are secret. So: `clientSchema` = `z.object({ NEXT_PUBLIC_SUPABASE_URL: z.url(), NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1), NEXT_PUBLIC_SITE_URL: z.url().default('http://127.0.0.1:3000'), NEXT_PUBLIC_EMAIL_USER: z.email() })` and `serverSchema` = `z.object({ EMAIL_HOST: z.string().min(1), EMAIL_PASS: z.string().min(1), EMAIL_TO: z.email() })`. No `parse` call here.
 
 #### 3. Client env entry (refactor existing)
 
@@ -83,7 +83,7 @@ Refactor env handling so both client and server vars fail the build when invalid
 
 **Intent**: Validate client vars eagerly from the shared schema; keep the existing public exports so the 6 importers don't change.
 
-**Contract**: Import `clientSchema` from `./env-schema`; `const env = clientSchema.parse({ <static NEXT_PUBLIC_* literals> })`; re-export `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SITE_URL` exactly as today. Client-safe (no `server-only`, no server keys).
+**Contract**: Import `clientSchema` from `./env-schema`; `const env = clientSchema.parse({ <static NEXT_PUBLIC_* literals, incl. NEXT_PUBLIC_EMAIL_USER> })`; re-export `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SITE_URL` exactly as today, plus `export const EMAIL_USER = env.NEXT_PUBLIC_EMAIL_USER` for the action. Client-safe (no `server-only`, no server keys).
 
 #### 4. Server env entry (server-only)
 
@@ -151,7 +151,7 @@ Define the form schema and the auth-gated send action consuming `serverEnv`.
 
 **Intent**: Gate on auth, validate input, send one email to the owner with the user's address as Reply-To. Return `ActionResultT`; never throw to the client.
 
-**Contract**: `'use server'`. `async function sendContactMessage(input: ContactInputT): Promise<ActionResultT>`. Steps: `getCurrentUser()` → no user/no email → `{ success: false, error: 'Not authenticated' }`; `contactSchema.safeParse` → error branch; module-scope `nodemailer.createTransport` from `serverEnv` (`import { serverEnv } from '@/lib/env.server'`, `port: 465, secure: true`); `await transport.sendMail({ from: serverEnv.EMAIL_USER, to: serverEnv.EMAIL_TO, replyTo: user.email, subject: \`Contact: ${data.subject}\`, text: <email + subject + message> })`; thrown → `console.error`+`{ success: false, error: 'Failed to send message' }`; else `{ success: true }`.
+**Contract**: `'use server'`. `async function sendContactMessage(input: ContactInputT): Promise<ActionResultT>`. Steps: `getCurrentUser()` → no user/no email → `{ success: false, error: 'Not authenticated' }`; `contactSchema.safeParse` → error branch; module-scope `nodemailer.createTransport({ host: serverEnv.EMAIL_HOST, port: 465, secure: true, auth: { user: EMAIL_USER, pass: serverEnv.EMAIL_PASS } })` (`import { serverEnv } from '@/lib/env.server'` for host/pass/to; `import { EMAIL_USER } from '@/lib/env'` for the public user/from); `await transport.sendMail({ from: EMAIL_USER, to: serverEnv.EMAIL_TO, replyTo: user.email, subject: \`Contact: ${data.subject}\`, text: <email + subject + message> })`; thrown → `console.error`+`{ success: false, error: 'Failed to send message' }`; else `{ success: true }`.
 
 ### Success Criteria:
 
@@ -246,7 +246,7 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 ## Migration Notes
 
 - No schema/DB changes.
-- **New build-time requirement**: `EMAIL_HOST/EMAIL_USER/EMAIL_PASS/EMAIL_TO` (custom-domain SMTP) must exist in `.env.local` for local builds and be added via `vercel env add` (preview + production) before the next deploy — otherwise the Vercel build fails (by design). Never hand-edit `.env.local` for hosted values (AGENTS.md ritual).
+- **New build-time requirement**: `EMAIL_HOST`, `NEXT_PUBLIC_EMAIL_USER`, `EMAIL_PASS`, `EMAIL_TO` (custom-domain SMTP, names mirrored from the portfolio repo) must exist in `.env.local` for local builds and be added via `vercel env add` (preview + production) before the next deploy — otherwise the Vercel build fails (by design). Never hand-edit `.env.local` for hosted values (AGENTS.md ritual). Note `NEXT_PUBLIC_EMAIL_USER` ships in the client bundle (it's the from-address, not a secret) — same trade the portfolio makes.
 
 ## References
 
