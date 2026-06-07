@@ -1,10 +1,18 @@
-export type OpenRouterModelT = { id: string; label: string }
+// A model in the picker: the live `/models` catalog normalizes to this; the curated recommended set
+// is the same shape sans live pricing (filled at 0). `inputModalities` drives the file/vision filter.
+export type OpenRouterModelT = {
+  id: string
+  label: string
+  // Per-token USD (as OpenRouter bills). Multiply by 1e6 for the conventional "/1M tokens" display.
+  inputPrice: number
+  outputPrice: number
+  inputModalities: string[]
+}
 
-// Curated short list (curate-don't-enumerate — same call as S-13's Shiki langs). All are cheap and
-// good at structured extraction. BYOK bills the user's own key, so cost/quality is ultimately their
-// call; this just keeps the picker sane versus OpenRouter's 300+ models. A live /models fetch is
-// deliberately deferred (only if a user needs an off-list model).
-export const OPENROUTER_MODELS: OpenRouterModelT[] = [
+// Curated short list, pinned as the "Recommended" group on top of the live catalog. All are cheap and
+// good at structured extraction. The live `/models` fetch (catalog.ts) supplies the full 300+ list
+// below this set; these ids stay first-class so the picker has a sane default even offline.
+export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
   { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini — cheap, fast' },
   { id: 'openai/gpt-4o', label: 'GPT-4o — stronger' },
   { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku — cheap' },
@@ -13,10 +21,55 @@ export const OPENROUTER_MODELS: OpenRouterModelT[] = [
   { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
 ]
 
+export const RECOMMENDED_MODEL_IDS: string[] = RECOMMENDED_MODELS.map((m) => m.id)
+
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
 
-// Guard against off-list ids reaching OpenRouter (the per-generate override and the settings write
-// both pass through here). Cheap even under BYOK — keeps the curated picker authoritative.
-export function isAllowedModel(id: string): boolean {
-  return OPENROUTER_MODELS.some((m) => m.id === id)
+// Modalities that count as "can read a file" (PDF/image vision) — the Phase 8 import surface filters
+// the catalog to these. OpenRouter reports image input as `'image'`; some entries also list `'file'`.
+const FILE_MODALITIES = ['image', 'file']
+
+// Shape of one entry in the OpenRouter `/models` payload we actually read. Everything is optional/loose
+// because it's an external API — `normalizeModels` defends against missing fields rather than trusting it.
+type RawModelT = {
+  id?: unknown
+  name?: unknown
+  pricing?: { prompt?: unknown; completion?: unknown }
+  architecture?: { input_modalities?: unknown }
+}
+
+function toPrice(value: unknown): number {
+  const n = parseFloat(String(value))
+  return Number.isFinite(n) ? n : 0
+}
+
+// Pure: map the raw `/models` `data[]` to our trimmed shape, dropping entries without a usable id.
+// Kept pure (no fetch) so it's unit-testable and so models.ts stays client-importable.
+export function normalizeModels(data: RawModelT[]): OpenRouterModelT[] {
+  return data
+    .filter((m): m is RawModelT & { id: string } => typeof m.id === 'string' && m.id.length > 0)
+    .map((m) => ({
+      id: m.id,
+      label: typeof m.name === 'string' && m.name.length > 0 ? m.name : m.id,
+      inputPrice: toPrice(m.pricing?.prompt),
+      outputPrice: toPrice(m.pricing?.completion),
+      inputModalities: Array.isArray(m.architecture?.input_modalities)
+        ? m.architecture.input_modalities.filter((x): x is string => typeof x === 'string')
+        : ['text'],
+    }))
+}
+
+// Pure: scope the catalog to a surface. `'file'` keeps only file/vision-capable models (Phase 8 PDF);
+// `'text'` keeps everything (every model takes text input).
+export function filterModels(
+  models: OpenRouterModelT[],
+  filter: 'text' | 'file',
+): OpenRouterModelT[] {
+  if (filter === 'text') return models
+  return models.filter((m) => m.inputModalities.some((mod) => FILE_MODALITIES.includes(mod)))
+}
+
+// Per-token USD → conventional "$X.XX/1M" display.
+export function formatPricePerM(price: number): string {
+  return `$${(price * 1e6).toFixed(2)}/1M`
 }

@@ -1,15 +1,19 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
-import { DEFAULT_OPENROUTER_MODEL, isAllowedModel } from '@/features/openrouter/models'
+import { isAllowedModel } from '@/features/openrouter/catalog'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/models'
 import { decryptSecret } from '@/lib/crypto/aes-gcm'
 import { SITE_URL } from '@/lib/env'
 import { createClient } from '@/lib/supabase/server'
 
 // Resolution order: per-generate override > settings default (credential.model) > hard default. The
-// override is validated against the curated list (off-list ids are ignored, not trusted). Returns
+// override is validated against the live catalog (off-list ids are ignored, not trusted). Returns
 // `{ model, modelId }` so callers can log/return the id actually used.
-function resolveModelId(override: string | undefined, stored: string | null): string {
-  if (override && isAllowedModel(override)) return override
+async function resolveModelId(
+  override: string | undefined,
+  stored: string | null,
+): Promise<string> {
+  if (override && (await isAllowedModel(override))) return override
   return stored ?? DEFAULT_OPENROUTER_MODEL
 }
 
@@ -34,6 +38,6 @@ export async function getOpenRouterModel(overrideModelId?: string) {
     appName: 'coding-learning-companion',
     appUrl: SITE_URL,
   })
-  const modelId = resolveModelId(overrideModelId, data.model)
+  const modelId = await resolveModelId(overrideModelId, data.model)
   return { model: openrouter(modelId), modelId }
 }
