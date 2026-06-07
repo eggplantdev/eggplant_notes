@@ -285,8 +285,8 @@
 
 /* Shiki dual-theme: spans carry the light color inline + a `--shiki-dark` var. Under the
    app's class-based `.dark`, swap every token to the dark set. Background is intentionally NOT
-   swapped here (handled by the --card rule above), and spans get no background so the card
-   surface shows through. See https://shiki.style/guide/dual-themes */
+   swapped here (handled by the --background rule above), and spans get no background so the
+   shell surface shows through. See https://shiki.style/guide/dual-themes */
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark) !important;
