@@ -56,3 +56,10 @@ update note by agent via webhook?
 Adding notes instruction
 
 Na kiedyś
+
+# Settings
+
+Settings model pickder
+Allow setting default models
+Sort by price
+Sort alphabeticall
