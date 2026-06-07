@@ -1,5 +1,80 @@
 # S-19 AI-Assisted Authoring — Session Handoff (2026-06-07)
 
+> **Session 4 update (2026-06-07) — Phase 7 #3 + Phase 8 SHIPPED + reviewed; gate paused at
+> `/simplify`. Read this block first; Sessions 3/2 and the Phase 1–4 handoff follow below.**
+>
+> ### State: on `feat/ai-authoring-iter2` (MAIN checkout), tree clean. The parallel session is DONE.
+>
+> The branch is no longer shared — the other session (FormTextarea, SegmentedToggle, openrouter
+> nav-balance) has finished and committed; its work is interleaved in history but settled. Stage by
+> path is no longer strictly required, but the slice's own files are still the gate scope.
+>
+> ### What shipped this session (all committed, typecheck + lint green on each)
+>
+> - **Phase 7 #3 — in-dialog topic input (DONE):** `17af2fa`. `TopicGenerator` collapsed to just the
+>   `GenerateDialog` trigger; the topic `<textarea>` now renders INSIDE the dialog as `children` (topic
+>   state stays in `TopicGenerator`, feeds `previewInput`/`action` reactively). Reworked the dialog's
+>   editable prompt from seed-on-open `useState` to an **override** (`undefined` = follow live default)
+>   so the preview tracks the in-dialog source as you type instead of sending a stale prompt. Added
+>   `canGenerate` gate. Dialog bug-fixes folded in: trigger error is an absolute opaque chip (no button
+>   shift, `form-error.tsx` got an optional `className`); `ModelSelect` got a `modal` Popover so
+>   mouse-wheel scroll works inside the dialog; **`gradient-border ring-0`** on the dialog. The
+>   clear-stale-trigger-error-on-input line (adjust-during-render, generate-dialog.tsx ~70-73) was
+>   added by the operator — keep it.
+> - **Phase 8 — PDF via vision (DONE):** `61e626f` (core) + `67799f8` (UI) + `baba88d` (hint).
+>   `generateNotes` takes a `{ file: { dataBase64, mediaType:'application/pdf', filename } }` variant,
+>   decodes to a Buffer, sends as an AI SDK v6 **file content part** (`messages` + `system`, NOT
+>   `prompt`) to a vision model; 10 MB cap; zero-note result → scanned-PDF hint. New
+>   `DEFAULT_OPENROUTER_FILE_MODEL` (gemini-2.0-flash-001), `buildNotesFilePrompt`, `{task:'notes',
+file:true}` preview variant. `SourceInput` accepts `.pdf` → `readFileAsBase64` (chunked util) →
+>   `onPdf`; `ImportPanel` holds a PDF source mutually exclusive with text (hides the H1/H2/H3 split,
+>   routes Decompose to the vision path with `modelFilter='file'`). `GenerateDialog` got a `modelFilter`
+>   passthrough to `ModelSelect`; shows a "vision models only" hint in file mode.
+>
+> ### Gate status (per CLAUDE.md): review ✅ → triage ✅ → fixes ✅ → **`/simplify` NOT RUN** → tests ✗ → archive ✗
+>
+> - **Review fan-out DONE** (4 read-only checks): correctness `/10x-impl-review`, `/tailwind-v4-audit`,
+>   `feature-first-structure`, `/module-cohesion-audit`. Verdict: APPROVED — Tailwind 0 findings,
+>   structure PASS, cohesion 1 nit, correctness 0 bugs.
+> - **Fixes applied** (`40428c4`): **F1** — a 10 MB PDF is ~13.4 MB base64 on the Server Action body;
+>   default body limit is 1 MB → set `experimental.serverActions.bodySizeLimit: '14mb'` in
+>   `next.config.ts` so the Zod cap is the real boundary; documented the limit + a Route-Handler escape
+>   hatch at the PDF send site in `import-panel.tsx`. **Cohesion** — moved `PdfSourceT` from
+>   `source-input.tsx` into `features/import/types.ts`.
+> - **Dismissed:** F2 (`UsageT` already `number|undefined`), F4 (edited prompt freezes vs later topic
+>   edits — intended, Reset recovers), F5 (`Buffer` Node-only — fine on `fra1`).
+> - **Deferred** → `follow-ups/review-fixes.md` (`67dccce`): **G8-1** file-filtered picker is empty when
+>   the live catalog is offline/fails (seed/FALLBACK hardcode `inputModalities:['text']`; happy path
+>   fine); **G8-2** no Tailwind-aware ESLint plugin (unregistered classes invisible to CI).
+> - **`/simplify` — NOT run.** Operator will run it against the **whole slice** (their call). The slice
+>   is 13 files (below). Reviews found the code already clean, so expect few findings.
+>
+> ### This slice's 13 files (the gate scope — `git show` these 6 commits)
+>
+> Commits: `17af2fa` (p7#3), `61e626f` (p8 core), `67799f8` (p8 ui), `baba88d` (p8 hint),
+> `40428c4` (gate fixes), `67dccce` (deferrals doc). Files:
+> `next.config.ts`; `src/components/forms/form-components/form-error.tsx`;
+> `src/features/openrouter/{components/generate-dialog.tsx, model-select.tsx, topic-generator.tsx,
+prompts.ts, models.ts, actions/generate-notes.ts}`;
+> `src/features/import/{components/import-panel.tsx, components/source-input.tsx, types.ts,
+utils/read-file-base64.ts}`; `src/features/{memory-cards/components/card-form.tsx,
+notes/components/note-form.tsx}` (last two: one-line `inputClassName` removals).
+>
+> ### Resume checklist
+>
+> 1. `/simplify` the slice (operator running). Then re-verify typecheck + lint green.
+> 2. **Author tests** (gate step 3, AFTER simplify): plan automated criteria still unmet — 7.1
+>    (promptOverride sent+logged verbatim), 8.x (`filterModels('file')` keeps only vision models; the
+>    PDF action builds the AI SDK v6 file part + validates the notes schema), plus the base64 reader.
+>    Phase 5 unit tests 5.1–5.3 from the Session-2 block are still unwritten too.
+> 3. Ask before the full suite (`pnpm typecheck && lint && test && test:e2e && build`); E2E needs the
+>    local Supabase stack up. PDF vision can't be exercised headlessly (needs a connected OpenRouter
+>    account + a real PDF) — operator must verify that flow manually.
+> 4. `/10x-archive import-markdown-to-notes`, then flip plan Progress rows (7.3/7.4 + Phase 8), the
+>    Linear issue, and reconcile `feat/ai-authoring-iter2` ↔ PR #1 (still diverged — undecided).
+>
+> ---
+
 > **Session 3 update (2026-06-07) — Phase 6 done + Phase 7 mostly done, ON A NEW BRANCH IN THE MAIN
 > CHECKOUT. Read this block first; Session 2 (Phase 5) and the original Phase 1–4 handoff follow below.**
 >
