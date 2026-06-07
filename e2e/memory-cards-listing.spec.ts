@@ -7,7 +7,7 @@ import { attachCheck, signUp, uniqueEmail } from './helpers'
 //     source-note title.
 //  2. The Subjects multiselect filters the list server-side (?subjects=<id> in the URL),
 //     committed on popover close (the debounce's flush-on-close) — joining through notes.
-//  3. Clicking a card deep-links to its parent note at the exact card (#card-<id>).
+//  3. Clicking a card opens its own review page, from which the source note stays reachable.
 // Shared auth/check helpers live in ./helpers.
 
 async function createSubject(page: Page, title: string): Promise<void> {

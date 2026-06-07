@@ -5,7 +5,7 @@ import { signUp, uniqueEmail } from './helpers'
 // Acceptance path for the subject-tied note creation + server-side subject ("topic") filter:
 //  1. "New note" from a subject's detail page lands on /notes/new?subject=<id> with that
 //     subject pre-selected, so the saved note is already assigned (proven via the subject's
-//     document view).
+//     master-detail view: opening it redirects to the first note and lists it in the sidebar).
 //  2. The /notes list shows each note's subject as a chip on its card.
 //  3. The Subjects multiselect filters the list server-side (?subjects=<id> in the URL),
 //     committed on popover close (the debounce's flush-on-close).
