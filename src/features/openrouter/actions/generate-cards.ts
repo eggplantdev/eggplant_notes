@@ -68,7 +68,8 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
       system,
       prompt,
     })
-    await logGeneration({
+    // Best-effort, self-contained error handling — don't block the response on the log write.
+    void logGeneration({
       task: 'cards',
       model: bound.modelId,
       system,

@@ -17,7 +17,7 @@ import { listOpenRouterModels } from '@/features/openrouter/actions/list-models'
 import {
   filterModels,
   formatPricePerM,
-  RECOMMENDED_MODELS,
+  RECOMMENDED_FALLBACK,
   RECOMMENDED_MODEL_IDS,
   type OpenRouterModelT,
 } from '@/features/openrouter/models'
@@ -25,12 +25,7 @@ import { cn } from '@/lib/utils'
 
 // Seed the picker with the curated set so the trigger labels a recommended id (the common case)
 // before the live catalog loads. Prices are unknown offline → 0, hidden until the live fetch lands.
-const RECOMMENDED_SEED: OpenRouterModelT[] = RECOMMENDED_MODELS.map((m) => ({
-  ...m,
-  inputPrice: 0,
-  outputPrice: 0,
-  inputModalities: ['text'],
-}))
+const RECOMMENDED_SEED = RECOMMENDED_FALLBACK
 
 // Searchable model picker over the live OpenRouter catalog. Pure controlled primitive — persistence
 // (settings) or per-generate override (dialog) lives in the consumer. The 300+ catalog is fetched

@@ -4,7 +4,7 @@ import { unstable_cache } from 'next/cache'
 
 import {
   normalizeModels,
-  RECOMMENDED_MODELS,
+  RECOMMENDED_FALLBACK,
   type OpenRouterModelT,
 } from '@/features/openrouter/models'
 
@@ -12,12 +12,7 @@ const MODELS_URL = 'https://openrouter.ai/api/v1/models'
 
 // If the live fetch fails (network, OpenRouter down), fall back to the curated set so the picker still
 // works and the allowlist still accepts the recommended ids. Prices unknown offline → 0 (hidden in UI).
-const FALLBACK: OpenRouterModelT[] = RECOMMENDED_MODELS.map((m) => ({
-  ...m,
-  inputPrice: 0,
-  outputPrice: 0,
-  inputModalities: ['text'],
-}))
+const FALLBACK = RECOMMENDED_FALLBACK
 
 // Uncached fetch+normalize — exported so it can be unit-tested against a mocked `fetch`. The public
 // entry point is the cached `getModelCatalog` below.

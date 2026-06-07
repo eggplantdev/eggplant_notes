@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
@@ -59,10 +59,14 @@ export function NoteForm(props: NoteFormPropsT) {
   // before saving. Create mode only; the generator itself gates on OpenRouter connection.
   const isCreateMode = !props.note
 
-  const subjectOptions = [
-    { value: NO_SUBJECT, label: 'None' },
-    ...props.subjects.map((subject) => ({ value: subject.id, label: subject.title })),
-  ]
+  // Memoized so the form's frequent re-renders (typing) don't re-allocate the option list each keystroke.
+  const subjectOptions = useMemo(
+    () => [
+      { value: NO_SUBJECT, label: 'None' },
+      ...props.subjects.map((subject) => ({ value: subject.id, label: subject.title })),
+    ],
+    [props.subjects],
+  )
 
   const defaultSubjectId = props.note ? null : (props.defaultSubjectId ?? null)
 

@@ -35,12 +35,15 @@ export async function logGeneration(entry: GenerationLogT): Promise<void> {
   try {
     const day = toISODate(Date.now())
     await mkdir(LOG_DIR, { recursive: true })
-    await appendFile(
-      path.join(LOG_DIR, `${day}.jsonl`),
-      JSON.stringify({ ...entry, at: new Date().toISOString() }) + '\n',
-      'utf8',
-    )
-    await appendFile(path.join(LOG_DIR, `${day}.md`), renderMarkdownEntry(entry), 'utf8')
+    // The two channels write to different files — append them concurrently.
+    await Promise.all([
+      appendFile(
+        path.join(LOG_DIR, `${day}.jsonl`),
+        JSON.stringify({ ...entry, at: new Date().toISOString() }) + '\n',
+        'utf8',
+      ),
+      appendFile(path.join(LOG_DIR, `${day}.md`), renderMarkdownEntry(entry), 'utf8'),
+    ])
   } catch {
     // Read-only FS (prod) or any IO error — console + the dialog already carried the signal.
   }

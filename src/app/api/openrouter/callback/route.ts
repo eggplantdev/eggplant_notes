@@ -5,6 +5,7 @@ import { type NextRequest } from 'next/server'
 import { VERIFIER_COOKIE } from '@/features/openrouter/pkce'
 import { encryptSecret } from '@/lib/crypto/aes-gcm'
 import { createClient } from '@/lib/supabase/server'
+import { toastRedirect } from '@/lib/toast-redirect'
 
 // OpenRouter OAuth PKCE callback: exchange the returned `code` (+ the verifier we stashed) for the
 // user's API key, encrypt it, and upsert the per-user credential. The user is authenticated here
@@ -44,9 +45,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  redirect(
-    connected
-      ? '/settings?toast=openrouter-connected'
-      : '/settings?error=Could not connect OpenRouter',
-  )
+  if (connected) toastRedirect('/settings', 'openrouter-connected')
+  redirect('/settings?error=Could not connect OpenRouter')
 }

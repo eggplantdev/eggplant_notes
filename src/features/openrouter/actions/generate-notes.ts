@@ -101,7 +101,8 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
           "Couldn't extract any notes — if this is a scanned PDF, its text may not be readable.",
       }
     }
-    await logGeneration({
+    // Best-effort, self-contained error handling — don't block the response on the log write.
+    void logGeneration({
       task: 'notes',
       model: bound.modelId,
       system,

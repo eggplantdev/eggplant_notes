@@ -23,6 +23,16 @@ export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
 
 export const RECOMMENDED_MODEL_IDS: string[] = RECOMMENDED_MODELS.map((m) => m.id)
 
+// The curated set widened to the full picker shape with unknown (0) pricing and text-only modality.
+// Shared by the offline catalog FALLBACK (catalog.ts) and the picker's pre-fetch SEED (model-select.tsx)
+// so the two can't drift. Read-only; neither consumer mutates it.
+export const RECOMMENDED_FALLBACK: OpenRouterModelT[] = RECOMMENDED_MODELS.map((m) => ({
+  ...m,
+  inputPrice: 0,
+  outputPrice: 0,
+  inputModalities: ['text'],
+}))
+
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
 
 // Default for the PDF/vision import surface (Phase 8): a cheap, file-capable, dated id (never a

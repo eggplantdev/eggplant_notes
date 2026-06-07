@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { cache } from 'react'
+
 import { decryptSecret } from '@/lib/crypto/aes-gcm'
 import { createClient } from '@/lib/supabase/server'
 
@@ -8,16 +10,26 @@ export type OpenRouterCredentialT = {
   model: string | null
 }
 
-// Reads + decrypts the caller's OpenRouter credential in ONE row read (key + persisted default model).
-// The key is decrypted server-side and never leaves the server; RLS scopes the row to the owner.
-// Returns null when not connected. NOTE: decryptSecret throws on a missing enc key or corrupted auth
-// tag — callers that must fail soft (e.g. the nav badge) call this inside a try/catch.
-export async function getOpenRouterCredential(): Promise<OpenRouterCredentialT | null> {
+// The caller's credential row, read once per request. A protected render fans out to several
+// readers of this single row — the nav connection gate, the page status (gate + default model),
+// and the nav credits badge (which decrypts the key) — so React cache() dedupes them to ONE round
+// trip. Selecting the encrypted columns unconditionally is free (same row); they never leave the
+// server. RLS scopes the row to the owner. Returns null when not connected.
+export const getCredentialRow = cache(async () => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('openrouter_credentials')
-    .select('key_ciphertext, key_iv, key_auth_tag, model')
+    .select('user_id, model, key_ciphertext, key_iv, key_auth_tag')
     .maybeSingle()
+  return data
+})
+
+// Reads + decrypts the caller's OpenRouter credential (key + persisted default model). The key is
+// decrypted server-side and never leaves the server. NOTE: decryptSecret throws on a missing enc
+// key or corrupted auth tag — callers that must fail soft (e.g. the nav badge) call this in a
+// try/catch.
+export async function getOpenRouterCredential(): Promise<OpenRouterCredentialT | null> {
+  const data = await getCredentialRow()
   if (!data) return null
 
   const apiKey = decryptSecret({
