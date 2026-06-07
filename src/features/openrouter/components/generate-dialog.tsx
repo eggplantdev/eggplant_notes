@@ -1,7 +1,7 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
@@ -36,6 +36,8 @@ export function GenerateDialog<T>({
   triggerTestId,
   validate,
   dialogTitle,
+  children,
+  canGenerate = true,
 }: {
   connected: boolean
   defaultModel: string
@@ -48,6 +50,12 @@ export function GenerateDialog<T>({
   // source text / topic is empty). The trigger stays enabled so the click always gives feedback.
   validate?: () => string | undefined
   dialogTitle: string
+  // Rendered at the top of the dialog body — used by the topic flow to put its source <textarea>
+  // inside the dialog (the parent owns its state and feeds it back through previewInput/action).
+  children?: ReactNode
+  // Gates the Generate button. The topic flow sets it false while its in-dialog source is empty;
+  // the import flow (source validated before open) leaves it at the default.
+  canGenerate?: boolean
 }) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
@@ -58,14 +66,20 @@ export function GenerateDialog<T>({
   const [error, setError] = useState<string | undefined>(undefined)
   const [triggerError, setTriggerError] = useState<string | undefined>(undefined)
   const [isGenerating, startGenerate] = useTransition()
-  // The editable prompt. Seeded from previewPrompt on open; compared against that default to decide
-  // whether to send a promptOverride (only when the user actually edited it).
-  const [system, setSystem] = useState('')
-  const [prompt, setPrompt] = useState('')
+  // The editable prompt as an OVERRIDE: `undefined` means "follow the live default", so the preview
+  // tracks an in-dialog source (topic flow) as the user types; a value means the user edited and now
+  // owns it. This is what's sent to the action — undefined lets the action build the prompt itself.
+  const [override, setOverride] = useState<PromptT | undefined>(undefined)
 
-  // previewPrompt is pure (no DB / no LLM) — the default the textareas seed from and "Reset" restores.
+  // previewPrompt is pure (no DB / no LLM). `shown` is the override if edited, else the live default.
   const defaults = previewPrompt(previewInput)
-  const isEdited = system !== defaults.system || prompt !== defaults.prompt
+  const shown = override ?? defaults
+  const isEdited = override !== undefined
+
+  // Clear the stale trigger error as soon as the input becomes valid again (e.g. the user starts
+  // typing — the parent re-renders us with fresh props). Adjust-during-render, not an effect; only
+  // runs while an error is actually showing, and converges (the set makes the guard false).
+  if (triggerError && !validate?.()) setTriggerError(undefined)
 
   // Trigger click: validate input first (feedback beside the button if missing), then gate on the
   // connection, then open.
@@ -80,21 +94,16 @@ export function GenerateDialog<T>({
     setError(undefined)
     setResult(undefined)
     setModel(defaultModel) // re-seed from the default in case a prior open changed it
-    resetPrompt()
+    setOverride(undefined)
     setOpen(true)
-  }
-
-  function resetPrompt() {
-    setSystem(defaults.system)
-    setPrompt(defaults.prompt)
   }
 
   function generate() {
     setError(undefined)
     startGenerate(async () => {
-      // Send the edited prompt only when changed; an unedited prompt lets the action build it
+      // `override` is undefined unless the user edited; an unedited prompt lets the action build it
       // server-side (and re-fetch grounded source under its own RLS trust boundary).
-      const outcome = await action(model, isEdited ? { system, prompt } : undefined)
+      const outcome = await action(model, override)
       if (outcome.success) setResult({ data: outcome.data, debug: outcome.debug })
       else setError(outcome.error)
     })
@@ -107,7 +116,8 @@ export function GenerateDialog<T>({
 
   return (
     <>
-      <div className="grid justify-items-start gap-1">
+      {/* relative + absolute error: the message must not grow this cell, or it re-centers the button row. */}
+      <div className="relative grid justify-items-start">
         <Button
           type="button"
           variant="ai"
@@ -118,11 +128,17 @@ export function GenerateDialog<T>({
           <Sparkles />
           {triggerLabel}
         </Button>
-        <FormError message={triggerError} />
+        <FormError
+          message={triggerError}
+          className="bg-background absolute top-full left-0 z-10 mt-1 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-sm"
+        />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent data-testid="generate-dialog" className="sm:max-w-3xl">
+        <DialogContent
+          data-testid="generate-dialog"
+          className="gradient-border ring-0 sm:max-w-3xl"
+        >
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogDescription>
@@ -132,6 +148,7 @@ export function GenerateDialog<T>({
           </DialogHeader>
 
           <div className="grid gap-4">
+            {children}
             <div className="grid gap-2">
               <Label htmlFor="generate-model">Model</Label>
               <ModelSelect
@@ -139,6 +156,7 @@ export function GenerateDialog<T>({
                 onChange={setModel}
                 defaultModelId={defaultModel}
                 testId="generate-model"
+                modal
               />
             </div>
 
@@ -151,7 +169,7 @@ export function GenerateDialog<T>({
                     variant="ghost"
                     size="sm"
                     data-testid="generate-prompt-reset"
-                    onClick={resetPrompt}
+                    onClick={() => setOverride(undefined)}
                   >
                     Reset to default
                   </Button>
@@ -160,8 +178,8 @@ export function GenerateDialog<T>({
               <Textarea
                 id="generate-system"
                 data-testid="generate-system"
-                value={system}
-                onChange={(e) => setSystem(e.target.value)}
+                value={shown.system}
+                onChange={(e) => setOverride({ ...shown, system: e.target.value })}
                 className="max-h-32 font-mono text-xs"
               />
             </div>
@@ -171,8 +189,8 @@ export function GenerateDialog<T>({
               <Textarea
                 id="generate-prompt"
                 data-testid="generate-prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                value={shown.prompt}
+                onChange={(e) => setOverride({ ...shown, prompt: e.target.value })}
                 className="max-h-72 min-h-40 font-mono text-xs"
               />
             </div>
@@ -204,7 +222,7 @@ export function GenerateDialog<T>({
                 variant="ai"
                 size="sm"
                 data-testid="generate-confirm"
-                disabled={isGenerating}
+                disabled={isGenerating || !canGenerate}
                 onClick={generate}
               >
                 <Sparkles />

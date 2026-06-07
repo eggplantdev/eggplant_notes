@@ -118,7 +118,6 @@ export function NoteForm(props: NoteFormPropsT) {
           label="Generate a note from a topic (AI)"
           placeholder="e.g. The actor model of concurrency"
           testIdPrefix="note-ai"
-          inputClassName="sm:w-96"
           task="notes"
           connected={props.aiEnabled ?? false}
           defaultModel={props.defaultModel}

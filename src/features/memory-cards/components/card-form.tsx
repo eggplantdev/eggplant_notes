@@ -135,7 +135,6 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
           label="Generate from a topic (AI)"
           placeholder="e.g. JavaScript closures"
           testIdPrefix="card-ai"
-          inputClassName="sm:w-72"
           task="cards"
           connected={aiEnabled ?? false}
           defaultModel={defaultModel ?? DEFAULT_OPENROUTER_MODEL}

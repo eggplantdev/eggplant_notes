@@ -43,6 +43,7 @@ export function ModelSelect({
   filter = 'text',
   disabled,
   testId,
+  modal,
 }: {
   value: string
   onChange: (modelId: string) => void
@@ -50,6 +51,10 @@ export function ModelSelect({
   filter?: 'text' | 'file'
   disabled?: boolean
   testId?: string
+  // Set when rendered inside a Dialog: makes the Popover mount its own scroll-lock so wheel events
+  // reach the list. Without it the Dialog's react-remove-scroll swallows wheel on the portalled
+  // popover (keyboard still scrolls via cmdk's scrollIntoView). Leave off for standalone use.
+  modal?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [catalog, setCatalog] = useState<OpenRouterModelT[]>(RECOMMENDED_SEED)
@@ -105,7 +110,7 @@ export function ModelSelect({
   }
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={open} onOpenChange={handleOpenChange} modal={modal}>
       <PopoverTrigger asChild>
         <Button
           type="button"
