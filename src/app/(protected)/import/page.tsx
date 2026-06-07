@@ -1,10 +1,14 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { ImportPanel } from '@/features/import/components/import-panel'
-import { isOpenRouterConnected } from '@/features/openrouter/queries'
+import { getOpenRouterDefaultModel, isOpenRouterConnected } from '@/features/openrouter/queries'
 import { getSubjects } from '@/features/subjects/queries'
 
 export default async function ImportPage() {
-  const [subjects, aiEnabled] = await Promise.all([getSubjects(), isOpenRouterConnected()])
+  const [subjects, aiEnabled, defaultModel] = await Promise.all([
+    getSubjects(),
+    isOpenRouterConnected(),
+    getOpenRouterDefaultModel(),
+  ])
   return (
     <PageShell
       title="Import notes"
@@ -13,7 +17,7 @@ export default async function ImportPage() {
       backHref="/notes"
       backLabel="Notes"
     >
-      <ImportPanel subjects={subjects} aiEnabled={aiEnabled} />
+      <ImportPanel subjects={subjects} aiEnabled={aiEnabled} defaultModel={defaultModel} />
     </PageShell>
   )
 }

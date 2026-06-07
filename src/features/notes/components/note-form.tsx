@@ -39,6 +39,8 @@ type NoteFormPropsT =
       note?: undefined
       // OpenRouter connected → offer the AI "generate a note from a topic" filler (#5).
       aiEnabled?: boolean
+      // The user's persisted default model, pre-selected in the generate dialog.
+      defaultModel: string
     }
   | {
       action: (
@@ -58,8 +60,8 @@ export function NoteForm(props: NoteFormPropsT) {
   // Holds the edit input while the move/unlink dialog is open; the dialog's choices resume submit.
   const [pendingInput, setPendingInput] = useState<NoteInputT | undefined>(undefined)
   // #5 ungrounded gen-notes: a topic → AI fills the title/content fields below for the user to edit
-  // before saving. Create mode only.
-  const canUseAi = props.note ? false : (props.aiEnabled ?? false)
+  // before saving. Create mode only; the generator itself gates on OpenRouter connection.
+  const isCreateMode = !props.note
 
   // Memoized so the form's frequent re-renders (typing) don't re-allocate the option list.
   const subjectOptions = useMemo(
@@ -119,13 +121,16 @@ export function NoteForm(props: NoteFormPropsT) {
         form.handleSubmit()
       }}
     >
-      {canUseAi && (
+      {isCreateMode && (
         <TopicGenerator
           label="Generate a note from a topic (AI)"
           placeholder="e.g. The actor model of concurrency"
           testIdPrefix="note-ai"
           inputClassName="sm:w-96"
-          action={(topic) => generateNotes({ topic })}
+          task="notes"
+          connected={props.aiEnabled ?? false}
+          defaultModel={props.defaultModel}
+          action={(topic, modelId) => generateNotes({ topic, modelId })}
           onResult={(genNote) => {
             form.setFieldValue('title', genNote.title)
             form.setFieldValue('content', genNote.content)

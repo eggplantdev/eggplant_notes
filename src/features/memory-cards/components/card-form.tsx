@@ -28,6 +28,7 @@ import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/models'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
@@ -42,8 +43,12 @@ type CardFormPropsT = {
   subjects: SubjectOptionT[]
   card?: MemoryCardT
   sourceNote?: { id: string; title: string | null }
-  // OpenRouter connected → offer the AI "generate from a topic" filler (#2, create mode only).
+  // Whether OpenRouter is connected. The AI "generate from a topic" filler (#2) shows in create
+  // mode regardless; when not connected its Generate button opens the connect dialog.
   aiEnabled?: boolean
+  // The user's persisted default model, pre-selected in the generate dialog. Only consumed in
+  // create mode (the topic generator); edit mode omits it.
+  defaultModel?: string
 }
 
 type CardFormValuesT = {
@@ -53,7 +58,7 @@ type CardFormValuesT = {
   code_context: string
 }
 
-export function CardForm({ subjects, card, sourceNote, aiEnabled }: CardFormPropsT) {
+export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | undefined>(undefined)
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
@@ -126,13 +131,16 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled }: CardFormProp
         )}
       </form.Field>
 
-      {!card && aiEnabled && (
+      {!card && (
         <TopicGenerator
           label="Generate from a topic (AI)"
           placeholder="e.g. JavaScript closures"
           testIdPrefix="card-ai"
           inputClassName="sm:w-72"
-          action={(topic) => generateCards({ topic })}
+          task="cards"
+          connected={aiEnabled ?? false}
+          defaultModel={defaultModel ?? DEFAULT_OPENROUTER_MODEL}
+          action={(topic, modelId) => generateCards({ topic, modelId })}
           onResult={(genCard) => {
             form.setFieldValue('prompt', genCard.prompt)
             form.setFieldValue('example', genCard.example)

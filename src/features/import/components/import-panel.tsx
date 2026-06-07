@@ -15,6 +15,8 @@ import { SourceInput } from '@/features/import/components/source-input'
 import type { ImportDraftT } from '@/features/import/types'
 import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-markdown'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
+import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
+import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import type { SubjectOptionT } from '@/features/subjects/types'
 
 const LEVELS: SplitLevelT[] = [1, 2, 3]
@@ -31,10 +33,14 @@ function toDraft(section: { title: string; content: string }): ImportDraftT {
 export function ImportPanel({
   subjects,
   aiEnabled = false,
+  defaultModel,
 }: {
   subjects: SubjectOptionT[]
-  // OpenRouter connected → offer the AI decomposition read-strategy (#3) alongside the split (#4).
+  // Whether OpenRouter is connected. The AI decompose control (#3) is always shown alongside the
+  // split (#4); when not connected, the dialog intercepts with the connect gate.
   aiEnabled?: boolean
+  // The user's persisted default model, pre-selected in the generate dialog.
+  defaultModel: string
 }) {
   const [text, setText] = useState('')
   const [level, setLevel] = useState<SplitLevelT>(1)
@@ -44,18 +50,12 @@ export function ImportPanel({
   const [newTitle, setNewTitle] = useState('')
   const [formError, setFormError] = useState<string | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
-  const [isDecomposing, startDecompose] = useTransition()
 
-  // #3: AI decomposes the same source text into multiple notes, feeding the SAME preview/commit
-  // pipeline as the deterministic split — the two read-strategies converge here.
-  function decomposeWithAi() {
+  // #3: AI decomposes the source text into multiple notes, feeding the SAME preview/commit pipeline
+  // as the deterministic split — the two read-strategies converge on `drafts`.
+  function applyDecomposition(notes: GeneratedNoteT[]) {
     setFormError(undefined)
-    if (!text.trim()) return
-    startDecompose(async () => {
-      const result = await generateNotes({ text })
-      if (result.success) setDrafts(result.data.map(toDraft))
-      else setFormError(result.error)
-    })
+    setDrafts(notes.map(toDraft))
   }
 
   function regenerate(source: string, splitLevel: SplitLevelT) {
@@ -85,6 +85,12 @@ export function ImportPanel({
 
   function handleLevel(next: SplitLevelT) {
     setLevel(next)
+    // Clicking a level with no source is the same dead-end as the AI trigger — give feedback rather
+    // than silently doing nothing.
+    if (!text.trim()) {
+      setFormError('Paste or upload some text first.')
+      return
+    }
     regenerate(text, next)
   }
 
@@ -125,42 +131,65 @@ export function ImportPanel({
     <div className="flex flex-col gap-6">
       <SourceInput value={text} onChange={handleSource} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground text-sm">Split on heading level:</span>
-        <div className="flex gap-2" role="group">
-          {LEVELS.map((l) => (
-            <Button
-              key={l}
-              type="button"
-              size="sm"
-              variant={level === l ? 'default' : 'outline'}
-              data-testid={`import-level-h${l}`}
-              onClick={() => handleLevel(l)}
-            >
-              {`H${l}`}
-            </Button>
-          ))}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground text-sm">Split on heading level:</span>
+          <div className="flex gap-2" role="group">
+            {LEVELS.map((l) => (
+              <Button
+                key={l}
+                type="button"
+                size="sm"
+                variant={level === l ? 'default' : 'outline'}
+                data-testid={`import-level-h${l}`}
+                onClick={() => handleLevel(l)}
+              >
+                {`H${l}`}
+              </Button>
+            ))}
+          </div>
+          <GenerateDialog<GeneratedNoteT>
+            connected={aiEnabled}
+            defaultModel={defaultModel}
+            previewInput={{ task: 'notes', text }}
+            action={(modelId) => generateNotes({ text, modelId })}
+            onResult={applyDecomposition}
+            triggerLabel="Decompose with AI"
+            triggerTestId="import-decompose-ai"
+            validate={() =>
+              text.trim().length === 0 ? 'Paste or upload some text first.' : undefined
+            }
+            dialogTitle="Decompose into notes with AI"
+          />
         </div>
-        {aiEnabled && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            data-testid="import-decompose-ai"
-            disabled={isDecomposing || text.trim().length === 0}
-            onClick={decomposeWithAi}
-          >
-            {isDecomposing ? 'Decomposing…' : 'Decompose with AI'}
-          </Button>
-        )}
+
+        <p className="text-muted-foreground text-sm">
+          Each H{level}
+          {' heading starts a new note, titled from that heading. Deeper headings stay inside the '}
+          note&apos;s body. Text before the first H{level}
+          {' heading becomes an "Untitled" note you can rename or skip.'}
+        </p>
+
+        <p className="text-muted-foreground text-sm">
+          <span className="font-medium">Split</span> cuts on headings — instant, deterministic, best
+          when the doc is already well-structured.{' '}
+          <span className="font-medium">Decompose with AI</span> sends the whole text to your
+          connected OpenRouter model, which reads it for meaning and proposes a set of notes —
+          splitting by topic rather than headings. Use it for messy or unstructured prose. Either
+          way the result lands in the same editable preview below before anything is saved.
+        </p>
       </div>
 
       {drafts.length > 0 && (
         <>
           <div>
-            <h2 className="mb-3 text-lg font-semibold">
+            <h2 className="text-lg font-semibold">
               Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
             </h2>
+            <p className="text-muted-foreground mt-1 mb-3 text-sm">
+              Edit any title or body, or skip notes you don&apos;t want, before importing. Changing
+              the split level re-splits and discards these edits.
+            </p>
             <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
           </div>
 

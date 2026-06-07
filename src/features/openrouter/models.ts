@@ -14,3 +14,9 @@ export const OPENROUTER_MODELS: OpenRouterModelT[] = [
 ]
 
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
+
+// Guard against off-list ids reaching OpenRouter (the per-generate override and the settings write
+// both pass through here). Cheap even under BYOK — keeps the curated picker authoritative.
+export function isAllowedModel(id: string): boolean {
+  return OPENROUTER_MODELS.some((m) => m.id === id)
+}

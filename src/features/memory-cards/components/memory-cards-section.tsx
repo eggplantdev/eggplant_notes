@@ -18,19 +18,27 @@ import { GenerateCardsButton } from '@/features/memory-cards/components/generate
 type MemoryCardsSectionPropsT = {
   noteId: string
   cards: MemoryCardT[]
-  // OpenRouter connected → show the AI card-generation entry point (#1).
+  // Whether OpenRouter is connected. The AI card-generation entry point (#1) always shows; when not
+  // connected, the button opens the connect dialog instead of generating.
   aiEnabled: boolean
+  // The user's persisted default model, pre-selected in the generate dialog.
+  defaultModel: string
 }
 
 // Server Component (renders the server-only Shiki RenderMarkdown). This section only ADDS cards —
 // editing lives at the /memory-cards/[id]/edit route.
-export async function MemoryCardsSection({ noteId, cards, aiEnabled }: MemoryCardsSectionPropsT) {
+export async function MemoryCardsSection({
+  noteId,
+  cards,
+  aiEnabled,
+  defaultModel,
+}: MemoryCardsSectionPropsT) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
       <AddMemoryCard noteId={noteId} />
-      {aiEnabled && <GenerateCardsButton noteId={noteId} />}
+      <GenerateCardsButton noteId={noteId} connected={aiEnabled} defaultModel={defaultModel} />
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">

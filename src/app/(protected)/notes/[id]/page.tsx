@@ -12,7 +12,7 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
-import { isOpenRouterConnected } from '@/features/openrouter/queries'
+import { getOpenRouterDefaultModel, isOpenRouterConnected } from '@/features/openrouter/queries'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Next 16 `params`/`searchParams` are Promises. getNote() is RLS-scoped, so a missing OR
@@ -28,11 +28,12 @@ export default async function NotePage({
   const { id } = await params
   const { edit } = await searchParams
   // Independent RLS-scoped reads run concurrently to avoid serial round-trips.
-  const [note, memoryCards, subjects, aiEnabled] = await Promise.all([
+  const [note, memoryCards, subjects, aiEnabled, defaultModel] = await Promise.all([
     getNote(id),
     getMemoryCardsForNote(id),
     getSubjects(),
     isOpenRouterConnected(),
+    getOpenRouterDefaultModel(),
   ])
   if (!note) notFound()
 
@@ -89,7 +90,12 @@ export default async function NotePage({
       {/* The gradient image paints over the Separator's bg-border. */}
       <Separator className="from-neon-green to-neon-cyan neon-glow bg-linear-to-r" />
 
-      <MemoryCardsSection noteId={note.id} cards={memoryCards} aiEnabled={aiEnabled} />
+      <MemoryCardsSection
+        noteId={note.id}
+        cards={memoryCards}
+        aiEnabled={aiEnabled}
+        defaultModel={defaultModel}
+      />
     </PageShell>
   )
 }

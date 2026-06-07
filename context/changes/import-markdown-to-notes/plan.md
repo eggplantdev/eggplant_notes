@@ -401,6 +401,116 @@ for edit → existing create path.
 
 ---
 
+## Phase 5: per-generate model select + always-on prompt/token visibility
+
+### Overview
+
+Two gaps left by Phases 2–4: (a) the credential's `model` column is **never written** — `ConnectCard`
+is connect/disconnect only — so `getOpenRouterModel` always falls through to `DEFAULT_OPENROUTER_MODEL`
+and every user is silently on `gpt-4o-mini`; (b) no visibility into the exact prompt, the token cost, or
+a refinement trail. This phase makes the model **user-selectable** (settings default + per-generate
+override) and surfaces the **exact prompt + token usage** on every generation, with a best-effort local
+log for prompt-refinement history. Full design: `model-select-and-prompt-debug-design.md`.
+
+Model resolution becomes coherent end-to-end:
+
+```
+per-generate override  >  settings default (credential.model)  >  DEFAULT_OPENROUTER_MODEL
+     (GenerateDialog)            (ConnectCard — NEW write)              (fallback)
+```
+
+No `NODE_ENV`/`AI_DEBUG` gate — prompt view, token counts, and logs are always on. File logging is
+best-effort (try/catch; no-ops on read-only prod FS); `console.log` + the in-dialog panel work everywhere.
+
+### Changes Required:
+
+#### 1. Single prompt source — `src/features/openrouter/prompts.ts` (new)
+
+Move the inline `SYSTEM` / `SYSTEM_DECOMPOSE` / `SYSTEM_TOPIC` constants into pure builders so the
+previewed prompt and the sent prompt can never drift:
+
+- `buildCardsPrompt(source) → { system, prompt }`
+- `buildNotesPrompt(source) → { system, prompt }`
+
+This is the one file to edit during prompt refinement.
+
+#### 2. Model override threaded through actions + server client
+
+- `getOpenRouterModel(overrideModelId?)` (`server-client.ts`): resolve `override ?? credential.model ??
+DEFAULT`. Validate `override` against `OPENROUTER_MODELS` (reject off-list ids — cheap guard under BYOK).
+- `generateCards` / `generateNotes`: accept optional `modelId` in their input union, pass to
+  `getOpenRouterModel`; consume the new builders.
+- Capture `usage` off the result: `const { object, usage } = await generateObject(...)` —
+  `usage = { inputTokens, outputTokens, totalTokens }` (AI SDK v6; each may be `undefined` — handle it).
+
+#### 3. `GenerateResultT` carries debug; logger writes the trail
+
+- Extend `GenerateResultT` (`types.ts`) with `debug: { system: string; prompt: string; usage: UsageT }`,
+  populated on **every** call (no gate).
+- `src/lib/ai-debug/log-generation.ts` (new, server-only): per call → structured `console.log` (always)
+  **plus** best-effort append to `context/changes/import-markdown-to-notes/ai-debug/<date>.jsonl` and a
+  readable `<date>.md` (task, model, system, prompt, output, usage, latencyMs). Wrap file writes in
+  try/catch. Add `context/changes/import-markdown-to-notes/ai-debug/` to `.gitignore`.
+
+#### 4. Prompt preview action — `src/features/openrouter/actions/preview-prompt.ts` (new)
+
+`previewPrompt(task, input, modelId) → { system, prompt }` — runs the builder only, **no LLM call, zero
+cost**. Feeds the dialog's live prompt view before the user commits to generating.
+
+#### 5. Settings model picker — the persisted default
+
+- `src/features/openrouter/components/model-select.tsx` (new, client) — `<Select>` over
+  `OPENROUTER_MODELS`; **shared** by settings and the dialog. Client component; settings passes the
+  current default as a prop.
+- `setOpenRouterModel(modelId)` (new action, `actions/set-model.ts`): allowlist-validate → write
+  `credential.model` via the `runTableAction`/upsert pattern (`update-daily-goal.ts` is the model) →
+  `revalidatePath('/settings')`.
+- `getOpenRouterDefaultModel()` query (`queries.ts`): returns `credential.model ?? DEFAULT` for pre-select.
+- `ConnectCard` (connected branch) gains the picker + an explicit **"Default model: <label>"** line +
+  "used for all AI generation unless you override it per-generate."
+
+#### 6. Shared `GenerateDialog` — `src/features/openrouter/components/generate-dialog.tsx` (new)
+
+Two-step: trigger → dialog (model `<Select>` pre-selected to the default, default option tagged
+`(default)`; live prompt view via `previewPrompt`) → **Generate** → `action(input, modelId)` → on success
+render input/output/total **token counts**, then `onResult`. Generic over the action: caller passes base
+input (noteId / topic / text) + `onResult`; the dialog injects `modelId`.
+
+Route all four entry points through it: `TopicGenerator` (#2, #5), the import **decompose** button (#3,
+`import-panel.tsx`), and **generate-cards-button** (#1).
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `previewPrompt` output for each task equals the prompt the matching action sends (shared-builder test).
+- Off-list `modelId` is rejected by both `getOpenRouterModel` and `setOpenRouterModel`.
+- `setOpenRouterModel` persists `credential.model`; `getOpenRouterDefaultModel` reads it back.
+- Type/lint/build pass.
+
+#### Manual Verification:
+
+- Settings shows the current default model; changing it persists and is reflected after reload.
+- Each of the four dialogs pre-selects the default (tagged), shows the exact prompt, and after generate
+  shows token counts; picking a different model overrides for that generate only (settings unchanged).
+- Local `ai-debug/*.jsonl` + `*.md` accumulate one entry per generation; `console.log` shows usage.
+- All four AI surfaces still hidden when OpenRouter is not connected.
+
+**Implementation Note**: After Phase 5, run the full slice gate, then proceed to the deferred merge +
+archive + Linear steps in `handoff.md`.
+
+### Addendum AG-4 (2026-06-07): AI controls always-render + gate-on-click
+
+A parallel AI-button/gate stream (review doc `follow-ups/ai-button-gate-review.md`) deliberately
+**reversed** the original "hide AI controls when not connected" decision: every AI trigger now
+**always renders**, and a click while disconnected opens a "Connect OpenRouter" gate dialog instead
+of running. This is a discoverability improvement, but it supersedes the wording of **Phase 3 #2,
+Phase 4 #2, and success criteria 3.7 / 4.7 / 5.8** ("hidden when not connected"). The corrected
+contract: _AI controls are visible when disconnected; clicking opens the connect gate._ Any future
+E2E that asserts "AI button absent when disconnected" must instead assert the gate dialog opens.
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests
@@ -515,3 +625,19 @@ for edit → existing create path.
 - [ ] 4.5 Real unstructured doc decomposes into sensible multiple notes
 - [ ] 4.6 `#5` topic note coherent; editable before save
 - [ ] 4.7 Both hidden when not connected
+
+### Phase 5: model select + prompt/token visibility
+
+#### Automated
+
+- [ ] 5.1 `previewPrompt` output matches the action's sent prompt per task (shared-builder test)
+- [ ] 5.2 Off-list `modelId` rejected by `getOpenRouterModel` + `setOpenRouterModel`
+- [ ] 5.3 `setOpenRouterModel` persists `credential.model`; `getOpenRouterDefaultModel` reads it back
+- [x] 5.4 Type/lint/build pass
+
+#### Manual
+
+- [ ] 5.5 Settings shows + persists the default model (survives reload)
+- [ ] 5.6 Each of the 4 dialogs pre-selects the tagged default, shows the exact prompt + token counts; override is per-generate only
+- [ ] 5.7 `ai-debug/*.jsonl` + `*.md` accumulate one entry per generation; `console.log` shows usage
+- [ ] 5.8 All 4 AI surfaces render when not connected and open the connect gate on click (supersedes the original "hidden when not connected" — see addendum AG-4)

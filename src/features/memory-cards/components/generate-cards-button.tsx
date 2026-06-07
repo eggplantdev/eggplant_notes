@@ -12,25 +12,24 @@ import { Textarea } from '@/components/ui/textarea'
 import { createCardsForNote } from '@/features/memory-cards/actions/create-cards-for-note'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
+import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 
-// #1 grounded gen-cards: generate recall cards from the note's prose, preview/edit them, then commit.
-// Shown only when OpenRouter is connected (the parent gates on it). The preview is the gate — nothing
-// persists until the user accepts.
-export function GenerateCardsButton({ noteId }: { noteId: string }) {
+// #1 grounded gen-cards: generate recall cards from the note's prose via the shared GenerateDialog
+// (model select + prompt preview + tokens; also handles the connect gate), then preview/edit them
+// before committing. The candidate list is the second gate — nothing persists until the user saves.
+export function GenerateCardsButton({
+  noteId,
+  connected,
+  defaultModel,
+}: {
+  noteId: string
+  connected: boolean
+  defaultModel: string
+}) {
   const router = useRouter()
   const [candidates, setCandidates] = useState<GeneratedCardT[] | null>(null)
   const [error, setError] = useState<string | undefined>(undefined)
-  const [isGenerating, startGenerate] = useTransition()
   const [isSaving, startSave] = useTransition()
-
-  function generate() {
-    setError(undefined)
-    startGenerate(async () => {
-      const result = await generateCards({ noteId })
-      if (result.success) setCandidates(result.data)
-      else setError(result.error)
-    })
-  }
 
   function patch(index: number, patchValue: Partial<GeneratedCardT>) {
     setCandidates(
@@ -60,16 +59,16 @@ export function GenerateCardsButton({ noteId }: { noteId: string }) {
     <div className="flex flex-col gap-3">
       {!candidates && (
         <div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            data-testid="cards-generate-ai"
-            disabled={isGenerating}
-            onClick={generate}
-          >
-            {isGenerating ? 'Generating…' : 'Generate cards with AI'}
-          </Button>
+          <GenerateDialog<GeneratedCardT>
+            connected={connected}
+            defaultModel={defaultModel}
+            previewInput={{ task: 'cards', noteId }}
+            action={(modelId) => generateCards({ noteId, modelId })}
+            onResult={(data) => setCandidates(data)}
+            triggerLabel="Generate cards with AI"
+            triggerTestId="cards-generate-ai"
+            dialogTitle="Generate cards from this note"
+          />
         </div>
       )}
 

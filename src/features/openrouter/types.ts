@@ -1,4 +1,18 @@
+// Token usage off the AI SDK v6 `generateObject` result. Each field can be undefined (the SDK types
+// them as `number | undefined`), so the UI/logger must tolerate missing counts.
+export type UsageT = {
+  inputTokens: number | undefined
+  outputTokens: number | undefined
+  totalTokens: number | undefined
+}
+
+// Always-on generation debug: the exact prompt sent + the token usage. Surfaced in the generate
+// dialog and written to the local ai-debug log. Not gated — present on every successful call.
+export type GenerateDebugT = { system: string; prompt: string; model: string; usage: UsageT }
+
 // Shared result envelope for the AI generation actions (gen-cards, gen-notes): a typed data payload
 // on success, an error string on failure. Lives here (not in an action file) because more than one
 // action returns it. Distinct from the project's bare ActionResultT — this carries `data`.
-export type GenerateResultT<T> = { success: true; data: T } | { success: false; error: string }
+export type GenerateResultT<T> =
+  | { success: true; data: T; debug: GenerateDebugT }
+  | { success: false; error: string }
