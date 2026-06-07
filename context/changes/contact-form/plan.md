@@ -297,9 +297,9 @@ Negligible. Transport created once at module scope (Fluid Compute reuse). jiti r
 
 #### Automated
 
-- [x] 2.1 `pnpm typecheck` passes
-- [x] 2.2 `pnpm lint` passes
-- [x] 2.3 `pnpm build` passes
+- [x] 2.1 `pnpm typecheck` passes — 2f44cd2
+- [x] 2.2 `pnpm lint` passes — 2f44cd2
+- [x] 2.3 `pnpm build` passes — 2f44cd2
 
 #### Manual
 
