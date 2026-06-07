@@ -8,15 +8,15 @@ import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
 import { FSRS_STATE_LABELS, MATURITY_OPTIONS } from '@/features/memory-cards/constants'
-import { getCardsForStats, getMemoryCardsList } from '@/features/memory-cards/queries'
+import { getCardOverview, getMemoryCardsList } from '@/features/memory-cards/queries'
 import { parseCardFilters } from '@/features/memory-cards/utils'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
 
-// The "Cards overview" chart is the ONE exception to the filtered/paginated view — it reads the
-// ENTIRE deck via getCardsForStats (ignores q/page/subjects), so it stays a stable whole-deck stat.
+// The "Cards overview" chart is the ONE exception to the filtered/paginated view — it counts the
+// ENTIRE deck via getCardOverview (ignores q/page/subjects), so it stays a stable whole-deck stat.
 export default async function MemoryCardsPage({
   searchParams,
 }: {
@@ -33,10 +33,10 @@ export default async function MemoryCardsPage({
   const q = sp.q ?? ''
   const { states, maturity } = parseCardFilters(sp)
   const { page, limit } = parsePagination(sp)
-  const [subjects, { rows: cards, total }, statsCards] = await Promise.all([
+  const [subjects, { rows: cards, total }, overview] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ subjectIds: selectedIds, q, states, maturity, page, limit }),
-    getCardsForStats(),
+    getCardOverview(),
   ])
   const isFiltered =
     selectedIds.length > 0 || Boolean(q) || states.length > 0 || maturity.length > 0
@@ -51,9 +51,9 @@ export default async function MemoryCardsPage({
       width="full"
       actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >
-      {statsCards.length > 0 && (
+      {overview.total > 0 && (
         <TitledCard title="Cards overview">
-          <CardsOverview cards={statsCards} />
+          <CardsOverview overview={overview} />
         </TitledCard>
       )}
 

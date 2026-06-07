@@ -244,6 +244,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      card_overview: { Args: { p_mature_stability: number }; Returns: Json }
+      card_stats: {
+        Args: { p_time_zone: string; p_window_days: number }
+        Returns: Json
+      }
       create_note_with_checks: {
         Args: { p_checks: Json; p_note: Json }
         Returns: string
@@ -252,6 +257,14 @@ export type Database = {
       record_review: {
         Args: { p_card: Json; p_memory_card_id: string; p_rating: number }
         Returns: undefined
+      }
+      review_day_counts: {
+        Args: { p_since?: string; p_time_zone: string }
+        Returns: {
+          day: string
+          distinct_cards: number
+          total_events: number
+        }[]
       }
     }
     Enums: {

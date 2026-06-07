@@ -1,20 +1,18 @@
 import { InfoTip } from '@/components/ui/info-tip'
 import { CardsByMaturityChart } from '@/features/memory-cards/components/cards-by-maturity-chart'
 import { CardsByStateChart } from '@/features/memory-cards/components/cards-by-state-chart'
-import { MATURE_STABILITY_DAYS } from '@/features/memory-cards/constants'
-import type { MemoryCardT } from '@/features/memory-cards/types'
+import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
+import type { CardOverviewT } from '@/features/memory-cards/types'
 
-type PropsT = { cards: Pick<MemoryCardT, 'state' | 'stability'>[] }
+type PropsT = { overview: CardOverviewT }
 
-// Aggregate over the ENTIRE deck (getCardsForStats, not the paginated list — so it ignores
-// `?q`/`?page`/`?subjects`). Two axes: the FSRS state mix and the maturity split.
-export function CardsOverview({ cards }: PropsT) {
-  const stateCounts = [0, 0, 0, 0]
-  let mature = 0
-  for (const c of cards) {
-    if (c.state >= 0 && c.state < stateCounts.length) stateCounts[c.state] += 1
-    if (c.stability >= MATURE_STABILITY_DAYS) mature += 1
-  }
+// Whole-deck counts (card_overview RPC, not the paginated list — so it ignores `?q`/`?page`/
+// `?subjects`). Two axes: the FSRS state mix and the maturity split. `byState` omits absent states,
+// so zero-fill one slot per FSRS state (vocabulary single-sourced in FSRS_STATE_LABELS); young =
+// everything not mature.
+export function CardsOverview({ overview }: PropsT) {
+  const stateCounts = FSRS_STATE_LABELS.map((_, state) => overview.byState[state] ?? 0)
+  const mature = overview.mature
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -39,7 +37,7 @@ export function CardsOverview({ cards }: PropsT) {
             </span>
           </InfoTip>
         </p>
-        <CardsByMaturityChart mature={mature} young={cards.length - mature} />
+        <CardsByMaturityChart mature={mature} young={overview.total - mature} />
       </div>
     </div>
   )

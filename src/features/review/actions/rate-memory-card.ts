@@ -6,7 +6,8 @@ import { detectGoalCrossing } from '@/features/review/detect-goal-crossing'
 import { goalSchema, ratingSchema } from '@/features/review/schemas'
 import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
-import { getReviewedTodayCount, getReviewsThisWeekCount } from '@/features/review-events/queries'
+import { nextReviewCounts, reviewWindowKeys } from '@/features/review-events/derive-counts'
+import { getReviewCounts } from '@/features/review-events/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
@@ -32,10 +33,9 @@ export async function rateMemoryCard(
   const goalParsed = goalSchema.safeParse(goal)
   const dailyGoal = goalParsed.success ? goalParsed.data : 0
 
-  const [{ data: row, error: fetchError }, dailyBefore, weeklyBefore] = await Promise.all([
+  const [{ data: row, error: fetchError }, before] = await Promise.all([
     supabase.from('memory_cards').select('*').eq('id', parsedId.data).maybeSingle(),
-    getReviewedTodayCount(supabase),
-    getReviewsThisWeekCount(supabase),
+    getReviewCounts(supabase),
   ])
   if (fetchError) {
     console.error('[rateMemoryCard] fetch error', fetchError)
@@ -54,15 +54,14 @@ export async function rateMemoryCard(
     return { success: false, error: error.message }
   }
 
-  const [dailyAfter, weeklyAfter] = await Promise.all([
-    getReviewedTodayCount(supabase),
-    getReviewsThisWeekCount(supabase),
-  ])
+  // After-counts derived in memory — no second round-trip (record_review just added one event for
+  // this card). See nextReviewCounts for the +1/+0 rules.
+  const after = nextReviewCounts(before, row.last_review, reviewWindowKeys().todayStr)
   const celebrate = detectGoalCrossing({
-    dailyBefore,
-    dailyAfter,
-    weeklyBefore,
-    weeklyAfter,
+    dailyBefore: before.today,
+    dailyAfter: after.today,
+    weeklyBefore: before.week,
+    weeklyAfter: after.week,
     dailyGoal,
   })
 

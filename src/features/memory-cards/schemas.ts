@@ -1,5 +1,16 @@
 import { z } from 'zod'
 
+import type { CardOverviewT } from '@/features/memory-cards/types'
+
+// Runtime-validates the card_overview RPC's jsonb payload at the boundary (loud throw on a future
+// SQL key change, not a silent `undefined`). `satisfies z.ZodType<CardOverviewT>` binds it to the
+// hand type so the two can't drift.
+export const cardOverviewSchema = z.object({
+  byState: z.record(z.string(), z.number()),
+  mature: z.number(),
+  total: z.number(),
+}) satisfies z.ZodType<CardOverviewT>
+
 export const promptSchema = z
   .string()
   .trim()

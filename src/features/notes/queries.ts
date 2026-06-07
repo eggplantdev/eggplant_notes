@@ -3,7 +3,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { NoteListItemT } from '@/features/notes/types'
 import type { NoteT } from '@/types/note'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
-import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -43,13 +42,6 @@ export async function getNotes(
       .range(offset, offset + limit - 1),
     () => filtered(true),
   )
-}
-
-// Lean read for the dashboard stats: id/title only, never `content`. Injectable client per the
-// isolation rule.
-export async function getNotesForStats(client?: SupabaseClient<Database>) {
-  const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) => c.from('notes').select('id, title'))
 }
 
 // RLS scopes to the owner, so a missing OR not-owned id both resolve to `undefined` (caller
