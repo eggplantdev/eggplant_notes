@@ -19,13 +19,21 @@ export function uniqueEmail(tag = '') {
   return `e2e-${prefix}${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
 }
 
+// Assert we've landed on the dashboard after an auth action. Sign-up/in/password-update redirect
+// to `/dashboard?toast=<kind>`, a transient query the client strips after mount — so match with or
+// without it rather than racing the strip, and allow for GoTrue/hydration latency under full-suite
+// load (the bare-`/dashboard`, default-5s form flaked once the local stack degraded over a long run).
+export async function expectDashboard(page: Page) {
+  await expect(page).toHaveURL(/\/dashboard(\?|$)/, { timeout: 15_000 })
+}
+
 // Sign up through the real UI and land on the dashboard.
 export async function signUp(page: Page, email: string) {
   await page.goto('/sign-up')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(PASSWORD)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page).toHaveURL('/dashboard')
+  await expectDashboard(page)
 }
 
 // Create a note via the UI (title only) and land on its detail page (/notes/<id>). Shared by

@@ -29,8 +29,10 @@ test('memory-cards overview: renders both radial charts with accessible text cou
   // Mature/Young explanation is reachable as an accessible tooltip trigger.
   await expect(page.getByRole('button', { name: 'What do Mature and Young mean?' })).toBeVisible()
 
-  // Counts exposed as text for screen-reader / non-hover users (sr-only → attached, not visible).
-  await expect(page.getByText('New: 1')).toBeAttached()
-  await expect(page.getByText('Mature: 0')).toBeAttached()
-  await expect(page.getByText('Young: 1')).toBeAttached()
+  // Counts exposed as text in each legend item (label + value). Match the legend listitems with a
+  // label→count regex (\D* tolerates any separator) so the readout's wording/format is free to
+  // change — we assert the deterministic counts, not the exact "New: 1" string.
+  await expect(page.getByRole('listitem').filter({ hasText: /New\D*1/ })).toBeAttached()
+  await expect(page.getByRole('listitem').filter({ hasText: /Mature\D*0/ })).toBeAttached()
+  await expect(page.getByRole('listitem').filter({ hasText: /Young\D*1/ })).toBeAttached()
 })

@@ -11,7 +11,9 @@ test('renders both stat cards', async ({ page }) => {
   await page.goto('/dashboard')
   await expect(page.getByText('Due today')).toBeVisible()
   await expect(page.getByText('Current streak')).toBeVisible()
-  await expect(page.getByText('consecutive days with ≥1 review')).toBeVisible()
+  // Streak renders a numeric value next to the 🔥 marker. Assert structure, not the description
+  // copy — the wording is free to change without breaking this smoke test.
+  await expect(page.getByText('🔥')).toBeVisible()
 })
 
 test('renders the 12-month heatmap grid', async ({ page }) => {
