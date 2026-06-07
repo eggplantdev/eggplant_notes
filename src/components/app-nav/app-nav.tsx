@@ -1,5 +1,8 @@
+import { Suspense } from 'react'
+
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
 import { NavConnectButton } from '@/features/openrouter/components/nav-connect-button'
+import { NavCredits } from '@/features/openrouter/components/nav-credits'
 import { isOpenRouterConnected } from '@/features/openrouter/queries'
 import { CurrentPageLabel } from './current-page-label'
 import { MobileNav } from './mobile-nav'
@@ -20,7 +23,13 @@ export async function AppNav() {
           </nav>
 
           <div className="flex items-center gap-1">
-            {!connected && <NavConnectButton />}
+            {connected ? (
+              <Suspense fallback={null}>
+                <NavCredits />
+              </Suspense>
+            ) : (
+              <NavConnectButton />
+            )}
             <NavLink href={SETTINGS_ITEM.href} label={SETTINGS_ITEM.label} />
             <SignOutButton size="sm" />
           </div>
