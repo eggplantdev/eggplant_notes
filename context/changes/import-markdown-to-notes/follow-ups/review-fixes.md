@@ -37,3 +37,28 @@ here for a later change.
   `features/notes`. `prompts.ts:cardsMaterialFromNote` is already shaped for this. (The action layer
   still re-fetches server-side for the RLS trust boundary — only the display-only `previewPrompt` can
   fully sever the edge.) Surfaced by the Phase 5 feature-first-structure review.
+
+## Gate 2026-06-07 (Phase 7 #3 + Phase 8 — PDF/vision)
+
+### G8-1 — File-filtered model picker is empty when the live catalog is offline/fails
+
+- **Where:** `src/features/openrouter/components/model-select.tsx:28-33` (`RECOMMENDED_SEED`),
+  `src/features/openrouter/catalog.ts` (`FALLBACK`).
+- **What:** Both hardcode `inputModalities: ['text']` for every recommended model. With
+  `filter='file'` (PDF surface), `filterModels` drops all of them — so before the live `/models`
+  fetch lands the "Recommended" group is empty, and if the fetch _fails_ the file-filtered picker
+  shows "No models found" permanently. Generation still works (the selected value defaults to
+  `DEFAULT_OPENROUTER_FILE_MODEL`, which passes `isAllowedModel` via FALLBACK), but the user can't
+  see or switch models. Degraded/offline-only; the happy path (live fetch) is fine.
+- **Why deferred:** Fix is to tag the known file-capable recommended ids (Gemini Flash, GPT-4o,
+  Claude 3.x) with a vision modality in the seed/fallback — but hardcoding modalities risks drifting
+  from OpenRouter's truth. Low severity; revisit if offline PDF use matters.
+
+### G8-2 — No Tailwind-aware ESLint plugin → unregistered classes invisible to CI
+
+- **Where:** `eslint.config.mjs` (project-wide).
+- **What:** No `eslint-plugin-better-tailwindcss`, so `pnpm lint` never flags an unregistered utility
+  or legacy `[var(--x)]` syntax — those are editor-IntelliSense-only. Surfaced by the tailwind-v4
+  audit (the slice itself was clean).
+- **Why deferred:** Tooling change, project-wide, out of this slice's scope. Wire the plugin with
+  `entryPoint` → `src/app/globals.css` as a standalone chore.
