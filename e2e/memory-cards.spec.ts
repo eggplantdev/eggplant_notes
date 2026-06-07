@@ -29,16 +29,17 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await expect(page.locator('pre.shiki')).toBeVisible()
   expect(await page.locator('pre.shiki span[style*="--shiki"]').count()).toBeGreaterThan(3)
 
-  // Edit via the ?edit link → form seeds → change the question → save.
+  // Edit via the dedicated /memory-cards/<id>/edit route → form seeds → change the question → save.
   await row.getByRole('link', { name: 'Edit' }).click()
-  await expect(page).toHaveURL(/\?edit=[0-9a-f-]+/)
+  await expect(page).toHaveURL(/\/memory-cards\/[0-9a-f-]+\/edit$/)
   const editedPrompt = `${prompt} (edited)`
   await page.getByLabel('Question').fill(editedPrompt)
   await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page.getByText(editedPrompt)).toBeVisible({ timeout: 15_000 })
 
-  // Delete via the row's AlertDialog confirm.
-  const editedRow = page.locator('li', { hasText: editedPrompt })
+  // Saving redirects to the /memory-cards listing; delete from there via the row's AlertDialog.
+  // Listing rows are card links (not <li>), with Edit/Delete buttons in the action slot.
+  const editedRow = page.getByRole('link').filter({ hasText: editedPrompt })
   await editedRow.getByRole('button', { name: 'Delete' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })

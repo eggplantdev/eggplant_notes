@@ -27,7 +27,7 @@ async function createNoteInSubject(page: Page, title: string, subject: string): 
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
 }
 
-test('memory-cards listing: lists checks, filters by subject, card deep-links to its note', async ({
+test('memory-cards listing: lists checks, filters by subject, card opens its review page', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('tc-list'))
@@ -64,8 +64,8 @@ test('memory-cards listing: lists checks, filters by subject, card deep-links to
   await expect(page.getByRole('link').filter({ hasText: promptA })).toBeVisible()
   await expect(page.getByRole('link').filter({ hasText: promptB })).toHaveCount(0)
 
-  // (3) Click the card → its parent note, deep-linked to the exact card.
+  // (3) Click the card → its own review page; the source note stays reachable from there.
   await page.getByRole('link').filter({ hasText: promptA }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+#card-[0-9a-f-]+$/, { timeout: 15_000 })
-  await expect(page.locator('li', { hasText: promptA })).toBeVisible()
+  await expect(page).toHaveURL(/\/memory-cards\/[0-9a-f-]+$/, { timeout: 15_000 })
+  await expect(page.getByRole('link', { name: `From: ${noteA}` })).toBeVisible()
 })
