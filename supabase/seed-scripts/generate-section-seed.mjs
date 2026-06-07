@@ -183,7 +183,11 @@ const pad = (n) => String(n).padStart(12, '0');
 // keep emitting valid v4 anyway for cleanliness and to match `gen_random_uuid()` output.
 const noteId = (i) => `0a7e0000-0000-4000-8000-${pad(i)}`;
 const cardId = (i) => `c4ec0000-0000-4000-8000-${pad(i)}`;
-const eventId = (i) => `5e1e0000-0000-4000-8000-${pad(i)}`;
+
+// Deterministic 0..99 hash of a SQL text expression — the seed for all review-history
+// variation. md5 → take 8 hex chars → bit(32) → signed int → fold to 0..99. `(% 100 + 100) % 100`
+// normalizes the sign so negative ints map into range. Stable across `db reset` (no random()).
+const H = (seedExpr) => `(('x' || substr(md5(${seedExpr}), 1, 8))::bit(32)::int % 100 + 100) % 100`;
 
 // FSRS profiles cycled across cards so /review (due_at <= now()) and the
 // dashboard both light up: a mix of due-now, overdue, and future cards.
@@ -296,23 +300,50 @@ out.push(cardRows.join(',\n'));
 out.push(`on conflict (id) do nothing;`);
 out.push('');
 
-// review_events: 14 days of history for the overdue/review cards so the
-// dashboard heatmap + streak render with real history. rating FSRS 1..4.
-out.push(`-- Past review history (last 14 days) for the dashboard heatmap/streak.`);
+// review_events: ~53 weeks of history so the dashboard heatmap fills the whole grid
+// (not a 2-week band) and the streak/retention stats render against real volume.
+//
+// HISTORY_DAYS spans the heatmap window (53 weeks ≈ 371 days; getReviewActivity fetches 400d back).
+// STREAK_DAYS most-recent days are forced ≥ daily-goal (5) so a live streak always shows.
+//
+// Per day we pick `n` DISTINCT cards — distinct-count is exactly what the heatmap buckets on
+// (countToLevel: 0 / 1-5 / 6-10 / 11-15 / 16+). `n` comes from a deterministic hash distribution:
+// ~30% rest days, the rest spread across all five levels. Cards are chosen by modular rotation
+// `(rn + d*7) % total < n`, which yields precisely `n` distinct cards and rotates the set day-to-day.
+// reviewed_at is anchored to noon UTC (+ jitter) so it never crosses the UTC↔APP_TIME_ZONE midnight
+// and lands in the wrong day-bucket. Event ids are md5-derived → re-running `db reset` is idempotent.
+const HISTORY_DAYS = 371;
+const STREAK_DAYS = 12;
+out.push(`-- Review history (~53 weeks) for the dashboard heatmap, streak, and retention stats.`);
 out.push(`insert into review_events (id, user_id, memory_card_id, rating, reviewed_at)`);
+out.push(`with cards as (`);
+out.push(`  select id, (row_number() over (order by id) - 1) as rn, count(*) over () as total`);
+out.push(`  from memory_cards where user_id = '${USER_ID}'`);
+out.push(`),`);
+out.push(`day_n as (`);
+out.push(`  select g.d, case`);
+out.push(`    when g.d < ${STREAK_DAYS} then 5 + (${H(`'goal' || g.d::text`)} % 8)`); // 5..12, always ≥ goal
+out.push(`    when ${H(`'act' || g.d::text`)} < 30 then 0`); //                       ~30% rest days
+out.push(`    when ${H(`'act' || g.d::text`)} < 60 then 1 + (${H(`'lvl' || g.d::text`)} % 5)`); //  L1
+out.push(`    when ${H(`'act' || g.d::text`)} < 82 then 6 + (${H(`'lvl' || g.d::text`)} % 5)`); //  L2
+out.push(`    when ${H(`'act' || g.d::text`)} < 95 then 11 + (${H(`'lvl' || g.d::text`)} % 5)`); // L3
+out.push(`    else 16 + (${H(`'lvl' || g.d::text`)} % 8)`); //                          L4 (16..23)
+out.push(`  end as n`);
+out.push(`  from generate_series(0, ${HISTORY_DAYS - 1}) as g(d)`);
+out.push(`)`);
 out.push(`select`);
-out.push(`  ('${eventId(0).slice(0, 24)}' || lpad((tc.rn * 100 + g.d)::text, 12, '0'))::uuid,`);
+out.push(`  md5('rev-' || dn.d::text || '-' || c.rn::text)::uuid,`);
 out.push(`  '${USER_ID}',`);
-out.push(`  tc.id,`);
-out.push(`  (1 + (g.d % 4))::smallint,`);
-out.push(`  now() - (g.d || ' days')::interval`);
-out.push(`from (`);
-out.push(`  select id, row_number() over (order by id) as rn`);
-out.push(`  from memory_cards`);
-out.push(`  where user_id = '${USER_ID}' and state = 2`);
-out.push(`) as tc`);
-out.push(`cross join generate_series(0, 13) as g(d)`);
-out.push(`where tc.rn <= 12`);
+out.push(`  c.id,`);
+out.push(`  (case`); // FSRS rating, weighted toward good — flat 1..4 would imply a 25% lapse rate
+out.push(`    when ${H(`'rate' || dn.d::text || '-' || c.rn::text`)} < 8 then 1`);
+out.push(`    when ${H(`'rate' || dn.d::text || '-' || c.rn::text`)} < 22 then 2`);
+out.push(`    when ${H(`'rate' || dn.d::text || '-' || c.rn::text`)} < 80 then 3`);
+out.push(`    else 4 end)::smallint,`);
+out.push(`  date_trunc('day', now()) - (dn.d || ' days')::interval`);
+out.push(`    + interval '12 hours' + ((${H(`'min' || dn.d::text || '-' || c.rn::text`)} * 2) || ' minutes')::interval`);
+out.push(`from day_n dn`);
+out.push(`join cards c on ((c.rn + dn.d * 7) % c.total) < least(dn.n, c.total)`);
 out.push(`on conflict (id) do nothing;`);
 out.push('');
 

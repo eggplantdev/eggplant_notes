@@ -1697,21 +1697,36 @@ Expression unika mutowania zmiennej `result`.$seed$, null,
    0, 0, 0, 0, 0, 0, 0, 0, now(), null)
 on conflict (id) do nothing;
 
--- Past review history (last 14 days) for the dashboard heatmap/streak.
+-- Review history (~53 weeks) for the dashboard heatmap, streak, and retention stats.
 insert into review_events (id, user_id, memory_card_id, rating, reviewed_at)
+with cards as (
+  select id, (row_number() over (order by id) - 1) as rn, count(*) over () as total
+  from memory_cards where user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
+),
+day_n as (
+  select g.d, case
+    when g.d < 12 then 5 + ((('x' || substr(md5('goal' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 % 8)
+    when (('x' || substr(md5('act' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 30 then 0
+    when (('x' || substr(md5('act' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 60 then 1 + ((('x' || substr(md5('lvl' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 % 5)
+    when (('x' || substr(md5('act' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 82 then 6 + ((('x' || substr(md5('lvl' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 % 5)
+    when (('x' || substr(md5('act' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 95 then 11 + ((('x' || substr(md5('lvl' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 % 5)
+    else 16 + ((('x' || substr(md5('lvl' || g.d::text), 1, 8))::bit(32)::int % 100 + 100) % 100 % 8)
+  end as n
+  from generate_series(0, 370) as g(d)
+)
 select
-  ('5e1e0000-0000-4000-8000-' || lpad((tc.rn * 100 + g.d)::text, 12, '0'))::uuid,
+  md5('rev-' || dn.d::text || '-' || c.rn::text)::uuid,
   'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
-  tc.id,
-  (1 + (g.d % 4))::smallint,
-  now() - (g.d || ' days')::interval
-from (
-  select id, row_number() over (order by id) as rn
-  from memory_cards
-  where user_id = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee' and state = 2
-) as tc
-cross join generate_series(0, 13) as g(d)
-where tc.rn <= 12
+  c.id,
+  (case
+    when (('x' || substr(md5('rate' || dn.d::text || '-' || c.rn::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 8 then 1
+    when (('x' || substr(md5('rate' || dn.d::text || '-' || c.rn::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 22 then 2
+    when (('x' || substr(md5('rate' || dn.d::text || '-' || c.rn::text), 1, 8))::bit(32)::int % 100 + 100) % 100 < 80 then 3
+    else 4 end)::smallint,
+  date_trunc('day', now()) - (dn.d || ' days')::interval
+    + interval '12 hours' + (((('x' || substr(md5('min' || dn.d::text || '-' || c.rn::text), 1, 8))::bit(32)::int % 100 + 100) % 100 * 2) || ' minutes')::interval
+from day_n dn
+join cards c on ((c.rn + dn.d * 7) % c.total) < least(dn.n, c.total)
 on conflict (id) do nothing;
 
 -- ----------------------------------------------------------------------------
