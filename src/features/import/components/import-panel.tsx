@@ -132,6 +132,24 @@ export function ImportPanel({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Intro up front, under the page header — explain the two paths BEFORE the controls. */}
+      <div className="text-muted-foreground flex flex-col gap-2 text-sm">
+        <p>Paste text or upload a Markdown file, then turn it into notes in one of two ways:</p>
+        <ul className="ml-4 list-disc space-y-1">
+          <li>
+            <span className="text-foreground font-medium">Split</span> — cut the document at its
+            headings (H1, H2, or H3). Instant and exact; best when it&apos;s already
+            well-structured.
+          </li>
+          <li>
+            <span className="text-foreground font-medium">Decompose with AI</span> — your connected
+            model reads the text and groups it into notes by topic. Best for messy or unstructured
+            prose.
+          </li>
+        </ul>
+        <p>Either way, you can edit, rename, or skip notes before saving.</p>
+      </div>
+
       <SourceInput value={text} onChange={handleSource} />
 
       <div className="flex flex-col gap-2">
@@ -165,19 +183,9 @@ export function ImportPanel({
         </div>
 
         <p className="text-muted-foreground text-sm">
-          Each H{level}
-          {' heading starts a new note, titled from that heading. Deeper headings stay inside the '}
-          note&apos;s body. Text before the first H{level}
-          {' heading becomes an "Untitled" note you can rename or skip.'}
-        </p>
-
-        <p className="text-muted-foreground text-sm">
-          <span className="font-medium">Split</span> cuts on headings — instant, deterministic, best
-          when the doc is already well-structured.{' '}
-          <span className="font-medium">Decompose with AI</span> sends the whole text to your
-          connected OpenRouter model, which reads it for meaning and proposes a set of notes —
-          splitting by topic rather than headings. Use it for messy or unstructured prose. Either
-          way the result lands in the same editable preview below before anything is saved.
+          Each H{level} heading becomes a note titled from that heading; deeper headings stay in its
+          body. Text before the first H{level} heading becomes an “Untitled” note you can rename or
+          skip.
         </p>
       </div>
 

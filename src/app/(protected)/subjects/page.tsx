@@ -26,7 +26,14 @@ export default async function SubjectsPage({
       title="Subjects"
       subtitle={pluralize(total, 'subject')}
       width="prose"
-      actions={<ButtonLink href="/subjects/new">New subject</ButtonLink>}
+      actions={
+        <>
+          <ButtonLink href="/import" variant="outline">
+            Import
+          </ButtonLink>
+          <ButtonLink href="/subjects/new">New subject</ButtonLink>
+        </>
+      }
     >
       {(total > 0 || isFiltered) && <SearchFilterInput placeholder="Search subjects…" />}
 

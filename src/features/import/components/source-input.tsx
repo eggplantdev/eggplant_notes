@@ -29,7 +29,7 @@ export function SourceInput({
           type="file"
           accept=".md,.markdown,.txt,text/markdown,text/plain"
           onChange={handleFile}
-          className="file:text-foreground text-muted-foreground text-sm file:mr-3 file:rounded-md file:border file:bg-transparent file:px-3 file:py-1.5 file:text-sm"
+          className="file:text-foreground text-muted-foreground w-fit text-sm file:mr-3 file:rounded-md file:border file:bg-transparent file:px-3 file:py-1.5 file:text-sm"
         />
       </div>
       <div className="grid gap-2">
