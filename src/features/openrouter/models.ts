@@ -25,6 +25,10 @@ export const RECOMMENDED_MODEL_IDS: string[] = RECOMMENDED_MODELS.map((m) => m.i
 
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
 
+// Default for the PDF/vision import surface (Phase 8): a cheap, file-capable, dated id (never a
+// `*-latest` alias). Gemini Flash reads PDFs well at low cost; the picker still lets the user switch.
+export const DEFAULT_OPENROUTER_FILE_MODEL = 'google/gemini-2.0-flash-001'
+
 // Modalities that count as "can read a file" (PDF/image vision) — the Phase 8 import surface filters
 // the catalog to these. OpenRouter reports image input as `'image'`; some entries also list `'file'`.
 const FILE_MODALITIES = ['image', 'file']

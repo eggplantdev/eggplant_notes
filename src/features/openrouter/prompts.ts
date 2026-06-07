@@ -69,6 +69,15 @@ export function buildNotesPrompt(source: { text: string } | { topic: string }): 
   return { system: NOTES_TOPIC_SYSTEM, prompt: `Write a study note about: ${source.topic}` }
 }
 
+// gen-notes from an uploaded file (#PDF, Phase 8): same decompose intent as the text path, but the
+// source is attached as a file part on the user message — the instruction here is the text half.
+export function buildNotesFilePrompt(): PromptT {
+  return {
+    system: NOTES_DECOMPOSE_SYSTEM,
+    prompt: 'Read the attached document and split it into multiple focused study notes.',
+  }
+}
+
 // What the generate dialog previews BEFORE generating — the exact prompt the matching action will
 // send, built from the SAME builders so the two can't drift. Pure: the caller passes material it
 // already has (the grounded-cards caller passes the note it already loaded), so there's no DB fetch
@@ -77,8 +86,10 @@ export type PreviewInputT =
   | { task: 'cards'; material: string }
   | { task: 'notes'; text: string }
   | { task: 'notes'; topic: string }
+  | { task: 'notes'; file: true }
 
 export function previewPrompt(input: PreviewInputT): PromptT {
   if (input.task === 'cards') return buildCardsPrompt(input.material)
+  if ('file' in input) return buildNotesFilePrompt()
   return buildNotesPrompt('text' in input ? { text: input.text } : { topic: input.topic })
 }
