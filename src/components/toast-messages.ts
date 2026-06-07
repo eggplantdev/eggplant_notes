@@ -9,6 +9,7 @@ export const TOAST_MESSAGES = {
   'card-saved': 'Card saved',
   'subject-saved': 'Subject saved',
   'subject-deleted': 'Subject deleted',
+  'notes-imported': 'Notes imported',
   'signed-in': 'Welcome back',
   'signed-up': 'Account created',
   'password-updated': 'Password updated',

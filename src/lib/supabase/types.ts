@@ -254,6 +254,10 @@ export type Database = {
         Returns: string
       }
       delete_account: { Args: never; Returns: undefined }
+      import_notes: {
+        Args: { p_notes: Json; p_subject: Json }
+        Returns: string
+      }
       record_review: {
         Args: { p_card: Json; p_memory_card_id: string; p_rating: number }
         Returns: undefined
