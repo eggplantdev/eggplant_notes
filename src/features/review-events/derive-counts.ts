@@ -30,3 +30,18 @@ export function reviewedTodayCount(rows: ReviewDayCountT[], todayStr: string): n
 export function reviewsThisWeekCount(rows: ReviewDayCountT[], weekStartStr: string): number {
   return rows.reduce((sum, r) => (r.date >= weekStartStr ? sum + r.totalEvents : sum), 0)
 }
+
+// The today/week counts AFTER recording exactly one new review for a card, derived in memory from
+// the pre-write `before` snapshot — so rateMemoryCard's goal-crossing check needs no second query.
+// `week` always +1 (the new event is in the trailing week); `today` (DISTINCT cards) rises only if
+// the card wasn't already reviewed today, told by its pre-write `lastReview` bucketed to
+// APP_TIME_ZONE. `todayStr` is passed in (clock-free) so this stays pure/testable.
+export function nextReviewCounts(
+  before: { today: number; week: number },
+  lastReview: string | null,
+  todayStr: string,
+): { today: number; week: number } {
+  const reviewedTodayAlready =
+    lastReview != null && isoDateInZone(new Date(lastReview), APP_TIME_ZONE) === todayStr
+  return { today: before.today + (reviewedTodayAlready ? 0 : 1), week: before.week + 1 }
+}

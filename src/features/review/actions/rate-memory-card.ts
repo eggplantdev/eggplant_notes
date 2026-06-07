@@ -6,11 +6,10 @@ import { detectGoalCrossing } from '@/features/review/detect-goal-crossing'
 import { goalSchema, ratingSchema } from '@/features/review/schemas'
 import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
-import { reviewWindowKeys } from '@/features/review-events/derive-counts'
+import { nextReviewCounts, reviewWindowKeys } from '@/features/review-events/derive-counts'
 import { getReviewCounts } from '@/features/review-events/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
-import { APP_TIME_ZONE, isoDateInZone } from '@/lib/utils'
 import { validateInput } from '@/lib/validate'
 
 // Server-trusted: the client sends only { memoryCardId, rating }; we compute the next FSRS state
@@ -55,16 +54,9 @@ export async function rateMemoryCard(
     return { success: false, error: error.message }
   }
 
-  // After-counts derived in memory — no second round-trip. record_review just added exactly one
-  // event for this card, always within the trailing week (week + 1). Today's DISTINCT-card count
-  // rises only if this card wasn't already reviewed today, which its pre-write `last_review` tells us.
-  const { todayStr } = reviewWindowKeys()
-  const reviewedTodayAlready =
-    row.last_review != null && isoDateInZone(new Date(row.last_review), APP_TIME_ZONE) === todayStr
-  const after = {
-    today: before.today + (reviewedTodayAlready ? 0 : 1),
-    week: before.week + 1,
-  }
+  // After-counts derived in memory — no second round-trip (record_review just added one event for
+  // this card). See nextReviewCounts for the +1/+0 rules.
+  const after = nextReviewCounts(before, row.last_review, reviewWindowKeys().todayStr)
   const celebrate = detectGoalCrossing({
     dailyBefore: before.today,
     dailyAfter: after.today,
