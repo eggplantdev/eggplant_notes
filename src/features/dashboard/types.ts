@@ -12,19 +12,6 @@ export type DashboardDataT = {
   stats: DashboardStatsT
 }
 
-// Structural row shapes defined here (not imported from each feature's queries) so
-// computeDashboardStats stays free of cross-feature type imports; feature reads return assignable rows.
-export type CardStatRowT = {
-  id: string
-  prompt: string
-  note_id: string | null // null for a standalone card
-  due_at: string
-  stability: number
-  lapses: number
-}
-export type NoteStatRowT = { id: string; title: string | null }
-export type RatingStatRowT = { rating: number; reviewed_at: string }
-
 // noteId is null for a standalone card (rendered as a plain, non-link title).
 export type HardestCardT = {
   id: string
@@ -33,6 +20,16 @@ export type HardestCardT = {
   noteTitle: string
   lapses: number
   stability: number
+}
+
+// Decoded payload of the card_stats RPC (jsonb). `good`/`reviewsInWindow` are the retention
+// numerator/denominator; the dashboard divides them (guarding /0).
+export type CardStatsT = {
+  overdue: number
+  dueNow: number
+  reviewsInWindow: number
+  good: number
+  hardest: HardestCardT[]
 }
 
 export type DashboardStatsT = {

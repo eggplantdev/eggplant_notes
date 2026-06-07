@@ -2,12 +2,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { MATURE_STABILITY_DAYS, type MaturityT } from '@/features/memory-cards/constants'
 import type {
+  CardOverviewT,
   DueCardT,
   MemoryCardListItemT,
   MemoryCardT,
   MemoryCardWithSourceT,
 } from '@/features/memory-cards/types'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
+import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
@@ -37,14 +39,15 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
-// Every owned card, only the columns the aggregation needs. Returns the full set so counts/buckets
-// are computed in TS — PostgREST can't group by the APP_TIME_ZONE-shifted due date in a plain
-// select, and a lean fetch-all is sub-ms at personal scale. RLS scopes rows to the owner.
-export async function getCardsForStats(client?: SupabaseClient<Database>) {
+// Whole-deck counts for the "Cards overview" chart (per FSRS state + mature split), aggregated in
+// the card_overview RPC instead of fetching every card and bucketing in TS. SECURITY INVOKER, so
+// RLS scopes the counts to the owner. Returns a jsonb whose shape the RPC guarantees (safe cast).
+export async function getCardOverview(client?: SupabaseClient<Database>): Promise<CardOverviewT> {
   const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) =>
-    c.from('memory_cards').select('id, prompt, note_id, due_at, state, stability, lapses'),
+  const data = await runRpc('getCardOverview', () =>
+    supabase.rpc('card_overview', { p_mature_stability: MATURE_STABILITY_DAYS }),
   )
+  return data as unknown as CardOverviewT
 }
 
 // Backs the /memory-cards listing, ordered soonest-due first. Selects only the columns the card

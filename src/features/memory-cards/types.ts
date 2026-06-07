@@ -26,3 +26,12 @@ export type MemoryCardListItemT = Pick<
   notes: { title: string | null } | null
   subjects: { title: string } | null
 }
+
+// Decoded payload of the card_overview RPC (jsonb) for the whole-deck "Cards overview" chart.
+// `byState` maps an FSRS state integer (as a string key, per jsonb) to its count; absent states are
+// omitted (the chart zero-fills). `mature` = cards at/over the maturity stability threshold.
+export type CardOverviewT = {
+  byState: Record<string, number>
+  mature: number
+  total: number
+}

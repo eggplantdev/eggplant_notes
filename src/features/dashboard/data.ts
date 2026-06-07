@@ -1,36 +1,43 @@
-import { STATS_WINDOW_DAYS } from '@/features/dashboard/constants'
-import { computeDashboardStats } from '@/features/dashboard/stats'
-import type { DashboardDataT } from '@/features/dashboard/types'
-import { getNotesForStats } from '@/features/notes/queries'
+import { getCardStats } from '@/features/dashboard/queries'
+import type { DashboardDataT, DashboardStatsT } from '@/features/dashboard/types'
 import {
-  getRecentRatings,
-  getReviewActivity,
-  getReviewedTodayCount,
-} from '@/features/review-events/queries'
+  reviewedTodayCount,
+  reviewsThisWeekCount,
+  reviewWindowKeys,
+  toActivity,
+} from '@/features/review-events/derive-counts'
+import { getReviewDayCounts } from '@/features/review-events/queries'
 import { getCurrentStreak } from '@/features/review-events/streak'
-import { getCardsForStats } from '@/features/memory-cards/queries'
-import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 
 // `dailyGoalPromise` is handed in unawaited by the route loader and awaited INSIDE this fan-out:
 // keeps the goal fetch parallel AND keeps features/dashboard free of a features/settings import.
+// Two reads now: per-day review tallies (RPC, all history — feeds heatmap/streak/today/week) and
+// the card_stats RPC (overdue/due/window/hardest). Aggregation runs in SQL, not over fetched rows.
 export async function getDashboardData(dailyGoalPromise: Promise<number>): Promise<DashboardDataT> {
-  const [activity, cards, notes, ratings, reviewedToday, dailyGoal] = await Promise.all([
-    getReviewActivity(),
-    getCardsForStats(),
-    getNotesForStats(),
-    getRecentRatings(STATS_WINDOW_DAYS),
-    getReviewedTodayCount(),
+  const [dayCounts, cardStats, dailyGoal] = await Promise.all([
+    getReviewDayCounts(),
+    getCardStats(),
     dailyGoalPromise,
   ])
-  // "Due now" = getDueQueue's `due_at <= now()` rule, derived from in-memory cards (no extra query).
-  const nowIso = new Date().toISOString()
-  const dueToday = cards.filter((c) => c.due_at <= nowIso).length
+
+  const activity = toActivity(dayCounts)
+  const { todayStr, weekStartStr } = reviewWindowKeys()
   const currentStreak = getCurrentStreak(activity, dailyGoal)
-  const stats = computeDashboardStats({
-    cards,
-    notes,
-    ratings,
-    today: todayInZone(APP_TIME_ZONE),
-  })
-  return { dueToday, reviewedToday, currentStreak, dailyGoal, activity, stats }
+
+  const stats: DashboardStatsT = {
+    overdue: cardStats.overdue,
+    reviewsInWindow: cardStats.reviewsInWindow,
+    reviewsThisWeek: reviewsThisWeekCount(dayCounts, weekStartStr),
+    retention: cardStats.reviewsInWindow > 0 ? cardStats.good / cardStats.reviewsInWindow : null,
+    hardestCards: cardStats.hardest,
+  }
+
+  return {
+    dueToday: cardStats.dueNow,
+    reviewedToday: reviewedTodayCount(dayCounts, todayStr),
+    currentStreak,
+    dailyGoal,
+    activity,
+    stats,
+  }
 }

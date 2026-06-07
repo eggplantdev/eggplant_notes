@@ -6,9 +6,11 @@ import { detectGoalCrossing } from '@/features/review/detect-goal-crossing'
 import { goalSchema, ratingSchema } from '@/features/review/schemas'
 import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
-import { getReviewedTodayCount, getReviewsThisWeekCount } from '@/features/review-events/queries'
+import { reviewWindowKeys } from '@/features/review-events/derive-counts'
+import { getReviewCounts } from '@/features/review-events/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
+import { APP_TIME_ZONE, isoDateInZone } from '@/lib/utils'
 import { validateInput } from '@/lib/validate'
 
 // Server-trusted: the client sends only { memoryCardId, rating }; we compute the next FSRS state
@@ -32,10 +34,9 @@ export async function rateMemoryCard(
   const goalParsed = goalSchema.safeParse(goal)
   const dailyGoal = goalParsed.success ? goalParsed.data : 0
 
-  const [{ data: row, error: fetchError }, dailyBefore, weeklyBefore] = await Promise.all([
+  const [{ data: row, error: fetchError }, before] = await Promise.all([
     supabase.from('memory_cards').select('*').eq('id', parsedId.data).maybeSingle(),
-    getReviewedTodayCount(supabase),
-    getReviewsThisWeekCount(supabase),
+    getReviewCounts(supabase),
   ])
   if (fetchError) {
     console.error('[rateMemoryCard] fetch error', fetchError)
@@ -54,15 +55,21 @@ export async function rateMemoryCard(
     return { success: false, error: error.message }
   }
 
-  const [dailyAfter, weeklyAfter] = await Promise.all([
-    getReviewedTodayCount(supabase),
-    getReviewsThisWeekCount(supabase),
-  ])
+  // After-counts derived in memory — no second round-trip. record_review just added exactly one
+  // event for this card, always within the trailing week (week + 1). Today's DISTINCT-card count
+  // rises only if this card wasn't already reviewed today, which its pre-write `last_review` tells us.
+  const { todayStr } = reviewWindowKeys()
+  const reviewedTodayAlready =
+    row.last_review != null && isoDateInZone(new Date(row.last_review), APP_TIME_ZONE) === todayStr
+  const after = {
+    today: before.today + (reviewedTodayAlready ? 0 : 1),
+    week: before.week + 1,
+  }
   const celebrate = detectGoalCrossing({
-    dailyBefore,
-    dailyAfter,
-    weeklyBefore,
-    weeklyAfter,
+    dailyBefore: before.today,
+    dailyAfter: after.today,
+    weeklyBefore: before.week,
+    weeklyAfter: after.week,
     dailyGoal,
   })
 
