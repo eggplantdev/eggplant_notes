@@ -73,11 +73,13 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
     if (source.promptOverride) {
       ;({ system, prompt } = source.promptOverride)
     } else {
-      prompt = (
-        'file' in source
-          ? buildNotesFilePrompt()
-          : buildNotesPrompt('text' in source ? { text: source.text } : { topic: source.topic })
-      ).prompt
+      if ('file' in source) {
+        prompt = buildNotesFilePrompt().prompt
+      } else if ('text' in source) {
+        prompt = buildNotesPrompt({ text: source.text }).prompt
+      } else {
+        prompt = buildNotesPrompt({ topic: source.topic }).prompt
+      }
       const key = 'topic' in source ? 'notes_topic' : 'notes_decompose'
       system = (await getResolvedSystemPrompts())[key]
     }
