@@ -243,10 +243,10 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
-- [x] 1.3 New unit tests for `keepCompleteCards`/`keepCompleteNotes` pass: `pnpm test`
-- [x] 1.4 Existing `ai-schemas.test.ts` stays green: `pnpm test`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — dd724f3
+- [x] 1.2 Linting passes: `pnpm lint` — dd724f3
+- [x] 1.3 New unit tests for `keepCompleteCards`/`keepCompleteNotes` pass: `pnpm test` — dd724f3
+- [x] 1.4 Existing `ai-schemas.test.ts` stays green: `pnpm test` — dd724f3
 
 #### Manual
 
@@ -257,9 +257,9 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
-- [ ] 2.3 Unit test for `describeGenerationError` passes: `pnpm test`
+- [x] 2.1 Type checking passes: `pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.3 Unit test for `describeGenerationError` passes: `pnpm test`
 
 #### Manual
 

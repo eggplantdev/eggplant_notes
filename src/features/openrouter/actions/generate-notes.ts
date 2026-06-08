@@ -10,7 +10,9 @@ import {
   promptOverrideSchema,
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
+import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
+import { describeGenerationError } from '@/features/openrouter/utils/describe-generation-error'
 import { keepCompleteNotes } from '@/features/openrouter/utils/sanitize-generated'
 import { logGeneration } from '@/lib/ai-debug/log-generation'
 import { validateInput } from '@/lib/validate'
@@ -74,6 +76,7 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
       model: bound.model,
       schema: generatedNotesSchema,
       system,
+      abortSignal: AbortSignal.timeout(GENERATION_TIMEOUT_MS),
       ...('file' in source
         ? {
             messages: [
@@ -123,6 +126,6 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
     }
   } catch (error) {
     console.error('[generateNotes] generation failed', error)
-    return { success: false, error: 'AI generation failed. Try again.' }
+    return { success: false, error: describeGenerationError(error) }
   }
 }

@@ -11,7 +11,9 @@ import {
   promptOverrideSchema,
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
+import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
+import { describeGenerationError } from '@/features/openrouter/utils/describe-generation-error'
 import { keepCompleteCards } from '@/features/openrouter/utils/sanitize-generated'
 import { getNote } from '@/features/notes/queries'
 import { logGeneration } from '@/lib/ai-debug/log-generation'
@@ -68,6 +70,7 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
       schema: generatedCardsSchema,
       system,
       prompt,
+      abortSignal: AbortSignal.timeout(GENERATION_TIMEOUT_MS),
     })
     // Drop blank-field cards before they reach the preview; an all-blank/empty result is surfaced as
     // a friendly error instead of a silent success that no-ops on Apply (mirrors the notes guard).
@@ -97,6 +100,6 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
     }
   } catch (error) {
     console.error('[generateCards] generation failed', error)
-    return { success: false, error: 'AI generation failed. Try again.' }
+    return { success: false, error: describeGenerationError(error) }
   }
 }
