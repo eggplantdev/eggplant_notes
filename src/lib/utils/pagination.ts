@@ -1,6 +1,18 @@
 // Fixed page size for all list reads; no per-page selector for MVP.
 export const DEFAULT_LIMIT = 100
 
+// Resolves a list query's `?page`/`?limit` opts to the `{ offset, limit }` a PostgREST `.range()`
+// needs (`range(offset, offset + limit - 1)`). Single-sources the `?? 1` / `?? DEFAULT_LIMIT`
+// defaults every paginated query repeated.
+export function pageRange(opts?: { page?: number; limit?: number }): {
+  offset: number
+  limit: number
+} {
+  const page = opts?.page ?? 1
+  const limit = opts?.limit ?? DEFAULT_LIMIT
+  return { offset: (page - 1) * limit, limit }
+}
+
 // `totalDocs` is the full match count (the query's `total`), not the page length.
 export type PaginationMetaT = {
   currentPage: number

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { subjectIdSchema } from '@/features/subjects/schemas'
-import { runTableAction } from '@/lib/supabase/run-table-action'
+import { runDeleteRow } from '@/lib/supabase/run-delete-row'
 import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
@@ -11,9 +11,7 @@ import type { ActionResultT } from '@/types/action'
 // (stale `position` is ignored while unassigned; reassigning recomputes it). Revalidate /notes
 // too, since detached notes resurface in the notes list.
 export async function deleteSubject(id: string): Promise<ActionResultT> {
-  const result = await runTableAction(subjectIdSchema, id, (supabase, validId) =>
-    supabase.from('subjects').delete().eq('id', validId).select('id').single(),
-  )
+  const result = await runDeleteRow(subjectIdSchema, 'subjects', id)
   if (!result.success) return result
 
   revalidatePath('/subjects')

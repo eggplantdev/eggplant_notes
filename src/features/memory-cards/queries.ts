@@ -9,13 +9,14 @@ import type {
   MemoryCardWithSourceT,
 } from '@/features/memory-cards/types'
 import { cardOverviewSchema } from '@/features/memory-cards/schemas'
+import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
+import { pageRange } from '@/lib/utils/pagination'
 
 // The single soonest-due card plus the total due count, in one round-trip. RLS scopes rows to the
 // owner. The `(user_id, due_at)` btree index backs the `due_at <= now()` filter + ordering.
@@ -72,9 +73,7 @@ export async function getMemoryCardsList(
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
-  const page = opts?.page ?? 1
-  const limit = opts?.limit ?? DEFAULT_LIMIT
-  const offset = (page - 1) * limit
+  const { offset, limit } = pageRange(opts)
   const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
 
   // `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
@@ -119,16 +118,10 @@ export async function getMemoryCard(
   client?: SupabaseClient<Database>,
 ): Promise<MemoryCardWithSourceT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
-    .from('memory_cards')
-    .select('*, notes(id, title)')
-    .eq('id', id)
-    .maybeSingle()
-  if (error) {
-    console.error('[getMemoryCard] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle(
+    'getMemoryCard',
+    supabase.from('memory_cards').select('*, notes(id, title)').eq('id', id).maybeSingle(),
+  )
 }
 
 // Single card by id in the exact DueCardT shape ReviewPanel consumes, so the standalone card page
@@ -139,16 +132,10 @@ export async function getMemoryCardForReview(
   client?: SupabaseClient<Database>,
 ): Promise<DueCardT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
-    .from('memory_cards')
-    .select('*, notes(title, subject_id)')
-    .eq('id', id)
-    .maybeSingle()
-  if (error) {
-    console.error('[getMemoryCardForReview] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle(
+    'getMemoryCardForReview',
+    supabase.from('memory_cards').select('*, notes(title, subject_id)').eq('id', id).maybeSingle(),
+  )
 }
 
 // All memory cards attached to one note, oldest first. RLS scopes rows to the owner, so a note the

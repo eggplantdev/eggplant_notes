@@ -1,11 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
+import { pageRange } from '@/lib/utils/pagination'
 import type {
   SubjectListItemT,
   SubjectNoteSummaryT,
@@ -33,9 +34,7 @@ export async function getSubjectsList(
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: SubjectListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
-  const page = opts?.page ?? 1
-  const limit = opts?.limit ?? DEFAULT_LIMIT
-  const offset = (page - 1) * limit
+  const { offset, limit } = pageRange(opts)
   const orFilter = opts?.q ? searchOr(['title', 'description'], opts.q) : null
 
   // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
@@ -63,12 +62,10 @@ export async function getSubject(
   client?: SupabaseClient<Database>,
 ): Promise<SubjectT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase.from('subjects').select('*').eq('id', id).maybeSingle()
-  if (error) {
-    console.error('[getSubject] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle(
+    'getSubject',
+    supabase.from('subjects').select('*').eq('id', id).maybeSingle(),
+  )
 }
 
 // Lightweight list for the docs-style sidebar nav: id/title/position only, never `content`.
