@@ -34,6 +34,16 @@ const sourceSchema = z.union([
     modelId: z.string().optional(),
     promptOverride: promptOverrideSchema.optional(),
   }),
+  // Ungrounded on the note the user is CURRENTLY writing (create-note form) — no saved row to fetch,
+  // so the material is built from the draft title+content the client sends (capped like notes text).
+  z.object({
+    draftNote: z.object({
+      title: z.string().max(200),
+      content: z.string().trim().min(1, 'Add note content first').max(50_000),
+    }),
+    modelId: z.string().optional(),
+    promptOverride: promptOverrideSchema.optional(),
+  }),
 ])
 
 export async function generateCards(input: unknown): Promise<GenerateResultT<GeneratedCardT[]>> {
@@ -59,6 +69,8 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
         const note = await getNote(source.noteId)
         if (!note) return { success: false, error: 'Note not found.' }
         material = cardsMaterialFromNote(note)
+      } else if ('draftNote' in source) {
+        material = cardsMaterialFromNote(source.draftNote)
       } else {
         material = cardsMaterialFromTopic(source.topic)
       }

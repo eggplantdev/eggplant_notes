@@ -163,7 +163,13 @@ export function NoteForm(props: NoteFormPropsT) {
       </form.Field>
 
       {/* Inline memory-card staging — create mode only; edit manages cards on the detail page. */}
-      {!note && <MemoryCardsField form={form} />}
+      {!note && (
+        <MemoryCardsField
+          form={form}
+          aiEnabled={props.aiEnabled ?? false}
+          defaultModel={props.defaultModel}
+        />
+      )}
 
       <FormError message={formError} />
 

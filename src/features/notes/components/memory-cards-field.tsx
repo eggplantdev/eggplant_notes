@@ -1,11 +1,15 @@
 'use client'
 
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
-import { withForm } from '@/components/forms/hooks/form-hooks'
+import { useStore, withForm } from '@/components/forms/hooks/form-hooks'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { promptSchema } from '@/features/memory-cards/schemas'
+import { generateCards } from '@/features/openrouter/actions/generate-cards'
+import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
+import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
+import { cardsMaterialFromNote } from '@/features/openrouter/prompts'
 import type { StagedCheckInputT } from '@/features/notes/schemas'
 
 // Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.
@@ -24,7 +28,14 @@ export const MemoryCardsField = withForm({
     subject_id: null as string | null,
     checks: [] as StagedCheckInputT[],
   },
-  render: function Render({ form }) {
+  // OpenRouter connection + default model, forwarded so the inline AI generator can ground on the
+  // note being written. Defaults keep the AI button gated-off when NoteForm doesn't pass them.
+  props: { aiEnabled: false, defaultModel: '' },
+  render: function Render({ form, aiEnabled, defaultModel }) {
+    // Reactive draft note text — the AI generator grounds card generation on what's typed so far.
+    const title = useStore(form.store, (s) => s.values.title)
+    const content = useStore(form.store, (s) => s.values.content)
+
     return (
       <form.Field name="checks" mode="array">
         {(checksField) => (
@@ -36,14 +47,42 @@ export const MemoryCardsField = withForm({
                   Add recall questions to save alongside this note.
                 </span>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => checksField.pushValue(EMPTY_CHECK)}
-              >
-                Add card
-              </Button>
+              <div className="flex items-center gap-2">
+                <GenerateDialog<GeneratedCardT>
+                  connected={aiEnabled}
+                  defaultModel={defaultModel}
+                  previewInput={{
+                    task: 'cards',
+                    material: cardsMaterialFromNote({ title, content }),
+                  }}
+                  action={(modelId, promptOverride) =>
+                    generateCards({ draftNote: { title, content }, modelId, promptOverride })
+                  }
+                  onResult={(cards) =>
+                    cards.forEach((c) =>
+                      checksField.pushValue({
+                        prompt: c.prompt,
+                        example: c.example,
+                        code_context: '',
+                      }),
+                    )
+                  }
+                  validate={() => (content.trim() ? undefined : 'Add note content first.')}
+                  triggerLabel="Generate cards with AI"
+                  triggerTestId="note-cards-generate-ai"
+                  dialogTitle="Generate cards from this note"
+                  resultNoun="card"
+                  applyHint="Cards added below — edit if needed, then Create note to save."
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => checksField.pushValue(EMPTY_CHECK)}
+                >
+                  Add card
+                </Button>
+              </div>
             </div>
 
             {checksField.state.value.map((_, i) => (
