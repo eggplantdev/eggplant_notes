@@ -88,6 +88,18 @@ export function isBuiltinSystem(promptKey: PromptKeyT, system: string): boolean 
   return system.trim() === BUILTIN_SYSTEM[promptKey]
 }
 
+// Pure reduce behind getResolvedSystemPrompts: overlay each saved row onto the built-in defaults.
+// Unknown keys are ignored so a stray row can't widen the map. Kept pure (no DB) so it's unit-testable.
+export function resolveSystemPrompts(
+  rows: ReadonlyArray<{ prompt_key: string; system: string }>,
+): Record<PromptKeyT, string> {
+  const resolved = { ...BUILTIN_SYSTEM }
+  for (const row of rows) {
+    if (row.prompt_key in resolved) resolved[row.prompt_key as PromptKeyT] = row.system
+  }
+  return resolved
+}
+
 export function buildNotesPrompt(source: { text: string } | { topic: string }): PromptT {
   if ('text' in source) {
     return {

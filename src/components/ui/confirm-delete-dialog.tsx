@@ -27,6 +27,9 @@ type ConfirmDeleteDialogPropsT = {
   error?: string
   confirmDisabled?: boolean
   confirmLabel?: string
+  // Label shown on the confirm button while the action runs — defaults to the delete wording, but a
+  // non-delete reuse (e.g. resetting a prompt) can pass its own.
+  pendingLabel?: string
   children?: ReactNode
 }
 
@@ -40,6 +43,7 @@ export function ConfirmDeleteDialog({
   error,
   confirmDisabled = false,
   confirmLabel = 'Delete',
+  pendingLabel = 'Deleting…',
   children,
 }: ConfirmDeleteDialogPropsT) {
   return (
@@ -66,7 +70,7 @@ export function ConfirmDeleteDialog({
               onConfirm()
             }}
           >
-            {isPending ? 'Deleting…' : confirmLabel}
+            {isPending ? pendingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

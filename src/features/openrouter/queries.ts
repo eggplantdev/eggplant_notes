@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { getCredentialRow } from '@/features/openrouter/credential'
 import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
-import { BUILTIN_SYSTEM, type PromptKeyT } from '@/features/openrouter/prompts'
+import { resolveSystemPrompts, type PromptKeyT } from '@/features/openrouter/prompts'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -33,11 +33,5 @@ export async function getResolvedSystemPrompts(
   const rows = await runTableQuery(supabase, (c) =>
     c.from('user_prompts').select('prompt_key, system'),
   )
-  const resolved = { ...BUILTIN_SYSTEM }
-  for (const row of rows) {
-    // The CHECK constraint guarantees prompt_key is a PromptKeyT; guard anyway so a stray value
-    // can't widen the map with an unknown key.
-    if (row.prompt_key in resolved) resolved[row.prompt_key as PromptKeyT] = row.system
-  }
-  return resolved
+  return resolveSystemPrompts(rows)
 }

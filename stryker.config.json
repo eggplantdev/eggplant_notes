@@ -17,6 +17,7 @@
     "src/features/memory-cards/schemas.ts",
     "src/features/notes/schemas.ts",
     "src/features/openrouter/models.ts",
+    "src/features/openrouter/prompts.ts",
     "src/lib/utils/build-url-with-params.ts",
     "src/lib/utils/date.ts",
     "src/lib/utils/pagination.ts",

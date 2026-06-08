@@ -19,10 +19,21 @@ import {
 import { Label } from '@/components/ui/label'
 import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
+import { useActionTransition } from '@/hooks/use-action-transition'
 import type { GenerateResultT } from '@/features/openrouter/types'
-import { previewPrompt, type PreviewInputT, type PromptT } from '@/features/openrouter/prompts'
+import { resetUserPrompt } from '@/features/openrouter/actions/reset-user-prompt'
+import { saveUserPrompt } from '@/features/openrouter/actions/save-user-prompt'
+import {
+  BUILTIN_SYSTEM,
+  isBuiltinSystem,
+  previewPrompt,
+  promptKeyFromPreviewInput,
+  type PreviewInputT,
+  type PromptT,
+} from '@/features/openrouter/prompts'
 
 // The single entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible trigger,
 // the connect gate (via useAiGate), per-generate model selection, and an EDITABLE view of the exact
@@ -34,6 +45,7 @@ import { previewPrompt, type PreviewInputT, type PromptT } from '@/features/open
 export function GenerateDialog<T>({
   connected,
   defaultModel,
+  systemDefault,
   previewInput,
   action,
   onResult,
@@ -49,6 +61,10 @@ export function GenerateDialog<T>({
 }: {
   connected: boolean
   defaultModel: string
+  // The user's saved system-prompt override for this surface's prompt key (resolved server-side), or
+  // undefined to use the built-in default. Seeds the System textarea + the saved baseline; the
+  // generate action independently re-resolves the same value, so the preview can't drift from sent.
+  systemDefault?: string
   previewInput: PreviewInputT
   action: (modelId: string, promptOverride?: PromptT) => Promise<GenerateResultT<T[]>>
   onResult: (data: T[]) => void
@@ -85,10 +101,26 @@ export function GenerateDialog<T>({
   // owns it. This is what's sent to the action — undefined lets the action build the prompt itself.
   const [override, setOverride] = useState<PromptT | undefined>(undefined)
 
-  // previewPrompt is pure (no DB / no LLM). `shown` is the override if edited, else the live default.
-  const defaults = previewPrompt(previewInput)
+  // Which overridable system prompt this surface uses — derived from the previewInput, so no extra prop.
+  const promptKey = promptKeyFromPreviewInput(previewInput)
+  const builtinSystem = BUILTIN_SYSTEM[promptKey]
+  // The persisted baseline this session started from (saved override or built-in). Updated imperatively
+  // on Save/Reset success so the buttons reflect the new state without waiting for a full reload.
+  const [savedSystem, setSavedSystem] = useState(systemDefault ?? builtinSystem)
+  const saveTx = useActionTransition()
+  const resetTx = useActionTransition()
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
+
+  // previewPrompt is pure (no DB / no LLM); its system half is overlaid with the saved baseline so the
+  // textarea seeds from — and the preview matches — what the action will actually send.
+  const defaults = { ...previewPrompt(previewInput), system: savedSystem }
   const shown = override ?? defaults
-  const isEdited = override !== undefined
+  const systemTrimmed = shown.system.trim()
+  const mutating = saveTx.isPending || resetTx.isPending
+  // Save is meaningful only when the system text is non-empty and differs from the saved baseline.
+  const canSavePrompt = systemTrimmed !== '' && systemTrimmed !== savedSystem
+  // Reset deletes the saved override — only available when one exists.
+  const hasSavedOverride = savedSystem !== builtinSystem
 
   // Clear the stale trigger error as soon as the input becomes valid again (e.g. the user starts
   // typing — the parent re-renders us with fresh props). Adjust-during-render, not an effect; only
@@ -190,17 +222,42 @@ export function GenerateDialog<T>({
             <div className="grid gap-2">
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="generate-system">System prompt</Label>
-                {isEdited && (
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-testid="generate-prompt-save"
+                    disabled={!canSavePrompt || mutating}
+                    onClick={() => {
+                      void saveTx
+                        .run(() => saveUserPrompt({ promptKey, system: shown.system }), {
+                          successMessage: 'Prompt saved as your default.',
+                        })
+                        .then((result) => {
+                          if (!result.success) return
+                          // Saving the built-in verbatim deletes the row → baseline is the built-in again.
+                          setSavedSystem(
+                            isBuiltinSystem(promptKey, shown.system)
+                              ? builtinSystem
+                              : systemTrimmed,
+                          )
+                        })
+                    }}
+                  >
+                    {saveTx.isPending ? 'Saving…' : 'Save prompt'}
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     data-testid="generate-prompt-reset"
-                    onClick={() => setOverride(undefined)}
+                    disabled={!hasSavedOverride || mutating}
+                    onClick={() => setConfirmResetOpen(true)}
                   >
-                    Reset to default
+                    Reset prompt
                   </Button>
-                )}
+                </div>
               </div>
               <Textarea
                 id="generate-system"
@@ -251,6 +308,30 @@ export function GenerateDialog<T>({
           </div>,
           document.body,
         )}
+
+      <ConfirmDeleteDialog
+        open={confirmResetOpen}
+        onOpenChange={setConfirmResetOpen}
+        title="Reset to built-in prompt?"
+        description="Your customized prompt will be permanently deleted and AI generation will use the built-in default again. This can't be undone."
+        isPending={resetTx.isPending}
+        error={resetTx.error}
+        confirmLabel="Reset prompt"
+        pendingLabel="Resetting…"
+        onConfirm={() => {
+          void resetTx
+            .run(() => resetUserPrompt({ promptKey }), {
+              successMessage: 'Reset to the built-in prompt.',
+            })
+            .then((result) => {
+              if (!result.success) return
+              setSavedSystem(builtinSystem)
+              // Revert the System half of any in-dialog edit to the built-in; keep the Prompt half.
+              setOverride((o) => (o ? { ...o, system: builtinSystem } : o))
+              setConfirmResetOpen(false)
+            })
+        }}
+      />
 
       {gateDialog}
     </>
