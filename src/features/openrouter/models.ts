@@ -16,8 +16,8 @@ export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
   { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini — cheap, fast' },
   { id: 'openai/gpt-4o', label: 'GPT-4o — stronger' },
   { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku — cheap' },
-  { id: 'anthropic/claude-3.7-sonnet', label: 'Claude 3.7 Sonnet — stronger' },
-  { id: 'google/gemini-2.0-flash-001', label: 'Gemini 2.0 Flash — cheap' },
+  { id: 'anthropic/claude-sonnet-4.5', label: 'Claude Sonnet 4.5 — stronger' },
+  { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash — cheap' },
   { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
 ]
 
@@ -37,7 +37,7 @@ export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
 
 // Default for the PDF/vision import surface (Phase 8): a cheap, file-capable, dated id (never a
 // `*-latest` alias). Gemini Flash reads PDFs well at low cost; the picker still lets the user switch.
-export const DEFAULT_OPENROUTER_FILE_MODEL = 'google/gemini-2.0-flash-001'
+export const DEFAULT_OPENROUTER_FILE_MODEL = 'google/gemini-2.5-flash'
 
 // Modalities that count as "can read a file" (PDF/image vision) — the Phase 8 import surface filters
 // the catalog to these. OpenRouter reports image input as `'image'`; some entries also list `'file'`.

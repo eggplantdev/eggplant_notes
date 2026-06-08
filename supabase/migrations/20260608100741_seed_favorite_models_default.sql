@@ -11,8 +11,8 @@ alter table openrouter_credentials
     'openai/gpt-4o-mini',
     'openai/gpt-4o',
     'anthropic/claude-3.5-haiku',
-    'anthropic/claude-3.7-sonnet',
-    'google/gemini-2.0-flash-001',
+    'anthropic/claude-sonnet-4.5',
+    'google/gemini-2.5-flash',
     'meta-llama/llama-3.3-70b-instruct'
   ]::text[];
 
@@ -23,8 +23,8 @@ update openrouter_credentials
     'openai/gpt-4o-mini',
     'openai/gpt-4o',
     'anthropic/claude-3.5-haiku',
-    'anthropic/claude-3.7-sonnet',
-    'google/gemini-2.0-flash-001',
+    'anthropic/claude-sonnet-4.5',
+    'google/gemini-2.5-flash',
     'meta-llama/llama-3.3-70b-instruct'
   ]::text[]
   where favorite_models = '{}';
