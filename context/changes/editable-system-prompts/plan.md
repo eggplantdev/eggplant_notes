@@ -425,9 +425,9 @@ project test plan; do not author E2E inline here.
 
 #### Automated
 
-- [x] 3.1 Type checking passes
-- [x] 3.2 Linting passes
-- [x] 3.3 New + existing unit tests pass
+- [x] 3.1 Type checking passes — ede188e
+- [x] 3.2 Linting passes — ede188e
+- [x] 3.3 New + existing unit tests pass — ede188e
 
 #### Manual
 

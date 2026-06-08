@@ -247,16 +247,19 @@ export function GenerateDialog<T>({
                   >
                     {saveTx.isPending ? 'Saving…' : 'Save prompt'}
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    data-testid="generate-prompt-reset"
-                    disabled={!hasSavedOverride || mutating}
-                    onClick={() => setConfirmResetOpen(true)}
-                  >
-                    Reset prompt
-                  </Button>
+                  {/* Reset only appears once a saved override exists — nothing to reset on the built-in. */}
+                  {hasSavedOverride && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      data-testid="generate-prompt-reset"
+                      disabled={mutating}
+                      onClick={() => setConfirmResetOpen(true)}
+                    >
+                      Reset prompt
+                    </Button>
+                  )}
                 </div>
               </div>
               <Textarea
