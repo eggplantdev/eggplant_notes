@@ -9,6 +9,12 @@ import type { NoteT } from '@/types/note'
 
 export type PromptT = { system: string; prompt: string }
 
+// The three system prompts a user can override (editable-system-prompts). MUST match the
+// prompt_key CHECK constraint in the user_prompts migration. Single source: PromptKeyT and the
+// userPromptSchema enum both derive from this array.
+export const PROMPT_KEYS = ['cards', 'notes_decompose', 'notes_topic'] as const
+export type PromptKeyT = (typeof PROMPT_KEYS)[number]
+
 // Cap on a user-edited prompt. The auto-built prompt embeds the source text (notes decompose allows
 // up to 50k chars) plus instructions, so the ceiling is generous — it only guards against pathological
 // payloads, not normal refinement.
@@ -20,6 +26,14 @@ const MAX_PROMPT_CHARS = 100_000
 export const promptOverrideSchema = z.object({
   system: z.string().trim().min(1, 'System prompt is empty').max(MAX_PROMPT_CHARS),
   prompt: z.string().trim().min(1, 'Prompt is empty').max(MAX_PROMPT_CHARS),
+})
+
+// Validates a Save-prompt mutation (editable-system-prompts): which prompt to override + the
+// replacement system text. Only the system half is persisted — the user-message half stays a
+// per-generation override (see generate-dialog). Reuses the generous MAX_PROMPT_CHARS cap.
+export const userPromptSchema = z.object({
+  promptKey: z.enum(PROMPT_KEYS),
+  system: z.string().trim().min(1, 'Prompt is empty').max(MAX_PROMPT_CHARS),
 })
 
 // gen-cards #1 grounded source assembly. Note is already fetched (the IO stays in the caller); this
@@ -59,6 +73,14 @@ const NOTES_TOPIC_SYSTEM = [
   'The note has a "title" and clear, well-structured markdown "content".',
 ].join(' ')
 
+// The built-in default per key — the fallback when a user has no override row (resolver returns
+// these) and the equality target for the Save "delete-if-default" branch (isBuiltinSystem).
+export const BUILTIN_SYSTEM: Record<PromptKeyT, string> = {
+  cards: CARDS_SYSTEM,
+  notes_decompose: NOTES_DECOMPOSE_SYSTEM,
+  notes_topic: NOTES_TOPIC_SYSTEM,
+}
+
 export function buildNotesPrompt(source: { text: string } | { topic: string }): PromptT {
   if ('text' in source) {
     return {
@@ -92,4 +114,13 @@ export function previewPrompt(input: PreviewInputT): PromptT {
   if (input.task === 'cards') return buildCardsPrompt(input.material)
   if ('file' in input) return buildNotesFilePrompt()
   return buildNotesPrompt('text' in input ? { text: input.text } : { topic: input.topic })
+}
+
+// Which overridable system prompt a generation surface uses — lets the dialog self-identify its
+// prompt_key from the previewInput it already has (no extra prop). Mirrors previewPrompt's routing:
+// cards → 'cards'; a topic note → 'notes_topic'; decompose (text or file) → 'notes_decompose'.
+export function promptKeyFromPreviewInput(input: PreviewInputT): PromptKeyT {
+  if (input.task === 'cards') return 'cards'
+  if ('topic' in input) return 'notes_topic'
+  return 'notes_decompose'
 }

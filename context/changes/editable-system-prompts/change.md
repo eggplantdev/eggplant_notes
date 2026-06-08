@@ -1,7 +1,7 @@
 ---
 change_id: editable-system-prompts
 title: User-editable, persisted AI system prompts
-status: in-progress
+status: implementing
 created: 2026-06-08
 updated: 2026-06-08
 ---

@@ -22,7 +22,10 @@ export const generatedCardSchema = z.object({
     .describe('The answer to the cue: a concise explanation or worked example revealed on review.'),
 })
 export const generatedCardsSchema = z.object({
-  cards: z.array(generatedCardSchema).describe('3 to 7 recall cards covering the key ideas.'),
+  // Count-agnostic on purpose: with the system prompt now user-editable (editable-system-prompts),
+  // the system prompt is the single lever for how many cards. A "3 to 7" here would be a second,
+  // hidden steering voice that fights a user who edits the count out.
+  cards: z.array(generatedCardSchema).describe('Recall cards covering the key ideas.'),
 })
 
 // gen-notes: a note is a title + markdown content.
