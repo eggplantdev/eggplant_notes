@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import { isPdfFile, readFileAsBase64 } from '@/features/import/utils/read-file-base64'
 
-function fileFrom(bytes: Uint8Array, name = 'doc.pdf', type = 'application/pdf'): File {
+// Uint8Array<ArrayBuffer> (not the default <ArrayBufferLike>) so the bytes satisfy the File/BlobPart
+// constructor under TS's newer typed-array generics; every caller already passes ArrayBuffer-backed arrays.
+function fileFrom(
+  bytes: Uint8Array<ArrayBuffer>,
+  name = 'doc.pdf',
+  type = 'application/pdf',
+): File {
   return new File([bytes], name, { type })
 }
 
