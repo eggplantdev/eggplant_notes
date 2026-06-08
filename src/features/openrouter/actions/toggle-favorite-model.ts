@@ -25,6 +25,9 @@ export async function toggleFavoriteModel(input: unknown): Promise<ActionResultT
     return { success: false, error: 'Unknown model' }
   }
 
+  // Read-modify-write in app code (per plan §3) rather than the spec's atomic array_append/remove:
+  // a "toggle" needs membership to pick the op, so the single-statement win is marginal, and this
+  // matches set-model.ts's house style. The TOCTOU window is irrelevant — one row per user.
   const { modelId } = parsed.data
   const current = (await getCredentialRow())?.favorite_models ?? []
   const next = current.includes(modelId)

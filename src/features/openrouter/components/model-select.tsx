@@ -92,12 +92,13 @@ export function ModelSelect({
   // Optimistically flip the star, then persist; revert + toast on failure. Favorites is global
   // per-user state the picker owns, so local state is the source of truth for the UI.
   function toggleFavorite(modelId: string) {
-    const previous = favorites
-    setFavorites((ids) =>
-      ids.includes(modelId) ? ids.filter((id) => id !== modelId) : [...ids, modelId],
-    )
+    // Toggling membership is its own inverse, so the same flip both applies AND reverts. Revert
+    // against live state (not a captured snapshot) so a concurrent toggle of another id isn't lost.
+    const flip = (ids: string[]) =>
+      ids.includes(modelId) ? ids.filter((id) => id !== modelId) : [...ids, modelId]
+    setFavorites(flip)
     void toggleFavoriteModel({ modelId }).then((result) => {
-      if (!toastActionResult(result)) setFavorites(previous)
+      if (!toastActionResult(result)) setFavorites(flip)
     })
   }
 

@@ -9,9 +9,10 @@ export type OpenRouterModelT = {
   inputModalities: string[]
 }
 
-// Curated short list, pinned as the "Recommended" group on top of the live catalog. All are cheap and
-// good at structured extraction. The live `/models` fetch (catalog.ts) supplies the full 300+ list
-// below this set; these ids stay first-class so the picker has a sane default even offline.
+// Curated short list. Not a UI group (the picker's top group is the user's per-user "Pinned" set);
+// it seeds two things: the offline catalog FALLBACK (RECOMMENDED_FALLBACK below) and a freshly
+// connected account's DB-default favorites (mirrored in migration 20260608100741 — keep aligned).
+// All are cheap and good at structured extraction.
 export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
   { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini — cheap, fast' },
   { id: 'openai/gpt-4o', label: 'GPT-4o — stronger' },
@@ -20,8 +21,6 @@ export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
   { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash — cheap' },
   { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
 ]
-
-export const RECOMMENDED_MODEL_IDS: string[] = RECOMMENDED_MODELS.map((m) => m.id)
 
 // The curated set widened to the full picker shape with unknown (0) pricing and text-only modality.
 // Shared by the offline catalog FALLBACK (catalog.ts) and the picker's pre-fetch SEED (model-select.tsx)
@@ -118,7 +117,8 @@ export function formatPricePerM(price: number): string {
 }
 
 // Row pricing label. Router models report a negative sentinel (variable pricing) — show that as
-// "Variable pricing" rather than a nonsense "$-1000000.00/1M".
+// "Variable pricing" rather than a nonsense "$-1000000.00/1M". The sentinel is all-or-nothing
+// (both axes negative together), so this either-axis check and sortModels' per-axis check agree.
 export function formatModelPricing(model: OpenRouterModelT): string {
   if (model.inputPrice < 0 || model.outputPrice < 0) return 'Variable pricing'
   return `${formatPricePerM(model.inputPrice)} in · ${formatPricePerM(model.outputPrice)} out`
