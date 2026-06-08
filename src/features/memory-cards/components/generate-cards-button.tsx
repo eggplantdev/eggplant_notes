@@ -79,6 +79,8 @@ export function GenerateCardsButton({
             triggerLabel="Generate cards with AI"
             triggerTestId="cards-generate-ai"
             dialogTitle="Generate cards from this note"
+            resultNoun="card"
+            applyHint="Cards ready below — review, then Add to save."
           />
         </div>
       )}

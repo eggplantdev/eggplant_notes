@@ -257,9 +257,9 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Unit test for `describeGenerationError` passes: `pnpm test`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — b4b6ea5
+- [x] 2.2 Linting passes: `pnpm lint` — b4b6ea5
+- [x] 2.3 Unit test for `describeGenerationError` passes: `pnpm test` — b4b6ea5
 
 #### Manual
 
@@ -270,9 +270,9 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Existing tests stay green: `pnpm test`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Existing tests stay green: `pnpm test`
 
 #### Manual
 

@@ -132,6 +132,8 @@ export function NoteForm(props: NoteFormPropsT) {
             form.setFieldValue('title', genNote.title)
             form.setFieldValue('content', genNote.content)
           }}
+          resultNoun="note"
+          applyHint="Note filled in below — edit if needed, then Create note to save."
         />
       )}
 

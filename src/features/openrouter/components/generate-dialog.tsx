@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react'
 import { useState, useTransition, type ReactNode } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
+import { toastMessage } from '@/components/toasts'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -40,6 +41,8 @@ export function GenerateDialog<T>({
   children,
   canGenerate = true,
   modelFilter = 'text',
+  resultNoun = 'item',
+  applyHint,
 }: {
   connected: boolean
   defaultModel: string
@@ -60,6 +63,12 @@ export function GenerateDialog<T>({
   canGenerate?: boolean
   // Scopes the model picker: 'file' restricts to vision/file-capable models (PDF import, Phase 8).
   modelFilter?: 'text' | 'file'
+  // Singular noun for the success toast ("Generated 3 cards"). Caller-set so the toast is accurate.
+  resultNoun?: string
+  // Toasted on Apply, when the result lands in the caller's surface (fields / candidate list) that
+  // the now-closed dialog was covering — the moment that was otherwise fully silent. Should point at
+  // where the result went AND that nothing is saved until the caller's own Save/Add/Create/Import.
+  applyHint?: string
 }) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
@@ -108,13 +117,26 @@ export function GenerateDialog<T>({
       // `override` is undefined unless the user edited; an unedited prompt lets the action build it
       // server-side (and re-fetch grounded source under its own RLS trust boundary).
       const outcome = await action(model, override)
-      if (outcome.success) setResult({ data: outcome.data, debug: outcome.debug })
-      else setError(outcome.error)
+      if (outcome.success) {
+        setResult({ data: outcome.data, debug: outcome.debug })
+        const n = outcome.data.length
+        // Toast renders in a body-level portal (above the dialog), so the outcome is visible even if
+        // the user's attention has drifted off the dialog while the model worked.
+        toastMessage(`Generated ${n} ${n === 1 ? resultNoun : `${resultNoun}s`}`, 'success')
+      } else {
+        setError(outcome.error)
+        // Keep the inline FormError too — the toast is the attention-grabber, the inline line is the
+        // persistent in-dialog record while the user retries.
+        toastMessage(outcome.error, 'error')
+      }
     })
   }
 
   function apply() {
     if (result) onResult(result.data)
+    // Kill the silent moment: Apply closes the dialog and the result lands in a surface the user
+    // wasn't watching. The hint says where it went and that nothing is saved yet.
+    if (applyHint) toastMessage(applyHint, 'info')
     setOpen(false)
   }
 

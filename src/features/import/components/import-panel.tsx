@@ -255,6 +255,8 @@ export function ImportPanel({
             triggerTestId="import-decompose-ai"
             validate={() => (pdf || text.trim().length > 0 ? undefined : NO_SOURCE_MSG)}
             dialogTitle="Decompose into notes with AI"
+            resultNoun="note"
+            applyHint="Notes ready in the preview below — review, then Import to save."
           />
         </div>
 

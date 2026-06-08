@@ -145,6 +145,8 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
             form.setFieldValue('prompt', genCard.prompt)
             form.setFieldValue('example', genCard.example)
           }}
+          resultNoun="card"
+          applyHint="Card filled in below — edit if needed, then Create card to save."
         />
       )}
 

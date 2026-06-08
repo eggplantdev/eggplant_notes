@@ -22,6 +22,8 @@ export function TopicGenerator<T>({
   defaultModel,
   action,
   onResult,
+  resultNoun,
+  applyHint,
 }: {
   label: string
   placeholder: string
@@ -35,6 +37,9 @@ export function TopicGenerator<T>({
     promptOverride?: PromptT,
   ) => Promise<GenerateResultT<T[]>>
   onResult: (item: T) => void
+  // Forwarded to GenerateDialog for the success + apply toasts (see its props).
+  resultNoun?: string
+  applyHint?: string
 }) {
   const [topic, setTopic] = useState('')
 
@@ -53,6 +58,8 @@ export function TopicGenerator<T>({
       triggerTestId={`${testIdPrefix}-generate`}
       canGenerate={topic.trim().length > 0}
       dialogTitle={label}
+      resultNoun={resultNoun}
+      applyHint={applyHint}
     >
       <div className="grid gap-2">
         <Label htmlFor={`${testIdPrefix}-topic`}>Topic</Label>
