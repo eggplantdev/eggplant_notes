@@ -439,10 +439,10 @@ project test plan; do not author E2E inline here.
 
 #### Automated
 
-- [x] 4.1 Type checking passes
-- [x] 4.2 Linting passes
-- [x] 4.3 Unit tests pass
-- [x] 4.4 Production build succeeds (`pnpm build`)
+- [x] 4.1 Type checking passes — 0f05977
+- [x] 4.2 Linting passes — 0f05977
+- [x] 4.3 Unit tests pass — 0f05977
+- [x] 4.4 Production build succeeds (`pnpm build`) — 0f05977
 
 #### Manual
 
