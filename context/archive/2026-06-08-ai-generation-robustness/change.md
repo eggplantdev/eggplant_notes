@@ -1,10 +1,10 @@
 ---
 change_id: ai-generation-robustness
 title: Harden AI generation against silent failures before testing
-status: implemented
+status: archived
 created: 2026-06-08
 updated: 2026-06-08
-archived_at: null
+archived_at: 2026-06-08T19:50:59Z
 ---
 
 > Review gate (2026-06-08): all automated legs green (typecheck/lint/unit 170/170); four-lens review
