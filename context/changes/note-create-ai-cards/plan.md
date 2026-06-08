@@ -79,9 +79,9 @@ cards with AI"`, `triggerTestId="note-cards-generate-ai"`, `dialogTitle="Generat
 
 #### Automated
 
-- [x] 1.1 `pnpm typecheck` passes
-- [x] 1.2 `pnpm lint` passes
-- [x] 1.3 `pnpm test` stays green
+- [x] 1.1 `pnpm typecheck` passes — d8274f6
+- [x] 1.2 `pnpm lint` passes — d8274f6
+- [x] 1.3 `pnpm test` stays green — d8274f6
 
 #### Manual
 
