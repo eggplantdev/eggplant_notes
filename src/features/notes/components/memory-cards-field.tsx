@@ -2,6 +2,7 @@
 
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { withForm } from '@/components/forms/hooks/form-hooks'
+import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { promptSchema } from '@/features/memory-cards/schemas'
@@ -27,7 +28,7 @@ export const MemoryCardsField = withForm({
     return (
       <form.Field name="checks" mode="array">
         {(checksField) => (
-          <div className="flex flex-col gap-4 rounded-lg border p-4">
+          <Box>
             <div className="flex items-center justify-between gap-2">
               <div className="flex flex-col gap-2">
                 <Label>Memory cards (optional)</Label>
@@ -46,7 +47,7 @@ export const MemoryCardsField = withForm({
             </div>
 
             {checksField.state.value.map((_, i) => (
-              <div key={i} className="flex flex-col gap-3 rounded-lg border p-4">
+              <Box key={i} gap={3}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium">Card {i + 1}</span>
                   <Button
@@ -85,9 +86,9 @@ export const MemoryCardsField = withForm({
                     </div>
                   )}
                 </form.Field>
-              </div>
+              </Box>
             ))}
-          </div>
+          </Box>
         )}
       </form.Field>
     )

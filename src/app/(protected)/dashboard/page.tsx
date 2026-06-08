@@ -3,6 +3,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { ActivityHeatmap } from '@/features/dashboard/components/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
+import { SectionLabel } from '@/components/ui/section-label'
 import { HardestCards } from '@/features/dashboard/components/hardest-cards'
 import { StatCard } from '@/features/dashboard/components/stat-card'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -53,9 +54,7 @@ export default async function DashboardPage() {
     >
       {/* Card-less hero stat: StatCard's type scale without the chrome. */}
       <div>
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          Current streak
-        </p>
+        <SectionLabel>Current streak</SectionLabel>
         <p className="text-foreground mt-1 flex items-baseline gap-2 text-4xl font-bold">
           <span>🔥</span>
           <span className="tabular-nums">{currentStreak}</span>

@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { toastActionResult } from '@/components/forms/toast-result'
+import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -83,7 +84,7 @@ export function GenerateCardsButton({
       )}
 
       {candidates && (
-        <div className="flex flex-col gap-3 rounded-lg border p-4">
+        <Box gap={3}>
           <p className="text-sm font-medium">
             Review {candidates.length} generated card{candidates.length === 1 ? '' : 's'} before
             adding
@@ -132,7 +133,7 @@ export function GenerateCardsButton({
               Discard
             </Button>
           </div>
-        </div>
+        </Box>
       )}
 
       {!candidates && <FormError message={error} />}

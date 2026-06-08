@@ -1,10 +1,10 @@
 'use client'
 
-import { X } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
 import { MultiSelect, type MultiSelectOptionT } from '@/components/ui/multi-select'
+import { Pill } from '@/components/ui/pill'
 import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
 // Batch rapid toggles into one server round-trip: a popover session re-queries on the trailing
@@ -121,15 +121,9 @@ export function UrlMultiSelectFilter({
         <ul className="flex flex-wrap gap-2">
           {selected.map((value) => (
             <li key={value}>
-              <button
-                type="button"
-                onClick={() => handleRemove(value)}
-                aria-label={`Remove ${labelFor(value)}`}
-                className="bg-muted text-foreground hover:bg-muted/70 flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium"
-              >
-                <span className="line-clamp-1 max-w-40">{labelFor(value)}</span>
-                <X className="size-3 shrink-0" />
-              </button>
+              <Pill onRemove={() => handleRemove(value)} removeLabel={`Remove ${labelFor(value)}`}>
+                {labelFor(value)}
+              </Pill>
             </li>
           ))}
         </ul>
