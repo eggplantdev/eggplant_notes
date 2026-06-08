@@ -19,7 +19,7 @@ export const getCredentialRow = cache(async () => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('openrouter_credentials')
-    .select('user_id, model, key_ciphertext, key_iv, key_auth_tag')
+    .select('user_id, model, favorite_models, key_ciphertext, key_iv, key_auth_tag')
     .maybeSingle()
   return data
 })

@@ -298,18 +298,18 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 #### Automated
 
-- [x] 2.1 New sortModels tests fail before, pass after: `pnpm test openrouter-models`
-- [x] 2.2 Full unit suite passes: `pnpm test`
-- [x] 2.3 Type checking passes: `pnpm typecheck`
-- [x] 2.4 Linting passes: `pnpm lint`
+- [x] 2.1 New sortModels tests fail before, pass after: `pnpm test openrouter-models` — 15cfef3
+- [x] 2.2 Full unit suite passes: `pnpm test` — 15cfef3
+- [x] 2.3 Type checking passes: `pnpm typecheck` — 15cfef3
+- [x] 2.4 Linting passes: `pnpm lint` — 15cfef3
 
 ### Phase 3: Favorites server actions + read path
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Unit suite still green: `pnpm test`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Unit suite still green: `pnpm test`
 
 #### Manual
 
