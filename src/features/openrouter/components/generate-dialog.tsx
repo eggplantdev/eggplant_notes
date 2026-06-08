@@ -32,6 +32,7 @@ import {
   previewPrompt,
   promptKeyFromPreviewInput,
   type PreviewInputT,
+  type PromptKeyT,
   type PromptT,
 } from '@/features/openrouter/prompts'
 
@@ -45,7 +46,7 @@ import {
 export function GenerateDialog<T>({
   connected,
   defaultModel,
-  systemDefault,
+  systemDefaults,
   previewInput,
   action,
   onResult,
@@ -61,10 +62,10 @@ export function GenerateDialog<T>({
 }: {
   connected: boolean
   defaultModel: string
-  // The user's saved system-prompt override for this surface's prompt key (resolved server-side), or
-  // undefined to use the built-in default. Seeds the System textarea + the saved baseline; the
-  // generate action independently re-resolves the same value, so the preview can't drift from sent.
-  systemDefault?: string
+  // The user's resolved system prompts (per key, server-side). The dialog picks its own key; undefined
+  // (e.g. AI not connected) falls back to the built-in. Seeds the System textarea + the saved baseline;
+  // the generate action independently re-resolves the same values, so the preview can't drift from sent.
+  systemDefaults?: Record<PromptKeyT, string>
   previewInput: PreviewInputT
   action: (modelId: string, promptOverride?: PromptT) => Promise<GenerateResultT<T[]>>
   onResult: (data: T[]) => void
@@ -106,7 +107,7 @@ export function GenerateDialog<T>({
   const builtinSystem = BUILTIN_SYSTEM[promptKey]
   // The persisted baseline this session started from (saved override or built-in). Updated imperatively
   // on Save/Reset success so the buttons reflect the new state without waiting for a full reload.
-  const [savedSystem, setSavedSystem] = useState(systemDefault ?? builtinSystem)
+  const [savedSystem, setSavedSystem] = useState(systemDefaults?.[promptKey] ?? builtinSystem)
   const saveTx = useActionTransition()
   const resetTx = useActionTransition()
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
@@ -165,6 +166,32 @@ export function GenerateDialog<T>({
         toastMessage(outcome.error, 'error')
       }
     })
+  }
+
+  function handleSavePrompt() {
+    void saveTx
+      .run(() => saveUserPrompt({ promptKey, system: shown.system }), {
+        successMessage: 'Prompt saved as your default.',
+      })
+      .then((result) => {
+        if (!result.success) return
+        // Saving the built-in verbatim deletes the row → baseline is the built-in again.
+        setSavedSystem(isBuiltinSystem(promptKey, shown.system) ? builtinSystem : systemTrimmed)
+      })
+  }
+
+  function handleResetPrompt() {
+    void resetTx
+      .run(() => resetUserPrompt({ promptKey }), {
+        successMessage: 'Reset to the built-in prompt.',
+      })
+      .then((result) => {
+        if (!result.success) return
+        setSavedSystem(builtinSystem)
+        // Revert the System half of any in-dialog edit to the built-in; keep the Prompt half.
+        setOverride((o) => (o ? { ...o, system: builtinSystem } : o))
+        setConfirmResetOpen(false)
+      })
   }
 
   return (
@@ -229,21 +256,7 @@ export function GenerateDialog<T>({
                     size="sm"
                     data-testid="generate-prompt-save"
                     disabled={!canSavePrompt || mutating}
-                    onClick={() => {
-                      void saveTx
-                        .run(() => saveUserPrompt({ promptKey, system: shown.system }), {
-                          successMessage: 'Prompt saved as your default.',
-                        })
-                        .then((result) => {
-                          if (!result.success) return
-                          // Saving the built-in verbatim deletes the row → baseline is the built-in again.
-                          setSavedSystem(
-                            isBuiltinSystem(promptKey, shown.system)
-                              ? builtinSystem
-                              : systemTrimmed,
-                          )
-                        })
-                    }}
+                    onClick={handleSavePrompt}
                   >
                     {saveTx.isPending ? 'Saving…' : 'Save prompt'}
                   </Button>
@@ -321,19 +334,7 @@ export function GenerateDialog<T>({
         error={resetTx.error}
         confirmLabel="Reset prompt"
         pendingLabel="Resetting…"
-        onConfirm={() => {
-          void resetTx
-            .run(() => resetUserPrompt({ promptKey }), {
-              successMessage: 'Reset to the built-in prompt.',
-            })
-            .then((result) => {
-              if (!result.success) return
-              setSavedSystem(builtinSystem)
-              // Revert the System half of any in-dialog edit to the built-in; keep the Prompt half.
-              setOverride((o) => (o ? { ...o, system: builtinSystem } : o))
-              setConfirmResetOpen(false)
-            })
-        }}
+        onConfirm={handleResetPrompt}
       />
 
       {gateDialog}

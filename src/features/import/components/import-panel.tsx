@@ -16,6 +16,7 @@ import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-m
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/constants'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
+import type { PromptKeyT } from '@/features/openrouter/prompts'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
@@ -38,6 +39,7 @@ export function ImportPanel({
   subjects,
   aiEnabled = false,
   defaultModel,
+  systemDefaults,
 }: {
   subjects: SubjectOptionT[]
   // Whether OpenRouter is connected. The AI decompose control (#3) is always shown alongside the
@@ -45,6 +47,8 @@ export function ImportPanel({
   aiEnabled?: boolean
   // The user's persisted default model, pre-selected in the generate dialog.
   defaultModel: string
+  // The user's resolved system prompts, forwarded to the generate dialog to seed its editable prompt.
+  systemDefaults?: Record<PromptKeyT, string>
 }) {
   const [text, setText] = useState('')
   // A PDF source is mutually exclusive with text: it has no markdown to split, so it routes ONLY
@@ -208,6 +212,7 @@ export function ImportPanel({
           <GenerateDialog<GeneratedNoteT>
             connected={aiEnabled}
             defaultModel={pdf ? DEFAULT_OPENROUTER_FILE_MODEL : defaultModel}
+            systemDefaults={systemDefaults}
             modelFilter={pdf ? 'file' : 'text'}
             previewInput={pdf ? { task: 'notes', file: true } : { task: 'notes', text }}
             action={(modelId, promptOverride) =>

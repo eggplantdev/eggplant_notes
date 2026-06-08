@@ -11,7 +11,7 @@ import { promptSchema } from '@/features/memory-cards/schemas'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import { cardsMaterialFromNote } from '@/features/openrouter/prompts'
+import { cardsMaterialFromNote, type PromptKeyT } from '@/features/openrouter/prompts'
 import type { StagedCheckInputT } from '@/features/notes/schemas'
 
 // Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.
@@ -61,8 +61,13 @@ export const MemoryCardsField = withForm({
   },
   // OpenRouter connection + default model, forwarded so the inline AI generator can ground on the
   // note being written. Defaults keep the AI button gated-off when NoteForm doesn't pass them.
-  props: { aiEnabled: false, defaultModel: '' },
-  render: function Render({ form, aiEnabled, defaultModel }) {
+  // systemDefaults seeds the generate dialog's editable prompt (undefined → built-in).
+  props: {
+    aiEnabled: false,
+    defaultModel: '',
+    systemDefaults: undefined as Record<PromptKeyT, string> | undefined,
+  },
+  render: function Render({ form, aiEnabled, defaultModel, systemDefaults }) {
     // Reactive draft note text — the AI generator grounds card generation on what's typed so far.
     const title = useStore(form.store, (s) => s.values.title)
     const content = useStore(form.store, (s) => s.values.content)
@@ -82,6 +87,7 @@ export const MemoryCardsField = withForm({
                 <GenerateDialog<GeneratedCardT>
                   connected={aiEnabled}
                   defaultModel={defaultModel}
+                  systemDefaults={systemDefaults}
                   previewInput={{
                     task: 'cards',
                     material: cardsMaterialFromNote({ title, content }),

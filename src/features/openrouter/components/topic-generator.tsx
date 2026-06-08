@@ -5,7 +5,11 @@ import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import { cardsMaterialFromTopic, type PromptT } from '@/features/openrouter/prompts'
+import {
+  cardsMaterialFromTopic,
+  type PromptKeyT,
+  type PromptT,
+} from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
 
 // Shared ungrounded "generate from a topic" control (#2 card / #5 note). Collapses to just the
@@ -20,6 +24,7 @@ export function TopicGenerator<T>({
   task,
   connected,
   defaultModel,
+  systemDefaults,
   action,
   onResult,
   resultNoun,
@@ -31,6 +36,7 @@ export function TopicGenerator<T>({
   task: 'cards' | 'notes'
   connected: boolean
   defaultModel: string
+  systemDefaults?: Record<PromptKeyT, string>
   action: (
     topic: string,
     modelId: string,
@@ -47,6 +53,7 @@ export function TopicGenerator<T>({
     <GenerateDialog<T>
       connected={connected}
       defaultModel={defaultModel}
+      systemDefaults={systemDefaults}
       previewInput={
         task === 'cards'
           ? { task: 'cards', material: cardsMaterialFromTopic(topic) }

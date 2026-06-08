@@ -10,7 +10,7 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
-import { getOpenRouterStatus } from '@/features/openrouter/queries'
+import { getOpenRouterStatus, getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { assertFound } from '@/lib/assert-found'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
@@ -27,12 +27,14 @@ export default async function NotePage({
   const { id } = await params
   const { edit } = await searchParams
   // Independent RLS-scoped reads run concurrently to avoid serial round-trips.
-  const [note, memoryCards, subjects, { connected: aiEnabled, defaultModel }] = await Promise.all([
-    getNote(id),
-    getMemoryCardsForNote(id),
-    getSubjects(),
-    getOpenRouterStatus(),
-  ])
+  const [note, memoryCards, subjects, { connected: aiEnabled, defaultModel }, systemDefaults] =
+    await Promise.all([
+      getNote(id),
+      getMemoryCardsForNote(id),
+      getSubjects(),
+      getOpenRouterStatus(),
+      getResolvedSystemPrompts(),
+    ])
   assertFound(note)
 
   const isEditingNote = edit === 'note'
@@ -95,6 +97,7 @@ export default async function NotePage({
         cards={memoryCards}
         aiEnabled={aiEnabled}
         defaultModel={defaultModel}
+        systemDefaults={systemDefaults}
       />
     </PageShell>
   )
