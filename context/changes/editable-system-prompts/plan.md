@@ -398,23 +398,23 @@ project test plan; do not author E2E inline here.
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly (`supabase db reset`)
-- [x] 1.2 Types regenerate and include `user_prompts` (`pnpm db:types`)
-- [x] 1.3 Type checking passes
-- [x] 1.4 Linting passes
-- [x] 1.5 Existing unit tests pass
+- [x] 1.1 Migration applies cleanly (`supabase db reset`) — 17ff21e
+- [x] 1.2 Types regenerate and include `user_prompts` (`pnpm db:types`) — 17ff21e
+- [x] 1.3 Type checking passes — 17ff21e
+- [x] 1.4 Linting passes — 17ff21e
+- [x] 1.5 Existing unit tests pass — 17ff21e
 
 #### Manual
 
-- [x] 1.6 RLS isolation spot-checked across two accounts
+- [x] 1.6 RLS isolation spot-checked across two accounts — 17ff21e
 
 ### Phase 2: Server actions + generate wiring
 
 #### Automated
 
-- [ ] 2.1 Type checking passes
-- [ ] 2.2 Linting passes
-- [ ] 2.3 Unit tests pass
+- [x] 2.1 Type checking passes
+- [x] 2.2 Linting passes
+- [x] 2.3 Unit tests pass
 
 #### Manual
 

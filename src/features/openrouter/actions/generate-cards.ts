@@ -11,6 +11,7 @@ import {
   promptOverrideSchema,
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
+import { getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
 import { describeGenerationError } from '@/features/openrouter/utils/describe-generation-error'
@@ -74,7 +75,11 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
       } else {
         material = cardsMaterialFromTopic(source.topic)
       }
-      ;({ system, prompt } = buildCardsPrompt(material))
+      // The user-message half comes from the builder; the system half is the user's RESOLVED prompt
+      // (their override or the built-in) — so an unedited generation still honors a saved prompt and
+      // matches what the dialog previewed.
+      prompt = buildCardsPrompt(material).prompt
+      system = (await getResolvedSystemPrompts())['cards']
     }
     const startedAt = Date.now()
     const { object, usage } = await generateObject({

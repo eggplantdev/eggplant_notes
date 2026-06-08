@@ -10,6 +10,7 @@ import {
   promptOverrideSchema,
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
+import { getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
 import { describeGenerationError } from '@/features/openrouter/utils/describe-generation-error'
@@ -63,12 +64,23 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
     const bound = await getOpenRouterModel(source.modelId)
     if (!bound) return { success: false, error: 'Connect OpenRouter in Settings first.' }
 
-    // The edited prompt (when present) is sent verbatim; otherwise build it from the source.
-    const { system, prompt } = source.promptOverride
-      ? source.promptOverride
-      : 'file' in source
-        ? buildNotesFilePrompt()
-        : buildNotesPrompt('text' in source ? { text: source.text } : { topic: source.topic })
+    // The edited prompt (when present) is sent verbatim. Otherwise the user-message half comes from the
+    // builder and the system half is the user's RESOLVED prompt (override or built-in) — so an unedited
+    // generation still honors a saved prompt and matches what the dialog previewed. A topic note uses
+    // the 'notes_topic' key; decompose (text or file) uses 'notes_decompose'.
+    let system: string
+    let prompt: string
+    if (source.promptOverride) {
+      ;({ system, prompt } = source.promptOverride)
+    } else {
+      prompt = (
+        'file' in source
+          ? buildNotesFilePrompt()
+          : buildNotesPrompt('text' in source ? { text: source.text } : { topic: source.topic })
+      ).prompt
+      const key = 'topic' in source ? 'notes_topic' : 'notes_decompose'
+      system = (await getResolvedSystemPrompts())[key]
+    }
     const startedAt = Date.now()
     // PDF path attaches the file as a vision content part; text/topic send the prompt as-is. Both
     // extract the same notes schema and capture usage identically.

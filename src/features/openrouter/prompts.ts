@@ -81,6 +81,13 @@ export const BUILTIN_SYSTEM: Record<PromptKeyT, string> = {
   notes_topic: NOTES_TOPIC_SYSTEM,
 }
 
+// Drives the Save "delete-if-default" branch: saving the built-in text verbatim means "no override",
+// so the action deletes the row instead of forking the user onto a frozen copy of the default.
+// Trim both sides — the schema trims input, and the constants are already trim-clean.
+export function isBuiltinSystem(promptKey: PromptKeyT, system: string): boolean {
+  return system.trim() === BUILTIN_SYSTEM[promptKey]
+}
+
 export function buildNotesPrompt(source: { text: string } | { topic: string }): PromptT {
   if ('text' in source) {
     return {
