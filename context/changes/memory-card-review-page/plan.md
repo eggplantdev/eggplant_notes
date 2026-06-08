@@ -33,8 +33,8 @@ Verify: from the listing, open a card, reveal, rate "Good" → the review is rec
 - No practice/no-op review mode — rating is the real FSRS path, unchanged.
 - No new mutation, RPC, schema, or migration.
 - No bespoke back control — the standard `PageShell` `backHref` (as the edit page uses) is the only navigation affordance added.
-- No change to the dashboard's behavior or to `getDueQueue`.
-- No redirect to the listing or dashboard after rating — the user stays on the card.
+- No change to the dashboard's behavior. _(Revised 2026-06-08: `getDueQueue` gained an additive `excludeId` arg for the queue walk; the dashboard call site is unchanged.)_
+- ~~No redirect after rating — the user stays on the card.~~ _(Revised 2026-06-08 during the review gate: the page now advances through the due queue — see change.md "Revision". A non-goal rating navigates to the next due card; caught-up shows in place; a goal rating celebrates AND advances, with the celebration provider hoisted to the `[id]` layout.)_
 - No extra on-page context (subject chip, explicit next-due readout) beyond what `ReviewPanel` already renders; the source-note link is shown only when `note_id` is set (handled inside `ReviewPanel`).
 
 ## Implementation Approach
@@ -121,9 +121,9 @@ One Playwright spec covering the new public surface: list → open card → reve
 
 **File**: `e2e/memory-card-review-page.spec.ts`
 
-**Intent**: Prove the on-demand single-card review flow end-to-end against a fresh production build. Self-seed a card through the real UI (create a card), open it from the listing, reveal the answer, rate it, and assert the review took effect (status/next-due changed, still on the card page).
+**Intent**: Prove the queue-walk flow end-to-end against a fresh production build. Self-seed two due cards through the real UI, open one from the listing, rate it, and assert the page **advances to the next due card** (URL id changes), then rate the last one and assert the **caught-up notice shows in place** (URL pinned — no navigation). _(Revised 2026-06-08: was "rate → still on the card page"; the behavior is now a queue walk — see change.md "Revision".)_
 
-**Contract**: Fresh-per-test sign-up via `e2e/helpers.ts` (`uniqueEmail`) — this is a mutation spec, so no shared session (lessons.md:38). Locate via `data-testid`, scope-then-target the listing card, never `.first()` (lessons.md:119); add any missing testids to the card row / page in Phase 1's components if needed. Assert on URL (`/memory-cards/[id]`) and the observable rescheduled effect, not on copy.
+**Contract**: Fresh-per-test sign-up via `e2e/helpers.ts` (`uniqueEmail`) — this is a mutation spec, so no shared session (lessons.md:38). Locate the listing card by its unique injected prompt text (zero-maintenance, lessons.md:119) + role; assert on the URL card-id transition (the navigation IS the behavior under test) and the caught-up copy, not on incidental copy. Deliberate-break verified: commenting out `advance?.()` keeps the URL on the rated card and turns the spec red.
 
 ### Success Criteria:
 
@@ -190,10 +190,10 @@ One Playwright spec covering the new public surface: list → open card → reve
 
 #### Automated
 
-- [ ] 2.1 New spec passes: `pnpm test:e2e`
-- [ ] 2.2 Full unit suite passes: `pnpm test`
-- [ ] 2.3 Typecheck + lint + build still green
+- [x] 2.1 New spec passes: `pnpm test:e2e` (memory-card-review-page green solo; full-suite failures/flakes are unrelated specs that pass in isolation — documented stack-under-load pattern)
+- [x] 2.2 Full unit suite passes: `pnpm test` (146 passed)
+- [x] 2.3 Typecheck + lint + build still green
 
 #### Manual
 
-- [ ] 2.4 Spec fails when a Phase 1 change is reverted (negative sanity check)
+- [x] 2.4 Deliberate break (commented out `advance?.()`) turns the spec red at the advance assertion; reverted

@@ -1,9 +1,9 @@
 ---
 change_id: memory-card-review-page
 title: Standalone memory-card page with on-demand review buttons
-status: implementing
+status: implemented
 created: 2026-06-06
-updated: 2026-06-06
+updated: 2026-06-08
 archived_at: null
 ---
 
@@ -19,3 +19,11 @@ Decisions from brainstorming (2026-06-06):
 - Source-note link (`/notes/[noteId]#card-[id]`) shown only when `note_id` is set.
 - Reuse `ReviewPanel`; extract its card-rendering core if it carries dashboard-only copy (no dashboard behavior change).
 - New public surface → per-slice review gate + E2E spec (list → open card → reveal → rate → schedule advances).
+
+## Revision (2026-06-08) — queue walk instead of stay-on-card
+
+The "Stay on the card after rating" decision above was **reversed** during the review gate. The standalone page now **advances through the due queue**: a non-goal rating navigates to the next due card (`router.push('/memory-cards/<nextDueId>')`); when none remain it shows the caught-up notice in place; a goal-crossing rating shows the celebration dialog **and** advances. Mechanics:
+
+- `getDueQueue(client, excludeId)` gained an `excludeId` so an "Again" reschedule can't re-serve the just-rated card; `rateMemoryCard(..., returnNextDue)` returns the soonest-due remaining `nextDueId`.
+- New `features/review/components/`: `card-review-queue.tsx` (client wrapper; server `ReviewPanel` passed as children to keep its async markdown an RSC), `queue-advance-context.tsx`, `caught-up-notice.tsx`.
+- The `ReviewCelebrationProvider` is hoisted into a new `app/(protected)/memory-cards/[id]/layout.tsx` so the goal dialog survives navigating between cards (lessons.md:141). The dashboard still self-provides via `ReviewPanel` (`provideCelebration` prop).
