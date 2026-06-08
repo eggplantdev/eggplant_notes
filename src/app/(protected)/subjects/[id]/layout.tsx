@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import { PageShell } from '@/components/layout/page-shell'
@@ -8,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
 import { DeleteSubjectButton } from '@/features/subjects/components/delete-subject-button'
 import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
+import { assertFound } from '@/lib/assert-found'
 import { pluralize } from '@/lib/utils/pluralize'
 
 // This layout holds the persistent shell + header/sidebar; the nested [noteId] segment renders
@@ -23,7 +23,7 @@ export default async function SubjectLayout({
 }) {
   const { id } = await params
   const [subject, summaries] = await Promise.all([getSubject(id), getSubjectNoteSummaries(id)])
-  if (!subject) notFound()
+  assertFound(subject)
 
   return (
     <PageShell

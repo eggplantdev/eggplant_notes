@@ -1,5 +1,3 @@
-import { notFound } from 'next/navigation'
-
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -13,6 +11,7 @@ import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
 import { getOpenRouterStatus } from '@/features/openrouter/queries'
+import { assertFound } from '@/lib/assert-found'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Next 16 `params`/`searchParams` are Promises. getNote() is RLS-scoped, so a missing OR
@@ -34,7 +33,7 @@ export default async function NotePage({
     getSubjects(),
     getOpenRouterStatus(),
   ])
-  if (!note) notFound()
+  assertFound(note)
 
   const isEditingNote = edit === 'note'
   // Resolved from the already-fetched subjects list, so no extra round-trip.

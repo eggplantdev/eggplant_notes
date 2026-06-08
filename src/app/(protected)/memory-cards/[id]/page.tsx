@@ -1,9 +1,8 @@
-import { notFound } from 'next/navigation'
-
 import { PageShell } from '@/components/layout/page-shell'
 import { CardActions } from '@/components/ui/card-actions'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import { getMemoryCardForReview } from '@/features/memory-cards/queries'
+import { assertFound } from '@/lib/assert-found'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { CardReviewQueue } from '@/features/review/components/card-review-queue'
 import { ReviewPanel } from '@/features/review/components/review-panel'
@@ -18,7 +17,7 @@ export default async function MemoryCardReviewPage({
 }) {
   const { id } = await params
   const [card, goal] = await Promise.all([getMemoryCardForReview(id), getDailyGoal()])
-  if (!card) notFound()
+  assertFound(card)
 
   return (
     <PageShell
