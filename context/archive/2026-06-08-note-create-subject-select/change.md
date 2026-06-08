@@ -1,10 +1,10 @@
 ---
 change_id: note-create-subject-select
 title: New-or-existing subject selector on the create-note form (shared)
-status: implemented
+status: archived
 created: 2026-06-08
 updated: 2026-06-08
-archived_at: null
+archived_at: 2026-06-08T19:51:38Z
 ---
 
 > Review gate (2026-06-08): automated legs green; review confirmed the migration is RLS-safe and import
