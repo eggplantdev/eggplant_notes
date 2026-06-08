@@ -185,21 +185,23 @@ A read action (`listFavoriteModels`) and a write action (`toggleFavoriteModel`),
 
 ---
 
-## Phase 4: Picker UI — sort control, favorites group, star toggle, self-load
+## Phase 4: Picker UI — sort control, Pinned group, star toggle, self-load
 
 ### Overview
 
-Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites set with a "Favorites" group and per-row star toggle. No consumer changes.
+Wire everything into `model-select.tsx`: a sort field+direction control, a self-loaded "pinned" set (the star) shown as a top **Pinned** group, and per-row star toggle. No consumer changes.
+
+> **Design evolved during implementation (user feedback):** (a) the hardcoded "Recommended" group was **dropped** — the top group is purely the user's starred picks, labelled **Pinned**; the curated 6 become the DB-seeded starting pins (Phase 1 follow-up migration `20260608100741_seed_favorite_models_default.sql` sets the column default + backfills empty rows). (b) Sort gained a **direction** toggle (asc/desc) shown as a segmented field control + an Asc/Desc button — one-directional sort was rejected. (c) Router/dynamic models report a **negative sentinel price**; show "Variable pricing" (via `formatModelPricing`) and sort them last.
 
 ### Changes Required:
 
-#### 1. Sort control + apply sort
+#### 1. Sort field + direction control
 
 **File**: `src/features/openrouter/components/model-select.tsx`
 
-**Intent**: Let the user reorder the catalog; apply one comparator uniformly to every group.
+**Intent**: Let the user reorder the catalog by a field and a direction; apply one comparator uniformly to both groups.
 
-**Contract**: Local `const [sort, setSort] = useState<ModelSortT>('name')`. A compact control in the popover above `CommandList` (cycling `Button` or small segmented control) labeled by mode (e.g. "Sort: Name / Input $ / Output $"). Apply `sortModels(group, sort)` to each rendered group (Favorites, Recommended, All models) instead of the current inline `localeCompare`. cmdk still re-ranks on text query.
+**Contract**: Local `const [sort, setSort] = useState<ModelSortT>('name')` + `const [sortDir, setSortDir] = useState<SortDirT>('asc')`. A `SegmentedToggle` (reuse `@/components/ui/segmented-toggle`) for the field (Name / Input $ / Output $) plus an Asc/Desc `Button` toggle, under a "Sort by" label, above `CommandList`. Apply `sortModels(group, sort, sortDir)` to each rendered group. cmdk still re-ranks on text query.
 
 #### 2. Self-load favorites + optimistic toggle
 
@@ -207,23 +209,23 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 **Intent**: Own favorites internally, loaded alongside the catalog, toggled optimistically.
 
-**Contract**: Local `const [favorites, setFavorites] = useState<string[]>([])`. In `handleOpenChange`'s first-open load (the existing `startLoad`), also `listFavoriteModels()` — run it in parallel with `listOpenRouterModels()` (e.g. `Promise.all`). A `toggleFavorite(id)` handler: optimistically update `favorites` (remove if present else add), call `toggleFavoriteModel({ modelId: id })`, and on failure revert + `toastActionResult` (import from `@/components/forms/toast-result`). The picker only renders the star once `loaded`.
+**Contract**: Local `const [favorites, setFavorites] = useState<string[]>([])`. In `handleOpenChange`'s first-open load (the existing `startLoad`), also `listFavoriteModels()` — run it in parallel with `listOpenRouterModels()` via `Promise.all`. A `toggleFavorite(id)` handler: optimistically update `favorites` (remove if present else add), call `toggleFavoriteModel({ modelId: id })`, and on failure revert + `toastActionResult` (import from `@/components/forms/toast-result`). The star renders once `loaded`.
 
-#### 3. Favorites group + grouping/dedup
-
-**File**: `src/features/openrouter/components/model-select.tsx`
-
-**Intent**: Render a "Favorites" group above "Recommended", without duplicating ids across groups.
-
-**Contract**: Derive three lists from `filterModels(catalog, filter)`: `favoriteList` = models whose id ∈ `favorites`; `recommended` = `RECOMMENDED_MODEL_IDS` minus favorites; `rest` = everything not in favorites and not recommended. Render `CommandGroup heading="Favorites"` (only when non-empty) above the existing Recommended/All groups. Each group sorted via `sortModels`.
-
-#### 4. Per-row star toggle
+#### 3. Pinned group + grouping
 
 **File**: `src/features/openrouter/components/model-select.tsx`
 
-**Intent**: Toggle favorite from any row without selecting the model.
+**Intent**: Render a "Pinned" group (the user's stars) above "All models"; no hardcoded "Recommended".
 
-**Contract**: In `renderItem`, add a star `Button` (lucide `Star` filled when `favorites.includes(m.id)`, outline otherwise) inside the `CommandItem`. Its `onClick` must `e.stopPropagation()` then `toggleFavorite(m.id)` so cmdk's `onSelect` doesn't fire. Place it in the row's right side near the price readout; keep the existing `(default)` tag behavior.
+**Contract**: Derive two disjoint lists from `filterModels(catalog, filter)`: `pinned` = models whose id ∈ `favorites`; `rest` = everything else. Render `CommandGroup heading="Pinned"` (only when non-empty) above `CommandGroup heading="All models"`. Each sorted via `sortModels(list, sort, sortDir)`. `RECOMMENDED_MODEL_IDS` is no longer used for grouping (only as the DB seed + offline catalog fallback).
+
+#### 4. Per-row star toggle + variable pricing
+
+**File**: `src/features/openrouter/components/model-select.tsx`
+
+**Intent**: Toggle a pin from any row without selecting the model; show variable pricing sanely.
+
+**Contract**: In `renderItem`, add a star `Button` (lucide `Star`, filled when starred) inside the `CommandItem`; its `onClick` must `e.stopPropagation()` + `e.preventDefault()` then `toggleFavorite(m.id)` (plus `onPointerDown` stopPropagation) so cmdk's `onSelect` doesn't fire. Render the price via `formatModelPricing(m)` (shows "Variable pricing" for the negative sentinel). Keep the `(default)` tag.
 
 ### Success Criteria:
 
@@ -307,9 +309,9 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Unit suite still green: `pnpm test`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — bb6d3a8
+- [x] 3.2 Linting passes: `pnpm lint` — bb6d3a8
+- [x] 3.3 Unit suite still green: `pnpm test` — bb6d3a8
 
 #### Manual
 
@@ -319,15 +321,16 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `pnpm typecheck`
-- [ ] 4.2 Linting passes: `pnpm lint`
-- [ ] 4.3 Unit suite passes: `pnpm test`
-- [ ] 4.4 Production build passes: `pnpm build`
+- [x] 4.1 Type checking passes: `pnpm typecheck`
+- [x] 4.2 Linting passes: `pnpm lint`
+- [x] 4.3 Unit suite passes: `pnpm test`
+- [x] 4.4 Production build passes: `pnpm build`
 
 #### Manual
 
-- [ ] 4.5 Sort toggles and reorders (cheapest-first on price sorts)
-- [ ] 4.6 Star adds to Favorites group; star tap does not select the model
-- [ ] 4.7 Favorites persist across reload
-- [ ] 4.8 Generate dialog + PDF import dialog show favorites + sort; selection still works
-- [ ] 4.9 No empty Favorites group when nothing is starred
+- [ ] 4.5 Sort field (Name/Input $/Output $) + Asc/Desc direction reorder the list both ways
+- [ ] 4.6 Star adds to the Pinned group; star tap does not select the model
+- [ ] 4.7 Pins persist across reload
+- [ ] 4.8 Generate dialog + PDF import dialog show pins + sort; selection still works
+- [ ] 4.9 Router models show "Variable pricing" (not $-1000000) and sort last on price
+- [ ] 4.10 A freshly connected account shows the 6 seeded pins; All models lists the rest

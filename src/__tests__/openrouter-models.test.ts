@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   filterModels,
+  formatModelPricing,
   formatPricePerM,
   normalizeModels,
   sortModels,
@@ -103,6 +104,55 @@ describe('sortModels', () => {
     const original = [...models]
     sortModels(models, 'input')
     expect(models).toEqual(original)
+  })
+
+  it("'name' descending reverses to Z→A", () => {
+    expect(sortModels(models, 'name', 'desc').map((m) => m.label)).toEqual([
+      'Charlie',
+      'Bravo',
+      'Alpha',
+    ])
+  })
+
+  it("'input' descending orders priciest first", () => {
+    expect(sortModels(models, 'input', 'desc').map((m) => m.id)).toEqual(['c', 'b', 'a'])
+  })
+
+  it('sorts negative (variable) prices last in both directions', () => {
+    const withVariable: OpenRouterModelT[] = [
+      model('router', 'Router', -1, -1),
+      model('cheap', 'Cheap', 0.001, 0.001),
+      model('pricey', 'Pricey', 0.009, 0.009),
+    ]
+    expect(sortModels(withVariable, 'input', 'asc').map((m) => m.id)).toEqual([
+      'cheap',
+      'pricey',
+      'router',
+    ])
+    expect(sortModels(withVariable, 'input', 'desc').map((m) => m.id)).toEqual([
+      'pricey',
+      'cheap',
+      'router',
+    ])
+  })
+})
+
+describe('formatModelPricing', () => {
+  const withPrices = (inputPrice: number, outputPrice: number): OpenRouterModelT => ({
+    id: 'x/y',
+    label: 'X',
+    inputPrice,
+    outputPrice,
+    inputModalities: ['text'],
+  })
+
+  it('shows the in/out pair for normal prices', () => {
+    expect(formatModelPricing(withPrices(0.0000025, 0.00001))).toBe('$2.50/1M in · $10.00/1M out')
+  })
+
+  it('shows "Variable pricing" when either price is the negative sentinel', () => {
+    expect(formatModelPricing(withPrices(-1, -1))).toBe('Variable pricing')
+    expect(formatModelPricing(withPrices(0.001, -1))).toBe('Variable pricing')
   })
 })
 

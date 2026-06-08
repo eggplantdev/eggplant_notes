@@ -83,21 +83,43 @@ export function filterModels(
   return models.filter((m) => m.inputModalities.some((mod) => FILE_MODALITIES.includes(mod)))
 }
 
-// How the picker orders a group: by label, or cheapest-first on either price axis.
+// How the picker orders a group: by label, or by either price axis. Direction is orthogonal.
 export type ModelSortT = 'name' | 'input' | 'output'
+export type SortDirT = 'asc' | 'desc'
 
-// Pure: order a model list by one of the sort modes (ascending price, with a label tie-break so
-// equal-priced models stay deterministic). Returns a new array — the caller's source is untouched.
-export function sortModels(models: OpenRouterModelT[], sort: ModelSortT): OpenRouterModelT[] {
+// Pure: order a model list by a field + direction, with a label tie-break so equal values stay
+// deterministic. Router/dynamic-priced models report a NEGATIVE sentinel price — treat that as
+// "unknown" and always sort it last (it's neither cheapest nor priciest), regardless of direction.
+// Returns a new array — the caller's source is untouched.
+export function sortModels(
+  models: OpenRouterModelT[],
+  sort: ModelSortT,
+  dir: SortDirT = 'asc',
+): OpenRouterModelT[] {
   const byLabel = (a: OpenRouterModelT, b: OpenRouterModelT) => a.label.localeCompare(b.label)
+  const mul = dir === 'asc' ? 1 : -1
   return [...models].sort((a, b) => {
-    if (sort === 'input') return a.inputPrice - b.inputPrice || byLabel(a, b)
-    if (sort === 'output') return a.outputPrice - b.outputPrice || byLabel(a, b)
-    return byLabel(a, b)
+    if (sort === 'name') return mul * byLabel(a, b)
+    const pa = sort === 'input' ? a.inputPrice : a.outputPrice
+    const pb = sort === 'input' ? b.inputPrice : b.outputPrice
+    const unknownA = pa < 0
+    const unknownB = pb < 0
+    if (unknownA || unknownB) {
+      if (unknownA && unknownB) return byLabel(a, b)
+      return unknownA ? 1 : -1
+    }
+    return mul * (pa - pb) || byLabel(a, b)
   })
 }
 
 // Per-token USD → conventional "$X.XX/1M" display.
 export function formatPricePerM(price: number): string {
   return `$${(price * 1e6).toFixed(2)}/1M`
+}
+
+// Row pricing label. Router models report a negative sentinel (variable pricing) — show that as
+// "Variable pricing" rather than a nonsense "$-1000000.00/1M".
+export function formatModelPricing(model: OpenRouterModelT): string {
+  if (model.inputPrice < 0 || model.outputPrice < 0) return 'Variable pricing'
+  return `${formatPricePerM(model.inputPrice)} in · ${formatPricePerM(model.outputPrice)} out`
 }
