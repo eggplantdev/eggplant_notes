@@ -1,10 +1,10 @@
 ---
 change_id: model-picker-sort-favorites
 title: Model picker — sort by input/output cost or name + per-user favorites
-status: implemented
+status: archived
 created: 2026-06-08
 updated: 2026-06-08
-archived_at: null
+archived_at: 2026-06-08T10:56:55Z
 ---
 
 ## Notes
