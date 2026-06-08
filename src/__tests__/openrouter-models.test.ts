@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterModels, formatPricePerM, normalizeModels } from '@/features/openrouter/models'
+import {
+  filterModels,
+  formatPricePerM,
+  normalizeModels,
+  sortModels,
+  type OpenRouterModelT,
+} from '@/features/openrouter/models'
 
 describe('normalizeModels', () => {
   it('maps the raw /models shape to the trimmed picker shape', () => {
@@ -54,6 +60,49 @@ describe('filterModels', () => {
 
   it("'file' keeps only image/file-capable models", () => {
     expect(filterModels(models, 'file').map((m) => m.id)).toEqual(['vision/img', 'vision/file'])
+  })
+})
+
+describe('sortModels', () => {
+  const model = (
+    id: string,
+    label: string,
+    inputPrice: number,
+    outputPrice: number,
+  ): OpenRouterModelT => ({ id, label, inputPrice, outputPrice, inputModalities: ['text'] })
+
+  // Intentionally out of every target order so each sort has to do real work.
+  const models: OpenRouterModelT[] = [
+    model('c', 'Charlie', 0.003, 0.001),
+    model('a', 'Alpha', 0.001, 0.009),
+    model('b', 'Bravo', 0.002, 0.005),
+  ]
+
+  it("'name' orders by label A→Z", () => {
+    expect(sortModels(models, 'name').map((m) => m.label)).toEqual(['Alpha', 'Bravo', 'Charlie'])
+  })
+
+  it("'input' orders by ascending input price", () => {
+    expect(sortModels(models, 'input').map((m) => m.id)).toEqual(['a', 'b', 'c'])
+  })
+
+  it("'output' orders by ascending output price", () => {
+    expect(sortModels(models, 'output').map((m) => m.id)).toEqual(['c', 'b', 'a'])
+  })
+
+  it('breaks equal-price ties by label', () => {
+    const tied: OpenRouterModelT[] = [
+      model('z', 'Zeta', 0.005, 0.005),
+      model('m', 'Mu', 0.005, 0.005),
+    ]
+    expect(sortModels(tied, 'input').map((m) => m.label)).toEqual(['Mu', 'Zeta'])
+    expect(sortModels(tied, 'output').map((m) => m.label)).toEqual(['Mu', 'Zeta'])
+  })
+
+  it('does not mutate the source array', () => {
+    const original = [...models]
+    sortModels(models, 'input')
+    expect(models).toEqual(original)
   })
 })
 

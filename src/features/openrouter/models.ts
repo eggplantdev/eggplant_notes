@@ -83,6 +83,20 @@ export function filterModels(
   return models.filter((m) => m.inputModalities.some((mod) => FILE_MODALITIES.includes(mod)))
 }
 
+// How the picker orders a group: by label, or cheapest-first on either price axis.
+export type ModelSortT = 'name' | 'input' | 'output'
+
+// Pure: order a model list by one of the sort modes (ascending price, with a label tie-break so
+// equal-priced models stay deterministic). Returns a new array — the caller's source is untouched.
+export function sortModels(models: OpenRouterModelT[], sort: ModelSortT): OpenRouterModelT[] {
+  const byLabel = (a: OpenRouterModelT, b: OpenRouterModelT) => a.label.localeCompare(b.label)
+  return [...models].sort((a, b) => {
+    if (sort === 'input') return a.inputPrice - b.inputPrice || byLabel(a, b)
+    if (sort === 'output') return a.outputPrice - b.outputPrice || byLabel(a, b)
+    return byLabel(a, b)
+  })
+}
+
 // Per-token USD → conventional "$X.XX/1M" display.
 export function formatPricePerM(price: number): string {
   return `$${(price * 1e6).toFixed(2)}/1M`

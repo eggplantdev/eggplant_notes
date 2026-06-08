@@ -286,22 +286,22 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `supabase db reset`
-- [x] 1.2 Column exists and seed still loads after `supabase db reset`
-- [x] 1.3 Type checking passes: `pnpm typecheck`
+- [x] 1.1 Migration applies cleanly: `supabase db reset` — d374dd6
+- [x] 1.2 Column exists and seed still loads after `supabase db reset` — d374dd6
+- [x] 1.3 Type checking passes: `pnpm typecheck` — d374dd6
 
 #### Manual
 
-- [x] 1.4 Seed accounts log in; Settings → AI renders after reset
+- [x] 1.4 Seed accounts log in; Settings → AI renders after reset — d374dd6
 
 ### Phase 2: Pure sort logic in models.ts
 
 #### Automated
 
-- [ ] 2.1 New sortModels tests fail before, pass after: `pnpm test openrouter-models`
-- [ ] 2.2 Full unit suite passes: `pnpm test`
-- [ ] 2.3 Type checking passes: `pnpm typecheck`
-- [ ] 2.4 Linting passes: `pnpm lint`
+- [x] 2.1 New sortModels tests fail before, pass after: `pnpm test openrouter-models`
+- [x] 2.2 Full unit suite passes: `pnpm test`
+- [x] 2.3 Type checking passes: `pnpm typecheck`
+- [x] 2.4 Linting passes: `pnpm lint`
 
 ### Phase 3: Favorites server actions + read path
 
