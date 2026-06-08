@@ -210,6 +210,46 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 ---
 
+## Phase 4: Auto-close on success + loader
+
+### Overview
+
+Dogfooding finding: the dialog never previews the generated result (only token counts), so keeping it open after success was pure friction — the user had to click Apply just to close it and see the result land in the form/list. Collapse the two steps: on success, hand off + close immediately; stay open only on failure (for a retry). Add a real spinner during generation (the bare "Generating…" label read as "nothing happening").
+
+### Changes Required:
+
+#### 1. Auto-close on success; drop the Apply/result step
+
+**File**: `src/features/openrouter/components/generate-dialog.tsx`
+
+**Intent**: Success goes straight to the caller's surface and closes the dialog; failure keeps it open.
+
+**Contract**: In `generate()`'s success branch, call `onResult(outcome.data)`, fire ONE success toast (`applyHint ?? "Generated N <noun>"`), and `setOpen(false)`. Remove the `result` state, the `apply()` function, the Apply / "Generate again" footer, and the in-dialog token-usage line (token data still flows to the `.ai-debug/` log). Failure branch unchanged (inline `FormError` + error toast, dialog stays open). The Phase 3 success + apply toasts collapse into this single success toast.
+
+#### 2. Loader during generation
+
+**File**: `src/features/openrouter/components/generate-dialog.tsx`
+
+**Intent**: Make the in-flight state unmistakable.
+
+**Contract**: While `isGenerating`, the Generate button shows a spinning `LoaderCircle` (`animate-spin`, lucide) in place of `Sparkles`, plus "Generating…". Button already disabled during the transition.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- Type checking passes: `pnpm typecheck`
+- Linting passes: `pnpm lint`
+- Full suite stays green: `pnpm test`
+
+#### Manual Verification:
+
+- Generate on any surface → dialog closes on success, result is in the form/list, one success toast fires.
+- Force a failure → dialog stays open, spinner clears, error toast + inline message show.
+- During generation → the spinner animates.
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests:
@@ -279,3 +319,17 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 - [ ] 3.4 Generate success toast fires; Apply hint toast fires and fields/list populate
 - [ ] 3.5 Failure toast fires alongside the in-dialog message
 - [ ] 3.6 Noun + apply hint match the surface across all four callers
+
+### Phase 4: Auto-close on success + loader
+
+#### Automated
+
+- [x] 4.1 Type checking passes: `pnpm typecheck`
+- [x] 4.2 Linting passes: `pnpm lint`
+- [x] 4.3 Full suite stays green: `pnpm test`
+
+#### Manual
+
+- [ ] 4.4 Success closes the dialog; result is in the form/list; one success toast
+- [ ] 4.5 Failure keeps the dialog open; spinner clears; error toast + inline message
+- [ ] 4.6 Spinner animates during generation

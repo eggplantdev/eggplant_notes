@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { LoaderCircle, Sparkles } from 'lucide-react'
 import { useState, useTransition, type ReactNode } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
@@ -19,15 +19,16 @@ import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
-import type { GenerateDebugT, GenerateResultT } from '@/features/openrouter/types'
+import type { GenerateResultT } from '@/features/openrouter/types'
 import { previewPrompt, type PreviewInputT, type PromptT } from '@/features/openrouter/prompts'
 
-// The single two-step entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible
-// trigger, the connect gate (via useAiGate), per-generate model selection, an EDITABLE view of the
-// exact prompt that will be sent (no LLM cost to preview), and the token readout after generating.
-// Editing the prompt sends it verbatim (promptOverride) so the user can refine freely; an unedited
-// prompt sends nothing and the action builds it server-side. On Apply it hands the data to the
-// caller's own preview/edit surface (form fields / candidate list).
+// The single entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible trigger,
+// the connect gate (via useAiGate), per-generate model selection, and an EDITABLE view of the exact
+// prompt that will be sent (no LLM cost to preview). Editing the prompt sends it verbatim
+// (promptOverride) so the user can refine freely; an unedited prompt sends nothing and the action
+// builds it server-side. The dialog does NOT preview the result — there's nothing to decide inside
+// it — so on success it hands the data straight to the caller's own preview/edit surface (form
+// fields / candidate list) and CLOSES; it stays open only on failure, for a retry.
 export function GenerateDialog<T>({
   connected,
   defaultModel,
@@ -63,19 +64,17 @@ export function GenerateDialog<T>({
   canGenerate?: boolean
   // Scopes the model picker: 'file' restricts to vision/file-capable models (PDF import, Phase 8).
   modelFilter?: 'text' | 'file'
-  // Singular noun for the success toast ("Generated 3 cards"). Caller-set so the toast is accurate.
+  // Singular noun for the success toast fallback ("Generated 3 cards"). Caller-set so it's accurate.
   resultNoun?: string
-  // Toasted on Apply, when the result lands in the caller's surface (fields / candidate list) that
-  // the now-closed dialog was covering — the moment that was otherwise fully silent. Should point at
-  // where the result went AND that nothing is saved until the caller's own Save/Add/Create/Import.
+  // The success toast itself: shown when generation succeeds and the dialog auto-closes, handing the
+  // result to the caller's surface (fields / candidate list). Should say where the result went AND
+  // that nothing is saved until the caller's own Save/Add/Create/Import. Falls back to a generic
+  // "Generated N <noun>s" when unset.
   applyHint?: string
 }) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
   const [model, setModel] = useState(defaultModel)
-  // One slot for the generation outcome (data + token/prompt debug) — both are set and cleared
-  // together, so a single state can't desync the token readout from the data Apply commits.
-  const [result, setResult] = useState<{ data: T[]; debug: GenerateDebugT } | undefined>(undefined)
   const [error, setError] = useState<string | undefined>(undefined)
   const [triggerError, setTriggerError] = useState<string | undefined>(undefined)
   const [isGenerating, startGenerate] = useTransition()
@@ -105,7 +104,6 @@ export function GenerateDialog<T>({
 
   function openConfig() {
     setError(undefined)
-    setResult(undefined)
     setModel(defaultModel) // re-seed from the default in case a prior open changed it
     setOverride(undefined)
     setOpen(true)
@@ -118,26 +116,21 @@ export function GenerateDialog<T>({
       // server-side (and re-fetch grounded source under its own RLS trust boundary).
       const outcome = await action(model, override)
       if (outcome.success) {
-        setResult({ data: outcome.data, debug: outcome.debug })
+        // Success has nothing to decide in the dialog, so hand off + close immediately. The toast
+        // (body-level portal, renders above anything) is the visible outcome + says where it landed.
+        onResult(outcome.data)
         const n = outcome.data.length
-        // Toast renders in a body-level portal (above the dialog), so the outcome is visible even if
-        // the user's attention has drifted off the dialog while the model worked.
-        toastMessage(`Generated ${n} ${n === 1 ? resultNoun : `${resultNoun}s`}`, 'success')
+        toastMessage(
+          applyHint ?? `Generated ${n} ${n === 1 ? resultNoun : `${resultNoun}s`}`,
+          'success',
+        )
+        setOpen(false)
       } else {
+        // Stay open so the user can retry / tweak the prompt; toast + inline FormError both carry it.
         setError(outcome.error)
-        // Keep the inline FormError too — the toast is the attention-grabber, the inline line is the
-        // persistent in-dialog record while the user retries.
         toastMessage(outcome.error, 'error')
       }
     })
-  }
-
-  function apply() {
-    if (result) onResult(result.data)
-    // Kill the silent moment: Apply closes the dialog and the result lands in a surface the user
-    // wasn't watching. The hint says where it went and that nothing is saved yet.
-    if (applyHint) toastMessage(applyHint, 'info')
-    setOpen(false)
   }
 
   return (
@@ -227,40 +220,21 @@ export function GenerateDialog<T>({
               />
             </div>
 
-            {result && (
-              <p data-testid="generate-token-usage" className="text-muted-foreground text-sm">
-                Tokens — in {result.debug.usage.inputTokens ?? '?'} / out{' '}
-                {result.debug.usage.outputTokens ?? '?'} / total{' '}
-                {result.debug.usage.totalTokens ?? '?'} · model {result.debug.model}
-              </p>
-            )}
-
             <FormError message={error} />
           </div>
 
           <DialogFooter>
-            {result ? (
-              <>
-                <Button type="button" variant="outline" size="sm" onClick={generate}>
-                  Generate again
-                </Button>
-                <Button type="button" size="sm" data-testid="generate-apply" onClick={apply}>
-                  Apply
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="ai"
-                size="sm"
-                data-testid="generate-confirm"
-                disabled={isGenerating || !canGenerate}
-                onClick={generate}
-              >
-                <Sparkles />
-                {isGenerating ? 'Generating…' : 'Generate'}
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="ai"
+              size="sm"
+              data-testid="generate-confirm"
+              disabled={isGenerating || !canGenerate}
+              onClick={generate}
+            >
+              {isGenerating ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+              {isGenerating ? 'Generating…' : 'Generate'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
