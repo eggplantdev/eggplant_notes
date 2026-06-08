@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { CardOverviewT } from '@/features/memory-cards/types'
+import { trimmedString } from '@/lib/schema-builders'
 
 // Runtime-validates the card_overview RPC's jsonb payload at the boundary (loud throw on a future
 // SQL key change, not a silent `undefined`). `satisfies z.ZodType<CardOverviewT>` binds it to the
@@ -11,11 +12,7 @@ export const cardOverviewSchema = z.object({
   total: z.number(),
 }) satisfies z.ZodType<CardOverviewT>
 
-export const promptSchema = z
-  .string()
-  .trim()
-  .min(1, 'Question is required')
-  .max(2000, 'Question must be 2000 characters or fewer')
+export const promptSchema = trimmedString('Question', 2000)
 
 // Blank/whitespace-only → null (persist as SQL NULL, columns are nullable). Non-empty keeps its
 // ORIGINAL text (no trim) so code indentation / leading newlines in `code_context` survive.
