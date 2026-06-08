@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { getCredentialRow } from '@/features/openrouter/credential'
-import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/models'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { BUILTIN_SYSTEM, type PromptKeyT } from '@/features/openrouter/prompts'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'

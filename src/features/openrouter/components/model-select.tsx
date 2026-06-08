@@ -18,15 +18,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { listFavoriteModels } from '@/features/openrouter/actions/list-favorite-models'
 import { listOpenRouterModels } from '@/features/openrouter/actions/list-models'
 import { toggleFavoriteModel } from '@/features/openrouter/actions/toggle-favorite-model'
-import {
-  filterModels,
-  formatModelPricing,
-  RECOMMENDED_FALLBACK,
-  sortModels,
-  type ModelSortT,
-  type OpenRouterModelT,
-  type SortDirT,
-} from '@/features/openrouter/models'
+import { RECOMMENDED_FALLBACK } from '@/features/openrouter/constants'
+import type { ModelSortT, OpenRouterModelT, SortDirT } from '@/features/openrouter/types'
+import { filterModels } from '@/features/openrouter/utils/filter-models'
+import { formatModelPricing } from '@/features/openrouter/utils/format-pricing'
+import { sortModels } from '@/features/openrouter/utils/sort-models'
 import { cn } from '@/lib/utils'
 
 // Seed the picker with the curated set so the trigger labels a known id (the common case) before

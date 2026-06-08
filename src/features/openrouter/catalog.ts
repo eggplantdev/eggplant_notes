@@ -2,11 +2,9 @@ import 'server-only'
 
 import { unstable_cache } from 'next/cache'
 
-import {
-  normalizeModels,
-  RECOMMENDED_FALLBACK,
-  type OpenRouterModelT,
-} from '@/features/openrouter/models'
+import { RECOMMENDED_FALLBACK } from '@/features/openrouter/constants'
+import type { OpenRouterModelT } from '@/features/openrouter/types'
+import { normalizeModels } from '@/features/openrouter/utils/normalize-models'
 
 const MODELS_URL = 'https://openrouter.ai/api/v1/models'
 

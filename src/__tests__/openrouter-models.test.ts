@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  filterModels,
-  formatModelPricing,
-  formatPricePerM,
-  normalizeModels,
-  sortModels,
-  type OpenRouterModelT,
-} from '@/features/openrouter/models'
+import type { OpenRouterModelT } from '@/features/openrouter/types'
+import { filterModels } from '@/features/openrouter/utils/filter-models'
+import { formatModelPricing, formatPricePerM } from '@/features/openrouter/utils/format-pricing'
+import { normalizeModels } from '@/features/openrouter/utils/normalize-models'
+import { sortModels } from '@/features/openrouter/utils/sort-models'
 
 describe('normalizeModels', () => {
   it('maps the raw /models shape to the trimmed picker shape', () => {

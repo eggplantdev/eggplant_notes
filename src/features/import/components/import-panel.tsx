@@ -14,7 +14,7 @@ import { SourceInput } from '@/features/import/components/source-input'
 import type { ImportDraftT, PdfSourceT } from '@/features/import/types'
 import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-markdown'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
-import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/models'
+import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/constants'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
@@ -157,9 +157,9 @@ export function ImportPanel({
             well-structured.
           </li>
           <li>
-            <span className="text-foreground font-medium">Decompose with AI</span> — your connected
-            model reads the text and groups it into notes by topic. Best for messy or unstructured
-            prose.
+            <span className="text-foreground font-medium">Generate notes with AI</span> — your
+            connected model reads the text and groups it into notes by topic. Best for messy or
+            unstructured prose.
           </li>
         </ul>
         <p>Either way, you can edit, rename, or skip notes before saving.</p>
@@ -220,10 +220,10 @@ export function ImportPanel({
                 : generateNotes({ text, modelId, promptOverride })
             }
             onResult={applyDecomposition}
-            triggerLabel="Decompose with AI"
+            triggerLabel="Generate notes with AI"
             triggerTestId="import-decompose-ai"
             validate={() => (pdf || text.trim().length > 0 ? undefined : NO_SOURCE_MSG)}
-            dialogTitle="Decompose into notes with AI"
+            dialogTitle="Generate notes from this source with AI"
             resultNoun="note"
             applyHint="Notes ready in the preview below — review, then Import to save."
           />

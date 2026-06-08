@@ -2,7 +2,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 import { isAllowedModel } from '@/features/openrouter/catalog'
 import { getOpenRouterCredential } from '@/features/openrouter/credential'
-import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/models'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { SITE_URL } from '@/lib/env'
 
 // Resolution order: per-generate override > settings default (credential.model) > hard default. The

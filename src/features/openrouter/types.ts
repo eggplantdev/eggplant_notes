@@ -16,3 +16,18 @@ export type GenerateDebugT = { system: string; prompt: string; model: string; us
 export type GenerateResultT<T> =
   | { success: true; data: T; debug: GenerateDebugT }
   | { success: false; error: string }
+
+// A model in the picker: the live `/models` catalog normalizes to this; the curated recommended set
+// is the same shape sans live pricing (filled at 0). `inputModalities` drives the file/vision filter.
+export type OpenRouterModelT = {
+  id: string
+  label: string
+  // Per-token USD (as OpenRouter bills). Multiply by 1e6 for the conventional "/1M tokens" display.
+  inputPrice: number
+  outputPrice: number
+  inputModalities: string[]
+}
+
+// How the picker orders a group: by label, or by either price axis. Direction is orthogonal.
+export type ModelSortT = 'name' | 'input' | 'output'
+export type SortDirT = 'asc' | 'desc'

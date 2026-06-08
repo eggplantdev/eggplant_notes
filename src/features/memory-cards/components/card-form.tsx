@@ -27,7 +27,7 @@ import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
-import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/models'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
