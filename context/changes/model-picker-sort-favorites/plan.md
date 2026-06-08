@@ -315,22 +315,22 @@ Wire everything into `model-select.tsx`: a sort field+direction control, a self-
 
 #### Manual
 
-- [ ] 3.4 Toggle persists across reads; unknown id rejected; not-connected returns the connect error
+- [x] 3.4 Toggle persists across reads (verified live: star → DB row updated, survives reload); unknown-id + not-connected paths are server guards mirroring `set-model.ts`, code-verified not UI-exercised — 2026-06-08
 
 ### Phase 4: Picker UI — sort, favorites group, star toggle, self-load
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `pnpm typecheck`
-- [x] 4.2 Linting passes: `pnpm lint`
-- [x] 4.3 Unit suite passes: `pnpm test`
-- [x] 4.4 Production build passes: `pnpm build`
+- [x] 4.1 Type checking passes: `pnpm typecheck` — fcf52c1
+- [x] 4.2 Linting passes: `pnpm lint` — fcf52c1
+- [x] 4.3 Unit suite passes: `pnpm test` — fcf52c1
+- [x] 4.4 Production build passes: `pnpm build` — fcf52c1
 
 #### Manual
 
-- [ ] 4.5 Sort field (Name/Input $/Output $) + Asc/Desc direction reorder the list both ways
-- [ ] 4.6 Star adds to the Pinned group; star tap does not select the model
-- [ ] 4.7 Pins persist across reload
-- [ ] 4.8 Generate dialog + PDF import dialog show pins + sort; selection still works
-- [ ] 4.9 Router models show "Variable pricing" (not $-1000000) and sort last on price
-- [ ] 4.10 A freshly connected account shows the 6 seeded pins; All models lists the rest
+- [x] 4.5 Sort field (Name/Input $/Output $) + Asc/Desc direction reorder the list both ways — verified live 2026-06-08 (Input $ asc → cheapest first; Desc → o1-pro $150 first)
+- [x] 4.6 Star adds to the Pinned group; star tap does not select the model — verified live (default model trigger + DB `model` column unchanged after starring) 2026-06-08
+- [x] 4.7 Pins persist across reload — verified live (o1-pro survived full page reload via DB read path) 2026-06-08
+- [x] 4.8 Generate dialog + PDF import (Decompose) dialog show pins + sort — verified live on all 4 surfaces; favorites global across surfaces 2026-06-08
+- [x] 4.9 Router models show "Variable pricing" (not $-1000000) and sort last on price — verified live (4 router models sort last in BOTH asc + desc) 2026-06-08
+- [x] 4.10 Fresh-connect seeding shows 6 — verified live 2026-06-08. Original finding: 2 of the 6 seeded ids were retired upstream (`anthropic/claude-3.7-sonnet`, `google/gemini-2.0-flash-001` — confirmed GONE via OpenRouter `/api/v1/models`, 341 live models). **Fix:** refreshed `RECOMMENDED_MODELS` + the seed migration `20260608100741` (edited in place; unmerged/local-only) to `anthropic/claude-sonnet-4.5` + `google/gemini-2.5-flash` (both confirmed live, file/image-capable). All 6 default ids now exist in the catalog, so a fresh INSERT renders 6. Live-confirmed the 2 new ids render in the Pinned group after healing the test row. **Also fixed (same retired id, latent bug beyond seed scope):** `DEFAULT_OPENROUTER_FILE_MODEL` was `google/gemini-2.0-flash-001` → `google/gemini-2.5-flash`, so the PDF-import default points at a live model.
