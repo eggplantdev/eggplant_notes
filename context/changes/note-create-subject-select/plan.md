@@ -105,9 +105,9 @@ the existing submit/validation behavior.
 
 #### Automated
 
-- [x] 2.1 `pnpm typecheck` passes
-- [x] 2.2 `pnpm lint` passes
-- [x] 2.3 `pnpm test` stays green
+- [x] 2.1 `pnpm typecheck` passes — cfbd6e9
+- [x] 2.2 `pnpm lint` passes — cfbd6e9
+- [x] 2.3 `pnpm test` stays green — cfbd6e9
 
 #### Manual
 
