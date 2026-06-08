@@ -5,7 +5,7 @@ import { getOpenRouterCredential } from '@/features/openrouter/credential'
 const CREDITS_URL = 'https://openrouter.ai/api/v1/credits'
 
 // OpenRouter meters spend in USD credits, not tokens — `remaining` is the wallet balance to show.
-export type OpenRouterCreditsT = {
+type OpenRouterCreditsT = {
   remaining: number
   total: number
   used: number

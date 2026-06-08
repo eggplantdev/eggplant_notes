@@ -5,7 +5,7 @@ import { cache } from 'react'
 import { decryptSecret } from '@/lib/crypto/aes-gcm'
 import { createClient } from '@/lib/supabase/server'
 
-export type OpenRouterCredentialT = {
+type OpenRouterCredentialT = {
   apiKey: string
   model: string | null
 }
