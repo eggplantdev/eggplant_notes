@@ -8,8 +8,8 @@ import {
   buildCardsPrompt,
   cardsMaterialFromNote,
   cardsMaterialFromTopic,
-  promptOverrideSchema,
-} from '@/features/openrouter/prompts'
+} from '@/features/openrouter/build-prompt'
+import { promptOverrideSchema } from '@/features/openrouter/prompt-schemas'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'

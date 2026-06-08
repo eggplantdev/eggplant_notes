@@ -32,3 +32,9 @@ export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini'
 // Default for the PDF/vision import surface (Phase 8): a cheap, file-capable, dated id (never a
 // `*-latest` alias). Gemini Flash reads PDFs well at low cost; the picker still lets the user switch.
 export const DEFAULT_OPENROUTER_FILE_MODEL = 'google/gemini-2.5-flash'
+
+// The three system prompts a user can override (editable-system-prompts). MUST match the
+// prompt_key CHECK constraint in the user_prompts migration. Single source: PromptKeyT and the
+// userPromptSchema enum both derive from this array.
+export const PROMPT_KEYS = ['cards', 'notes_decompose', 'notes_topic'] as const
+export type PromptKeyT = (typeof PROMPT_KEYS)[number]

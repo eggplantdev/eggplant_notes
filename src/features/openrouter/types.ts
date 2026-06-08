@@ -31,3 +31,8 @@ export type OpenRouterModelT = {
 // How the picker orders a group: by label, or by either price axis. Direction is orthogonal.
 export type ModelSortT = 'name' | 'input' | 'output'
 export type SortDirT = 'asc' | 'desc'
+
+// The two halves of one AI generation call: a static `system` steer + a `prompt` user message that
+// carries the dynamic material. Built by build-prompt.ts, previewed by preview-prompt.ts, and sent by
+// the generate actions — all from the same builders so the shown prompt can't drift from the sent one.
+export type PromptT = { system: string; prompt: string }

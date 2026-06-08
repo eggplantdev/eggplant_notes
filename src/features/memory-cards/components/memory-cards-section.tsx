@@ -14,7 +14,7 @@ import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { GenerateCardsButton } from '@/features/memory-cards/components/generate-cards-button'
-import type { PromptKeyT } from '@/features/openrouter/prompts'
+import type { PromptKeyT } from '@/features/openrouter/constants'
 
 type MemoryCardsSectionPropsT = {
   noteId: string

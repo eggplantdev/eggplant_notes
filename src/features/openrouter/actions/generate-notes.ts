@@ -4,11 +4,8 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 
 import { generatedNotesSchema, type GeneratedNoteT } from '@/features/openrouter/ai-schemas'
-import {
-  buildNotesFilePrompt,
-  buildNotesPrompt,
-  promptOverrideSchema,
-} from '@/features/openrouter/prompts'
+import { buildNotesFilePrompt, buildNotesPrompt } from '@/features/openrouter/build-prompt'
+import { promptOverrideSchema } from '@/features/openrouter/prompt-schemas'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { GENERATION_TIMEOUT_MS } from '@/features/openrouter/constants'

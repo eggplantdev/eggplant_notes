@@ -26,15 +26,14 @@ import { useActionTransition } from '@/hooks/use-action-transition'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { resetUserPrompt } from '@/features/openrouter/actions/reset-user-prompt'
 import { saveUserPrompt } from '@/features/openrouter/actions/save-user-prompt'
+import { BUILTIN_SYSTEM, isBuiltinSystem } from '@/features/openrouter/system-prompts'
 import {
-  BUILTIN_SYSTEM,
-  isBuiltinSystem,
   previewPrompt,
   promptKeyFromPreviewInput,
   type PreviewInputT,
-  type PromptKeyT,
-  type PromptT,
-} from '@/features/openrouter/prompts'
+} from '@/features/openrouter/preview-prompt'
+import type { PromptKeyT } from '@/features/openrouter/constants'
+import type { PromptT } from '@/features/openrouter/types'
 
 // The single entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible trigger,
 // the connect gate (via useAiGate), per-generate model selection, and an EDITABLE view of the exact

@@ -5,11 +5,9 @@ import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import {
-  cardsMaterialFromTopic,
-  type PromptKeyT,
-  type PromptT,
-} from '@/features/openrouter/prompts'
+import { cardsMaterialFromTopic } from '@/features/openrouter/build-prompt'
+import type { PromptKeyT } from '@/features/openrouter/constants'
+import type { PromptT } from '@/features/openrouter/types'
 import type { GenerateResultT } from '@/features/openrouter/types'
 
 // Shared ungrounded "generate from a topic" control (#2 card / #5 note). Collapses to just the

@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   BUILTIN_SYSTEM,
   isBuiltinSystem,
-  promptKeyFromPreviewInput,
   resolveSystemPrompts,
-} from '@/features/openrouter/prompts'
+} from '@/features/openrouter/system-prompts'
+import { promptKeyFromPreviewInput } from '@/features/openrouter/preview-prompt'
 
 // The pure logic behind editable-system-prompts. The DB read (getResolvedSystemPrompts) and the
 // server actions are exercised via the Phase 4 manual/E2E pass; here we lock the decisions they lean on.

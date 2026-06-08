@@ -1,6 +1,7 @@
 'use server'
 
-import { isBuiltinSystem, userPromptSchema } from '@/features/openrouter/prompts'
+import { isBuiltinSystem } from '@/features/openrouter/system-prompts'
+import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
 import { revalidatePromptSurfaces } from '@/features/openrouter/actions/revalidate-prompt-surfaces'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'

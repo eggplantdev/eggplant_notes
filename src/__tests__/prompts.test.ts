@@ -4,9 +4,9 @@ import {
   buildCardsPrompt,
   buildNotesFilePrompt,
   buildNotesPrompt,
-  previewPrompt,
-  promptOverrideSchema,
-} from '@/features/openrouter/prompts'
+} from '@/features/openrouter/build-prompt'
+import { previewPrompt } from '@/features/openrouter/preview-prompt'
+import { promptOverrideSchema } from '@/features/openrouter/prompt-schemas'
 
 // The dialog previews `previewPrompt(...)` while the actions send `build*Prompt(...)`. The contract
 // is "what you see is what gets sent" — so previewPrompt must route to the SAME builders. These

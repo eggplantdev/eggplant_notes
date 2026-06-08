@@ -11,7 +11,8 @@ import { promptSchema } from '@/features/memory-cards/schemas'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import { cardsMaterialFromNote, type PromptKeyT } from '@/features/openrouter/prompts'
+import { cardsMaterialFromNote } from '@/features/openrouter/build-prompt'
+import type { PromptKeyT } from '@/features/openrouter/constants'
 import type { StagedCheckInputT } from '@/features/notes/schemas'
 
 // Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.

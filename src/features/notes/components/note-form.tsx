@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
-import type { PromptKeyT } from '@/features/openrouter/prompts'
+import type { PromptKeyT } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import { MemoryCardsField } from '@/features/notes/components/memory-cards-field'
 import {

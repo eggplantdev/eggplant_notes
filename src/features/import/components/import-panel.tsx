@@ -16,7 +16,7 @@ import { splitMarkdown, type SplitLevelT } from '@/features/import/utils/split-m
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/constants'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
-import type { PromptKeyT } from '@/features/openrouter/prompts'
+import type { PromptKeyT } from '@/features/openrouter/constants'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
 import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
