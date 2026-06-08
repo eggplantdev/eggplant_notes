@@ -24,15 +24,20 @@ import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
 // the row and the count off the same response.
 export async function getDueQueue(
   client?: SupabaseClient<Database>,
+  // Skip a card by id — used right after rating it so an "Again" reschedule (still due now) can't
+  // re-surface the same card as the next in queue.
+  excludeId?: string,
 ): Promise<{ first?: DueCardT; count: number }> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
-  const { data, count, error } = await supabase
+  let query = supabase
     .from('memory_cards')
     .select('*, notes(title, subject_id)', { count: 'exact' })
     .lte('due_at', now)
     .order('due_at', { ascending: true })
     .limit(1)
+  if (excludeId) query = query.neq('id', excludeId)
+  const { data, count, error } = await query
   if (error) {
     console.error('[getDueQueue] PostgREST error', error)
     throw new Error(error.message, { cause: error })

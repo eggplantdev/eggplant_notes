@@ -4,6 +4,7 @@ import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
 import { rateMemoryCard } from '@/features/review/actions/rate-memory-card'
 import { GRADES } from '@/features/review/grades'
+import { useQueueAdvance } from '@/features/review/components/queue-advance-context'
 import { useReviewCelebration } from '@/features/review/components/review-celebration-context'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
@@ -12,6 +13,8 @@ type PropsT = { memoryCardId: string; previews: Record<number, string>; goal: nu
 export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()
   const { celebrate } = useReviewCelebration()
+  // Present only on the standalone card page (a queue walk); undefined on the dashboard.
+  const advance = useQueueAdvance()
 
   return (
     <div className="mt-6 flex flex-col gap-3">
@@ -24,10 +27,14 @@ export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
             size="lg"
             disabled={isPending}
             onClick={() =>
-              run(() => rateMemoryCard(memoryCardId, grade, goal), {
+              run(() => rateMemoryCard(memoryCardId, grade, goal, Boolean(advance)), {
                 successMessage: 'Review recorded',
               }).then((result) => {
-                if (result.success && result.celebrate) celebrate(result.celebrate)
+                if (!result.success) return
+                // Celebrate AND advance: the dialog lives in the [id] layout's provider, so it
+                // survives the queue walk navigating to the next card behind it.
+                if (result.celebrate) celebrate(result.celebrate)
+                advance?.(result.nextDueId)
               })
             }
             className="h-auto flex-col gap-0.5 py-2"
