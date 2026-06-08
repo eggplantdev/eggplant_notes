@@ -324,9 +324,9 @@ Dogfooding finding: the dialog never previews the generated result (only token c
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `pnpm typecheck`
-- [x] 4.2 Linting passes: `pnpm lint`
-- [x] 4.3 Full suite stays green: `pnpm test`
+- [x] 4.1 Type checking passes: `pnpm typecheck` — 9c40d04
+- [x] 4.2 Linting passes: `pnpm lint` — 9c40d04
+- [x] 4.3 Full suite stays green: `pnpm test` — 9c40d04
 
 #### Manual
 
