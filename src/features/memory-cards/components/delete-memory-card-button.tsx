@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation'
 import { DeleteButton } from '@/components/ui/delete-button'
 import { deleteMemoryCard } from '@/features/memory-cards/actions/delete-memory-card'
 
+// Uses the self-contained DeleteButton (not the controlled Delete*Dialog + useDeleteDialogState
+// that notes/subjects use) ON PURPOSE: deleteMemoryCard returns instead of redirecting, because a
+// card is deleted from multiple contexts that each decide navigation differently. Don't unify the
+// two delete UIs — see lessons.md "The two delete UIs are intentional".
+//
 // `redirectTo` is for deleting a card while ON its own detail page: revalidating the listing isn't
 // enough — the current route now points at a deleted row, so it must navigate away. List rows omit
 // it and rely on the revalidate making the row vanish.
