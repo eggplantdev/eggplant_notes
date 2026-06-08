@@ -32,7 +32,7 @@ import {
   promptKeyFromPreviewInput,
   type PreviewInputT,
 } from '@/features/openrouter/preview-prompt'
-import type { PromptKeyT } from '@/features/openrouter/constants'
+import { usePromptDefault } from '@/features/openrouter/components/prompt-defaults-context'
 import type { PromptT } from '@/features/openrouter/types'
 
 // The single entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible trigger,
@@ -45,7 +45,6 @@ import type { PromptT } from '@/features/openrouter/types'
 export function GenerateDialog<T>({
   connected,
   defaultModel,
-  systemDefaults,
   previewInput,
   action,
   onResult,
@@ -61,10 +60,6 @@ export function GenerateDialog<T>({
 }: {
   connected: boolean
   defaultModel: string
-  // The user's resolved system prompts (per key, server-side). The dialog picks its own key; undefined
-  // (e.g. AI not connected) falls back to the built-in. Seeds the System textarea + the saved baseline;
-  // the generate action independently re-resolves the same values, so the preview can't drift from sent.
-  systemDefaults?: Record<PromptKeyT, string>
   previewInput: PreviewInputT
   action: (modelId: string, promptOverride?: PromptT) => Promise<GenerateResultT<T[]>>
   onResult: (data: T[]) => void
@@ -101,12 +96,13 @@ export function GenerateDialog<T>({
   // owns it. This is what's sent to the action — undefined lets the action build the prompt itself.
   const [override, setOverride] = useState<PromptT | undefined>(undefined)
 
-  // Which overridable system prompt this surface uses — derived from the previewInput, so no extra prop.
+  // Which overridable system prompt this surface uses — derived from the previewInput, so no key prop.
   const promptKey = promptKeyFromPreviewInput(previewInput)
   const builtinSystem = BUILTIN_SYSTEM[promptKey]
+  const systemDefault = usePromptDefault(promptKey)
   // The persisted baseline this session started from (saved override or built-in). Updated imperatively
   // on Save/Reset success so the buttons reflect the new state without waiting for a full reload.
-  const [savedSystem, setSavedSystem] = useState(systemDefaults?.[promptKey] ?? builtinSystem)
+  const [savedSystem, setSavedSystem] = useState(systemDefault ?? builtinSystem)
   const saveTx = useActionTransition()
   const resetTx = useActionTransition()
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)

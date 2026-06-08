@@ -1,5 +1,6 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { ImportPanel } from '@/features/import/components/import-panel'
+import { PromptDefaultsProvider } from '@/features/openrouter/components/prompt-defaults-context'
 import { getOpenRouterStatus, getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { getSubjects } from '@/features/subjects/queries'
 
@@ -17,12 +18,9 @@ export default async function ImportPage() {
       backHref="/notes"
       backLabel="Notes"
     >
-      <ImportPanel
-        subjects={subjects}
-        aiEnabled={aiEnabled}
-        defaultModel={defaultModel}
-        systemDefaults={systemDefaults}
-      />
+      <PromptDefaultsProvider value={systemDefaults}>
+        <ImportPanel subjects={subjects} aiEnabled={aiEnabled} defaultModel={defaultModel} />
+      </PromptDefaultsProvider>
     </PageShell>
   )
 }

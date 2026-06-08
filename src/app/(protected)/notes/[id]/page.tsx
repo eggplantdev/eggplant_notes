@@ -10,6 +10,7 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
+import { PromptDefaultsProvider } from '@/features/openrouter/components/prompt-defaults-context'
 import { getOpenRouterStatus, getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { assertFound } from '@/lib/assert-found'
 import { formatLocaleDateTime } from '@/lib/utils/date'
@@ -90,15 +91,16 @@ export default async function NotePage({
       {/* The gradient image paints over the Separator's bg-border. */}
       <Separator className="from-neon-green to-neon-cyan neon-glow bg-linear-to-r" />
 
-      <MemoryCardsSection
-        noteId={note.id}
-        noteTitle={note.title}
-        noteContent={note.content ?? ''}
-        cards={memoryCards}
-        aiEnabled={aiEnabled}
-        defaultModel={defaultModel}
-        systemDefaults={systemDefaults}
-      />
+      <PromptDefaultsProvider value={systemDefaults}>
+        <MemoryCardsSection
+          noteId={note.id}
+          noteTitle={note.title}
+          noteContent={note.content ?? ''}
+          cards={memoryCards}
+          aiEnabled={aiEnabled}
+          defaultModel={defaultModel}
+        />
+      </PromptDefaultsProvider>
     </PageShell>
   )
 }

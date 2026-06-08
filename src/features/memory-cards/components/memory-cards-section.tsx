@@ -14,7 +14,6 @@ import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { GenerateCardsButton } from '@/features/memory-cards/components/generate-cards-button'
-import type { PromptKeyT } from '@/features/openrouter/constants'
 
 type MemoryCardsSectionPropsT = {
   noteId: string
@@ -28,8 +27,6 @@ type MemoryCardsSectionPropsT = {
   aiEnabled: boolean
   // The user's persisted default model, pre-selected in the generate dialog.
   defaultModel: string
-  // The user's resolved system prompts, forwarded to the generate dialog to seed its editable prompt.
-  systemDefaults?: Record<PromptKeyT, string>
 }
 
 // Server Component (renders the server-only Shiki RenderMarkdown). This section only ADDS cards —
@@ -41,7 +38,6 @@ export async function MemoryCardsSection({
   cards,
   aiEnabled,
   defaultModel,
-  systemDefaults,
 }: MemoryCardsSectionPropsT) {
   return (
     <section className="flex flex-col gap-4">
@@ -54,7 +50,6 @@ export async function MemoryCardsSection({
         noteContent={noteContent}
         connected={aiEnabled}
         defaultModel={defaultModel}
-        systemDefaults={systemDefaults}
       />
 
       {cards.length === 0 ? (

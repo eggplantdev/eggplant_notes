@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { generateNotes } from '@/features/openrouter/actions/generate-notes'
-import type { PromptKeyT } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import { MemoryCardsField } from '@/features/notes/components/memory-cards-field'
 import {
@@ -40,8 +39,6 @@ type NoteFormPropsT =
       aiEnabled?: boolean
       // The user's persisted default model, pre-selected in the generate dialog.
       defaultModel: string
-      // The user's resolved system prompts, forwarded to the topic generator + inline card field.
-      systemDefaults?: Record<PromptKeyT, string>
     }
   | {
       action: (
@@ -155,7 +152,6 @@ export function NoteForm(props: NoteFormPropsT) {
           task="notes"
           connected={props.aiEnabled ?? false}
           defaultModel={props.defaultModel}
-          systemDefaults={props.systemDefaults}
           action={(topic, modelId, promptOverride) =>
             generateNotes({ topic, modelId, promptOverride })
           }
@@ -212,7 +208,6 @@ export function NoteForm(props: NoteFormPropsT) {
           form={form}
           aiEnabled={props.aiEnabled ?? false}
           defaultModel={props.defaultModel}
-          systemDefaults={props.systemDefaults}
         />
       )}
 

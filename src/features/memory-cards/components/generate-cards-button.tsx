@@ -15,7 +15,6 @@ import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import { cardsMaterialFromNote } from '@/features/openrouter/build-prompt'
-import type { PromptKeyT } from '@/features/openrouter/constants'
 
 // #1 grounded gen-cards: generate recall cards from the note's prose via the shared GenerateDialog
 // (model select + prompt preview + tokens; also handles the connect gate), then preview/edit them
@@ -28,14 +27,12 @@ export function GenerateCardsButton({
   noteContent,
   connected,
   defaultModel,
-  systemDefaults,
 }: {
   noteId: string
   noteTitle: string | null
   noteContent: string
   connected: boolean
   defaultModel: string
-  systemDefaults?: Record<PromptKeyT, string>
 }) {
   const router = useRouter()
   const [candidates, setCandidates] = useState<GeneratedCardT[] | null>(null)
@@ -73,7 +70,6 @@ export function GenerateCardsButton({
           <GenerateDialog<GeneratedCardT>
             connected={connected}
             defaultModel={defaultModel}
-            systemDefaults={systemDefaults}
             previewInput={{
               task: 'cards',
               material: cardsMaterialFromNote({ title: noteTitle, content: noteContent }),

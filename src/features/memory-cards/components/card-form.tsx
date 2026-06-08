@@ -28,7 +28,6 @@ import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
-import type { PromptKeyT } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
@@ -49,8 +48,6 @@ type CardFormPropsT = {
   // The user's persisted default model, pre-selected in the generate dialog. Only consumed in
   // create mode (the topic generator); edit mode omits it.
   defaultModel?: string
-  // The user's resolved system prompts, forwarded to the topic generator's dialog. Create mode only.
-  systemDefaults?: Record<PromptKeyT, string>
 }
 
 type CardFormValuesT = {
@@ -60,14 +57,7 @@ type CardFormValuesT = {
   code_context: string
 }
 
-export function CardForm({
-  subjects,
-  card,
-  sourceNote,
-  aiEnabled,
-  defaultModel,
-  systemDefaults,
-}: CardFormPropsT) {
+export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
   const router = useRouter()
   const { formError, clearError, reportResult } = useFormError()
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
@@ -148,7 +138,6 @@ export function CardForm({
           task="cards"
           connected={aiEnabled ?? false}
           defaultModel={defaultModel ?? DEFAULT_OPENROUTER_MODEL}
-          systemDefaults={systemDefaults}
           action={(topic, modelId, promptOverride) =>
             generateCards({ topic, modelId, promptOverride })
           }

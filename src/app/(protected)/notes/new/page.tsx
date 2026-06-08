@@ -1,6 +1,7 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { createNote } from '@/features/notes/actions/create-note'
 import { NoteForm } from '@/features/notes/components/note-form'
+import { PromptDefaultsProvider } from '@/features/openrouter/components/prompt-defaults-context'
 import { getOpenRouterStatus, getResolvedSystemPrompts } from '@/features/openrouter/queries'
 import { getSubjects } from '@/features/subjects/queries'
 
@@ -21,14 +22,15 @@ export default async function NewNotePage({
   const defaultSubjectId = subjects.some((s) => s.id === subject) ? subject : undefined
   return (
     <PageShell title="New note" width="wide" backHref="/notes" backLabel="Notes">
-      <NoteForm
-        action={createNote}
-        subjects={subjects}
-        defaultSubjectId={defaultSubjectId}
-        aiEnabled={aiEnabled}
-        defaultModel={defaultModel}
-        systemDefaults={systemDefaults}
-      />
+      <PromptDefaultsProvider value={systemDefaults}>
+        <NoteForm
+          action={createNote}
+          subjects={subjects}
+          defaultSubjectId={defaultSubjectId}
+          aiEnabled={aiEnabled}
+          defaultModel={defaultModel}
+        />
+      </PromptDefaultsProvider>
     </PageShell>
   )
 }
