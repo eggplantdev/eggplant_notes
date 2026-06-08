@@ -286,13 +286,13 @@ Wire everything into `model-select.tsx`: a sort control, a self-loaded favorites
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `supabase db reset`
-- [ ] 1.2 Column exists and seed still loads after `supabase db reset`
-- [ ] 1.3 Type checking passes: `pnpm typecheck`
+- [x] 1.1 Migration applies cleanly: `supabase db reset`
+- [x] 1.2 Column exists and seed still loads after `supabase db reset`
+- [x] 1.3 Type checking passes: `pnpm typecheck`
 
 #### Manual
 
-- [ ] 1.4 Seed accounts log in; Settings → AI renders after reset
+- [x] 1.4 Seed accounts log in; Settings → AI renders after reset
 
 ### Phase 2: Pure sort logic in models.ts
 
