@@ -270,9 +270,9 @@ These hints all reinforce the load-bearing fact the user was missing: **generati
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Existing tests stay green: `pnpm test`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — 9f9b9d0
+- [x] 3.2 Linting passes: `pnpm lint` — 9f9b9d0
+- [x] 3.3 Existing tests stay green: `pnpm test` — 9f9b9d0
 
 #### Manual
 
