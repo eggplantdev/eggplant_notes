@@ -89,7 +89,7 @@ The app gained a little cohort traction. A few users hammered the review API, an
 
 Version-accurate for Next.js 16 + the current Vercel CLI (no adapter required — native):
 
-1. **Fix the linkage first** (highest-leverage risk): `rm -rf .vercel && vercel link` → choose the **personal** scope (`admin-63074310`), not the `wykonczymys-projects` team. Verify with `cat .vercel/project.json` (orgId should **not** start with `team_`).
+1. **Linkage — RESOLVED (2026-06-01).** The repo is linked to the **personal** scope at the repo level (`.vercel/repo.json`, orgId `team_eTY6…` — a personal-scope orgId _does_ start with `team_`; the earlier "should not start with `team_`" guess was wrong). Live link state + the `vercel whoami` `Not authorized` recovery are in `@AGENTS.md` (Vercel section), the single operational source — don't restate them here. The risk register above is kept as the original decision rationale only.
 2. **Pin the EU region** to co-locate with Supabase: Project Settings → Functions → Region = `fra1` (Frankfurt), or set `regions` in `vercel.ts`. Create the Supabase project in the same region.
 3. **No adapter, no `vercel dev`.** Next.js 16 deploys natively; local dev stays `pnpm dev` (Turbopack already has runtime fidelity — a separate `vercel dev` is redundant).
 4. **Enable Spend Management** (Dashboard → Settings → Billing) — set a pause-at-limit cap to neutralize bill-shock.
