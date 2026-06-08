@@ -1,11 +1,15 @@
 ---
 change_id: note-create-subject-select
 title: New-or-existing subject selector on the create-note form (shared)
-status: implementing
+status: implemented
 created: 2026-06-08
 updated: 2026-06-08
 archived_at: null
 ---
+
+> Review gate (2026-06-08): automated legs green; review confirmed the migration is RLS-safe and import
+> testids preserved; /simplify applied the NO_SUBJECT dedup + dead create-default fix. Manual + E2E
+> (incl. import-notes.spec.ts for the import refactor) deferred to a batched pass per user direction.
 
 ## Notes
 

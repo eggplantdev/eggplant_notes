@@ -1,11 +1,16 @@
 ---
 change_id: ai-generation-robustness
 title: Harden AI generation against silent failures before testing
-status: implementing
+status: implemented
 created: 2026-06-08
 updated: 2026-06-08
 archived_at: null
 ---
+
+> Review gate (2026-06-08): all automated legs green (typecheck/lint/unit 170/170); four-lens review
+>
+> - 4-agent /simplify found no high/medium issues. Manual dogfooding + Playwright E2E **deferred** to a
+>   batched pass per user direction — the plans' Manual checkboxes remain unchecked by design.
 
 ## Notes
 
