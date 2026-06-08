@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useFormError } from '@/components/forms/hooks/use-form-error'
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import {
   AlertDialog,
@@ -59,7 +59,7 @@ type CardFormValuesT = {
 
 export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
   const router = useRouter()
-  const [formError, setFormError] = useState<string | undefined>(undefined)
+  const { formError, clearError, reportResult } = useFormError()
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
   // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
@@ -100,7 +100,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     const result = card
       ? await updateMemoryCard(card.id, values, unlinkFromNote)
       : await createStandaloneCard(values)
-    if (!toastActionResult(result)) setFormError(result.error)
+    reportResult(result)
   }
 
   return (
@@ -109,7 +109,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
       data-testid="card-form"
       onSubmit={(e) => {
         e.preventDefault()
-        setFormError(undefined)
+        clearError()
         form.handleSubmit()
       }}
     >

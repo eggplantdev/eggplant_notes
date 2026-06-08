@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useFormError } from '@/components/forms/hooks/use-form-error'
 import { Button } from '@/components/ui/button'
 import { subjectTitleSchema } from '@/features/subjects/schemas'
 import type { SubjectInputT } from '@/features/subjects/schemas'
@@ -20,7 +18,7 @@ type SubjectFormPropsT =
 
 export function SubjectForm(props: SubjectFormPropsT) {
   const { subject } = props
-  const [formError, setFormError] = useState<string | undefined>(undefined)
+  const { formError, clearError, reportResult } = useFormError()
 
   const form = useAppForm({
     defaultValues: { title: subject?.title ?? '', description: subject?.description ?? '' },
@@ -29,7 +27,7 @@ export function SubjectForm(props: SubjectFormPropsT) {
         ? await props.action(props.subject.id, value)
         : await props.action(value)
       // Error toasts here; success redirects → confirmed via the Phase-4 ?toast flag.
-      if (!toastActionResult(result)) setFormError(result.error)
+      reportResult(result)
     },
   })
 
@@ -38,7 +36,7 @@ export function SubjectForm(props: SubjectFormPropsT) {
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault()
-        setFormError(undefined)
+        clearError()
         form.handleSubmit()
       }}
     >

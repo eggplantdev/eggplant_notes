@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useFormError } from '@/components/forms/hooks/use-form-error'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
@@ -52,7 +52,7 @@ type NoteFormPropsT =
 // On success the server action redirects (throws), so the form only ever sees the failure branch.
 export function NoteForm(props: NoteFormPropsT) {
   const { note } = props
-  const [formError, setFormError] = useState<string | undefined>(undefined)
+  const { formError, clearError, reportResult } = useFormError()
   // Holds the edit input while the move/unlink dialog is open; the dialog's choices resume submit.
   const [pendingInput, setPendingInput] = useState<NoteInputT | undefined>(undefined)
   // #5 ungrounded gen-notes: a topic → AI fills the title/content fields below for the user to edit
@@ -85,7 +85,7 @@ export function NoteForm(props: NoteFormPropsT) {
       }
       if (!props.note) {
         const result = await props.action({ note: noteInput, checks: value.checks })
-        if (!toastActionResult(result)) setFormError(result.error)
+        reportResult(result)
         return
       }
       // A subject change on a note with linked cards opens the move/unlink dialog before saving.
@@ -105,7 +105,7 @@ export function NoteForm(props: NoteFormPropsT) {
     if (!props.note) return
     setPendingInput(undefined)
     const result = await props.action(props.note.id, noteInput, cardActions)
-    if (!toastActionResult(result)) setFormError(result.error)
+    reportResult(result)
   }
 
   return (
@@ -113,7 +113,7 @@ export function NoteForm(props: NoteFormPropsT) {
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault()
-        setFormError(undefined)
+        clearError()
         form.handleSubmit()
       }}
     >
