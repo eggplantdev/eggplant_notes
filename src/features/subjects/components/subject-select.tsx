@@ -12,8 +12,9 @@ export type SubjectChoiceT =
   | { mode: 'existing'; subjectId: string | null }
   | { mode: 'new'; title: string }
 
-// Combobox needs a concrete option value; "None" ↔ this sentinel ↔ null subjectId.
-const NO_SUBJECT = 'none'
+// Combobox needs a concrete option value; "None" ↔ this sentinel ↔ null subjectId. Exported so the
+// note form's edit-mode Combobox (which doesn't use SubjectSelect) shares the one sentinel.
+export const NO_SUBJECT = 'none'
 
 // Default existing-mode combobox sizing, matched to the create-note title Input (h-8) so toggling
 // modes doesn't shift the field. Overridable via `className`.

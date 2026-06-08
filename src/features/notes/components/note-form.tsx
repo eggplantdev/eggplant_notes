@@ -18,13 +18,14 @@ import {
 } from '@/features/notes/components/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
-import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
+import {
+  NO_SUBJECT,
+  SubjectSelect,
+  type SubjectChoiceT,
+} from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
 import type { ActionResultT } from '@/types/action'
-
-// Combobox needs a concrete option value; unassigned note ↔ this sentinel ↔ null on the way out.
-const NO_SUBJECT = 'none'
 
 // `note` present discriminates edit (action takes the id) from create. Create saves the note +
 // staged checks atomically; edit is note-only plus optional per-card move/unlink actions.
@@ -82,7 +83,9 @@ export function NoteForm(props: NoteFormPropsT) {
     defaultValues: {
       title: note?.title ?? '',
       content: note?.content ?? '',
-      subject_id: note?.subject_id ?? defaultSubjectId,
+      // Edit-only field: the create path resolves its subject from `subjectChoice`, never this. So it
+      // seeds from the note (edit) and is otherwise null — `defaultSubjectId` feeds `subjectChoice`.
+      subject_id: note?.subject_id ?? null,
       checks: [] as StagedCheckInputT[],
     },
     onSubmit: async ({ value }) => {
