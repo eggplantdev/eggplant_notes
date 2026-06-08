@@ -25,8 +25,17 @@ describe('describeGenerationError', () => {
     expect(describeGenerationError(apiError(403))).toMatch(/reconnect/i)
   })
 
-  it('maps 402 to an insufficient-credits message', () => {
-    expect(describeGenerationError(apiError(402))).toMatch(/credits/i)
+  it('passes the provider message through for 402 instead of curating it', () => {
+    const withBody = new APICallError({
+      message: 'wrapped',
+      url: 'https://openrouter.ai',
+      requestBodyValues: {},
+      statusCode: 402,
+      data: { error: { message: 'Insufficient credits.' } },
+    })
+    expect(describeGenerationError(withBody)).toBe('Insufficient credits.')
+    // No body to surface → generic, like any other unmapped status.
+    expect(describeGenerationError(apiError(402))).toBe('AI generation failed. Try again.')
   })
 
   it('maps 429 to a rate-limit message', () => {
