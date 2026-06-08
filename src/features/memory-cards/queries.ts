@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { PostgrestFilterBuilder, SupabaseClient } from '@supabase/supabase-js'
 
 import { MATURE_STABILITY_DAYS, type MaturityT } from '@/features/memory-cards/constants'
 import type {
@@ -18,26 +18,67 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { pageRange } from '@/lib/utils/pagination'
 
+// The subject/state/maturity/search predicate shared by the listing and the due query, so both
+// honor the same filters off one source. Takes an already-`.select()`ed builder and chains the
+// where-clauses on; PostgREST filters are projection-independent, so it works on either query's
+// columns. Generic over the concrete builder type T (the `any`s are only the constraint bound) so
+// the caller keeps its projection→row typing. Column names aren't checked inside (Row is `any`
+// here); the call sites' result types are. Maturity is derived from `stability`, not a column of
+// its own — both buckets (or neither) selected = no constraint; exactly one bucket narrows.
+type CardFilterOptsT = {
+  subjectIds?: string[]
+  q?: string
+  states?: number[]
+  maturity?: MaturityT[]
+}
+
+// `any` in the bound is deliberate: it sidesteps the builder's per-position generic variance so any
+// concrete memory_cards builder satisfies it, while `T` itself stays inferred (call-site projection
+// typing is preserved). A precise bound would need postgrest-js's unexported `GenericSchema`.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyCardFilters<T extends PostgrestFilterBuilder<any, any, any, any>>(
+  query: T,
+  opts?: CardFilterOptsT,
+): T {
+  if (opts?.subjectIds && opts.subjectIds.length > 0) {
+    query = query.in('subject_id', opts.subjectIds)
+  }
+  if (opts?.states && opts.states.length > 0) query = query.in('state', opts.states)
+  if (opts?.maturity?.length === 1) {
+    query =
+      opts.maturity[0] === 'mature'
+        ? query.gte('stability', MATURE_STABILITY_DAYS)
+        : query.lt('stability', MATURE_STABILITY_DAYS)
+  }
+  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
+  if (orFilter) query = query.or(orFilter)
+  return query
+}
+
 // The single soonest-due card plus the total due count, in one round-trip. RLS scopes rows to the
 // owner. The `(user_id, due_at)` btree index backs the `due_at <= now()` filter + ordering.
 // `count: 'exact'` returns the full match count alongside the `limit(1)` row, so the page renders
 // one card without over-fetching the backlog. Hand-rolled (not runTableQuery) because we need both
-// the row and the count off the same response.
+// the row and the count off the same response. `opts` scopes the queue to the same filters as the
+// listing (the /memory-cards review panel); the dashboard calls it with no opts (global queue).
 export async function getDueQueue(
+  opts?: CardFilterOptsT & {
+    // Skip a card by id — used right after rating it so an "Again" reschedule (still due now) can't
+    // re-surface the same card as the next in queue.
+    excludeId?: string
+  },
   client?: SupabaseClient<Database>,
-  // Skip a card by id — used right after rating it so an "Again" reschedule (still due now) can't
-  // re-surface the same card as the next in queue.
-  excludeId?: string,
 ): Promise<{ first?: DueCardT; count: number }> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
-  let query = supabase
-    .from('memory_cards')
-    .select('*, notes(title, subject_id)', { count: 'exact' })
+  let query = applyCardFilters(
+    supabase.from('memory_cards').select('*, notes(title, subject_id)', { count: 'exact' }),
+    opts,
+  )
     .lte('due_at', now)
     .order('due_at', { ascending: true })
     .limit(1)
-  if (excludeId) query = query.neq('id', excludeId)
+  if (opts?.excludeId) query = query.neq('id', opts.excludeId)
   const { data, count, error } = await query
   if (error) {
     console.error('[getDueQueue] PostgREST error', error)
@@ -74,32 +115,19 @@ export async function getMemoryCardsList(
 ): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
   const { offset, limit } = pageRange(opts)
-  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
 
-  // `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
-  const filtered = (head: boolean) => {
-    let query = supabase
-      .from('memory_cards')
-      .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
-        count: 'exact',
-        head,
-      })
-    if (opts?.subjectIds && opts.subjectIds.length > 0) {
-      query = query.in('subject_id', opts.subjectIds)
-    }
-    if (opts?.states && opts.states.length > 0) query = query.in('state', opts.states)
-    // Maturity is derived from `stability`, not a column of its own. Both buckets (or neither)
-    // selected = no constraint; exactly one bucket narrows. `stability` stays out of the
-    // projection — it's only needed for this WHERE clause.
-    if (opts?.maturity?.length === 1) {
-      query =
-        opts.maturity[0] === 'mature'
-          ? query.gte('stability', MATURE_STABILITY_DAYS)
-          : query.lt('stability', MATURE_STABILITY_DAYS)
-    }
-    if (orFilter) query = query.or(orFilter)
-    return query
-  }
+  // `head` toggles the rows-vs-count-only variant the 416 fallback reuses. `stability` stays out of
+  // the projection — applyCardFilters only needs it for the maturity WHERE clause.
+  const filtered = (head: boolean) =>
+    applyCardFilters(
+      supabase
+        .from('memory_cards')
+        .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
+          count: 'exact',
+          head,
+        }),
+      opts,
+    )
 
   return runPaginatedQuery(
     'getMemoryCardsList',

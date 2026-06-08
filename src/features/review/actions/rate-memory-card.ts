@@ -72,10 +72,12 @@ export async function rateMemoryCard(
   revalidatePath('/dashboard')
   // Refresh the standalone card page too, for when it's rated outside the dashboard queue.
   revalidatePath(`/memory-cards/${parsedId.data}`)
+  // And the memory-cards list page, where the filter-scoped review panel advances in place.
+  revalidatePath('/memory-cards')
 
   // Soonest-due remaining card (excluding the one just rated) so the card page can advance the queue.
   const nextDueId = returnNextDue
-    ? (await getDueQueue(supabase, parsedId.data)).first?.id
+    ? (await getDueQueue({ excludeId: parsedId.data }, supabase)).first?.id
     : undefined
   return { success: true, celebrate, nextDueId }
 }

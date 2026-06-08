@@ -176,9 +176,9 @@ None — no schema change. `memory_cards.subject_id` already exists and is index
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes on queries.ts + rate-memory-card.ts
-- [ ] 1.3 Existing unit tests pass: `pnpm test`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes on queries.ts + rate-memory-card.ts
+- [x] 1.3 Existing unit tests pass: `pnpm test`
 
 #### Manual
 

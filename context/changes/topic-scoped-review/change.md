@@ -1,7 +1,7 @@
 ---
 change_id: topic-scoped-review
 title: Topic-scoped review on the memory-cards page
-status: planned
+status: implementing
 created: 2026-06-08
 updated: 2026-06-08
 archived_at: null
