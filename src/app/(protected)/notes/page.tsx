@@ -39,7 +39,7 @@ export default async function NotesPage({
       actions={
         <>
           <ButtonLink href="/import" variant="outline">
-            Import
+            Import notes
           </ButtonLink>
           <ButtonLink href="/notes/new">New note</ButtonLink>
         </>

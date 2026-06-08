@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDown, ArrowUp, ChevronsUpDown, Star } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronsUpDown, Lightbulb, Star } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
 import { toastActionResult } from '@/components/forms/toast-result'
@@ -182,6 +182,14 @@ export function ModelSelect({
         align="start"
       >
         <Command>
+          <div className="flex items-start gap-2 border-b px-3 py-4 text-xs text-white">
+            <Lightbulb className="text-neon-cyan mt-0.5 size-4 shrink-0" />
+            <p>
+              Generating notes and cards is a simple task — the cheap default models handle it well,
+              so there&apos;s no need to reach for a pricier one. Feel free to experiment with
+              stronger models, but they cost more tokens.
+            </p>
+          </div>
           <CommandInput placeholder="Search models…" />
           <div className="flex flex-col gap-1.5 border-b px-2 py-2">
             <span className="text-muted-foreground text-xs font-medium">Sort by</span>

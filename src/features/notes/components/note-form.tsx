@@ -143,7 +143,7 @@ export function NoteForm(props: NoteFormPropsT) {
     >
       {isCreateMode && (
         <TopicGenerator
-          label="Generate a note from a topic (AI)"
+          label="Generate with AI"
           placeholder="e.g. The actor model of concurrency"
           testIdPrefix="note-ai"
           task="notes"

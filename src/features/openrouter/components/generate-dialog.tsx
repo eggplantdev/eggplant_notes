@@ -1,7 +1,9 @@
 'use client'
 
-import { LoaderCircle, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
 import { useState, useTransition, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { toastMessage } from '@/components/toasts'
@@ -232,12 +234,23 @@ export function GenerateDialog<T>({
               disabled={isGenerating || !canGenerate}
               onClick={generate}
             >
-              {isGenerating ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+              <Sparkles />
               {isGenerating ? 'Generating…' : 'Generate'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Screen-centred while generating. Portalled to <body> so it escapes the dialog's
+          -translate-x-1/2 transform (which would otherwise be the containing block for `fixed`)
+          and sits above the dialog (z-50). */}
+      {isGenerating &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[60] grid place-items-center">
+            <Spinner className="size-12 [--spinner-w:4px]" />
+          </div>,
+          document.body,
+        )}
 
       {gateDialog}
     </>

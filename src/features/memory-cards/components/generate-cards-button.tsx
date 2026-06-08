@@ -76,7 +76,7 @@ export function GenerateCardsButton({
             }}
             action={(modelId, promptOverride) => generateCards({ noteId, modelId, promptOverride })}
             onResult={(data) => setCandidates(data)}
-            triggerLabel="Generate cards with AI"
+            triggerLabel="Generate with AI"
             triggerTestId="cards-generate-ai"
             dialogTitle="Generate cards from this note"
             resultNoun="card"

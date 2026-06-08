@@ -239,6 +239,31 @@
     linear-gradient(to right, var(--color-neon-green), var(--color-neon-cyan)) border-box;
 }
 
+/* Spinning loader ring in the same green→cyan brand hues as `gradient-border`. A conic gradient
+   paints the ring (transparent tail → green → cyan leading edge so the spin direction reads); a
+   radial mask punches out the centre, leaving only a `--spinner-w` (2px default) band. Pair with
+   `animate-spin`. Size via `size-*`; thickness via `--spinner-w`. */
+@utility gradient-spinner {
+  --spinner-w: 2px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--color-neon-green) 45%,
+    var(--color-neon-cyan) 100%
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-w)),
+    #000 calc(100% - var(--spinner-w))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-w)),
+    #000 calc(100% - var(--spinner-w))
+  );
+}
+
 /* SVG-path glow for chart rings: box-shadow doesn't apply to <path>, so use a drop-shadow
    filter instead. currentColor means each ring haloes in its own colour — the cards-overview
    radial charts set each sector's `color` to its fill, so neon rings glow neon, white glows
