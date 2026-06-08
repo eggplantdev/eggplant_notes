@@ -5,8 +5,6 @@ import { useState, useTransition } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
-import { Combobox } from '@/components/ui/combobox'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SegmentedToggle } from '@/components/ui/segmented-toggle'
 import { importNotes } from '@/features/import/actions/import-notes'
@@ -19,11 +17,11 @@ import { generateNotes } from '@/features/openrouter/actions/generate-notes'
 import { DEFAULT_OPENROUTER_FILE_MODEL } from '@/features/openrouter/models'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import type { GeneratedNoteT } from '@/features/openrouter/ai-schemas'
+import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { MutedText } from '@/components/ui/muted-text'
 
 const LEVELS: SplitLevelT[] = [1, 2, 3]
-type SubjectModeT = 'existing' | 'new'
 
 // Shown by both source-consuming controls (split buttons + AI decompose) when there's no text yet.
 const NO_SOURCE_MSG = 'Paste or upload some text first.'
@@ -54,9 +52,8 @@ export function ImportPanel({
   const [pdf, setPdf] = useState<PdfSourceT | undefined>(undefined)
   const [level, setLevel] = useState<SplitLevelT>(1)
   const [drafts, setDrafts] = useState<ImportDraftT[]>([])
-  const [subjectMode, setSubjectMode] = useState<SubjectModeT>('new')
-  const [subjectId, setSubjectId] = useState<string | undefined>(undefined)
-  const [newTitle, setNewTitle] = useState('')
+  // Import always commits under a subject (existing or new) — no "None" option (allowNone omitted).
+  const [subjectChoice, setSubjectChoice] = useState<SubjectChoiceT>({ mode: 'new', title: '' })
   const [formError, setFormError] = useState<string | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
 
@@ -128,16 +125,18 @@ export function ImportPanel({
       setFormError('Add at least one note to import (all are skipped).')
       return
     }
-    const subject =
-      subjectMode === 'existing' ? { id: subjectId } : { title: newTitle.trim() || undefined }
-    if (subjectMode === 'existing' && !subjectId) {
+    if (subjectChoice.mode === 'existing' && !subjectChoice.subjectId) {
       setFormError('Pick a subject to import into.')
       return
     }
-    if (subjectMode === 'new' && !newTitle.trim()) {
+    if (subjectChoice.mode === 'new' && !subjectChoice.title.trim()) {
       setFormError('Name the new subject.')
       return
     }
+    const subject =
+      subjectChoice.mode === 'existing'
+        ? { id: subjectChoice.subjectId ?? undefined }
+        : { title: subjectChoice.title.trim() }
     startTransition(async () => {
       const result = await importNotes({ subject, notes })
       if (result && !toastActionResult(result)) setFormError(result.error)
@@ -168,42 +167,12 @@ export function ImportPanel({
 
       <div className="flex flex-col gap-3">
         <Label>Select subject</Label>
-        <SegmentedToggle
-          size="sm"
-          ariaLabel="Subject mode"
-          value={subjectMode}
-          onChange={setSubjectMode}
-          options={[
-            { value: 'new', label: 'New subject', testId: 'import-subject-new-mode' },
-            {
-              value: 'existing',
-              label: 'Existing subject',
-              testId: 'import-subject-existing-mode',
-              disabled: subjects.length === 0,
-            },
-          ]}
+        <SubjectSelect
+          subjects={subjects}
+          value={subjectChoice}
+          onChange={setSubjectChoice}
+          testIdPrefix="import-subject"
         />
-        {subjectMode === 'new' ? (
-          <Input
-            data-testid="import-subject-title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="New subject name"
-            className="sm:w-72"
-          />
-        ) : (
-          <Combobox
-            value={subjectId}
-            onChange={setSubjectId}
-            options={subjects.map((s) => ({ value: s.id, label: s.title }))}
-            searchPlaceholder="Search subject…"
-            emptyMessage="No subject found."
-            // Match the New-subject Input exactly so toggling modes doesn't shift the field: the
-            // trigger is a Button size="sm" (h-7, text-[0.8rem], font-medium) but the Input is
-            // h-8 / text-base md:text-sm / normal weight. twMerge lets these override the sm preset.
-            className="h-8 w-full rounded-lg text-base font-normal sm:w-72 md:text-sm"
-          />
-        )}
       </div>
 
       <SourceInput value={text} onChange={handleSource} onPdf={handlePdf} pdfName={pdf?.filename} />

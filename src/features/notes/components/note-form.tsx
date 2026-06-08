@@ -18,6 +18,7 @@ import {
 } from '@/features/notes/components/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
 import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
+import { SubjectSelect, type SubjectChoiceT } from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
 import type { ActionResultT } from '@/types/action'
@@ -69,6 +70,13 @@ export function NoteForm(props: NoteFormPropsT) {
   )
 
   const defaultSubjectId = props.note ? null : (props.defaultSubjectId ?? null)
+  // Create-mode subject choice (existing/None or a new subject by name) lives outside the form: it's a
+  // two-field control and resolves to subject_id OR subject_title at submit. Edit mode keeps the plain
+  // subject_id Combobox below (no inline new-subject need there).
+  const [subjectChoice, setSubjectChoice] = useState<SubjectChoiceT>({
+    mode: 'existing',
+    subjectId: defaultSubjectId,
+  })
 
   const form = useAppForm({
     defaultValues: {
@@ -78,15 +86,31 @@ export function NoteForm(props: NoteFormPropsT) {
       checks: [] as StagedCheckInputT[],
     },
     onSubmit: async ({ value }) => {
+      if (!props.note) {
+        // Resolve the subject choice into the create payload: an existing id (or null = None), or a
+        // new subject title the RPC will create. A new-mode choice with no name is a validation stop.
+        let subjectFields: { subject_id?: string | null; subject_title?: string }
+        if (subjectChoice.mode === 'new') {
+          const newTitle = subjectChoice.title.trim()
+          if (!newTitle) {
+            reportResult({ success: false, error: 'Name the new subject.' })
+            return
+          }
+          subjectFields = { subject_id: null, subject_title: newTitle }
+        } else {
+          subjectFields = { subject_id: subjectChoice.subjectId }
+        }
+        const result = await props.action({
+          note: { title: value.title, content: value.content, ...subjectFields },
+          checks: value.checks,
+        })
+        reportResult(result)
+        return
+      }
       const noteInput: NoteInputT = {
         title: value.title,
         content: value.content,
         subject_id: value.subject_id,
-      }
-      if (!props.note) {
-        const result = await props.action({ note: noteInput, checks: value.checks })
-        reportResult(result)
-        return
       }
       // A subject change on a note with linked cards opens the move/unlink dialog before saving.
       const subjectChanged = value.subject_id !== props.note.subject_id
@@ -141,22 +165,35 @@ export function NoteForm(props: NoteFormPropsT) {
         {(field) => <field.Input label="Title" placeholder="Note title" />}
       </form.AppField>
 
-      <form.Field name="subject_id">
-        {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor={field.name}>Subject</Label>
-            <Combobox
-              id={field.name}
-              value={field.state.value ?? NO_SUBJECT}
-              onChange={(v) => field.handleChange(v === NO_SUBJECT ? null : v)}
-              options={subjectOptions}
-              searchPlaceholder="Search subject…"
-              emptyMessage="No subject found."
-              className="w-full sm:w-72"
-            />
-          </div>
-        )}
-      </form.Field>
+      {isCreateMode ? (
+        <div className="grid gap-2">
+          <Label>Subject</Label>
+          <SubjectSelect
+            subjects={props.subjects}
+            value={subjectChoice}
+            onChange={setSubjectChoice}
+            allowNone
+            testIdPrefix="note-subject"
+          />
+        </div>
+      ) : (
+        <form.Field name="subject_id">
+          {(field) => (
+            <div className="grid gap-2">
+              <Label htmlFor={field.name}>Subject</Label>
+              <Combobox
+                id={field.name}
+                value={field.state.value ?? NO_SUBJECT}
+                onChange={(v) => field.handleChange(v === NO_SUBJECT ? null : v)}
+                options={subjectOptions}
+                searchPlaceholder="Search subject…"
+                emptyMessage="No subject found."
+                className="w-full sm:w-72"
+              />
+            </div>
+          )}
+        </form.Field>
+      )}
 
       <form.Field name="content">
         {(field) => <EditorWithPreview value={field.state.value} onChange={field.handleChange} />}

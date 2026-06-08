@@ -97,17 +97,17 @@ the existing submit/validation behavior.
 
 #### Automated
 
-- [x] 1.1 Migration applies (`supabase migration up`/`db reset`)
-- [x] 1.2 `pnpm typecheck` passes
-- [x] 1.3 `pnpm lint` passes
+- [x] 1.1 Migration applies (`supabase migration up`/`db reset`) — a522764
+- [x] 1.2 `pnpm typecheck` passes — a522764
+- [x] 1.3 `pnpm lint` passes — a522764
 
 ### Phase 2: Shared component + form wiring
 
 #### Automated
 
-- [ ] 2.1 `pnpm typecheck` passes
-- [ ] 2.2 `pnpm lint` passes
-- [ ] 2.3 `pnpm test` stays green
+- [x] 2.1 `pnpm typecheck` passes
+- [x] 2.2 `pnpm lint` passes
+- [x] 2.3 `pnpm test` stays green
 
 #### Manual
 
