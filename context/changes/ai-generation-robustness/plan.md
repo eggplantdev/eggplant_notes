@@ -374,9 +374,9 @@ Dogfooding finding: a real OpenRouter failure — `404 No endpoints found for al
 
 #### Automated
 
-- [x] 5.1 `pnpm typecheck` passes
-- [x] 5.2 `pnpm lint` passes
-- [x] 5.3 Classifier test (404-with-body surfaces provider message) + suite green
+- [x] 5.1 `pnpm typecheck` passes — 623bbad
+- [x] 5.2 `pnpm lint` passes — 623bbad
+- [x] 5.3 Classifier test (404-with-body surfaces provider message) + suite green — 623bbad
 
 #### Manual
 
