@@ -1,10 +1,10 @@
 ---
 change_id: memory-card-review-page
 title: Standalone memory-card page with on-demand review buttons
-status: implemented
+status: archived
 created: 2026-06-06
 updated: 2026-06-08
-archived_at: null
+archived_at: 2026-06-08T07:40:50Z
 ---
 
 ## Notes
