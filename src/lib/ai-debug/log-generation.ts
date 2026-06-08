@@ -21,6 +21,9 @@ export type GenerationLogT = {
   output: unknown
   usage: UsageT
   latencyMs: number
+  // How many items were dropped as incomplete (blank required field) before returning. Surfaced so a
+  // silent drop is visible in the log even though the user only sees the kept items.
+  droppedCount?: number
 }
 
 export async function logGeneration(entry: GenerationLogT): Promise<void> {
@@ -30,6 +33,7 @@ export async function logGeneration(entry: GenerationLogT): Promise<void> {
     model: entry.model,
     usage: entry.usage,
     latencyMs: entry.latencyMs,
+    ...(entry.droppedCount ? { droppedCount: entry.droppedCount } : {}),
   })
 
   try {
@@ -50,11 +54,11 @@ export async function logGeneration(entry: GenerationLogT): Promise<void> {
 }
 
 function renderMarkdownEntry(entry: GenerationLogT): string {
-  const { task, model, usage, latencyMs, system, prompt, output } = entry
+  const { task, model, usage, latencyMs, system, prompt, output, droppedCount } = entry
   return [
     `## ${new Date().toISOString()} · ${task} · ${model}`,
     '',
-    `- tokens: in ${usage.inputTokens ?? '?'} / out ${usage.outputTokens ?? '?'} / total ${usage.totalTokens ?? '?'} · ${latencyMs}ms`,
+    `- tokens: in ${usage.inputTokens ?? '?'} / out ${usage.outputTokens ?? '?'} / total ${usage.totalTokens ?? '?'} · ${latencyMs}ms${droppedCount ? ` · dropped ${droppedCount}` : ''}`,
     '',
     '**System**',
     '',

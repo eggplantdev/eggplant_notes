@@ -12,6 +12,7 @@ import {
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
+import { keepCompleteCards } from '@/features/openrouter/utils/sanitize-generated'
 import { getNote } from '@/features/notes/queries'
 import { logGeneration } from '@/lib/ai-debug/log-generation'
 import { validateInput } from '@/lib/validate'
@@ -68,6 +69,10 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
       system,
       prompt,
     })
+    // Drop blank-field cards before they reach the preview; an all-blank/empty result is surfaced as
+    // a friendly error instead of a silent success that no-ops on Apply (mirrors the notes guard).
+    const cards = keepCompleteCards(object.cards)
+    const droppedCount = object.cards.length - cards.length
     // Best-effort, self-contained error handling — don't block the response on the log write.
     void logGeneration({
       task: 'cards',
@@ -77,10 +82,17 @@ export async function generateCards(input: unknown): Promise<GenerateResultT<Gen
       output: object,
       usage,
       latencyMs: Date.now() - startedAt,
+      droppedCount,
     })
+    if (cards.length === 0) {
+      return {
+        success: false,
+        error: "Couldn't generate any usable cards — try a more detailed note or topic.",
+      }
+    }
     return {
       success: true,
-      data: object.cards,
+      data: cards,
       debug: { system, prompt, model: bound.modelId, usage },
     }
   } catch (error) {

@@ -11,6 +11,7 @@ import {
 } from '@/features/openrouter/prompts'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { getOpenRouterModel } from '@/features/openrouter/server-client'
+import { keepCompleteNotes } from '@/features/openrouter/utils/sanitize-generated'
 import { logGeneration } from '@/lib/ai-debug/log-generation'
 import { validateInput } from '@/lib/validate'
 
@@ -92,15 +93,9 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
           }
         : { prompt }),
     })
-    // Scanned/empty/garbage input can yield zero notes without throwing — surface it instead of a
-    // confusing empty preview.
-    if (object.notes.length === 0) {
-      return {
-        success: false,
-        error:
-          "Couldn't extract any notes — if this is a scanned PDF, its text may not be readable.",
-      }
-    }
+    // Drop blank-field notes first, so the zero-length guard also catches an all-blank result.
+    const notes = keepCompleteNotes(object.notes)
+    const droppedCount = object.notes.length - notes.length
     // Best-effort, self-contained error handling — don't block the response on the log write.
     void logGeneration({
       task: 'notes',
@@ -110,10 +105,20 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
       output: object,
       usage,
       latencyMs: Date.now() - startedAt,
+      droppedCount,
     })
+    // Scanned/empty/garbage input can yield zero notes without throwing — surface it instead of a
+    // confusing empty preview.
+    if (notes.length === 0) {
+      return {
+        success: false,
+        error:
+          "Couldn't extract any notes — if this is a scanned PDF, its text may not be readable.",
+      }
+    }
     return {
       success: true,
-      data: object.notes,
+      data: notes,
       debug: { system, prompt, model: bound.modelId, usage },
     }
   } catch (error) {
