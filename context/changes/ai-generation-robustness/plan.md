@@ -250,6 +250,42 @@ Dogfooding finding: the dialog never previews the generated result (only token c
 
 ---
 
+## Phase 5: Surface provider messages + readable error toasts
+
+### Overview
+
+Dogfooding finding: a real OpenRouter failure — `404 No endpoints found for allenai/olmo-3-32b-think.` — was collapsed to the generic "AI generation failed. Try again." (404 is unmapped in the Phase 2 classifier), AND the error toast auto-closed at 2s, too fast to read. Both hide the one actionable thing the user needs.
+
+### Changes Required:
+
+#### 1. Surface the provider error message for unmapped API errors
+
+**File**: `src/features/openrouter/utils/describe-generation-error.ts`
+
+**Intent**: When there's no friendlier mapping, show OpenRouter's own message rather than the generic string.
+
+**Contract**: Add `providerErrorMessage(error)` that extracts `error.message` from a `{ error: { message } }` body found on `error.data` or a JSON-parsed `error.responseBody`. Use it as the fallback in the `APICallError` default branch (after the 5xx check) and in the final fallback: `providerErrorMessage(error) ?? GENERIC`. Mapped codes (401/402/403/429/408/5xx) keep their friendly messages. No-body errors still hit GENERIC.
+
+#### 2. Error toasts stay readable
+
+**File**: `src/components/toasts.ts`
+
+**Intent**: 2s was too short to read an error before it closed.
+
+**Contract**: `toastMessage`'s `autoClose` becomes optional; default `type === 'error' ? 6000 : 2000`. Explicit `autoClose` still overrides. Applies to every error toast (AI + form saves).
+
+### Success Criteria:
+
+#### Automated
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm test` green (incl. a new classifier test: 404-with-body surfaces the provider message via both `data` and `responseBody`).
+
+#### Manual
+
+- Generate with a model that has no endpoints → the toast shows "No endpoints found for <model>." and stays up ~6s.
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests:
@@ -333,3 +369,15 @@ Dogfooding finding: the dialog never previews the generated result (only token c
 - [ ] 4.4 Success closes the dialog; result is in the form/list; one success toast
 - [ ] 4.5 Failure keeps the dialog open; spinner clears; error toast + inline message
 - [ ] 4.6 Spinner animates during generation
+
+### Phase 5: Surface provider messages + readable error toasts
+
+#### Automated
+
+- [x] 5.1 `pnpm typecheck` passes
+- [x] 5.2 `pnpm lint` passes
+- [x] 5.3 Classifier test (404-with-body surfaces provider message) + suite green
+
+#### Manual
+
+- [ ] 5.4 No-endpoints model → toast shows "No endpoints found for <model>." and stays ~6s

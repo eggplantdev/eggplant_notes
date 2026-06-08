@@ -41,4 +41,31 @@ describe('describeGenerationError', () => {
     expect(describeGenerationError(new Error('boom'))).toBe('AI generation failed. Try again.')
     expect(describeGenerationError(apiError(418))).toBe('AI generation failed. Try again.')
   })
+
+  it('surfaces the provider error message for an unmapped status (e.g. 404 no endpoints)', () => {
+    const body = {
+      error: { message: 'No endpoints found for allenai/olmo-3-32b-think.', code: 404 },
+    }
+    const fromData = new APICallError({
+      message: 'wrapped',
+      url: 'https://openrouter.ai',
+      requestBodyValues: {},
+      statusCode: 404,
+      data: body,
+    })
+    expect(describeGenerationError(fromData)).toBe(
+      'No endpoints found for allenai/olmo-3-32b-think.',
+    )
+
+    const fromResponseBody = new APICallError({
+      message: 'wrapped',
+      url: 'https://openrouter.ai',
+      requestBodyValues: {},
+      statusCode: 404,
+      responseBody: JSON.stringify(body),
+    })
+    expect(describeGenerationError(fromResponseBody)).toBe(
+      'No endpoints found for allenai/olmo-3-32b-think.',
+    )
+  })
 })
