@@ -3,7 +3,7 @@ project: 'Coding Learning Companion'
 version: 2
 status: draft
 created: 2026-06-01
-updated: 2026-06-07
+updated: 2026-06-08
 prd_version: 2
 main_goal: speed
 top_blocker: time
@@ -418,6 +418,7 @@ Carried from v1 (out-of-MVP):
 
 ## Done
 
+- **Model picker — sort + per-user pins (S-19 follow-up; no own roadmap id):** the shared OpenRouter `ModelSelect` gained catalog sort (Name / Input $ / Output $ × asc/desc), a per-user **Pinned** group (★, replacing the hardcoded "Recommended"), and "Variable pricing" handling for router models' negative-sentinel price — all confined to `features/openrouter/` + 2 migrations, zero consumer changes. — Archived 2026-06-08 → `context/archive/2026-06-08-model-picker-sort-favorites/`. Lesson: hardcoded model ids (seed/default) go stale vs the live OpenRouter catalog — 2 retired ids (`claude-3.7-sonnet`, `gemini-2.0-flash-001`) caught + fixed at review; verify against `/api/v1/models` before seeding.
 - **S-19: the user uploads a markdown file (or pastes prose / a PDF) and gets notes via a deterministic heading-split they preview and edit before commit; optionally, AI (BYOK OpenRouter) generates notes from a doc and recall cards from prose, all preview-gated.** — Archived 2026-06-07 → `context/archive/2026-06-06-import-markdown-to-notes/`. AI-assisted authoring across 8 phases (deterministic split → OpenRouter PKCE connect + AES-GCM key → gen-cards → gen-notes → model select → live catalog → editable dialog → PDF-via-vision). Lesson: AI-integration tests (override-sent-verbatim, PDF file-part) + manual PDF-vision verify deferred to a separate dense-coverage phase (test-plan R3/R4/R5/R7 via M3L4 `/10x-e2e`); PR #1 ↔ `feat/ai-authoring-iter2` reconciliation still open.
 - **S-12: one-click Load sample data into an empty account (the `test@gmail.com` seed corpus re-scoped to the current user — fresh ids, `is_seeded` marker, RLS-safe per-user inserts, no service-role) + paired Clear; controls in `/settings` and the `/notes` empty state.** — Archived 2026-06-06 → `context/archive/2026-06-06-seed-sample-data/`. Generated/committed fixture (`sample-data.ts`, dumped from the local DB so prod has no template account); pure unit-tested remap; rollback-on-failure via a shared `is_seeded` delete guarded by `isAccountEmpty`. **On-demand redesign (operator):** dropped the eager gating queries — settings renders both buttons, the actions self-correct (zero queries on render). Built alongside the parallel `list-search-pagination` session (staged by explicit path). Manual 4.5/5.6 deferred; happy-path round-trip covered by a green E2E. Lesson: —.
 - **F-01: (foundation) email/password auth + session; gated product routes** — Archived 2026-06-02 → `context/archive/2026-06-02-minimal-auth-and-session/`. Lesson: —.
