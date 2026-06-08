@@ -47,7 +47,7 @@ export function SourceInput({
               : '.md,.markdown,.txt,text/markdown,text/plain'
           }
           onChange={handleFile}
-          className="file:text-foreground text-muted-foreground w-fit text-sm file:mr-3 file:rounded-md file:border file:bg-transparent file:px-3 file:py-1.5 file:text-sm"
+          className="file:text-foreground text-muted-foreground w-fit text-[0.8rem] file:mr-3 file:rounded-md file:border file:bg-transparent file:px-3 file:py-1.5 file:text-[0.8rem]"
         />
         <MutedText>
           {onPdf ? 'Markdown, plain text, or PDF.' : 'Markdown or plain text.'}
