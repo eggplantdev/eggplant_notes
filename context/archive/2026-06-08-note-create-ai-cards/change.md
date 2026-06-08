@@ -1,10 +1,10 @@
 ---
 change_id: note-create-ai-cards
 title: Inline AI card generation on the create-note form
-status: implemented
+status: archived
 created: 2026-06-08
 updated: 2026-06-08
-archived_at: null
+archived_at: 2026-06-08T19:51:20Z
 ---
 
 > Review gate (2026-06-08): automated legs green; review + /simplify clean. Manual + E2E deferred to a
