@@ -55,6 +55,8 @@ export function ImportPanel({
   // Import always commits under a subject (existing or new) — no "None" option (allowNone omitted).
   const [subjectChoice, setSubjectChoice] = useState<SubjectChoiceT>({ mode: 'new', title: '' })
   const [formError, setFormError] = useState<string | undefined>(undefined)
+  // One fold governs the whole text-source authoring strip: the paste box AND the split-level picker.
+  const [isPasteOpen, setIsPasteOpen] = useState(true)
   const [isPending, startTransition] = useTransition()
 
   // #3: AI decomposes the source text into multiple notes, feeding the SAME preview/commit pipeline
@@ -175,12 +177,20 @@ export function ImportPanel({
         />
       </div>
 
-      <SourceInput value={text} onChange={handleSource} onPdf={handlePdf} pdfName={pdf?.filename} />
+      <SourceInput
+        value={text}
+        onChange={handleSource}
+        onPdf={handlePdf}
+        pdfName={pdf?.filename}
+        isPasteOpen={isPasteOpen}
+        onTogglePaste={() => setIsPasteOpen((open) => !open)}
+      />
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          {/* The deterministic split needs markdown text — hidden for a PDF, which only AI can read. */}
-          {!pdf && (
+          {/* The deterministic split needs markdown text — hidden for a PDF, which only AI can read;
+              and it folds together with the paste box (one authoring strip, one toggle). */}
+          {!pdf && isPasteOpen && (
             <>
               <span className="text-muted-foreground text-sm">Split on heading level:</span>
               <SegmentedToggle
@@ -235,11 +245,13 @@ export function ImportPanel({
             dialog.
           </MutedText>
         ) : (
-          <MutedText>
-            Each H{level} heading becomes a note titled from that heading; deeper headings stay in
-            its body. Text before the first H{level} heading becomes an “Untitled” note you can
-            rename or skip.
-          </MutedText>
+          isPasteOpen && (
+            <MutedText>
+              Each H{level} heading becomes a note titled from that heading; deeper headings stay in
+              its body. Text before the first H{level} heading becomes an “Untitled” note you can
+              rename or skip.
+            </MutedText>
+          )
         )}
       </div>
 

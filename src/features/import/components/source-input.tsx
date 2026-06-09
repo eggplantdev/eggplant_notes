@@ -1,5 +1,6 @@
 'use client'
 
+import { AccordionArrow } from '@/components/ui/accordion-arrow'
 import { Label } from '@/components/ui/label'
 import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,6 +16,8 @@ export function SourceInput({
   onChange,
   onPdf,
   pdfName,
+  isPasteOpen,
+  onTogglePaste,
 }: {
   value: string
   onChange: (text: string) => void
@@ -22,6 +25,9 @@ export function SourceInput({
   onPdf?: (pdf: PdfSourceT) => void
   // Name of the currently-selected PDF, shown as confirmation; undefined when the source is text.
   pdfName?: string
+  // Fold state is owned by the parent so the split-level controls collapse in lockstep with the paste box.
+  isPasteOpen: boolean
+  onTogglePaste: () => void
 }) {
   async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -55,15 +61,31 @@ export function SourceInput({
         </MutedText>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="import-paste">…or paste markdown</Label>
-        <Textarea
-          id="import-paste"
-          data-testid="import-paste"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="# Heading&#10;Notes go here…"
-          className="min-h-40 font-mono"
-        />
+        <button
+          type="button"
+          onClick={onTogglePaste}
+          aria-expanded={isPasteOpen}
+          aria-controls="import-paste"
+          className="group flex w-full cursor-pointer items-center justify-between gap-1.5 pb-2"
+        >
+          <Label htmlFor="import-paste" className="pointer-events-none">
+            …or paste markdown
+          </Label>
+          <AccordionArrow
+            isOpen={isPasteOpen}
+            className="group-hover:text-neon-cyan group-hover:drop-shadow-neon-cyan duration-300"
+          />
+        </button>
+        {isPasteOpen && (
+          <Textarea
+            id="import-paste"
+            data-testid="import-paste"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="# Heading&#10;Notes go here…"
+            className="min-h-40 font-mono"
+          />
+        )}
       </div>
     </div>
   )
