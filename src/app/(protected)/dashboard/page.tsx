@@ -6,6 +6,7 @@ import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { SectionLabel } from '@/components/ui/section-label'
 import { HardestCards } from '@/features/dashboard/components/hardest-cards'
 import { StatCard } from '@/features/dashboard/components/stat-card'
+import { WelcomeDialog } from '@/features/dashboard/components/welcome-dialog'
 import { TitledCard } from '@/components/ui/titled-card'
 import { ReviewPanel } from '@/features/review/components/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
@@ -24,6 +25,7 @@ export default async function DashboardPage() {
     currentStreak,
     dailyGoal,
     card,
+    isEmpty,
   } = await getDashboardPageData()
 
   const columns = buildHeatmapMatrix(activity, {
@@ -52,6 +54,7 @@ export default async function DashboardPage() {
         </div>
       }
     >
+      {isEmpty && <WelcomeDialog />}
       {/* Card-less hero stat: StatCard's type scale without the chrome. */}
       <div>
         <SectionLabel>Current streak</SectionLabel>
