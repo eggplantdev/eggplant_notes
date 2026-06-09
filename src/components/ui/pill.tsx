@@ -24,7 +24,7 @@ export function Pill({ children, className, onRemove, removeLabel }: PillPropsT)
         aria-label={removeLabel}
         className={cn(baseClasses, 'hover:bg-muted/70 flex items-center gap-1', className)}
       >
-        <span className="line-clamp-1 max-w-40">{children}</span>
+        <span className="line-clamp-1 max-w-40 text-left">{children}</span>
         <X className="size-3 shrink-0" />
       </button>
     )
