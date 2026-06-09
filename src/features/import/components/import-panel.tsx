@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { toastActionResult } from '@/components/forms/toast-result'
+import { AccordionArrow } from '@/components/ui/accordion-arrow'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { SegmentedToggle } from '@/components/ui/segmented-toggle'
@@ -57,6 +58,8 @@ export function ImportPanel({
   const [formError, setFormError] = useState<string | undefined>(undefined)
   // One fold governs the whole text-source authoring strip: the paste box AND the split-level picker.
   const [isPasteOpen, setIsPasteOpen] = useState(true)
+  // Separate fold for the whole preview list, so a long split result can be collapsed out of the way.
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true)
   const [isPending, startTransition] = useTransition()
 
   // #3: AI decomposes the source text into multiple notes, feeding the SAME preview/commit pipeline
@@ -258,14 +261,27 @@ export function ImportPanel({
       {drafts.length > 0 && (
         <>
           <div>
-            <h2 className="text-lg font-semibold">
-              Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
-            </h2>
-            <p className="text-muted-foreground mt-1 mb-3 text-sm">
-              Edit any title or body, or skip notes you don&apos;t want, before importing. Changing
-              the split level re-splits and discards these edits.
-            </p>
-            <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen((open) => !open)}
+              aria-expanded={isPreviewOpen}
+              aria-controls="import-preview-list"
+              className="group flex w-full cursor-pointer items-center justify-between gap-1.5"
+            >
+              <h2 className="text-lg font-semibold">
+                Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
+              </h2>
+              <AccordionArrow isOpen={isPreviewOpen} />
+            </button>
+            {isPreviewOpen && (
+              <div id="import-preview-list">
+                <p className="text-muted-foreground mt-1 mb-3 text-sm">
+                  Edit any title or body, or skip notes you don&apos;t want, before importing.
+                  Changing the split level re-splits and discards these edits.
+                </p>
+                <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
+              </div>
+            )}
           </div>
 
           <FormError message={formError} />

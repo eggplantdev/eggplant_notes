@@ -71,10 +71,7 @@ export function SourceInput({
           <Label htmlFor="import-paste" className="pointer-events-none">
             …or paste markdown
           </Label>
-          <AccordionArrow
-            isOpen={isPasteOpen}
-            className="group-hover:text-neon-cyan group-hover:drop-shadow-neon-cyan duration-300"
-          />
+          <AccordionArrow isOpen={isPasteOpen} className="duration-300" />
         </button>
         {isPasteOpen && (
           <Textarea

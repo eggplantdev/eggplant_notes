@@ -41,19 +41,19 @@ export function NotePreviewList({
           <li
             key={draft.id}
             data-testid="import-note-row"
-            className={cn('rounded-lg border p-4', draft.skip && 'opacity-50')}
+            className={cn('relative rounded-lg border p-4', draft.skip && 'opacity-50')}
           >
-            <div className="mb-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => toggleCollapsed(draft.id)}
-                aria-expanded={isOpen}
-                aria-controls={`import-note-body-${draft.id}`}
-                aria-label={isOpen ? 'Collapse note' : 'Expand note'}
-                className="mt-7"
-              >
-                <AccordionArrow isOpen={isOpen} />
-              </button>
+            <button
+              type="button"
+              onClick={() => toggleCollapsed(draft.id)}
+              aria-expanded={isOpen}
+              aria-controls={`import-note-body-${draft.id}`}
+              aria-label={isOpen ? 'Collapse note' : 'Expand note'}
+              className="group absolute top-3 right-3 cursor-pointer"
+            >
+              <AccordionArrow isOpen={isOpen} />
+            </button>
+            <div className="mb-3 flex items-end gap-2 pr-7">
               <div className="grid flex-1 gap-2">
                 <Label htmlFor={`import-title-${draft.id}`}>Title</Label>
                 <Input
@@ -66,10 +66,8 @@ export function NotePreviewList({
               </div>
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
+                variant="glowy-red"
                 data-testid="import-note-skip"
-                className="mt-7"
                 onClick={() => onToggleSkip(draft.id)}
               >
                 {draft.skip ? 'Include' : 'Skip'}
