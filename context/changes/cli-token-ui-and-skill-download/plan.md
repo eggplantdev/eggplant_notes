@@ -236,26 +236,26 @@ None — `api_tokens` already exists. Hosted prod/preview still need `SUPABASE_J
 
 #### Automated
 
-- [x] 1.1 Type checking passes (`next typegen && typecheck`)
-- [x] 1.2 Linting passes (eslint on changed files)
-- [x] 1.3 Production build succeeds (`pnpm build`)
-- [x] 1.4 Unit test for token-name/mint schema passes
+- [x] 1.1 Type checking passes (`next typegen && typecheck`) — 16d6b92
+- [x] 1.2 Linting passes (eslint on changed files) — 16d6b92
+- [x] 1.3 Production build succeeds (`pnpm build`) — 16d6b92
+- [x] 1.4 Unit test for token-name/mint schema passes — 16d6b92
 
 #### Manual
 
-- [x] 1.5 Mint shows the raw token once; Copy works; never re-shown
-- [x] 1.6 Token lists with name/created; last_used_at populates after an API call
-- [x] 1.7 Revoke removes it from the list and the token 401s against `/api/*`
-- [x] 1.8 A second account sees none of the first account's tokens
+- [x] 1.5 Mint shows the raw token once; Copy works; never re-shown — 16d6b92
+- [x] 1.6 Token lists with name/created; last_used_at populates after an API call — 16d6b92
+- [x] 1.7 Revoke removes it from the list and the token 401s against `/api/*` — 16d6b92
+- [x] 1.8 A second account sees none of the first account's tokens — 16d6b92
 
 ### Phase 2: Downloadable agent skill
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`next typegen && typecheck`)
-- [ ] 2.2 Linting passes (eslint on changed files)
-- [ ] 2.3 Production build succeeds (`pnpm build`)
-- [ ] 2.4 Unit test: template drift + origin-injection guard passes
+- [x] 2.1 Type checking passes (`next typegen && typecheck`) — c48b7af
+- [x] 2.2 Linting passes (eslint on changed files) — c48b7af
+- [x] 2.3 Production build succeeds (`pnpm build`) — c48b7af
+- [x] 2.4 Unit test: template drift + origin-injection guard passes — c48b7af
 
 #### Manual
 
