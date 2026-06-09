@@ -31,7 +31,7 @@ export function MobileNav({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          size="icon"
+          size="icon-sm"
           aria-label="Open menu"
           className={TOGGLE_BUTTON_CLASS}
         >
@@ -44,7 +44,7 @@ export function MobileNav({
         <SheetClose asChild>
           <Button
             variant="outline"
-            size="icon"
+            size="icon-sm"
             aria-label="Close menu"
             className={TOGGLE_BUTTON_CLASS}
           >
