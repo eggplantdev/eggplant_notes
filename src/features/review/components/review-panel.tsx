@@ -27,7 +27,11 @@ type PropsT = {
 // rated (lessons.md:141-145) — owned here for the dashboard, by the [id] layout for the card page.
 export function ReviewPanel({ card, goal, provideCelebration = true, subtitle }: PropsT) {
   const body = !card ? (
-    <CaughtUpNotice />
+    <Card className="gradient-border ring-0">
+      <CardContent>
+        <CaughtUpNotice />
+      </CardContent>
+    </Card>
   ) : (
     <Card className="gradient-border ring-0">
       <CardHeader>
