@@ -1,12 +1,15 @@
 ---
 name: clc-note-api
 description: >-
-  Interact with the Coding Learning Companion (CLC) app's HTTP API — read your subjects/notes and add
-  notes and spaced-repetition memory cards over HTTP, authenticated by a personal `clc_` API token you
-  mint in the app's Settings. Use this skill whenever you need to push a note or memory card INTO the CLC
-  learning app, use a `clc_...` token, or call `/api/notes`, `/api/memory-cards`, or `/api/subjects`.
-  Trigger even when the user only says "add this to my learning app", "save these as memory cards in CLC",
-  "create a note in my coding companion", or hands you a `clc_...` token.
+  Interact with the Coding Learning Companion (CLC) app's HTTP API — read, create, update, and delete your
+  subjects, notes, and spaced-repetition memory cards over HTTP, authenticated by a personal `clc_` API
+  token you mint in the app's Settings. Full CRUD: list/read structure, add notes and cards, edit them or
+  move them between subjects, rename subjects, and delete any of them. Use this skill whenever you need to
+  read from or write to the CLC learning app, use a `clc_...` token, or call `/api/notes`,
+  `/api/memory-cards`, or `/api/subjects`. Trigger even when the user only says "add this to my learning
+  app", "save these as memory cards in CLC", "create a note in my coding companion", "update / rename /
+  move my note, card, or subject in CLC", "delete that card / note / subject in CLC", or hands you a
+  `clc_...` token.
 ---
 
 # CLC HTTP API — notes & memory cards via personal token
@@ -40,10 +43,16 @@ There is nothing else to install or configure — the token is the only credenti
 Notes and cards live under an optional **subject** (a topic). Read structure first so you reuse an existing
 subject instead of creating duplicates:
 
-1. `GET /api/subjects` → see existing topics; grab a `subject_id` to reuse, or decide to make a new one.
+1. `GET /api/subjects` → see existing topics; grab a `subject_id` to reuse, or decide to make a new one
+   (`POST /api/subjects`).
 2. `POST /api/notes` → create the note under an existing subject (`subject_id`) **or** a new one created
    inline (`subject_title`). Include its recall cards in the same call via `checks`.
 3. `POST /api/memory-cards` → add more cards to a note later, or create standalone cards.
+4. `GET /api/notes/:id` · `GET /api/memory-cards` → read a note's content + cards back, or list/inspect
+   cards (filter by note/subject/unfiled) before writing.
+5. **Edit, reorganize, or remove**: `PATCH` a note/card/subject to change its fields or move it between
+   subjects, and `DELETE` to remove one. See [Endpoints](#endpoints) for the full surface and
+   [Linked vs standalone cards](#linked-vs-standalone-cards) for what a subject change does to linked cards.
 
 ## Endpoints
 

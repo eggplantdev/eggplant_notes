@@ -41,6 +41,14 @@ describe('CLC_SKILL_TEMPLATE', () => {
     expect(CLC_SKILL_TEMPLATE).toContain('Deleting a subject does NOT delete its notes or cards')
   })
 
+  it('the frontmatter description advertises the write surface, not just read+add (discovery)', () => {
+    // Guards the gap where the Endpoints section grew CRUD but the description — what an agent matches
+    // on to PICK the skill — still only mentioned read/add, so edit/delete tasks never triggered it.
+    const description = CLC_SKILL_TEMPLATE.split('---')[1] ?? ''
+    expect(description).toMatch(/update/i)
+    expect(description).toMatch(/delete/i)
+  })
+
   it('injects a given origin in place of every placeholder', () => {
     const origin = 'https://clc.example.com'
     const filled = CLC_SKILL_TEMPLATE.replaceAll(CLC_BASE_URL_PLACEHOLDER, origin)
