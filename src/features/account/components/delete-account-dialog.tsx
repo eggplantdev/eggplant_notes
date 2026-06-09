@@ -19,7 +19,7 @@ export function DeleteAccountDialog() {
   return (
     <DeleteButton
       triggerLabel="Delete account"
-      triggerSize="default"
+      triggerSize="sm"
       title="Delete your account?"
       description="This permanently deletes your account and all your notes, memory cards, and review history. This cannot be undone."
       confirmLabel="Delete account"
