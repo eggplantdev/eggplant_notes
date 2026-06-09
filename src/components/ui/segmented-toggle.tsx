@@ -1,10 +1,19 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 
-import type { SegmentedOptionT } from '@/types/segmented-toggle'
 import { cn } from '@/lib/utils'
+
+export type SegmentedOptionT<V extends string> = {
+  value: V
+  label: ReactNode
+  disabled?: boolean
+  testId?: string
+  // Fired on hover/focus of this segment — used to prefetch lazy content before the click
+  // (e.g. the markdown Preview pane's Shiki chunk).
+  onPrefetch?: () => void
+}
 
 type SegmentedTogglePropsT<V extends string> = {
   value: V

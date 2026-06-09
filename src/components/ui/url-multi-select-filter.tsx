@@ -3,9 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
-import { MultiSelect } from '@/components/ui/multi-select'
+import { MultiSelect, type MultiSelectOptionT } from '@/components/ui/multi-select'
 import { Pill } from '@/components/ui/pill'
-import type { MultiSelectOptionT } from '@/types/multi-select'
 import { buildUrlWithParams } from '@/lib/utils/build-url-with-params'
 
 // Batch rapid toggles into one server round-trip: a popover session re-queries on the trailing

@@ -1,6 +1,6 @@
 'use client'
 
-import type { MultiSelectOptionT } from '@/types/multi-select'
+import { type MultiSelectOptionT } from '@/components/ui/multi-select'
 import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 
 type SubjectFilterPropsT = {

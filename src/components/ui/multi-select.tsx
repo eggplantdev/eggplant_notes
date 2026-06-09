@@ -13,8 +13,9 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import type { MultiSelectOptionT } from '@/types/multi-select'
 import { cn } from '@/lib/utils'
+
+export type MultiSelectOptionT = { value: string; label: string }
 
 type MultiSelectPropsT = {
   options: readonly MultiSelectOptionT[]
