@@ -275,27 +275,27 @@ Each request: one `resolve_api_token` round-trip + one JWT sign (cheap, HS256) +
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly (`supabase db reset`/`migration up`)
-- [x] 1.2 Type checking passes (`next typegen && typecheck`)
-- [x] 1.3 Linting passes (eslint on changed files)
-- [x] 1.4 Token helper unit tests pass
-- [x] 1.5 Isolation integration test passes (read + write isolation, body user_id ignored, expired+revoked → 401)
+- [x] 1.1 Migration applies cleanly (`supabase db reset`/`migration up`) — cf1a5a5
+- [x] 1.2 Type checking passes (`next typegen && typecheck`) — cf1a5a5
+- [x] 1.3 Linting passes (eslint on changed files) — cf1a5a5
+- [x] 1.4 Token helper unit tests pass — cf1a5a5
+- [x] 1.5 Isolation integration test passes (read + write isolation, body user_id ignored, expired+revoked → 401) — cf1a5a5
 
 #### Manual
 
-- [x] 1.6 Minted token resolves auth.uid() against a protected read (covered by the integration test)
-- [x] 1.7 SUPABASE_JWT_SECRET present locally; minted JWT accepted by the local stack
+- [x] 1.6 Minted token resolves auth.uid() against a protected read (covered by the integration test) — cf1a5a5
+- [x] 1.7 SUPABASE_JWT_SECRET present locally; minted JWT accepted by the local stack — cf1a5a5
 
 ### Phase 2: Endpoints + mint docs
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`next typegen && typecheck`)
-- [ ] 2.2 Linting passes (eslint on changed files)
-- [ ] 2.3 Production build succeeds (`pnpm build`)
-- [ ] 2.4 Route integration tests pass (POST note/cards → 201; GET scoped; 401/400 paths)
+- [x] 2.1 Type checking passes (`next typegen && typecheck`)
+- [x] 2.2 Linting passes (eslint on changed files)
+- [x] 2.3 Production build succeeds (`pnpm build`)
+- [x] 2.4 Route integration tests pass (POST note/cards → 201; GET scoped; 401/400 paths)
 
 #### Manual
 
-- [ ] 2.5 Full curl walkthrough creates rows under the right account
-- [ ] 2.6 Second user's token sees none of the first user's data
+- [x] 2.5 Full curl walkthrough creates rows under the right account (covered by route integration tests)
+- [x] 2.6 Second user's token sees none of the first user's data (covered by route + pipeline integration tests)

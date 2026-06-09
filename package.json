@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:integration": "RUN_INTEGRATION=1 vitest run src/__tests__/api-tokens.integration.test.ts",
+    "test:integration": "RUN_INTEGRATION=1 vitest run src/__tests__/api-tokens.integration.test.ts src/__tests__/api-routes.integration.test.ts",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/types.ts",
     "seed:dump-fixture": "node supabase/seed-scripts/dump-sample-fixture.mjs",
     "prepare": "husky"
