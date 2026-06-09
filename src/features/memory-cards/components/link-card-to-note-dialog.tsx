@@ -89,7 +89,21 @@ export function LinkCardToNoteDialog({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent
+        // The note/subject Comboboxes are `modal` (so their portaled popovers sit above this modal
+        // dialog's pointer-events freeze and stay clickable) — but opening one moves focus into the
+        // popover, which Radix's DismissableLayer reads as an "outside" interaction and uses to
+        // dismiss the whole dialog (an intermittent focus/pointer race, ~1-in-6). Guard it: ignore
+        // any outside-interaction whose target lives inside a portaled popover.
+        onInteractOutside={(event) => {
+          const target = event.target as Element | null
+          if (
+            target?.closest('[data-slot="popover-content"],[data-radix-popper-content-wrapper]')
+          ) {
+            event.preventDefault()
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Link to a note</DialogTitle>
           <DialogDescription>
