@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
 
 import { noteAttachCardsSchema } from '@/features/api-tokens/schemas'
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
 import { authError, errorJson, readJsonBody } from '@/features/api-tokens/route-helpers'
-import { cardWithSubjectSchema } from '@/features/memory-cards/schemas'
+import { cardWithSubjectSchema, noteIdSchema } from '@/features/memory-cards/schemas'
 import { insertCardsForNote } from '@/features/memory-cards/insert-cards-for-note'
 import { insertStandaloneCard } from '@/features/memory-cards/insert-standalone-card'
+import { subjectIdSchema } from '@/features/subjects/schemas'
 import { validateInput } from '@/lib/validate'
 
 // POST /api/memory-cards — create card(s) for the token's user. The body discriminates: `note_id`
@@ -52,8 +52,9 @@ export async function GET(request: Request) {
   const subject = searchParams.get('subject')
   const unfiled = searchParams.get('unfiled') === 'true'
 
-  if (note !== null && !z.guid().safeParse(note).success) return errorJson(400, 'Invalid note id')
-  if (subject !== null && !z.guid().safeParse(subject).success) {
+  if (note !== null && !noteIdSchema.safeParse(note).success)
+    return errorJson(400, 'Invalid note id')
+  if (subject !== null && !subjectIdSchema.safeParse(subject).success) {
     return errorJson(400, 'Invalid subject id')
   }
 
