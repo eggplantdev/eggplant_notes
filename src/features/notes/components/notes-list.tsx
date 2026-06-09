@@ -2,6 +2,7 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
+import { Pill } from '@/components/ui/pill'
 import { DeleteNoteDialog } from '@/features/notes/components/delete-note-dialog'
 import type { NoteListItemT } from '@/features/notes/types'
 import { useDeleteDialogState } from '@/hooks/use-delete-dialog-state'
@@ -31,11 +32,7 @@ export function NotesList({ notes }: { notes: NoteListItemT[] }) {
           />
         )}
         renderSubtitle={(note) =>
-          note.subjects?.title ? (
-            <span className="bg-muted text-foreground line-clamp-1 w-fit max-w-full rounded px-1.5 py-0.5 text-xs font-medium">
-              {note.subjects.title}
-            </span>
-          ) : null
+          note.subjects?.title ? <Pill className="w-fit">{note.subjects.title}</Pill> : null
         }
       />
       <DeleteNoteDialog noteId={openId} onOpenChange={onOpenChange} />

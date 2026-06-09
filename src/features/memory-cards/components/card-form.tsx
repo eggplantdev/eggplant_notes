@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useFormError } from '@/components/forms/hooks/use-form-error'
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import {
   AlertDialog,
@@ -21,12 +21,14 @@ import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
+import { generateCards } from '@/features/openrouter/actions/generate-cards'
+import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
+import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
@@ -40,6 +42,12 @@ type CardFormPropsT = {
   subjects: SubjectOptionT[]
   card?: MemoryCardT
   sourceNote?: { id: string; title: string | null }
+  // Whether OpenRouter is connected. The AI "generate from a topic" filler (#2) shows in create
+  // mode regardless; when not connected its Generate button opens the connect dialog.
+  aiEnabled?: boolean
+  // The user's persisted default model, pre-selected in the generate dialog. Only consumed in
+  // create mode (the topic generator); edit mode omits it.
+  defaultModel?: string
 }
 
 type CardFormValuesT = {
@@ -49,9 +57,9 @@ type CardFormValuesT = {
   code_context: string
 }
 
-export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
+export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
   const router = useRouter()
-  const [formError, setFormError] = useState<string | undefined>(undefined)
+  const { formError, clearError, reportResult } = useFormError()
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
   // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
@@ -92,7 +100,7 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
     const result = card
       ? await updateMemoryCard(card.id, values, unlinkFromNote)
       : await createStandaloneCard(values)
-    if (!toastActionResult(result)) setFormError(result.error)
+    reportResult(result)
   }
 
   return (
@@ -101,7 +109,7 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
       data-testid="card-form"
       onSubmit={(e) => {
         e.preventDefault()
-        setFormError(undefined)
+        clearError()
         form.handleSubmit()
       }}
     >
@@ -122,25 +130,39 @@ export function CardForm({ subjects, card, sourceNote }: CardFormPropsT) {
         )}
       </form.Field>
 
+      {!card && (
+        <TopicGenerator
+          label="Generate with AI"
+          placeholder="e.g. JavaScript closures"
+          testIdPrefix="card-ai"
+          task="cards"
+          connected={aiEnabled ?? false}
+          defaultModel={defaultModel ?? DEFAULT_OPENROUTER_MODEL}
+          action={(topic, modelId, promptOverride) =>
+            generateCards({ topic, modelId, promptOverride })
+          }
+          onResult={(genCard) => {
+            form.setFieldValue('prompt', genCard.prompt)
+            form.setFieldValue('example', genCard.example)
+          }}
+          resultNoun="card"
+          applyHint="Card filled in below — edit if needed, then Create card to save."
+        />
+      )}
+
       <form.AppField name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
         {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
       </form.AppField>
 
-      <form.Field name="example">
+      <form.AppField name="example">
         {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor="card-example">Example (optional)</Label>
-            <Textarea
-              id="card-example"
-              data-testid="card-form-example"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="A worked example or expected answer"
-            />
-          </div>
+          <field.Textarea
+            label="Example (optional)"
+            placeholder="A worked example or expected answer"
+            testId="card-form-example"
+          />
         )}
-      </form.Field>
+      </form.AppField>
 
       <form.Field name="code_context">
         {(field) => (

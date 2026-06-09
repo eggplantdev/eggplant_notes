@@ -28,7 +28,10 @@ _App currently has no name/logo/footer._
 
 ## Cluster 7 — Code health (dedup / simplification)
 
-- [ ] Work the remaining items in `@SIMPLIFICATION-PROPOSALS.md` (repo root). Section A (`CardActions`, `useDeleteDialogState`, `EmptyState`, `MutedText`) is shipped; next quick-wins: **D1** toast-layer split, **B3** `useFormSubmit`, **C1** `runTableSingleQuery`, **D2** split `heatmap-view.ts`. See the doc's top **Handoff** block for state + decisions.
+- [ ] **Split `src/features/openrouter/prompts.ts`** — grab-bag flagged by both `feature-first-structure` + `module-cohesion-audit` at the `editable-system-prompts` review gate (2026-06-08). Mixes 4 concerns: persistence Zod schemas, system-prompt constants + `resolveSystemPrompts`, pure prompt builders, preview-routing helpers. Split into `prompt-schemas.ts` / `system-prompts.ts` / `build-prompt.ts` / `preview-prompt.ts`, keeping `PROMPT_KEYS`/`PromptKeyT` as the shared const→type source. Deferred from the slice: behavior-neutral, touches cross-feature import sites (memory-cards/notes/import), and the parallel openrouter session was live — do it once that work settles.
+- [ ] **Behavioral coverage for `editable-system-prompts`** (deferred at the 2026-06-08 review gate; unit logic is covered by `user-prompts.test.ts`, the rest isn't). The DB read (`getResolvedSystemPrompts`), both Save/Reset actions, and the dialog wiring have zero behavioral tests — `plan.md` Progress rows 2.4–2.5, 3.4–3.6, 4.5–4.8 stayed `[ ]` by design. Drive via `/10x-e2e`: save → cross-surface reopen → generate-honors-saved-prompt → reset-confirm → built-in; plus the programmatic two-client RLS isolation check.
+- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — it `revalidatePath`s four pages that are always-dynamic (`cookies()`), so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to a `revalidateTag('user-prompts')` on the data. Also noted: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
+- [ ] **E2E for `topic-scoped-review`** (deferred at the 2026-06-09 review gate; unit not high-value — the filter builder is a thin PostgREST wrapper). Drive via `/10x-e2e`: seed cards across two subjects with known due dates → filter `/memory-cards` to subject A → assert the reviewed card belongs to A → rate → assert the next card is also from A (advance stays in-filter) → exhaust → `CaughtUpNotice` with the list still present. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`.
 
 ---
 
@@ -59,3 +62,10 @@ ai
 - instructions everywhere
 - open router connect button visible all the time conditionally when not connected
 -
+
+# Settings
+
+Settings model pickder
+Allow setting default models
+Sort by price
+Sort alphabeticall

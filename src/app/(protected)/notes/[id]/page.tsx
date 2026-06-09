@@ -1,5 +1,3 @@
-import { notFound } from 'next/navigation'
-
 import { PageShell } from '@/components/layout/page-shell'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -12,6 +10,9 @@ import { getNote } from '@/features/notes/queries'
 import { getSubjects } from '@/features/subjects/queries'
 import { getMemoryCardsForNote } from '@/features/memory-cards/queries'
 import { MemoryCardsSection } from '@/features/memory-cards/components/memory-cards-section'
+import { PromptDefaultsProvider } from '@/features/openrouter/components/prompt-defaults-context'
+import { getOpenRouterStatus, getResolvedSystemPrompts } from '@/features/openrouter/queries'
+import { assertFound } from '@/lib/assert-found'
 import { formatLocaleDateTime } from '@/lib/utils/date'
 
 // Next 16 `params`/`searchParams` are Promises. getNote() is RLS-scoped, so a missing OR
@@ -27,12 +28,15 @@ export default async function NotePage({
   const { id } = await params
   const { edit } = await searchParams
   // Independent RLS-scoped reads run concurrently to avoid serial round-trips.
-  const [note, memoryCards, subjects] = await Promise.all([
-    getNote(id),
-    getMemoryCardsForNote(id),
-    getSubjects(),
-  ])
-  if (!note) notFound()
+  const [note, memoryCards, subjects, { connected: aiEnabled, defaultModel }, systemDefaults] =
+    await Promise.all([
+      getNote(id),
+      getMemoryCardsForNote(id),
+      getSubjects(),
+      getOpenRouterStatus(),
+      getResolvedSystemPrompts(),
+    ])
+  assertFound(note)
 
   const isEditingNote = edit === 'note'
   // Resolved from the already-fetched subjects list, so no extra round-trip.
@@ -87,7 +91,16 @@ export default async function NotePage({
       {/* The gradient image paints over the Separator's bg-border. */}
       <Separator className="from-neon-green to-neon-cyan neon-glow bg-linear-to-r" />
 
-      <MemoryCardsSection noteId={note.id} cards={memoryCards} />
+      <PromptDefaultsProvider value={systemDefaults}>
+        <MemoryCardsSection
+          noteId={note.id}
+          noteTitle={note.title}
+          noteContent={note.content ?? ''}
+          cards={memoryCards}
+          aiEnabled={aiEnabled}
+          defaultModel={defaultModel}
+        />
+      </PromptDefaultsProvider>
     </PageShell>
   )
 }

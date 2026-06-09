@@ -1,0 +1,33 @@
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { FormError } from '@/components/forms/form-components/form-error'
+import { useFieldContext } from '@/components/forms/hooks/form-hooks'
+import type { FormControlPropsT } from '@/components/forms/types/form-types'
+import { getFieldErrorText } from '@/components/forms/utils'
+
+// Textarea counterpart to FormInput: reads the field off context (so it only works as a
+// `form.AppField` child), wires value/blur/change + label + error. Same prop shape as FormInput
+// minus input-only `type`/`autoComplete`.
+export function FormTextarea(props: FormControlPropsT) {
+  const field = useFieldContext<string>()
+  const isInvalid = field.state.meta.errors.length > 0
+
+  return (
+    <div className="grid gap-2">
+      {props.label && <Label htmlFor={field.name}>{props.label}</Label>}
+      <Textarea
+        id={field.name}
+        name={field.name}
+        data-testid={props.testId}
+        placeholder={props.placeholder}
+        disabled={props.disabled}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+        aria-invalid={isInvalid}
+        className={props.className}
+      />
+      <FormError message={getFieldErrorText(field.state.meta.errors)} />
+    </div>
+  )
+}

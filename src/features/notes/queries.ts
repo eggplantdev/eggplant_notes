@@ -2,11 +2,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { NoteListItemT } from '@/features/notes/types'
 import type { NoteT } from '@/types/note'
+import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
+import { pageRange } from '@/lib/utils/pagination'
 
 // RLS scopes rows to the owner — no explicit `user_id` filter. Selects only the list-card columns
 // (never `content`) so payloads stay slim. Hand-rolls the query rather than using runTableQuery
@@ -18,9 +19,7 @@ export async function getNotes(
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: NoteListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
-  const page = opts?.page ?? 1
-  const limit = opts?.limit ?? DEFAULT_LIMIT
-  const offset = (page - 1) * limit
+  const { offset, limit } = pageRange(opts)
   const orFilter = opts?.q ? searchOr(['title', 'content'], opts.q) : null
 
   // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
@@ -52,10 +51,5 @@ export async function getNote(
   client?: SupabaseClient<Database>,
 ): Promise<NoteT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase.from('notes').select('*').eq('id', id).maybeSingle()
-  if (error) {
-    console.error('[getNote] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle('getNote', supabase.from('notes').select('*').eq('id', id).maybeSingle())
 }

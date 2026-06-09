@@ -36,7 +36,14 @@ export default async function NotesPage({
       subtitle={pluralize(total, 'note')}
       // 'full' so the card grid can fan out to three columns on wide screens.
       width="full"
-      actions={<ButtonLink href="/notes/new">New note</ButtonLink>}
+      actions={
+        <>
+          <ButtonLink href="/import" variant="outline">
+            Import notes
+          </ButtonLink>
+          <ButtonLink href="/notes/new">New note</ButtonLink>
+        </>
+      }
     >
       {(total > 0 || isFiltered) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

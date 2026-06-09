@@ -1,11 +1,9 @@
 import { z } from 'zod'
 
+import { trimmedString } from '@/lib/schema-builders'
+
 // description is normalized to undefined when blank so the DB stores null, not an empty string.
-export const subjectTitleSchema = z
-  .string()
-  .trim()
-  .min(1, 'Title is required')
-  .max(200, 'Title must be 200 characters or fewer')
+export const subjectTitleSchema = trimmedString('Title', 200)
 
 export const subjectDescriptionSchema = z
   .string()

@@ -199,7 +199,7 @@ function SidebarFilter({ value, onChange }: { value: string; onChange: (next: st
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Filter notes…"
-        className="h-8 w-full pl-8 text-sm"
+        className="h-7 w-full pl-8 text-[0.8rem]"
       />
     </div>
   )

@@ -1,0 +1,338 @@
+'use client'
+
+import { Sparkles } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
+import { useState, useTransition, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+
+import { FormError } from '@/components/forms/form-components/form-error'
+import { toastMessage } from '@/components/toasts'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { MutedText } from '@/components/ui/muted-text'
+import { Textarea } from '@/components/ui/textarea'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
+import { ModelSelect } from '@/features/openrouter/components/model-select'
+import { useAiGate } from '@/features/openrouter/use-ai-gate'
+import { useActionTransition } from '@/hooks/use-action-transition'
+import type { GenerateResultT } from '@/features/openrouter/types'
+import { resetUserPrompt } from '@/features/openrouter/actions/reset-user-prompt'
+import { saveUserPrompt } from '@/features/openrouter/actions/save-user-prompt'
+import { BUILTIN_SYSTEM, isBuiltinSystem } from '@/features/openrouter/system-prompts'
+import {
+  previewPrompt,
+  promptKeyFromPreviewInput,
+  type PreviewInputT,
+} from '@/features/openrouter/preview-prompt'
+import { usePromptDefault } from '@/features/openrouter/components/prompt-defaults-context'
+import type { PromptT } from '@/features/openrouter/types'
+
+// The single entry point for every AI generation (#1/#2/#3/#5). Owns: the always-visible trigger,
+// the connect gate (via useAiGate), per-generate model selection, and an EDITABLE view of the exact
+// prompt that will be sent (no LLM cost to preview). Editing the prompt sends it verbatim
+// (promptOverride) so the user can refine freely; an unedited prompt sends nothing and the action
+// builds it server-side. The dialog does NOT preview the result — there's nothing to decide inside
+// it — so on success it hands the data straight to the caller's own preview/edit surface (form
+// fields / candidate list) and CLOSES; it stays open only on failure, for a retry.
+export function GenerateDialog<T>({
+  connected,
+  defaultModel,
+  previewInput,
+  action,
+  onResult,
+  triggerLabel,
+  triggerTestId,
+  validate,
+  dialogTitle,
+  children,
+  canGenerate = true,
+  modelFilter = 'text',
+  resultNoun = 'item',
+  applyHint,
+}: {
+  connected: boolean
+  defaultModel: string
+  previewInput: PreviewInputT
+  action: (modelId: string, promptOverride?: PromptT) => Promise<GenerateResultT<T[]>>
+  onResult: (data: T[]) => void
+  triggerLabel: string
+  triggerTestId: string
+  // Runs on trigger click; return a message to show beside the button instead of opening (e.g. the
+  // source text / topic is empty). The trigger stays enabled so the click always gives feedback.
+  validate?: () => string | undefined
+  dialogTitle: string
+  // Rendered at the top of the dialog body — used by the topic flow to put its source <textarea>
+  // inside the dialog (the parent owns its state and feeds it back through previewInput/action).
+  children?: ReactNode
+  // Gates the Generate button. The topic flow sets it false while its in-dialog source is empty;
+  // the import flow (source validated before open) leaves it at the default.
+  canGenerate?: boolean
+  // Scopes the model picker: 'file' restricts to vision/file-capable models (PDF import, Phase 8).
+  modelFilter?: 'text' | 'file'
+  // Singular noun for the success toast fallback ("Generated 3 cards"). Caller-set so it's accurate.
+  resultNoun?: string
+  // The success toast itself: shown when generation succeeds and the dialog auto-closes, handing the
+  // result to the caller's surface (fields / candidate list). Should say where the result went AND
+  // that nothing is saved until the caller's own Save/Add/Create/Import. Falls back to a generic
+  // "Generated N <noun>s" when unset.
+  applyHint?: string
+}) {
+  const { guard, gateDialog } = useAiGate(connected)
+  const [open, setOpen] = useState(false)
+  const [model, setModel] = useState(defaultModel)
+  const [error, setError] = useState<string | undefined>(undefined)
+  const [triggerError, setTriggerError] = useState<string | undefined>(undefined)
+  const [isGenerating, startGenerate] = useTransition()
+  // The editable prompt as an OVERRIDE: `undefined` means "follow the live default", so the preview
+  // tracks an in-dialog source (topic flow) as the user types; a value means the user edited and now
+  // owns it. This is what's sent to the action — undefined lets the action build the prompt itself.
+  const [override, setOverride] = useState<PromptT | undefined>(undefined)
+
+  // Which overridable system prompt this surface uses — derived from the previewInput, so no key prop.
+  const promptKey = promptKeyFromPreviewInput(previewInput)
+  const builtinSystem = BUILTIN_SYSTEM[promptKey]
+  const systemDefault = usePromptDefault(promptKey)
+  // The persisted baseline this session started from (saved override or built-in). Updated imperatively
+  // on Save/Reset success so the buttons reflect the new state without waiting for a full reload.
+  const [savedSystem, setSavedSystem] = useState(systemDefault ?? builtinSystem)
+  const saveTx = useActionTransition()
+  const resetTx = useActionTransition()
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
+
+  // previewPrompt is pure (no DB / no LLM); its system half is overlaid with the saved baseline so the
+  // textarea seeds from — and the preview matches — what the action will actually send.
+  const defaults = { ...previewPrompt(previewInput), system: savedSystem }
+  const shown = override ?? defaults
+  const systemTrimmed = shown.system.trim()
+  const mutating = saveTx.isPending || resetTx.isPending
+  // Save is meaningful only when the system text is non-empty and differs from the saved baseline.
+  const canSavePrompt = systemTrimmed !== '' && systemTrimmed !== savedSystem
+  // Reset deletes the saved override — only available when one exists.
+  const hasSavedOverride = savedSystem !== builtinSystem
+
+  // Clear the stale trigger error as soon as the input becomes valid again (e.g. the user starts
+  // typing — the parent re-renders us with fresh props). Adjust-during-render, not an effect; only
+  // runs while an error is actually showing, and converges (the set makes the guard false).
+  if (triggerError && !validate?.()) setTriggerError(undefined)
+
+  // Trigger click: validate input first (feedback beside the button if missing), then gate on the
+  // connection, then open.
+  function handleTrigger() {
+    const message = validate?.()
+    setTriggerError(message)
+    if (message) return
+    guard(openConfig)()
+  }
+
+  function openConfig() {
+    setError(undefined)
+    setModel(defaultModel) // re-seed from the default in case a prior open changed it
+    setOverride(undefined)
+    setOpen(true)
+  }
+
+  function generate() {
+    setError(undefined)
+    startGenerate(async () => {
+      // `override` is undefined unless the user edited; an unedited prompt lets the action build it
+      // server-side (and re-fetch grounded source under its own RLS trust boundary).
+      const outcome = await action(model, override)
+      if (outcome.success) {
+        // Success has nothing to decide in the dialog, so hand off + close immediately. The toast
+        // (body-level portal, renders above anything) is the visible outcome + says where it landed.
+        onResult(outcome.data)
+        const n = outcome.data.length
+        toastMessage(
+          applyHint ?? `Generated ${n} ${n === 1 ? resultNoun : `${resultNoun}s`}`,
+          'success',
+        )
+        setOpen(false)
+      } else {
+        // Stay open so the user can retry / tweak the prompt; toast + inline FormError both carry it.
+        setError(outcome.error)
+        toastMessage(outcome.error, 'error')
+      }
+    })
+  }
+
+  function handleSavePrompt() {
+    void saveTx
+      .run(() => saveUserPrompt({ promptKey, system: shown.system }), {
+        successMessage: 'Prompt saved as your default.',
+      })
+      .then((result) => {
+        if (!result.success) return
+        // Saving the built-in verbatim deletes the row → baseline is the built-in again.
+        setSavedSystem(isBuiltinSystem(promptKey, shown.system) ? builtinSystem : systemTrimmed)
+      })
+  }
+
+  function handleResetPrompt() {
+    void resetTx
+      .run(() => resetUserPrompt({ promptKey }), {
+        successMessage: 'Reset to the built-in prompt.',
+      })
+      .then((result) => {
+        if (!result.success) return
+        setSavedSystem(builtinSystem)
+        // Revert the System half of any in-dialog edit to the built-in; keep the Prompt half.
+        setOverride((o) => (o ? { ...o, system: builtinSystem } : o))
+        setConfirmResetOpen(false)
+      })
+  }
+
+  return (
+    <>
+      {/* relative + absolute error: the message must not grow this cell, or it re-centers the button row. */}
+      <div className="relative grid justify-items-start">
+        <Button
+          type="button"
+          variant="ai"
+          size="sm"
+          data-testid={triggerTestId}
+          onClick={handleTrigger}
+        >
+          <Sparkles />
+          {triggerLabel}
+        </Button>
+        <FormError
+          message={triggerError}
+          className="bg-background absolute top-full left-0 z-10 mt-1 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-sm"
+        />
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          data-testid="generate-dialog"
+          className="gradient-border ring-0 sm:max-w-3xl"
+        >
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogDescription>
+              Pick a model and edit the exact prompt before generating. The result is editable
+              before it is saved.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4">
+            {children}
+            <div className="grid gap-2">
+              <Label htmlFor="generate-model">Model</Label>
+              <ModelSelect
+                value={model}
+                onChange={setModel}
+                defaultModelId={defaultModel}
+                testId="generate-model"
+                filter={modelFilter}
+                modal
+              />
+              {modelFilter === 'file' && (
+                <MutedText>
+                  Only models that can read files (vision) are listed — a PDF needs one.
+                </MutedText>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="generate-system">System prompt</Label>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-testid="generate-prompt-save"
+                    disabled={!canSavePrompt || mutating}
+                    onClick={handleSavePrompt}
+                  >
+                    {saveTx.isPending ? 'Saving…' : 'Save prompt'}
+                  </Button>
+                  {/* Reset only appears once a saved override exists — nothing to reset on the built-in. */}
+                  {hasSavedOverride && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      data-testid="generate-prompt-reset"
+                      disabled={mutating}
+                      onClick={() => setConfirmResetOpen(true)}
+                    >
+                      Reset prompt
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <Textarea
+                id="generate-system"
+                data-testid="generate-system"
+                value={shown.system}
+                onChange={(e) => setOverride({ ...shown, system: e.target.value })}
+                className="max-h-32 font-mono text-xs"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="generate-prompt">Prompt</Label>
+              <Textarea
+                id="generate-prompt"
+                data-testid="generate-prompt"
+                value={shown.prompt}
+                onChange={(e) => setOverride({ ...shown, prompt: e.target.value })}
+                className="max-h-72 min-h-40 font-mono text-xs"
+              />
+            </div>
+
+            <FormError message={error} />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ai"
+              size="sm"
+              data-testid="generate-confirm"
+              disabled={isGenerating || !canGenerate}
+              onClick={generate}
+            >
+              <Sparkles />
+              {isGenerating ? 'Generating…' : 'Generate'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Screen-centred while generating. Portalled to <body> so it escapes the dialog's
+          -translate-x-1/2 transform (which would otherwise be the containing block for `fixed`)
+          and sits above the dialog (z-50). */}
+      {isGenerating &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[60] grid place-items-center">
+            <Spinner className="size-12 [--spinner-w:4px]" />
+          </div>,
+          document.body,
+        )}
+
+      <ConfirmDeleteDialog
+        open={confirmResetOpen}
+        onOpenChange={setConfirmResetOpen}
+        title="Reset to built-in prompt?"
+        description="Your customized prompt will be permanently deleted and AI generation will use the built-in default again. This can't be undone."
+        isPending={resetTx.isPending}
+        error={resetTx.error}
+        confirmLabel="Reset prompt"
+        pendingLabel="Resetting…"
+        onConfirm={handleResetPrompt}
+      />
+
+      {gateDialog}
+    </>
+  )
+}

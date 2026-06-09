@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useFormError } from '@/components/forms/hooks/use-form-error'
 import { Button } from '@/components/ui/button'
 import { updateDailyGoal } from '@/features/settings/actions/update-daily-goal'
 import { dailyGoalFieldSchema } from '@/features/settings/schemas'
@@ -13,15 +11,13 @@ type DailyGoalFormPropsT = { dailyGoal: number }
 
 // The field value is a string (the shared FormInput is string-typed); the action re-validates as a number server-side.
 export function DailyGoalForm({ dailyGoal }: DailyGoalFormPropsT) {
-  const [formError, setFormError] = useState<string | undefined>(undefined)
+  const { formError, clearError, reportResult } = useFormError()
 
   const form = useAppForm({
     defaultValues: { dailyGoal: String(dailyGoal) },
     onSubmit: async ({ value }) => {
       const result = await updateDailyGoal({ dailyGoal: Number(value.dailyGoal) })
-      if (!toastActionResult(result, { successMessage: 'Daily goal saved' })) {
-        setFormError(result.error)
-      }
+      reportResult(result, { successMessage: 'Daily goal saved' })
     },
   })
 
@@ -30,7 +26,7 @@ export function DailyGoalForm({ dailyGoal }: DailyGoalFormPropsT) {
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault()
-        setFormError(undefined)
+        clearError()
         form.handleSubmit()
       }}
     >

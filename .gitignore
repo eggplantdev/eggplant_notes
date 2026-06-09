@@ -74,3 +74,6 @@ next-env.d.ts
 # Stryker mutation testing output
 reports/
 .stryker-tmp/
+
+# AI generation debug logs (Phase 5 — best-effort local prompt-refinement trail)
+.ai-debug/

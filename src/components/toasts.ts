@@ -11,13 +11,15 @@ export type ToastPosition = 'bottom-center' | 'top-center'
 export function toastMessage(
   message: string,
   type: ToastType = 'success',
-  autoClose: number = 2000,
+  // Errors stay up longer — they carry a message the user must actually read (e.g. a provider error);
+  // 2s was too short to read one before it closed. Explicit autoClose still overrides.
+  autoClose?: number,
   position: ToastPosition = 'bottom-center',
 ) {
   toast[type](message, {
     position: position,
     hideProgressBar: true,
-    autoClose: autoClose,
+    autoClose: autoClose ?? (type === 'error' ? 6000 : 2000),
     closeOnClick: true,
     pauseOnHover: false,
     draggable: true,

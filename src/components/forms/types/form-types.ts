@@ -7,4 +7,5 @@ export type FormControlPropsT = {
   type?: ComponentProps<'input'>['type']
   autoComplete?: ComponentProps<'input'>['autoComplete']
   className?: string
+  testId?: string
 }

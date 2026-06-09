@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { PostgrestFilterBuilder, SupabaseClient } from '@supabase/supabase-js'
 
 import { MATURE_STABILITY_DAYS, type MaturityT } from '@/features/memory-cards/constants'
 import type {
@@ -9,30 +9,77 @@ import type {
   MemoryCardWithSourceT,
 } from '@/features/memory-cards/types'
 import { cardOverviewSchema } from '@/features/memory-cards/schemas'
+import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { DEFAULT_LIMIT } from '@/lib/utils/pagination'
+import { pageRange } from '@/lib/utils/pagination'
+
+// The subject/state/maturity/search predicate shared by the listing and the due query, so both
+// honor the same filters off one source. Takes an already-`.select()`ed builder and chains the
+// where-clauses on; PostgREST filters are projection-independent, so it works on either query's
+// columns. Generic over the concrete builder type T (the `any`s are only the constraint bound) so
+// the caller keeps its projection→row typing. Column names aren't checked inside (Row is `any`
+// here); the call sites' result types are. Maturity is derived from `stability`, not a column of
+// its own — both buckets (or neither) selected = no constraint; exactly one bucket narrows.
+type CardFilterOptsT = {
+  subjectIds?: string[]
+  q?: string
+  states?: number[]
+  maturity?: MaturityT[]
+}
+
+// `any` in the bound is deliberate: it sidesteps the builder's per-position generic variance so any
+// concrete memory_cards builder satisfies it, while `T` itself stays inferred (call-site projection
+// typing is preserved). A precise bound would need postgrest-js's unexported `GenericSchema`.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyCardFilters<T extends PostgrestFilterBuilder<any, any, any, any>>(
+  query: T,
+  opts?: CardFilterOptsT,
+): T {
+  if (opts?.subjectIds && opts.subjectIds.length > 0) {
+    query = query.in('subject_id', opts.subjectIds)
+  }
+  if (opts?.states && opts.states.length > 0) query = query.in('state', opts.states)
+  if (opts?.maturity?.length === 1) {
+    query =
+      opts.maturity[0] === 'mature'
+        ? query.gte('stability', MATURE_STABILITY_DAYS)
+        : query.lt('stability', MATURE_STABILITY_DAYS)
+  }
+  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
+  if (orFilter) query = query.or(orFilter)
+  return query
+}
 
 // The single soonest-due card plus the total due count, in one round-trip. RLS scopes rows to the
 // owner. The `(user_id, due_at)` btree index backs the `due_at <= now()` filter + ordering.
 // `count: 'exact'` returns the full match count alongside the `limit(1)` row, so the page renders
 // one card without over-fetching the backlog. Hand-rolled (not runTableQuery) because we need both
-// the row and the count off the same response.
+// the row and the count off the same response. `opts` scopes the queue to the same filters as the
+// listing (the /memory-cards review panel); the dashboard calls it with no opts (global queue).
 export async function getDueQueue(
+  opts?: CardFilterOptsT & {
+    // Skip a card by id — used right after rating it so an "Again" reschedule (still due now) can't
+    // re-surface the same card as the next in queue.
+    excludeId?: string
+  },
   client?: SupabaseClient<Database>,
 ): Promise<{ first?: DueCardT; count: number }> {
   const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
-  const { data, count, error } = await supabase
-    .from('memory_cards')
-    .select('*, notes(title, subject_id)', { count: 'exact' })
+  let query = applyCardFilters(
+    supabase.from('memory_cards').select('*, notes(title, subject_id)', { count: 'exact' }),
+    opts,
+  )
     .lte('due_at', now)
     .order('due_at', { ascending: true })
     .limit(1)
+  if (opts?.excludeId) query = query.neq('id', opts.excludeId)
+  const { data, count, error } = await query
   if (error) {
     console.error('[getDueQueue] PostgREST error', error)
     throw new Error(error.message, { cause: error })
@@ -56,46 +103,24 @@ export async function getCardOverview(client?: SupabaseClient<Database>): Promis
 // (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
 // `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(
-  opts?: {
-    subjectIds?: string[]
-    q?: string
-    states?: number[]
-    maturity?: MaturityT[]
-    page?: number
-    limit?: number
-  },
+  opts?: CardFilterOptsT & { page?: number; limit?: number },
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
-  const page = opts?.page ?? 1
-  const limit = opts?.limit ?? DEFAULT_LIMIT
-  const offset = (page - 1) * limit
-  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
+  const { offset, limit } = pageRange(opts)
 
-  // `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
-  const filtered = (head: boolean) => {
-    let query = supabase
-      .from('memory_cards')
-      .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
-        count: 'exact',
-        head,
-      })
-    if (opts?.subjectIds && opts.subjectIds.length > 0) {
-      query = query.in('subject_id', opts.subjectIds)
-    }
-    if (opts?.states && opts.states.length > 0) query = query.in('state', opts.states)
-    // Maturity is derived from `stability`, not a column of its own. Both buckets (or neither)
-    // selected = no constraint; exactly one bucket narrows. `stability` stays out of the
-    // projection — it's only needed for this WHERE clause.
-    if (opts?.maturity?.length === 1) {
-      query =
-        opts.maturity[0] === 'mature'
-          ? query.gte('stability', MATURE_STABILITY_DAYS)
-          : query.lt('stability', MATURE_STABILITY_DAYS)
-    }
-    if (orFilter) query = query.or(orFilter)
-    return query
-  }
+  // `head` toggles the rows-vs-count-only variant the 416 fallback reuses. `stability` stays out of
+  // the projection — applyCardFilters only needs it for the maturity WHERE clause.
+  const filtered = (head: boolean) =>
+    applyCardFilters(
+      supabase
+        .from('memory_cards')
+        .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
+          count: 'exact',
+          head,
+        }),
+      opts,
+    )
 
   return runPaginatedQuery(
     'getMemoryCardsList',
@@ -114,16 +139,10 @@ export async function getMemoryCard(
   client?: SupabaseClient<Database>,
 ): Promise<MemoryCardWithSourceT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
-    .from('memory_cards')
-    .select('*, notes(id, title)')
-    .eq('id', id)
-    .maybeSingle()
-  if (error) {
-    console.error('[getMemoryCard] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle(
+    'getMemoryCard',
+    supabase.from('memory_cards').select('*, notes(id, title)').eq('id', id).maybeSingle(),
+  )
 }
 
 // Single card by id in the exact DueCardT shape ReviewPanel consumes, so the standalone card page
@@ -134,16 +153,10 @@ export async function getMemoryCardForReview(
   client?: SupabaseClient<Database>,
 ): Promise<DueCardT | undefined> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
-    .from('memory_cards')
-    .select('*, notes(title, subject_id)')
-    .eq('id', id)
-    .maybeSingle()
-  if (error) {
-    console.error('[getMemoryCardForReview] PostgREST error', error)
-    throw new Error(error.message, { cause: error })
-  }
-  return data ?? undefined
+  return runMaybeSingle(
+    'getMemoryCardForReview',
+    supabase.from('memory_cards').select('*, notes(title, subject_id)').eq('id', id).maybeSingle(),
+  )
 }
 
 // All memory cards attached to one note, oldest first. RLS scopes rows to the owner, so a note the

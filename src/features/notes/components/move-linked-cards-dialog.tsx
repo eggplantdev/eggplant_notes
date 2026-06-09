@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { SectionLabel } from '@/components/ui/section-label'
 import { cn } from '@/lib/utils'
 
 type CardChoiceT = 'move' | 'unlink'
@@ -102,9 +103,7 @@ export function MoveLinkedCardsDialog({
         </AlertDialogHeader>
 
         <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            Apply to all
-          </span>
+          <SectionLabel as="span">Apply to all</SectionLabel>
           <div className="flex gap-1">
             <Button type="button" size="sm" variant="ghost" onClick={() => setAll('move')}>
               Move all

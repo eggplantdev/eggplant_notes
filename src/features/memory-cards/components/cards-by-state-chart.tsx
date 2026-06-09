@@ -7,10 +7,10 @@ import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
 // Keys match FSRS_STATE_LABELS lowercased.
 const chartConfig = {
   value: { label: 'Cards' },
-  new: { label: 'New', color: 'var(--color-neon-green)' },
+  new: { label: 'New', color: 'var(--color-neon-fuchsia)' },
   learning: { label: 'Learning', color: 'var(--color-neon-cyan)' },
   review: { label: 'Review', color: 'var(--color-neon-violet)' },
-  relearning: { label: 'Relearning', color: 'var(--color-neon-fuchsia)' },
+  relearning: { label: 'Relearning', color: 'var(--color-neon-green)' },
 } satisfies ChartConfig
 
 // Index = FSRS state integer.

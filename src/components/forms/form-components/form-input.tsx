@@ -15,6 +15,7 @@ export function FormInput(props: FormControlPropsT) {
       <Input
         id={field.name}
         name={field.name}
+        data-testid={props.testId}
         type={props.type}
         placeholder={props.placeholder}
         disabled={props.disabled}

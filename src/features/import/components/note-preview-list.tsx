@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
+
 import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
+import { AccordionArrow } from '@/components/ui/accordion-arrow'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,44 +22,68 @@ export function NotePreviewList({
   onPatch: (id: string, patch: Partial<Pick<ImportDraftT, 'title' | 'content'>>) => void
   onToggleSkip: (id: string) => void
 }) {
+  // Per-note collapse, default expanded; a Set of collapsed ids keeps the common (all-open) case empty.
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  function toggleCollapsed(id: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   return (
     <ul className="flex flex-col gap-4">
-      {drafts.map((draft) => (
-        <li
-          key={draft.id}
-          data-testid="import-note-row"
-          className={cn('rounded-lg border p-4', draft.skip && 'opacity-50')}
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor={`import-title-${draft.id}`}>Title</Label>
-              <Input
-                id={`import-title-${draft.id}`}
-                data-testid="import-note-title"
-                value={draft.title}
-                disabled={draft.skip}
-                onChange={(e) => onPatch(draft.id, { title: e.target.value })}
-              />
-            </div>
-            <Button
+      {drafts.map((draft) => {
+        const isOpen = !collapsed.has(draft.id)
+        return (
+          <li
+            key={draft.id}
+            data-testid="import-note-row"
+            className={cn('relative rounded-lg border p-4', draft.skip && 'opacity-50')}
+          >
+            <button
               type="button"
-              variant="outline"
-              size="sm"
-              data-testid="import-note-skip"
-              className="mt-7"
-              onClick={() => onToggleSkip(draft.id)}
+              onClick={() => toggleCollapsed(draft.id)}
+              aria-expanded={isOpen}
+              aria-controls={`import-note-body-${draft.id}`}
+              aria-label={isOpen ? 'Collapse note' : 'Expand note'}
+              className="group absolute top-3 right-3 cursor-pointer"
             >
-              {draft.skip ? 'Include' : 'Skip'}
-            </Button>
-          </div>
-          {!draft.skip && (
-            <EditorWithPreview
-              value={draft.content}
-              onChange={(content) => onPatch(draft.id, { content })}
-            />
-          )}
-        </li>
-      ))}
+              <AccordionArrow isOpen={isOpen} />
+            </button>
+            <div className="mb-3 flex items-end gap-2">
+              <div className="grid flex-1 gap-2">
+                <Label htmlFor={`import-title-${draft.id}`}>Title</Label>
+                <Input
+                  id={`import-title-${draft.id}`}
+                  data-testid="import-note-title"
+                  value={draft.title}
+                  disabled={draft.skip}
+                  onChange={(e) => onPatch(draft.id, { title: e.target.value })}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="glowy-red"
+                data-testid="import-note-skip"
+                onClick={() => onToggleSkip(draft.id)}
+              >
+                {draft.skip ? 'Include' : 'Skip'}
+              </Button>
+            </div>
+            {!draft.skip && isOpen && (
+              <div id={`import-note-body-${draft.id}`}>
+                <EditorWithPreview
+                  value={draft.content}
+                  onChange={(content) => onPatch(draft.id, { content })}
+                />
+              </div>
+            )}
+          </li>
+        )
+      })}
     </ul>
   )
 }

@@ -6,3 +6,7 @@ export type ImportDraftT = {
   content: string
   skip: boolean
 }
+
+// A PDF chosen as the import source: base64 bytes for the wire + the original filename. Read by
+// SourceInput, held by ImportPanel, sent to the vision generateNotes path (Phase 8).
+export type PdfSourceT = { dataBase64: string; filename: string }

@@ -55,6 +55,15 @@ export function todayInZone(timeZone: string): Date {
   return zoneMidnight(new Date(), timeZone)
 }
 
+// Whole-day signed diff between a due instant and today, both snapped to zone-midnight (DST-safe):
+// negative = overdue, 0 = due today, positive = days remaining.
+export function daysUntilDue(dueAt: string, timeZone: string): number {
+  return Math.round(
+    (zoneMidnight(new Date(dueAt), timeZone).getTime() - todayInZone(timeZone).getTime()) /
+      MS_PER_DAY,
+  )
+}
+
 // e.g. "Wed, Jun 3, 2025" — heatmap tooltip.
 export function formatFullDate(isoDate: string): string {
   return parseIsoDateUtc(isoDate).toLocaleDateString('en-US', {

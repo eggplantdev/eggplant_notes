@@ -1,4 +1,5 @@
 import { InfoTip } from '@/components/ui/info-tip'
+import { SectionLabel } from '@/components/ui/section-label'
 import { CardsByMaturityChart } from '@/features/memory-cards/components/cards-by-maturity-chart'
 import { CardsByStateChart } from '@/features/memory-cards/components/cards-by-state-chart'
 import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
@@ -17,13 +18,11 @@ export function CardsOverview({ overview }: PropsT) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2">
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          By state
-        </p>
+        <SectionLabel>By state</SectionLabel>
         <CardsByStateChart stateCounts={stateCounts} />
       </div>
       <div className="space-y-2">
-        <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase">
+        <SectionLabel className="flex items-center gap-1.5">
           By maturity
           <InfoTip label="What do Mature and Young mean?">
             <span className="flex flex-col gap-1 font-normal normal-case">
@@ -36,7 +35,7 @@ export function CardsOverview({ overview }: PropsT) {
               </span>
             </span>
           </InfoTip>
-        </p>
+        </SectionLabel>
         <CardsByMaturityChart mature={mature} young={overview.total - mature} />
       </div>
     </div>

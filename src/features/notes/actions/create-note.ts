@@ -19,8 +19,11 @@ export async function createNote(input: unknown): Promise<ActionResultT> {
   const { note, checks } = parsed.data
 
   const supabase = await createClient()
+  // Append (position = epoch ms) when the note lands in ANY subject — existing id or a new title the
+  // RPC will create; unassigned notes get null position. The RPC resolves subject_id|subject_title.
+  const hasSubject = Boolean(note.subject_id || note.subject_title)
   const { data: newId, error } = await supabase.rpc('create_note_with_checks', {
-    p_note: { ...note, position: note.subject_id ? Date.now() : null },
+    p_note: { ...note, position: hasSubject ? Date.now() : null },
     p_checks: checks,
   })
   if (error) {

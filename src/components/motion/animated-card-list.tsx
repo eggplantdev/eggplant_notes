@@ -35,6 +35,9 @@ type PropsT<T> = {
   // Pinned to the card bottom (mt-auto) so it lines up across a grid row of unequal-height cards.
   renderSubtitle?: (item: T) => ReactNode
   renderAction?: (item: T) => ReactNode
+  // Per-item classes merged onto the Card (e.g. an overdue card's red glow). twMerge-resolved, so it
+  // can override the base hover:border-ring.
+  getItemClassName?: (item: T) => string | undefined
   // Default is a vertical stack; gridLayout switches to a responsive card grid (1/2/3 cols).
   gridLayout?: boolean
 }
@@ -50,6 +53,7 @@ export function AnimatedCardList<T>({
   renderEyebrow,
   renderSubtitle,
   renderAction,
+  getItemClassName,
   gridLayout = false,
 }: PropsT<T>) {
   // Keying the outer fade on the query string cross-fades whole-page swaps; otherwise the inner
@@ -73,7 +77,11 @@ export function AnimatedCardList<T>({
               <AnimatedListItem key={key} layoutId={key} layout>
                 <Link href={getHref(item)} className={cn(gridLayout && 'block h-full')}>
                   <Card
-                    className={cn('hover:border-ring transition-colors', gridLayout && 'h-full')}
+                    className={cn(
+                      'hover:border-ring transition-colors',
+                      gridLayout && 'h-full',
+                      getItemClassName?.(item),
+                    )}
                   >
                     {/* gap-x-4 keeps the title column clear of the action slot; row gap stays tight via base gap-1. */}
                     <CardHeader className="gap-x-4">

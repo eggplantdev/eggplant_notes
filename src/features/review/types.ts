@@ -11,5 +11,7 @@ export type GoalCelebrationT = {
   weeklyGoal: number
 }
 
-// `celebrate` is present only when this rating crossed a goal.
-export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT }
+// `celebrate` is present only when this rating crossed a goal. `nextDueId` is the soonest-due
+// remaining card (excluding the one just rated), populated only when the caller asks for it (the
+// standalone card page, which advances through the queue); undefined means none are due.
+export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT; nextDueId?: string }

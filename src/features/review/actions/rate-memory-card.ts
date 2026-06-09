@@ -8,6 +8,7 @@ import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
 import { nextReviewCounts, reviewWindowKeys } from '@/features/review-events/derive-counts'
 import { getReviewCounts } from '@/features/review-events/queries'
+import { getDueQueue } from '@/features/memory-cards/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
@@ -21,6 +22,9 @@ export async function rateMemoryCard(
   memoryCardId: string,
   rating: unknown,
   goal: unknown,
+  // The standalone card page advances through the due queue, so it asks for the next due card id;
+  // the dashboard re-renders via revalidate and doesn't need it (skips the extra query).
+  returnNextDue = false,
 ): Promise<RateResultT> {
   const parsedId = validateInput(memoryCardIdSchema, memoryCardId)
   if (!parsedId.success) return parsedId
@@ -68,5 +72,12 @@ export async function rateMemoryCard(
   revalidatePath('/dashboard')
   // Refresh the standalone card page too, for when it's rated outside the dashboard queue.
   revalidatePath(`/memory-cards/${parsedId.data}`)
-  return { success: true, celebrate }
+  // And the memory-cards list page, where the filter-scoped review panel advances in place.
+  revalidatePath('/memory-cards')
+
+  // Soonest-due remaining card (excluding the one just rated) so the card page can advance the queue.
+  const nextDueId = returnNextDue
+    ? (await getDueQueue({ excludeId: parsedId.data }, supabase)).first?.id
+    : undefined
+  return { success: true, celebrate, nextDueId }
 }

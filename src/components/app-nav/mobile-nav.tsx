@@ -1,5 +1,6 @@
 'use client'
 
+import { type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MenuIcon, XIcon } from 'lucide-react'
@@ -7,13 +8,22 @@ import { MenuIcon, XIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
+import { NavConnectButton } from '@/features/openrouter/components/nav-connect-button'
 import { isNavActive } from './is-nav-active'
 import { ALL_NAV_ITEMS } from './nav-items'
 
 // Open and close controls share these exact classes so they sit in one spot and read as a single toggle.
 const TOGGLE_BUTTON_CLASS = 'fixed top-4 right-4 z-50 md:hidden'
 
-export function MobileNav() {
+export function MobileNav({
+  connected,
+  credits,
+}: {
+  connected: boolean
+  // Rendered in AppNav (server) and passed down as a slot — NavCredits is an async server component
+  // and can't be imported into this client component directly.
+  credits?: ReactNode
+}) {
   const pathname = usePathname()
 
   return (
@@ -58,6 +68,7 @@ export function MobileNav() {
               </SheetClose>
             )
           })}
+          {connected ? credits : <NavConnectButton className="mt-2 w-full justify-start" />}
           <SignOutButton className="mt-2 w-full justify-start" />
         </nav>
       </SheetContent>

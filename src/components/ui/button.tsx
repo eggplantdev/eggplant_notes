@@ -25,6 +25,12 @@ const buttonVariants = cva(
         // glow). Not bg-black like glowy-red — Easy reads as a calm transparent affordance, not an alarm.
         'glowy-green':
           'neon-glow-green hover:neon-glow-green-hit transition-shadow hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
+        // AI / "magic" affordance: the dashboard's aurora gradient-border (green→cyan) + the
+        // fuchsia neon halo, intensifying on hover. Reuses the same gradient-border and
+        // neon-glow-fuchsia utilities the dashboard cards and Memory Card Review buttons use.
+        // disabled:opacity-100 cancels the base disabled:opacity-50 so a disabled AI button looks
+        // identical to an enabled one (full white + glow); it stays inert via disabled:pointer-events-none.
+        ai: 'gradient-border neon-glow-fuchsia hover:neon-glow-fuchsia-hit text-white transition-shadow disabled:opacity-100',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

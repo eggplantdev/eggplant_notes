@@ -156,6 +156,39 @@ export type Database = {
           },
         ]
       }
+      openrouter_credentials: {
+        Row: {
+          created_at: string
+          favorite_models: string[]
+          key_auth_tag: string
+          key_ciphertext: string
+          key_iv: string
+          model: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          favorite_models?: string[]
+          key_auth_tag: string
+          key_ciphertext: string
+          key_iv: string
+          model?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          favorite_models?: string[]
+          key_auth_tag?: string
+          key_ciphertext?: string
+          key_iv?: string
+          model?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       review_events: {
         Row: {
           id: string
@@ -213,6 +246,30 @@ export type Database = {
           id?: string
           is_seeded?: boolean
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_prompts: {
+        Row: {
+          created_at: string
+          prompt_key: string
+          system: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          prompt_key: string
+          system: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          prompt_key?: string
+          system?: string
           updated_at?: string
           user_id?: string
         }
