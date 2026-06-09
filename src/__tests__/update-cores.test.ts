@@ -63,8 +63,8 @@ describe('updateNoteCore', () => {
     const { client, calls } = fakeClient([
       { data: { subject_id: 'A' } },
       { data: { id: 'n1' } },
+      { error: null }, // card unlink (applied first)
       { error: null }, // card move
-      { error: null }, // card unlink
     ])
     const result = await updateNoteCore(
       client,
@@ -82,8 +82,8 @@ describe('updateNoteCore', () => {
     expect(typeof patch.position).toBe('number')
     const cardUpdates = calls.filter((c) => c.from === 'memory_cards' && c.op === 'update')
     expect(cardUpdates).toHaveLength(2)
-    expect(cardUpdates[0].args[0]).toEqual({ subject_id: 'B' }) // move keeps the link
-    expect(cardUpdates[1].args[0]).toEqual({ note_id: null }) // unlink detaches
+    expect(cardUpdates[0].args[0]).toEqual({ note_id: null }) // unlink detaches first (keeps old subject)
+    expect(cardUpdates[1].args[0]).toEqual({ subject_id: 'B' }) // then move keeps the link
   })
 
   it('move: "all" moves every linked card by note_id without enumerating ids', async () => {

@@ -114,14 +114,20 @@ curl -s -H "$AUTH" "$BASE/api/notes/<note-uuid>"
 Send the full note fields (`title` required, `content` required — may be `""`). Set `subject_id` to move the
 note to another subject (a uuid), to `null` to unfile it, or **omit it** to leave the subject unchanged.
 
-When you change `subject_id`, the note's linked cards come along by default (they keep sharing the note's
-subject). Override that per-card with an optional `card_actions`:
+When you change `subject_id`, **every linked card follows the note** to the new subject by default. To peel
+specific cards off, pass an optional `card_actions`:
 
-- `move` — card ids that follow the note to the new subject (stay linked).
-- `unlink` — card ids that detach instead (`note_id` → `null`), keeping their current subject as standalone.
+- `unlink` — card ids that detach (`note_id` → `null`), keeping their old subject as standalone. Every card
+  you don't list still follows the note.
 
-Omitting `card_actions` on a subject change = **move all** the note's linked cards. A non-existent or
-not-yours id returns `404`. See ["Linked vs standalone cards"](#linked-vs-standalone-cards) for the rule.
+There is no per-card "move" list: a linked card always shares its note's subject, so the only choice is which
+cards to detach. Omitting `card_actions` moves all linked cards. A non-existent or not-yours id returns `404`.
+See ["Linked vs standalone cards"](#linked-vs-standalone-cards) for the rule.
+
+> **Tell the user what happened to the cards.** A subject move silently re-files all the note's linked
+> cards, and `unlink` detaches the ones you name — side effects the user can't see in your request. After
+> the call, report it: that the note's cards moved with it, and (if you unlinked any) which cards you
+> detached and that they kept their old subject.
 
 ```bash
 # move the note (and all its cards) to another subject
@@ -130,9 +136,9 @@ curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
   "$BASE/api/notes/<note-uuid>"
 # → 200 { "id": "<note-uuid>" }
 
-# move the note but DETACH one card instead of moving it
+# move the note but DETACH one card instead of moving it (the rest still follow)
 curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"title":"Ownership basics","content":"# Ownership","subject_id":"<subject-uuid>","card_actions":{"move":[],"unlink":["<card-uuid>"]}}' \
+  -d '{"title":"Ownership basics","content":"# Ownership","subject_id":"<subject-uuid>","card_actions":{"unlink":["<card-uuid>"]}}' \
   "$BASE/api/notes/<note-uuid>"
 ```
 
@@ -210,7 +216,8 @@ curl -s -H "$AUTH" "$BASE/api/memory-cards?unfiled=true"
 Send the full card field set (`prompt`, `example`, `code_context` — same string rules as on create) plus
 `subject_id` (a uuid or `null`). Editing only the text fields leaves any note link intact. **Changing the
 subject of a card that is attached to a note UNLINKS it** (`note_id` → `null`) — see
-["Linked vs standalone cards"](#linked-vs-standalone-cards). A non-existent or not-yours id returns `404`.
+["Linked vs standalone cards"](#linked-vs-standalone-cards). If that unlink happens, **tell the user** the
+card was detached from its note. A non-existent or not-yours id returns `404`.
 
 ```bash
 curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \

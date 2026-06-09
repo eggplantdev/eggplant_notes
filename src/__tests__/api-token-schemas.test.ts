@@ -35,19 +35,19 @@ describe('validateInput + mintTokenSchema', () => {
   })
 })
 
-// PATCH /api/notes/:id body. `card_actions` is optional; when present, both arrays must hold
+// PATCH /api/notes/:id body. `card_actions` is optional; when present, its `unlink` array must hold
 // uuid-SHAPED ids (z.guid — see the DB-id lesson). A version-0 seed id must pass (z.uuid would reject).
 describe('patchNoteBodySchema', () => {
   it('accepts the note fields with no card_actions', () => {
     expect(validateInput(patchNoteBodySchema, { title: 'T', content: '' }).success).toBe(true)
   })
 
-  it('accepts a subject move with explicit card_actions (incl. a non-RFC version-0 id)', () => {
+  it('accepts a subject move with an explicit unlink list (incl. a non-RFC version-0 id)', () => {
     const result = validateInput(patchNoteBodySchema, {
       title: 'T',
       content: '',
       subject_id: '11111111-0000-0000-0000-000000000000',
-      card_actions: { move: ['22222222-0000-0000-0000-000000000000'], unlink: [] },
+      card_actions: { unlink: ['22222222-0000-0000-0000-000000000000'] },
     })
     expect(result.success).toBe(true)
   })
@@ -56,16 +56,16 @@ describe('patchNoteBodySchema', () => {
     const result = validateInput(patchNoteBodySchema, {
       title: 'T',
       content: '',
-      card_actions: { move: ['not-a-uuid'], unlink: [] },
+      card_actions: { unlink: ['not-a-uuid'] },
     })
     expect(result.success).toBe(false)
   })
 
-  it('rejects card_actions missing a required array', () => {
+  it('rejects card_actions missing the unlink array', () => {
     const result = validateInput(patchNoteBodySchema, {
       title: 'T',
       content: '',
-      card_actions: { move: [] },
+      card_actions: {},
     })
     expect(result.success).toBe(false)
   })

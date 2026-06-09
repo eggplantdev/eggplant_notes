@@ -25,16 +25,18 @@ export const noteAttachCardsSchema = z.object({
   cards: cardsArraySchema,
 })
 
-// Body for PATCH /api/notes/:id: the editable note fields plus an OPTIONAL per-card plan for a subject
-// move. Card ids are DB-originated → validate SHAPE only with z.guid() (z.uuid() rejects non-RFC seed
-// ids — see memory-cards/schemas.ts). When `card_actions` is omitted on a subject change, the route
-// applies a move-all default (the note's linked cards come with it).
+// Body for PATCH /api/notes/:id: the editable note fields plus an OPTIONAL `unlink` list for a subject
+// move. On a subject change every linked card follows the note by default; ids in `unlink` detach
+// instead (note_id → null, keeping their old subject). There is deliberately NO per-card `move` list —
+// the only fate the UI can't express is "stay linked but keep the old subject", which is exactly the
+// invariant-violating state (a linked card must share its note's subject), so the API mustn't mint it.
+// Card ids are DB-originated → validate SHAPE only with z.guid() (z.uuid() rejects non-RFC seed ids —
+// see memory-cards/schemas.ts).
 const cardActionIdSchema = z.guid('Invalid card id')
 
 export const patchNoteBodySchema = noteInputSchema.extend({
   card_actions: z
     .object({
-      move: z.array(cardActionIdSchema),
       unlink: z.array(cardActionIdSchema),
     })
     .optional(),

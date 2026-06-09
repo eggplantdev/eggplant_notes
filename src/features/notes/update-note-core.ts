@@ -4,12 +4,13 @@ import type { NoteInputT } from '@/features/notes/schemas'
 import type { Database } from '@/lib/supabase/types'
 
 // Per-card decisions when a note's subject changes: each linked card is either MOVED to the new
-// subject (stays linked — preserves the invariant that a linked card shares its note's subject)
-// or UNLINKED (note_id → null, kept on its current subject as standalone).
-// `move: 'all'` is the move-everything default (the common case: subject change with no explicit plan)
-// — it lets the core move by `note_id` alone instead of the caller pre-reading every linked id only to
-// hand them back as an `id IN (…)` filter the `note_id` match already covers. `'all'` only ever pairs
-// with `unlink: []`; explicit per-card plans always use an id array.
+// subject (stays linked — preserves the invariant that a linked card shares its note's subject) or
+// UNLINKED (note_id → null, kept on its current subject as standalone). Unlink is applied FIRST so a
+// detached card keeps its old subject even under the `'all'` sweep (once note_id is null it falls out
+// of the `note_id` match the move uses).
+// `move: 'all'` moves every still-linked card by `note_id` alone — no pre-read to enumerate ids. It
+// pairs with any `unlink` list: the token API sends `{ move: 'all', unlink }` (everything follows the
+// note except the peeled-off ids); the UI sends explicit disjoint `move`/`unlink` id arrays.
 export type CardActionsT = { move: string[] | 'all'; unlink: string[] }
 
 // Shared note-update core — patch derivation, subject-change detection, the position rule, and the
@@ -56,8 +57,22 @@ export async function updateNoteCore(
 
   // Per-card decisions apply only on a real subject change.
   if (subjectChanged && cardActions) {
+    // Unlink FIRST so detached cards keep their OLD subject: once note_id is null they no longer match
+    // the `note_id` filter below, so the move never restamps them. (Move-first would stamp the new
+    // subject onto cards we're about to unlink.)
+    if (cardActions.unlink.length > 0) {
+      const { error: unlinkError } = await supabase
+        .from('memory_cards')
+        .update({ note_id: null })
+        .eq('note_id', id)
+        .in('id', cardActions.unlink)
+      if (unlinkError) {
+        console.error('[updateNoteCore] card unlink error', unlinkError)
+        return { error: unlinkError.message }
+      }
+    }
     if (cardActions.move === 'all') {
-      // Move every linked card by note_id — no id enumeration needed.
+      // Move every still-linked card by note_id — no id enumeration needed.
       const { error: moveError } = await supabase
         .from('memory_cards')
         .update({ subject_id: input.subject_id })
@@ -75,17 +90,6 @@ export async function updateNoteCore(
       if (moveError) {
         console.error('[updateNoteCore] card move error', moveError)
         return { error: moveError.message }
-      }
-    }
-    if (cardActions.unlink.length > 0) {
-      const { error: unlinkError } = await supabase
-        .from('memory_cards')
-        .update({ note_id: null })
-        .eq('note_id', id)
-        .in('id', cardActions.unlink)
-      if (unlinkError) {
-        console.error('[updateNoteCore] card unlink error', unlinkError)
-        return { error: unlinkError.message }
       }
     }
   }

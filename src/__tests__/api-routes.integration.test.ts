@@ -166,6 +166,30 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect(res.status).toBe(400)
   })
 
+  it('POST /api/notes stamps the note subject onto its checks-cards (linked → same subject)', async () => {
+    const u = await userWithToken()
+    const { id: subjectId } = (await (
+      await subjectsPOST(postReq(u.token, '/api/subjects', { title: `chk-${Date.now()}` }))
+    ).json()) as { id: string }
+
+    const { id: noteId } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'WithSubject', content: '', subject_id: subjectId },
+          checks: [{ prompt: 'inherits-subject', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+
+    const { cards } = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?note=${noteId}`))
+    ).json()) as { cards: { note_id: string | null; subject_id: string | null }[] }
+
+    expect(cards).toHaveLength(1)
+    expect(cards[0].note_id).toBe(noteId) // linked to the note
+    expect(cards[0].subject_id).toBe(subjectId) // and filed under the note's subject, not unfiled
+  })
+
   it("GET /api/subjects returns only the caller's subjects", async () => {
     const a = await userWithToken()
     const b = await userWithToken()
@@ -418,9 +442,12 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
 
   // Seed a note that owns one attached card, plus a fresh target subject to move into. Returns the
   // note id, the (note-attached) card id, and the target subject id.
-  async function seedNoteWithCard(u: {
-    token: string
-  }): Promise<{ noteId: string; cardId: string; targetSubjectId: string }> {
+  async function seedNoteWithCard(u: { token: string }): Promise<{
+    noteId: string
+    cardId: string
+    sourceSubjectId: string
+    targetSubjectId: string
+  }> {
     const { id: noteId } = (await (
       await notesPOST(
         postReq(u.token, '/api/notes', {
@@ -429,13 +456,15 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         }),
       )
     ).json()) as { id: string }
-    const { cards } = (await (
+    // The checks-card inherits the note's subject (create_note_with_checks stamps it), so a linked card
+    // shares its note's subject. Capture that source subject for the unlink/edit assertions below.
+    const { note, cards } = (await (
       await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
-    ).json()) as { cards: { id: string }[] }
+    ).json()) as { note: { subject_id: string }; cards: { id: string }[] }
     const { id: targetSubjectId } = (await (
       await subjectsPOST(postReq(u.token, '/api/subjects', { title: `to-${Date.now()}-${seq++}` }))
     ).json()) as { id: string }
-    return { noteId, cardId: cards[0].id, targetSubjectId }
+    return { noteId, cardId: cards[0].id, sourceSubjectId: note.subject_id, targetSubjectId }
   }
 
   it('PATCH /api/notes/:id move-all default: a subject change carries the linked cards along', async () => {
@@ -468,42 +497,44 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
 
   it('PATCH /api/notes/:id with card_actions.unlink detaches the named cards (note_id → null)', async () => {
     const u = await userWithToken()
-    const { noteId, cardId, targetSubjectId } = await seedNoteWithCard(u)
+    const { noteId, cardId, sourceSubjectId, targetSubjectId } = await seedNoteWithCard(u)
 
     const res = await noteIdPATCH(
       patchReq(u.token, `/api/notes/${noteId}`, {
         title: 'P2',
         content: 'body',
         subject_id: targetSubjectId,
-        card_actions: { move: [], unlink: [cardId] },
+        card_actions: { unlink: [cardId] },
       }),
       idCtx(noteId),
     )
     expect(res.status).toBe(200)
 
-    // The note now owns no cards; the card survives, unlinked (visible via the unfiled filter only if
-    // its own subject is null — it was, so it lands there).
+    // The note now owns no cards; the unlinked card survives, KEEPING its own subject (the note's
+    // source subject) — unlink drops the note link, it does not unfile the card.
     const { cards } = (await (
       await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
     ).json()) as { cards: unknown[] }
     expect(cards).toHaveLength(0)
-    const unfiled = (await (
-      await cardsGET(getReq(u.token, '/api/memory-cards?unfiled=true'))
-    ).json()) as { cards: { id: string }[] }
-    expect(unfiled.cards.some((c) => c.id === cardId)).toBe(true)
+    const bySource = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?subject=${sourceSubjectId}`))
+    ).json()) as { cards: { id: string; note_id: string | null }[] }
+    const survivor = bySource.cards.find((c) => c.id === cardId)
+    expect(survivor).toBeDefined() // still filed under the source subject
+    expect(survivor?.note_id ?? null).toBeNull() // but detached from the note
   })
 
   it('PATCH /api/memory-cards/:id changing an attached card subject forces an unlink; field-only edit keeps the link', async () => {
     const u = await userWithToken()
-    const { noteId, cardId, targetSubjectId } = await seedNoteWithCard(u)
+    const { noteId, cardId, sourceSubjectId, targetSubjectId } = await seedNoteWithCard(u)
 
-    // Field-only edit (subject unchanged, still null) → stays linked.
+    // Field-only edit (subject unchanged — re-send the card's CURRENT subject) → stays linked.
     const fieldOnly = await cardIdPATCH(
       patchReq(u.token, `/api/memory-cards/${cardId}`, {
         prompt: 'edited prompt',
         example: '',
         code_context: '',
-        subject_id: null,
+        subject_id: sourceSubjectId,
       }),
       idCtx(cardId),
     )

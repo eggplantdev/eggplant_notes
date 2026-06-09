@@ -46,8 +46,9 @@ export async function GET(request: Request, ctx: RouteContext<'/api/notes/[id]'>
 }
 
 // PATCH /api/notes/:id — edit a note's title/content and/or move it between subjects. On a subject
-// change the linked cards come along by default (move-all); the caller can override per-card via
-// `card_actions: { move, unlink }`. RLS-scoped: non-owned/nonexistent → 404.
+// change every linked card follows the note by default; the caller can detach specific cards via
+// `card_actions: { unlink }` (they keep their old subject as standalone). RLS-scoped: non-owned/
+// nonexistent → 404.
 export async function PATCH(request: Request, ctx: RouteContext<'/api/notes/[id]'>) {
   const auth = await authenticateRequest(request)
   if ('error' in auth) return authError(auth.error)
@@ -63,12 +64,13 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/notes/[id]
 
   const { card_actions, ...noteInput } = parsed.data
 
-  // Move-all default: a subject change with no explicit plan moves every linked card with the note.
-  // The `move: 'all'` sentinel lets the core do that by `note_id` alone — no pre-read to enumerate ids.
-  // The UI passes its own per-card decisions and never hits this branch.
-  let cardActions: CardActionsT | undefined = card_actions
-  if (noteInput.subject_id !== undefined && !cardActions) {
-    cardActions = { move: 'all', unlink: [] }
+  // On a subject change, every linked card follows the note (`move: 'all'`) except the ids in `unlink`,
+  // which detach and keep their old subject. There is no "move only these, leave the rest linked-but-
+  // stale" path — that state is unreachable in the UI, so the API mustn't mint it either. `move: 'all'`
+  // lets the core sweep by `note_id` with no pre-read to enumerate ids.
+  let cardActions: CardActionsT | undefined
+  if (noteInput.subject_id !== undefined) {
+    cardActions = { move: 'all', unlink: card_actions?.unlink ?? [] }
   }
 
   const result = await updateNoteCore(auth.supabase, parsedId.data, noteInput, cardActions)
