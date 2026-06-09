@@ -27,7 +27,7 @@ This file assumes **Claude Code** — it names skills, slash-commands, and tools
 
 ## Project structure — project-specific facts
 
-The feature-first **decision procedure** — the tiers, the promotion rule, the deletion test, Route-Handler-vs-Server-Action, all `.tsx` in `components/` (incl. `*-form` / `delete-*-dialog`), no feature-root barrel, purpose-named `utils/` over a catch-all — lives in the **`feature-first-structure`** skill, whose own Next.js + Supabase example mirrors this repo. Consult it for _where a file goes_. Type naming (`*T`, shared in `src/types/`) is in the global `typescript.md` rule. Only the facts neither source can know live here:
+The feature-first **decision procedure** — the tiers, the promotion rule, the deletion test, Route-Handler-vs-Server-Action, all `.tsx` in `components/` (incl. `*-form` / `delete-*-dialog`), no feature-root barrel, purpose-named `utils/` over a catch-all — lives in the **`feature-first-structure`** skill, whose own Next.js + Supabase example mirrors this repo. Consult it for _where a file goes_ — including type placement (a component's own contract types colocate with it; only cross-cutting types live in `src/types/`). Type naming (`*T`) is in the global `typescript.md` rule. Only the facts neither source can know live here:
 
 - **`container-shell` `@utility`** (`globals.css`, max-w 120rem) is the one source for page width/padding — used by both the nav bar and `PageShell`'s `<main>`. Reuse it; never re-roll `mx-auto max-w-* px-*`.
 - Shared primitives that already exist — reach for these before building: `components/layout/PageShell`, `components/forms/` (TanStack `useAppForm`), `components/app-nav/`, `src/stores/` (Zustand, cross-feature only).

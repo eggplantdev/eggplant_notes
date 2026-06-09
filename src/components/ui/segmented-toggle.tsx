@@ -63,7 +63,7 @@ export function SegmentedToggle<V extends string>({
             onFocus={opt.onPrefetch}
             className={cn(
               'relative inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors outline-none',
-              'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+              'focus-ring',
               'disabled:pointer-events-none disabled:opacity-50',
               SIZE[size],
               isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',

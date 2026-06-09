@@ -24,6 +24,10 @@ export const memoryCardInputSchema = z.object({
   code_context: optionalText,
 })
 
+// Bulk card payload, capped to bound the insert. Shared by createCardsForNote (form action) and the
+// note-attach branch of POST /api/memory-cards so the cap lives in one place.
+export const cardsArraySchema = z.array(memoryCardInputSchema).min(1).max(20)
+
 // Card fields plus the card's OWN subject. `subject_id` is nullable (a card may be unfiled) and
 // validated SHAPE-only with z.guid() (see the id schemas below) — RLS owns existence/ownership.
 export const cardWithSubjectSchema = memoryCardInputSchema.extend({

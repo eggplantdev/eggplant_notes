@@ -1,39 +1,30 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 
-import { memoryCardInputSchema, noteIdSchema } from '@/features/memory-cards/schemas'
+import { insertCardsForNote } from '@/features/memory-cards/insert-cards-for-note'
+import { cardsArraySchema, noteIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// Bulk-insert the accepted AI-generated cards under a note (after the user's preview/edit). Mirrors
-// createMemoryCard's subject seeding (card inherits the note's subject); RLS + the user_id default
-// guard ownership. Capped to bound the insert.
-const cardsSchema = z.array(memoryCardInputSchema).min(1).max(20)
-
+// Bulk-insert the accepted AI-generated cards under a note (after the user's preview/edit). The write
+// core (insertCardsForNote) is shared with POST /api/memory-cards.
 export async function createCardsForNote(noteId: unknown, cards: unknown): Promise<ActionResultT> {
   const parsedId = validateInput(noteIdSchema, noteId)
   if (!parsedId.success) return parsedId
-  const parsedCards = validateInput(cardsSchema, cards)
+  const parsedCards = validateInput(cardsArraySchema, cards)
   if (!parsedCards.success) return parsedCards
 
   const supabase = await createClient()
-  const { data: note } = await supabase
-    .from('notes')
-    .select('subject_id')
-    .eq('id', parsedId.data)
-    .single()
-  const rows = parsedCards.data.map((c) => ({
-    ...c,
-    note_id: parsedId.data,
-    subject_id: note?.subject_id ?? null,
-  }))
-  const { error } = await supabase.from('memory_cards').insert(rows)
-  if (error) {
+  try {
+    await insertCardsForNote(supabase, parsedId.data, parsedCards.data)
+  } catch (error) {
     console.error('[createCardsForNote] insert error', error)
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create cards',
+    }
   }
 
   revalidatePath(`/notes/${parsedId.data}`)

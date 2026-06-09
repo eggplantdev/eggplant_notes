@@ -1,10 +1,10 @@
 ---
 change_id: expose-cli-note-api
 title: Expose a CLI/agent HTTP API to add notes + cards via personal API tokens
-status: planned
+status: archived
 created: 2026-06-06
-updated: 2026-06-08
-archived_at: null
+updated: 2026-06-09
+archived_at: 2026-06-09T07:20:15Z
 ---
 
 ## Plan refinements (2026-06-08) — supersede where they conflict with Notes below
