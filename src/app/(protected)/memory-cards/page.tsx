@@ -8,8 +8,10 @@ import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
 import { FSRS_STATE_LABELS, MATURITY_OPTIONS } from '@/features/memory-cards/constants'
-import { getCardOverview, getMemoryCardsList } from '@/features/memory-cards/queries'
+import { getCardOverview, getDueQueue, getMemoryCardsList } from '@/features/memory-cards/queries'
 import { parseCardFilters } from '@/features/memory-cards/utils'
+import { ReviewPanel } from '@/features/review/components/review-panel'
+import { getDailyGoal } from '@/features/settings/queries'
 import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
@@ -33,13 +35,25 @@ export default async function MemoryCardsPage({
   const q = sp.q ?? ''
   const { states, maturity } = parseCardFilters(sp)
   const { page, limit } = parsePagination(sp)
-  const [subjects, { rows: cards, total }, overview] = await Promise.all([
+  const [
+    subjects,
+    { rows: cards, total },
+    overview,
+    { first: dueCard, count: dueCount },
+    dailyGoal,
+  ] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ subjectIds: selectedIds, q, states, maturity, page, limit }),
     getCardOverview(),
+    // Same filters as the listing → the review panel is scoped to the active topic.
+    getDueQueue({ subjectIds: selectedIds, q, states, maturity }),
+    getDailyGoal(),
   ])
   const isFiltered =
     selectedIds.length > 0 || Boolean(q) || states.length > 0 || maturity.length > 0
+  const reviewDescription =
+    (isFiltered ? 'Reviewing due cards that match your filters' : 'Reviewing all due cards') +
+    (dueCount > 0 ? ` · ${pluralize(dueCount, 'card')} due` : '')
   const options = subjects.map((subject) => ({ value: subject.id, label: subject.title }))
   const paginationMeta = buildPaginationMeta(total, page, limit)
 
@@ -78,6 +92,15 @@ export default async function MemoryCardsPage({
             emptyMessage="No options found."
           />
         </div>
+      )}
+
+      {/* Topic-scoped review: only when cards match the filters — a zero-match search shows the
+          list's own empty state below, not a misleading "caught up". When cards exist but none are
+          due, ReviewPanel's CaughtUpNotice branch renders. */}
+      {total > 0 && (
+        <TitledCard title="Review" description={reviewDescription}>
+          <ReviewPanel card={dueCard} goal={dailyGoal} />
+        </TitledCard>
       )}
 
       {total === 0 ? (
