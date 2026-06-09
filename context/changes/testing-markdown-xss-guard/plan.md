@@ -305,27 +305,27 @@ None. Removing the superseded `notes.spec.ts` test is a net coverage gain (the n
 
 #### Automated
 
-- [x] 1.1 Lint passes on changed files (`pnpm exec eslint e2e/markdown-xss.spec.ts e2e/notes.spec.ts`)
-- [x] 1.2 Typecheck passes (`pnpm typecheck`)
-- [x] 1.3 New spec passes (`pnpm test:e2e markdown-xss`)
-- [x] 1.4 Notes spec still passes after removal (`pnpm test:e2e notes`)
+- [x] 1.1 Lint passes on changed files (`pnpm exec eslint e2e/markdown-xss.spec.ts e2e/notes.spec.ts`) — c7403ec
+- [x] 1.2 Typecheck passes (`pnpm typecheck`) — c7403ec
+- [x] 1.3 New spec passes (`pnpm test:e2e markdown-xss`) — c7403ec
+- [x] 1.4 Notes spec still passes after removal (`pnpm test:e2e notes`) — c7403ec
 
 #### Manual
 
-- [x] 1.5 Both tests fail with `rehype-raw` temporarily added (assertions proven real), then reverted
-- [x] 1.6 Dangerous-href assertion fails with a permissive `urlTransform` temporarily set, then reverted
-- [x] 1.7 `e2e/notes.spec.ts:85` test removed; no other spec references it
+- [x] 1.5 Both tests fail with `rehype-raw` temporarily added (assertions proven real), then reverted — c7403ec
+- [x] 1.6 Dangerous-href assertion fails with a permissive `urlTransform` temporarily set, then reverted — c7403ec
+- [x] 1.7 `e2e/notes.spec.ts:85` test removed; no other spec references it — c7403ec
 
 ### Phase 2: test-plan.md corrections + backport
 
 #### Automated
 
-- [ ] 2.1 No stale "untested"/"unbuilt" framing remains on R#7/Phase 7 (`rg` reviewed)
-- [ ] 2.2 Test-plan tables intact (`rg "Phase 7|Markdown render XSS"`)
+- [x] 2.1 No stale "untested"/"unbuilt" framing remains on R#7/Phase 7 (`rg` reviewed)
+- [x] 2.2 Test-plan tables intact (`rg "Phase 7|Markdown render XSS"`)
 
 #### Manual
 
-- [ ] 2.3 §2 R#7 reads truthfully (guard registered, four sources, D.1 framed)
-- [ ] 2.4 §3 Phase 7 framing no longer claims AI surface unbuilt
-- [ ] 2.5 D.2 ordering-integrity logged as a §2 row marked not-implemented-here
-- [ ] 2.6 §7 fidelity exclusion clarified to not exclude the security guard
+- [x] 2.3 §2 R#7 reads truthfully (guard registered, four sources, D.1 framed)
+- [x] 2.4 §3 Phase 7 framing no longer claims AI surface unbuilt
+- [x] 2.5 D.2 ordering-integrity logged as a §2 row marked not-implemented-here
+- [x] 2.6 §7 fidelity exclusion clarified to not exclude the security guard
