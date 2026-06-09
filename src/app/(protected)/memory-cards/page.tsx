@@ -117,7 +117,7 @@ export default async function MemoryCardsPage({
         />
       ) : (
         <>
-          <MemoryCardsList cards={cards} />
+          <MemoryCardsList cards={cards} subjects={subjects} />
           <PaginationFooter paginationMeta={paginationMeta} baseUrl="/memory-cards" />
         </>
       )}

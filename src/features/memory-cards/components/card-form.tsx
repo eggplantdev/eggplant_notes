@@ -23,6 +23,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
+import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
@@ -212,6 +213,16 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
           >
             {isUnlinking ? 'Unlinking…' : 'Unlink'}
           </Button>
+        </div>
+      )}
+
+      {/* Mirror of the source-note row for an UNLINKED card. `sourceNote` is present iff note_id is
+          set, so the two rows are mutually exclusive. Linking refreshes the page (in the dialog), so
+          this row is then replaced by the Unlink row above. */}
+      {card && !card.note_id && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">No source note</span>
+          <LinkCardButton cardId={card.id} cardSubjectId={card.subject_id} subjects={subjects} />
         </div>
       )}
 

@@ -334,16 +334,16 @@ None — both `note_id` and `subject_id` columns already exist; no data backfill
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — 80cdf67
+- [x] 2.2 Linting passes: `pnpm lint` — 80cdf67
 
 ### Phase 3: Wire the three triggers
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `pnpm typecheck`
-- [ ] 3.2 Linting passes: `pnpm lint`
-- [ ] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck`
+- [x] 3.2 Linting passes: `pnpm lint`
+- [x] 3.3 Production build passes: `pnpm build`
 
 #### Manual
 
