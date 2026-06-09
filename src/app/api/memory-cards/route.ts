@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { noteAttachCardsSchema } from '@/features/api-tokens/schemas'
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
@@ -37,4 +38,36 @@ export async function POST(request: Request) {
     console.error('[POST /api/memory-cards] insert error', error)
     return errorJson(500, 'Failed to create cards')
   }
+}
+
+// GET /api/memory-cards — list the caller's cards, optionally filtered so an agent can dedup/inspect
+// before writing. `?note=<uuid>` (filter note_id), `?subject=<uuid>` (filter subject_id), `?unfiled=true`
+// (subject_id is null). Malformed uuid → 400. RLS-scoped.
+export async function GET(request: Request) {
+  const auth = await authenticateRequest(request)
+  if ('error' in auth) return authError(auth.error)
+
+  const searchParams = new URL(request.url).searchParams
+  const note = searchParams.get('note')
+  const subject = searchParams.get('subject')
+  const unfiled = searchParams.get('unfiled') === 'true'
+
+  if (note !== null && !z.guid().safeParse(note).success) return errorJson(400, 'Invalid note id')
+  if (subject !== null && !z.guid().safeParse(subject).success) {
+    return errorJson(400, 'Invalid subject id')
+  }
+
+  let query = auth.supabase
+    .from('memory_cards')
+    .select('id,prompt,example,code_context,note_id,subject_id')
+  if (note !== null) query = query.eq('note_id', note)
+  if (subject !== null) query = query.eq('subject_id', subject)
+  if (unfiled) query = query.is('subject_id', null)
+
+  const { data, error } = await query
+  if (error) {
+    console.error('[GET /api/memory-cards] read error', error)
+    return errorJson(500, 'Failed to list cards')
+  }
+  return NextResponse.json({ cards: data })
 }

@@ -17,14 +17,25 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
 
   let notesPOST: typeof import('@/app/api/notes/route').POST
   let notesGET: typeof import('@/app/api/notes/route').GET
+  let noteIdGET: typeof import('@/app/api/notes/[id]/route').GET
+  let noteIdDELETE: typeof import('@/app/api/notes/[id]/route').DELETE
   let cardsPOST: typeof import('@/app/api/memory-cards/route').POST
+  let cardsGET: typeof import('@/app/api/memory-cards/route').GET
+  let cardIdDELETE: typeof import('@/app/api/memory-cards/[id]/route').DELETE
   let subjectsGET: typeof import('@/app/api/subjects/route').GET
+  let subjectsPOST: typeof import('@/app/api/subjects/route').POST
+  let subjectIdPATCH: typeof import('@/app/api/subjects/[id]/route').PATCH
+  let subjectIdDELETE: typeof import('@/app/api/subjects/[id]/route').DELETE
   let generateToken: typeof import('@/features/api-tokens/token').generateToken
 
   beforeAll(async () => {
     ;({ POST: notesPOST, GET: notesGET } = await import('@/app/api/notes/route'))
-    ;({ POST: cardsPOST } = await import('@/app/api/memory-cards/route'))
-    ;({ GET: subjectsGET } = await import('@/app/api/subjects/route'))
+    ;({ GET: noteIdGET, DELETE: noteIdDELETE } = await import('@/app/api/notes/[id]/route'))
+    ;({ POST: cardsPOST, GET: cardsGET } = await import('@/app/api/memory-cards/route'))
+    ;({ DELETE: cardIdDELETE } = await import('@/app/api/memory-cards/[id]/route'))
+    ;({ GET: subjectsGET, POST: subjectsPOST } = await import('@/app/api/subjects/route'))
+    ;({ PATCH: subjectIdPATCH, DELETE: subjectIdDELETE } =
+      await import('@/app/api/subjects/[id]/route'))
     ;({ generateToken } = await import('@/features/api-tokens/token'))
   })
 
@@ -56,6 +67,21 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       headers: token ? { authorization: `Bearer ${token}` } : {},
     })
   }
+  function patchReq(token: string, path: string, body: unknown): Request {
+    return new Request(`http://localhost${path}`, {
+      method: 'PATCH',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+  }
+  function delReq(token: string | null, path: string): Request {
+    return new Request(`http://localhost${path}`, {
+      method: 'DELETE',
+      headers: token ? { authorization: `Bearer ${token}` } : {},
+    })
+  }
+  // The dynamic [id] route handlers take Next's RouteContext, whose `params` is a Promise.
+  const idCtx = (id: string) => ({ params: Promise.resolve({ id }) })
 
   it('POST /api/notes creates a note (201) and GET /api/notes lists it', async () => {
     const u = await userWithToken()
@@ -167,5 +193,214 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect((await notesPOST(postReq(u.token, '/api/notes', { note: {}, checks: [] }))).status).toBe(
       400,
     )
+  })
+
+  // ---- Phase 1: reads, subject CRUD, deletes (clc-api-crud-endpoints) ----
+
+  it('GET /api/notes/:id returns the note content + its cards; foreign id → 404; bad id → 400', async () => {
+    const u = await userWithToken()
+    const { id } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'Readback', content: '# Hello' },
+          checks: [{ prompt: 'Q1?', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+
+    const res = await noteIdGET(getReq(u.token, `/api/notes/${id}`), idCtx(id))
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as {
+      note: { content: string }
+      cards: { prompt: string }[]
+    }
+    expect(body.note.content).toBe('# Hello')
+    expect(body.cards).toHaveLength(1)
+    expect(body.cards[0].prompt).toBe('Q1?')
+
+    // Another user can't read it → 404 (don't leak existence), not 403.
+    const other = await userWithToken()
+    expect((await noteIdGET(getReq(other.token, `/api/notes/${id}`), idCtx(id))).status).toBe(404)
+    // Malformed uuid → 400.
+    expect(
+      (await noteIdGET(getReq(u.token, '/api/notes/not-a-uuid'), idCtx('not-a-uuid'))).status,
+    ).toBe(400)
+  })
+
+  it('POST /api/subjects creates (201), PATCH /api/subjects/:id renames (200), GET lists it', async () => {
+    const u = await userWithToken()
+    const title = `S-${Date.now()}`
+    const createRes = await subjectsPOST(postReq(u.token, '/api/subjects', { title }))
+    expect(createRes.status).toBe(201)
+    const { id } = (await createRes.json()) as { id: string }
+
+    const newTitle = `${title}-renamed`
+    const patchRes = await subjectIdPATCH(
+      patchReq(u.token, `/api/subjects/${id}`, { title: newTitle }),
+      idCtx(id),
+    )
+    expect(patchRes.status).toBe(200)
+
+    const { subjects } = (await (await subjectsGET(getReq(u.token, '/api/subjects'))).json()) as {
+      subjects: { id: string; title: string }[]
+    }
+    expect(subjects.find((s) => s.id === id)?.title).toBe(newTitle)
+
+    // A foreign PATCH can't touch it → 404.
+    const other = await userWithToken()
+    expect(
+      (
+        await subjectIdPATCH(
+          patchReq(other.token, `/api/subjects/${id}`, { title: 'x' }),
+          idCtx(id),
+        )
+      ).status,
+    ).toBe(404)
+  })
+
+  it('GET /api/memory-cards filters by note, subject, and unfiled; bad filter → 400', async () => {
+    const u = await userWithToken()
+    // A card's subject is its OWN column, independent of any note: the create-note RPC inserts
+    // note-attached cards with subject_id null (the decouple-cards model — migration 20260606161054),
+    // so each filter is tested against cards whose subject_id we set directly.
+    const { id: subjectId } = (await (
+      await subjectsPOST(postReq(u.token, '/api/subjects', { title: `flt-${Date.now()}` }))
+    ).json()) as { id: string }
+
+    // filed standalone card (own subject = subjectId)
+    await cardsPOST(
+      postReq(u.token, '/api/memory-cards', {
+        prompt: 'filed-card',
+        example: '',
+        code_context: '',
+        subject_id: subjectId,
+      }),
+    )
+    // unfiled standalone card (subject_id null)
+    await cardsPOST(
+      postReq(u.token, '/api/memory-cards', {
+        prompt: 'unfiled-card',
+        example: '',
+        code_context: '',
+        subject_id: null,
+      }),
+    )
+    // note-attached card (note_id set; its own subject_id is null by the RPC)
+    const { id: noteId } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'F', content: '' },
+          checks: [{ prompt: 'note-card', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+
+    const byNote = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?note=${noteId}`))
+    ).json()) as { cards: { prompt: string }[] }
+    expect(byNote.cards.map((c) => c.prompt)).toEqual(['note-card'])
+
+    const bySubject = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?subject=${subjectId}`))
+    ).json()) as { cards: { prompt: string }[] }
+    expect(bySubject.cards.map((c) => c.prompt)).toEqual(['filed-card'])
+
+    // unfiled = subject_id null → the unfiled standalone AND the note-attached card (subject_id null),
+    // never the filed one.
+    const unfiled = (await (
+      await cardsGET(getReq(u.token, '/api/memory-cards?unfiled=true'))
+    ).json()) as { cards: { prompt: string }[] }
+    const unfiledPrompts = unfiled.cards.map((c) => c.prompt)
+    expect(unfiledPrompts).toContain('unfiled-card')
+    expect(unfiledPrompts).toContain('note-card')
+    expect(unfiledPrompts).not.toContain('filed-card')
+
+    expect((await cardsGET(getReq(u.token, '/api/memory-cards?note=nope'))).status).toBe(400)
+    expect((await cardsGET(getReq(u.token, '/api/memory-cards?subject=nope'))).status).toBe(400)
+  })
+
+  it('DELETE /api/notes/:id removes the note and cascades its cards', async () => {
+    const u = await userWithToken()
+    const { id } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'ToDelete', content: '' },
+          checks: [{ prompt: 'c?', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+
+    const before = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${id}`), idCtx(id))
+    ).json()) as { cards: unknown[] }
+    expect(before.cards).toHaveLength(1)
+
+    const del = await noteIdDELETE(delReq(u.token, `/api/notes/${id}`), idCtx(id))
+    expect(del.status).toBe(200)
+    expect((await del.json()).id).toBe(id)
+
+    // Note gone (404), and its cards cascaded away (filter returns empty).
+    expect((await noteIdGET(getReq(u.token, `/api/notes/${id}`), idCtx(id))).status).toBe(404)
+    const cards = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?note=${id}`))
+    ).json()) as { cards: unknown[] }
+    expect(cards.cards).toHaveLength(0)
+  })
+
+  it('DELETE /api/subjects/:id unfiles its members (subject_id → null), does not delete them', async () => {
+    const u = await userWithToken()
+    const subjTitle = `unfile-${Date.now()}`
+    const { id: noteId } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'Filed', content: '', subject_title: subjTitle },
+          checks: [{ prompt: 'k?', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+    const { subjects } = (await (await subjectsGET(getReq(u.token, '/api/subjects'))).json()) as {
+      subjects: { id: string; title: string }[]
+    }
+    const subjectId = subjects.find((s) => s.title === subjTitle)!.id
+
+    expect(
+      (await subjectIdDELETE(delReq(u.token, `/api/subjects/${subjectId}`), idCtx(subjectId)))
+        .status,
+    ).toBe(200)
+
+    // Note survives but is now unfiled.
+    const back = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as { note: { subject_id: string | null } }
+    expect(back.note.subject_id).toBeNull()
+  })
+
+  it('DELETE /api/memory-cards/:id removes one card; second delete → 404', async () => {
+    const u = await userWithToken()
+    const { ids } = (await (
+      await cardsPOST(
+        postReq(u.token, '/api/memory-cards', {
+          prompt: 'standalone',
+          example: '',
+          code_context: '',
+          subject_id: null,
+        }),
+      )
+    ).json()) as { ids: string[] }
+    const cardId = ids[0]
+
+    expect(
+      (await cardIdDELETE(delReq(u.token, `/api/memory-cards/${cardId}`), idCtx(cardId))).status,
+    ).toBe(200)
+    // Already gone → 404 (RLS-invisible row is indistinguishable from nonexistent).
+    expect(
+      (await cardIdDELETE(delReq(u.token, `/api/memory-cards/${cardId}`), idCtx(cardId))).status,
+    ).toBe(404)
+  })
+
+  it('401 on the new id routes without a token', async () => {
+    expect((await noteIdGET(getReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
+    expect((await noteIdDELETE(delReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
+    expect((await subjectsPOST(getReq(null, '/api/subjects'))).status).toBe(401)
   })
 })

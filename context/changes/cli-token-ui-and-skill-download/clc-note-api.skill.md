@@ -12,7 +12,8 @@ description: >-
 # CLC HTTP API — notes & memory cards via personal token
 
 The Coding Learning Companion app exposes a small HTTP API so an agent can read the user's structure and
-add **notes** (markdown) and **memory cards** (spaced-repetition recall prompts). Every request is scoped
+add **notes** and **memory cards** (spaced-repetition recall prompts), whose text fields are all markdown
+with syntax highlighting (see ["fence your code"](#all-text-fields-are-markdown--fence-your-code)). Every request is scoped
 by the server to the token's user — you never pass a `user_id`, and you can only ever touch that one
 user's data.
 
@@ -53,6 +54,29 @@ curl -s -H "$AUTH" "$BASE/api/subjects"
 # → { "subjects": [ { "id": "<uuid>", "title": "Rust" }, ... ] }
 ```
 
+### `POST /api/subjects` — create a topic
+
+Create a subject directly (instead of inline via a note's `subject_title`). `title` required (≤ 200 chars);
+`description` optional (≤ 2000 chars).
+
+```bash
+curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
+  -d '{"title":"Rust","description":"Ownership, lifetimes, traits"}' \
+  "$BASE/api/subjects"
+# → 201 { "id": "<subject-uuid>" }
+```
+
+### `PATCH /api/subjects/:id` — rename / re-describe a topic
+
+Same body as create (`title` required, `description` optional). A non-existent or not-yours id returns `404`.
+
+```bash
+curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
+  -d '{"title":"Rust (2024 edition)"}' \
+  "$BASE/api/subjects/<subject-uuid>"
+# → 200 { "id": "<subject-uuid>" }
+```
+
 ### `GET /api/notes` — list note titles
 
 Optional `?subject=<uuid>` filter. A malformed `subject` value returns `400`.
@@ -63,9 +87,22 @@ curl -s -H "$AUTH" "$BASE/api/notes?subject=<subject-uuid>"
 # → { "notes": [ { "id": "<uuid>", "title": "...", "subject_id": "<uuid>|null" }, ... ] }
 ```
 
+### `GET /api/notes/:id` — read one note + its cards
+
+Reads the note's full `content` back, plus every card linked to it. A non-existent or not-yours id returns `404`.
+
+```bash
+curl -s -H "$AUTH" "$BASE/api/notes/<note-uuid>"
+# → {
+#     "note":  { "id": "<uuid>", "title": "...", "content": "# ...", "subject_id": "<uuid>|null" },
+#     "cards": [ { "id": "<uuid>", "prompt": "...", "example": "...|null",
+#                  "code_context": "...|null", "subject_id": "<uuid>|null", "note_id": "<uuid>" }, ... ]
+#   }
+```
+
 ### `POST /api/notes` — create a note (+ optional cards)
 
-```jsonc
+````jsonc
 {
   "note": {
     "title": "Ownership basics", // required, trimmed, ≤ 200 chars
@@ -74,11 +111,16 @@ curl -s -H "$AUTH" "$BASE/api/notes?subject=<subject-uuid>"
     // "subject_title": "Rust"        // create a NEW subject inline. Mutually exclusive with subject_id.
   },
   "checks": [
-    // recall cards for this note; ≤ 50; may be [] for none
-    { "prompt": "What is ownership?", "example": "", "code_context": "" },
+    // recall cards for this note; ≤ 50; may be [] for none.
+    // example/code_context are MARKDOWN — fence code blocks or they render flat (see "fence your code" below).
+    {
+      "prompt": "What does a `move` do to ownership in Rust?",
+      "example": "Passing a String into a function transfers ownership; the caller can't use it afterwards.",
+      "code_context": "```rust\nlet s = String::from(\"hi\");\ntakes(s);          // s is moved\n// println!(\"{s}\"); // ❌ borrow of moved value\n```",
+    },
   ],
 }
-```
+````
 
 ```bash
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
@@ -110,27 +152,84 @@ curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
 # → 201 { "ids": ["<card-uuid>"] }
 ```
 
+### `GET /api/memory-cards` — list cards (filtered)
+
+List your cards so you can inspect or dedup before writing. Three optional, combinable filters — a
+malformed uuid returns `400`:
+
+- `?note=<uuid>` — only cards linked to that note
+- `?subject=<uuid>` — only cards filed under that subject
+- `?unfiled=true` — only cards with no subject
+
+```bash
+curl -s -H "$AUTH" "$BASE/api/memory-cards?subject=<subject-uuid>"
+curl -s -H "$AUTH" "$BASE/api/memory-cards?note=<note-uuid>"
+curl -s -H "$AUTH" "$BASE/api/memory-cards?unfiled=true"
+# → { "cards": [ { "id": "<uuid>", "prompt": "...", "example": "...|null",
+#                 "code_context": "...|null", "note_id": "<uuid>|null", "subject_id": "<uuid>|null" }, ... ] }
+```
+
+### Deleting — `DELETE /api/notes/:id` · `DELETE /api/memory-cards/:id` · `DELETE /api/subjects/:id`
+
+Each deletes one row you own and returns its id; a non-existent or not-yours id returns `404`. Two cascades
+are handled by the database — **mind them before you delete**:
+
+- **Deleting a note also deletes all of its cards** (cascade). The cards are gone, not unlinked.
+- **Deleting a subject does NOT delete its notes or cards** — they survive and become _unfiled_ (their
+  `subject_id` becomes `null`).
+
+```bash
+curl -s -X DELETE -H "$AUTH" "$BASE/api/notes/<note-uuid>"          # → 200 { "id": "<note-uuid>" }   (+ its cards gone)
+curl -s -X DELETE -H "$AUTH" "$BASE/api/memory-cards/<card-uuid>"   # → 200 { "id": "<card-uuid>" }
+curl -s -X DELETE -H "$AUTH" "$BASE/api/subjects/<subject-uuid>"    # → 200 { "id": "<subject-uuid>" } (members unfiled)
+```
+
 ## The card field shape — get this right or you get a 400
 
 Every card (in `checks` or `cards`) has exactly these fields:
 
-| field          | rule                                                                                     |
-| -------------- | ---------------------------------------------------------------------------------------- |
-| `prompt`       | **required** string, trimmed, ≤ 2000 chars. The question/recall cue.                     |
-| `example`      | **required to be a string** — use `""` when there's none. The server turns blank → null. |
-| `code_context` | same as `example`: a string, `""` when none.                                             |
+| field          | rule                                                                                                                                                                   |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`       | **required** string, trimmed, ≤ 2000 chars. The question/recall cue. Rendered as markdown.                                                                             |
+| `example`      | **required to be a string** — use `""` when none. **Markdown**: a short worked scenario (prose, or a fenced snippet). The server turns blank → null.                   |
+| `code_context` | same string rule as `example`, also **markdown**. Put the code here, **fenced** (` ```lang … ``` `) — bare code renders as a flattened paragraph with no highlighting. |
 
 **Do not send `null` for `example`/`code_context`** — they are validated as strings, so `null` is a `400`,
 not "no value". Send `""`. Omitting `prompt`, or sending `cards` as anything but a non-empty array, is also
 a `400`.
 
+## All text fields are markdown — fence your code
+
+`content` (notes) and `example` / `code_context` (cards) are rendered with react-markdown + Shiki syntax
+highlighting. **Code only highlights inside a fenced block** — ` ```lang … ``` `. Sending raw code with
+bare newlines renders as one flattened paragraph: whitespace collapses, nothing is highlighted.
+
+````jsonc
+// ❌ flattens to a single grey line, no highlighting
+{ "prompt": "Write a debounce wrapper.", "example": "", "code_context": "function debounce(fn, d){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),d) } }" }
+
+// ✅ renders as a highlighted JS block
+{
+  "prompt": "Write a debounce wrapper and explain why the timer lives in the closure.",
+  "example": "A search box collapsing rapid keystrokes into a single fetch.",
+  "code_context": "```js\nfunction debounce(fn, delay) {\n  let timer; // captured by the closure; survives across calls\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n```"
+}
+````
+
+Convention: put the code snippet in `code_context` (fenced) and a short prose scenario in `example`. Both
+are free markdown, so either may hold prose or fenced code — just **always fence code**, and tag the
+language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
+
 ## Responses & limits
 
-- **Success:** `200` for GETs; `201` for creates, returning `{ "id": ... }` (note) or `{ "ids": [...] }` (cards).
+- **Success:** `200` for GETs, `PATCH`es, and `DELETE`s (returning `{ "id": ... }`); `201` for creates,
+  returning `{ "id": ... }` (note/subject) or `{ "ids": [...] }` (cards).
 - **`401`** — token missing, malformed, expired, or revoked. Re-check the `Authorization` header; mint a
   fresh token in Settings if it was revoked.
+- **`404`** — the id in the path doesn't exist **or isn't yours** (the two are indistinguishable on
+  purpose — the API never reveals whether another user's row exists). Applies to every `:id` route.
 - **`400`** — malformed JSON, or a body that fails validation (card-shape rules, the `subject_id` XOR
-  `subject_title` rule, or an invalid uuid).
+  `subject_title` rule, or an invalid uuid in the path or query).
 - **`500`** — unexpected server error.
 - **Caps:** ≤ 50 cards per note (`checks`), 1–20 cards per `note_id` attach (`cards`), `prompt` ≤ 2000 chars,
   `title` ≤ 200 chars. Batch larger imports across multiple calls.
