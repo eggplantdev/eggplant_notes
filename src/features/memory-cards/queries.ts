@@ -103,14 +103,7 @@ export async function getCardOverview(client?: SupabaseClient<Database>): Promis
 // (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
 // `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(
-  opts?: {
-    subjectIds?: string[]
-    q?: string
-    states?: number[]
-    maturity?: MaturityT[]
-    page?: number
-    limit?: number
-  },
+  opts?: CardFilterOptsT & { page?: number; limit?: number },
   client?: SupabaseClient<Database>,
 ): Promise<{ rows: MemoryCardListItemT[]; total: number }> {
   const supabase = client ?? (await createClient())
