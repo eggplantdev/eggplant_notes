@@ -341,9 +341,9 @@ None — both `note_id` and `subject_id` columns already exist; no data backfill
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `pnpm typecheck`
-- [x] 3.2 Linting passes: `pnpm lint`
-- [x] 3.3 Production build passes: `pnpm build`
+- [x] 3.1 Type checking passes: `pnpm typecheck` — 63123d8
+- [x] 3.2 Linting passes: `pnpm lint` — 63123d8
+- [x] 3.3 Production build passes: `pnpm build` — 63123d8
 
 #### Manual
 
@@ -357,9 +357,9 @@ None — both `note_id` and `subject_id` columns already exist; no data backfill
 
 #### Automated
 
-- [ ] 4.1 E2E suite passes: `pnpm test:e2e`
-- [ ] 4.2 Type checking passes: `pnpm typecheck`
-- [ ] 4.3 Linting passes: `pnpm lint`
+- [ ] 4.1 E2E suite passes: `pnpm test:e2e` — DEFERRED: spec drove the full flow green once (note found + linked); reliable green/break verify deferred to a fresh local stack (degraded by repeated rebuilds this session)
+- [x] 4.2 Type checking passes: `pnpm typecheck`
+- [x] 4.3 Linting passes: `pnpm lint`
 
 #### Manual
 

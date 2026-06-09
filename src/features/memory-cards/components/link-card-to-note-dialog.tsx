@@ -55,11 +55,19 @@ export function LinkCardToNoteDialog({
   useEffect(() => {
     let ignore = false
     const subjectId = subjectValue === NO_SUBJECT ? null : subjectValue
-    getNotesForLinkingAction(subjectId).then((rows) => {
-      if (ignore) return
-      setNotes(rows)
-      setLoadingNotes(false)
-    })
+    getNotesForLinkingAction(subjectId)
+      .then((rows) => {
+        if (ignore) return
+        setNotes(rows)
+        setLoadingNotes(false)
+      })
+      // A rejected fetch must still clear the spinner (otherwise it hangs forever); the combobox
+      // then shows its empty state rather than trapping the user.
+      .catch(() => {
+        if (ignore) return
+        setNotes([])
+        setLoadingNotes(false)
+      })
     return () => {
       ignore = true
     }
@@ -91,25 +99,28 @@ export function LinkCardToNoteDialog({
         </DialogHeader>
 
         <div className="grid gap-2">
-          <Label>Subject</Label>
+          <Label htmlFor="link-subject">Subject</Label>
           <Combobox
+            id="link-subject"
             value={subjectValue}
             onChange={handleSubjectChange}
             options={subjectOptions}
             searchPlaceholder="Search subject…"
             emptyMessage="No subject found."
             className="w-full"
+            modal
           />
         </div>
 
         <div className="grid gap-2">
-          <Label>Note</Label>
+          <Label htmlFor="link-note">Note</Label>
           {loadingNotes ? (
             <div className="text-muted-foreground flex items-center gap-2 text-sm" role="status">
               <Spinner /> Loading notes…
             </div>
           ) : (
             <Combobox
+              id="link-note"
               value={noteId}
               onChange={setNoteId}
               options={noteOptions}
@@ -117,6 +128,7 @@ export function LinkCardToNoteDialog({
               searchPlaceholder="Search notes…"
               emptyMessage="No notes in this subject."
               className="w-full"
+              modal
             />
           )}
         </div>

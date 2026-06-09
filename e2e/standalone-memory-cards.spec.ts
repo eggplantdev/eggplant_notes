@@ -99,3 +99,58 @@ test("changing a note's subject moves a linked card to the new subject (per-card
   const card = await db.from('memory_cards').select('note_id').single()
   expect(card.data?.note_id).not.toBeNull()
 })
+
+test('a standalone card can be linked to an existing note and adopts the note’s subject', async ({
+  page,
+}) => {
+  const email = uniqueEmail('mc-link')
+  await signUp(page, email)
+
+  // A subject with a note filed under it.
+  const subjectTitle = `Subj ${Date.now()}`
+  await createSubject(page, subjectTitle)
+  const noteTitle = `Note ${Date.now()}`
+  await page.goto('/notes/new')
+  await page.getByLabel('Title').fill(noteTitle)
+  // SubjectSelect's Combobox is unlabeled (its name comes from the selected value); scope to it via
+  // the sibling "Subject mode" radiogroup, matching createAssignedNote in subjects.spec.ts.
+  await page
+    .getByRole('radiogroup', { name: 'Subject mode' })
+    .locator('..')
+    .getByRole('combobox')
+    .click()
+  await page.getByRole('option', { name: subjectTitle, exact: true }).click()
+  await page.getByRole('button', { name: 'Create note' }).click()
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
+
+  // A standalone card with NO subject.
+  await page.goto('/memory-cards/new')
+  const prompt = `Unfiled Q ${Date.now()}`
+  await page.getByLabel('Question').fill(prompt)
+  await page.getByTestId('card-form-submit').click()
+  await expect(page).toHaveURL(/\/memory-cards(\?|$)/, { timeout: 15_000 })
+
+  // Link it. The subject filter pre-fills "None" (card is unfiled) and lists no notes, so pick the
+  // subject to reveal the note, choose it, and Link. Picking a subject the card didn't have proves
+  // the card re-files to the note's subject, not the dialog filter.
+  await page.getByTestId('card-link-note').first().click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByRole('combobox', { name: 'Subject' }).click()
+  await page.getByRole('option', { name: subjectTitle, exact: true }).click()
+  // The Note combobox mounts right after the async note fetch resolves (spinner → combobox), so its
+  // popover is still settling; filter by typing and select with Enter rather than clicking the
+  // freshly-rendered (briefly unstable) option node.
+  await dialog.getByRole('combobox', { name: 'Note' }).click()
+  await page.getByPlaceholder('Search notes…').fill(noteTitle)
+  await page.getByPlaceholder('Search notes…').press('Enter')
+  await page.getByTestId('link-card-confirm').click()
+
+  // The card adopted the note: note_id points at that note and subject_id is the note's subject
+  // (derived server-side, NOT left null and NOT the card's prior unfiled state).
+  const db = await clientFor(email)
+  const subject = await db.from('subjects').select('id').eq('title', subjectTitle).single()
+  const note = await db.from('notes').select('id').eq('title', noteTitle).single()
+  await expect
+    .poll(async () => (await db.from('memory_cards').select('note_id, subject_id')).data?.[0])
+    .toEqual({ note_id: note.data?.id, subject_id: subject.data?.id })
+})
