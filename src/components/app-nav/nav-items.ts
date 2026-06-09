@@ -3,6 +3,7 @@ export const NAV_ITEMS = [
   { href: '/notes', label: 'Notes' },
   { href: '/memory-cards', label: 'Memory cards' },
   { href: '/subjects', label: 'Subjects' },
+  { href: '/faq', label: 'FAQ' },
 ] as const
 
 // Rendered in its own desktop cluster (right side), but part of the flat list on mobile.
