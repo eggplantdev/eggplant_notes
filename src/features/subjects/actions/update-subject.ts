@@ -11,7 +11,8 @@ import type { ActionResultT } from '@/types/action'
 
 // Cookie-client entry point for the subject edit form. The update lives in updateSubjectCore (shared
 // with PATCH /api/subjects/:id). RLS scopes the update to the owner — a non-owned id matches zero rows
-// (→ undefined → failure). redirect throws, so the form only ever observes the failure branch.
+// → the core returns `{ error, notFound }` → failure. redirect throws, so the form only ever observes
+// the failure branch.
 export async function updateSubject(id: string, input: unknown): Promise<ActionResultT> {
   const parsedId = validateInput(subjectIdSchema, id)
   if (!parsedId.success) return parsedId

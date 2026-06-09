@@ -7,7 +7,8 @@ import type { Database } from '@/lib/supabase/types'
 // subject, so changing its subject must clear `note_id`). Everything from the updateMemoryCard action
 // minus revalidate/redirect, so the cookie action and the PATCH route share it. The core self-detects
 // the forced-unlink from the card's own current row (mirrors updateNoteCore detecting its subject
-// change) — neither caller has to pre-read or compute it. Errors returned as values; `previousNoteId`
+// change) — neither caller pre-reads or passes it (the UI form still computes the same condition, but
+// only to drive its confirm dialog, not the write). Errors returned as values; `previousNoteId`
 // (read before the write, lost once unlinked) lets the action revalidate the old note page; `notFound`
 // lets the route 404 without leaking existence.
 export async function updateMemoryCardCore(
