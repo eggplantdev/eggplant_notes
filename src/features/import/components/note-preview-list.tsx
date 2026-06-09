@@ -53,7 +53,7 @@ export function NotePreviewList({
             >
               <AccordionArrow isOpen={isOpen} />
             </button>
-            <div className="mb-3 flex items-end gap-2 pr-7">
+            <div className="mb-3 flex items-end gap-2">
               <div className="grid flex-1 gap-2">
                 <Label htmlFor={`import-title-${draft.id}`}>Title</Label>
                 <Input

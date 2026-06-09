@@ -29,9 +29,6 @@ const SIZE = {
   default: 'h-8 px-3 text-sm',
 } as const
 
-// Single-select segmented control where the active "pill" SLIDES between options (motion layoutId
-// shared-layout animation), so switching blends instead of snapping. Always one value selected — no
-// deselect. The track is muted; the active segment is a raised background pill.
 export function SegmentedToggle<V extends string>({
   value,
   onChange,
@@ -76,7 +73,7 @@ export function SegmentedToggle<V extends string>({
               <motion.span
                 layoutId={layoutId}
                 aria-hidden
-                className="bg-background absolute inset-0 -z-0 rounded-md shadow-sm"
+                className="bg-background absolute inset-0 z-0 rounded-md shadow-sm"
                 transition={
                   shouldReduceMotion
                     ? { duration: 0 }

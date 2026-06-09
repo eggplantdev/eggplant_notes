@@ -66,7 +66,7 @@ export function SourceInput({
           onClick={onTogglePaste}
           aria-expanded={isPasteOpen}
           aria-controls="import-paste"
-          className="group flex w-full cursor-pointer items-center justify-between gap-1.5 pb-2"
+          className="group flex w-full cursor-pointer items-center gap-1.5 pb-2"
         >
           <Label htmlFor="import-paste" className="pointer-events-none">
             …or paste markdown

@@ -266,7 +266,7 @@ export function ImportPanel({
               onClick={() => setIsPreviewOpen((open) => !open)}
               aria-expanded={isPreviewOpen}
               aria-controls="import-preview-list"
-              className="group flex w-full cursor-pointer items-center justify-between gap-1.5"
+              className="group flex w-full cursor-pointer items-center gap-1.5"
             >
               <h2 className="text-lg font-semibold">
                 Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
