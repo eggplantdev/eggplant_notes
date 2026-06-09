@@ -96,12 +96,9 @@ export default async function MemoryCardsPage({
 
       {/* Topic-scoped review: only when cards match the filters — a zero-match search shows the
           list's own empty state below, not a misleading "caught up". When cards exist but none are
-          due, ReviewPanel's CaughtUpNotice branch renders. */}
-      {total > 0 && (
-        <TitledCard title="Review" description={reviewDescription}>
-          <ReviewPanel card={dueCard} goal={dailyGoal} />
-        </TitledCard>
-      )}
+          due, ReviewPanel's CaughtUpNotice branch renders. The filter/due-count context rides in as
+          the panel's subtitle. */}
+      {total > 0 && <ReviewPanel card={dueCard} goal={dailyGoal} subtitle={reviewDescription} />}
 
       {total === 0 ? (
         <EmptyState
