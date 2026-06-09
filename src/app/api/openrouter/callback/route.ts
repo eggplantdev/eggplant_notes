@@ -4,7 +4,7 @@ import { type NextRequest } from 'next/server'
 
 import { VERIFIER_COOKIE } from '@/features/openrouter/pkce'
 import { encryptSecret } from '@/lib/crypto/aes-gcm'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { toastRedirect } from '@/lib/toast-redirect'
 
 // OpenRouter OAuth PKCE callback: exchange the returned `code` (+ the verifier we stashed) for the
@@ -12,6 +12,12 @@ import { toastRedirect } from '@/lib/toast-redirect'
 // (the browser carries the Supabase session cookie on the redirect back), so RLS + the user_id
 // default scope the upsert to the caller. The decrypted key is never returned to the client.
 export async function GET(request: NextRequest) {
+  // Enforce the "user is authenticated here" invariant in-band: the proxy now lets all /api/* through
+  // (token routes self-enforce), so this callback must guard its own session rather than lean on the
+  // proxy's old redirect. An anon hit bounces to /sign-in exactly as the proxy used to do.
+  const user = await getCurrentUser()
+  if (!user) redirect('/sign-in')
+
   const code = new URL(request.url).searchParams.get('code')
   const cookieStore = await cookies()
   const verifier = cookieStore.get(VERIFIER_COOKIE)?.value

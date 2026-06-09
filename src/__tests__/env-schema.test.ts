@@ -1,6 +1,37 @@
 import { describe, expect, it } from 'vitest'
 
-import { clientSchema } from '@/lib/env-schema'
+import { clientSchema, serverSchema } from '@/lib/env-schema'
+
+// Guards the build-time env contract: next.config.ts runs serverSchema.parse(process.env) at
+// build/dev-start, so these assertions pin which server vars are mandatory. The token API's 500 bug
+// traced to an unvalidated SUPABASE_JWT_SECRET — this keeps it in the fail-fast set.
+const validEnv = {
+  EMAIL_HOST: 'smtp.example.com',
+  EMAIL_PASS: 'secret',
+  EMAIL_TO: 'me@example.com',
+  SUPABASE_JWT_SECRET: 'x'.repeat(32),
+}
+
+describe('serverSchema', () => {
+  it('accepts a fully-populated server env', () => {
+    expect(serverSchema.safeParse(validEnv).success).toBe(true)
+  })
+
+  it('requires SUPABASE_JWT_SECRET', () => {
+    const withoutSecret = {
+      EMAIL_HOST: validEnv.EMAIL_HOST,
+      EMAIL_PASS: validEnv.EMAIL_PASS,
+      EMAIL_TO: validEnv.EMAIL_TO,
+    }
+    expect(serverSchema.safeParse(withoutSecret).success).toBe(false)
+  })
+
+  it('rejects a SUPABASE_JWT_SECRET shorter than 32 chars (HS256 floor)', () => {
+    expect(serverSchema.safeParse({ ...validEnv, SUPABASE_JWT_SECRET: 'tooshort' }).success).toBe(
+      false,
+    )
+  })
+})
 
 const validClientEnv = {
   NEXT_PUBLIC_SUPABASE_URL: 'https://proj.supabase.co',

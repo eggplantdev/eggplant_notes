@@ -27,6 +27,16 @@ export async function authenticateRequest(request: Request): Promise<AuthResultT
   }
   if (!userId) return { error: { status: 401, message: 'Invalid, expired, or revoked token' } }
 
-  const jwt = await mintUserJwt(userId)
+  // Minting must not throw past this layer: a missing/misconfigured SUPABASE_JWT_SECRET (or any jose
+  // signing failure) would otherwise propagate uncaught and the route would answer a bodyless 500.
+  // Return a structured error so the route maps it to a JSON 500 the caller can actually read. The env
+  // layer (serverSchema) is the primary guard — this is defense-in-depth for the residual cases.
+  let jwt: string
+  try {
+    jwt = await mintUserJwt(userId)
+  } catch (error) {
+    console.error('[authenticateRequest] mintUserJwt failed', error)
+    return { error: { status: 500, message: 'Auth configuration error' } }
+  }
   return { supabase: clientForAccessToken(jwt), userId }
 }
