@@ -41,7 +41,7 @@ export default async function SettingsPage() {
         title="CLI Tokens"
         description="Create personal API tokens to use the HTTP API from a CLI or agent. A token is shown once at creation — copy it then. Revoke any token to disable it immediately."
       >
-        <ApiTokensSection tokens={apiTokens} />
+        <ApiTokensSection tokensResult={apiTokens} />
       </SettingsSection>
 
       <SettingsSection

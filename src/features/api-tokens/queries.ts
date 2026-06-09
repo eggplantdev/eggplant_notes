@@ -10,8 +10,13 @@ export type ApiTokenListItemT = Pick<
   'id' | 'name' | 'created_at' | 'last_used_at'
 >
 
+// Discriminated result, not a bare array: a read failure must NOT collapse to `[]`, which the UI would
+// render as "no tokens yet" and invite a duplicate mint while the real (hashed) tokens sit untouched.
+// `{ ok: false }` lets the section distinguish "you have none" from "we couldn't load them".
+export type GetApiTokensResultT = { ok: true; tokens: ApiTokenListItemT[] } | { ok: false }
+
 // RLS scopes the select to the owner, so no user_id filter. Active tokens only (revoked_at is null).
-export async function getApiTokens(): Promise<ApiTokenListItemT[]> {
+export async function getApiTokens(): Promise<GetApiTokensResultT> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('api_tokens')
@@ -21,7 +26,7 @@ export async function getApiTokens(): Promise<ApiTokenListItemT[]> {
 
   if (error) {
     console.error('[getApiTokens] select error', error)
-    return []
+    return { ok: false }
   }
-  return data ?? []
+  return { ok: true, tokens: data ?? [] }
 }
