@@ -1,10 +1,10 @@
 ---
 change_id: clc-api-crud-endpoints
 title: Extend CLC token API — read-back, create-subject, and update endpoints with linked/unlinked card semantics
-status: implemented
+status: archived
 created: 2026-06-09
 updated: 2026-06-09
-archived_at: null
+archived_at: 2026-06-09T12:32:52Z
 ---
 
 ## Notes
