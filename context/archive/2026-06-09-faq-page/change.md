@@ -1,9 +1,10 @@
 ---
 change_id: faq-page
 title: In-app FAQ page (static first pass)
-status: in-progress
+status: archived
 created: 2026-06-09
 updated: 2026-06-09
+archived_at: 2026-06-09T08:55:28Z
 ---
 
 ## Notes
