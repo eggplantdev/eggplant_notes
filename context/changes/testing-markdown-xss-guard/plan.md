@@ -320,12 +320,12 @@ None. Removing the superseded `notes.spec.ts` test is a net coverage gain (the n
 
 #### Automated
 
-- [x] 2.1 No stale "untested"/"unbuilt" framing remains on R#7/Phase 7 (`rg` reviewed)
-- [x] 2.2 Test-plan tables intact (`rg "Phase 7|Markdown render XSS"`)
+- [x] 2.1 No stale "untested"/"unbuilt" framing remains on R#7/Phase 7 (`rg` reviewed) — 6ccaec3
+- [x] 2.2 Test-plan tables intact (`rg "Phase 7|Markdown render XSS"`) — 6ccaec3
 
 #### Manual
 
-- [x] 2.3 §2 R#7 reads truthfully (guard registered, four sources, D.1 framed)
-- [x] 2.4 §3 Phase 7 framing no longer claims AI surface unbuilt
-- [x] 2.5 D.2 ordering-integrity logged as a §2 row marked not-implemented-here
-- [x] 2.6 §7 fidelity exclusion clarified to not exclude the security guard
+- [x] 2.3 §2 R#7 reads truthfully (guard registered, four sources, D.1 framed) — 6ccaec3
+- [x] 2.4 §3 Phase 7 framing no longer claims AI surface unbuilt — 6ccaec3
+- [x] 2.5 D.2 ordering-integrity logged as a §2 row marked not-implemented-here — 6ccaec3
+- [x] 2.6 §7 fidelity exclusion clarified to not exclude the security guard — 6ccaec3
