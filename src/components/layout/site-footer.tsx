@@ -6,7 +6,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="mt-16 border-t">
+    <footer className="mt-auto border-t">
       <div className="container-shell flex flex-col items-center justify-between gap-3 py-6 text-sm sm:flex-row">
         <span className="font-heading text-base font-semibold">Eggplant</span>
         <div className="text-muted-foreground flex items-center gap-3">
