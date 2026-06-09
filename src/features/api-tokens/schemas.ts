@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { cardsArraySchema, noteIdSchema } from '@/features/memory-cards/schemas'
+import { noteInputSchema } from '@/features/notes/schemas'
 import { trimmedString } from '@/lib/schema-builders'
 
 export const TOKEN_NAME_MAX_LENGTH = 60
@@ -23,3 +24,20 @@ export const noteAttachCardsSchema = z.object({
   note_id: noteIdSchema,
   cards: cardsArraySchema,
 })
+
+// Body for PATCH /api/notes/:id: the editable note fields plus an OPTIONAL per-card plan for a subject
+// move. Card ids are DB-originated → validate SHAPE only with z.guid() (z.uuid() rejects non-RFC seed
+// ids — see memory-cards/schemas.ts). When `card_actions` is omitted on a subject change, the route
+// applies a move-all default (the note's linked cards come with it).
+const cardActionIdSchema = z.guid('Invalid card id')
+
+export const patchNoteBodySchema = noteInputSchema.extend({
+  card_actions: z
+    .object({
+      move: z.array(cardActionIdSchema),
+      unlink: z.array(cardActionIdSchema),
+    })
+    .optional(),
+})
+
+export type PatchNoteBodyT = z.infer<typeof patchNoteBodySchema>

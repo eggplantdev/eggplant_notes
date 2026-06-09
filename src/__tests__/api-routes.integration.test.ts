@@ -14,13 +14,18 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL ??= SUPABASE_URL
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= ANON_KEY
   process.env.SUPABASE_JWT_SECRET ??= JWT_SECRET
+  // The client env (env.ts) eager-parses every NEXT_PUBLIC_* on import — incl. the contact-form sender
+  // — so importing any route handler needs this set even though these tests send no email.
+  process.env.NEXT_PUBLIC_EMAIL_USER ??= 'noreply@example.com'
 
   let notesPOST: typeof import('@/app/api/notes/route').POST
   let notesGET: typeof import('@/app/api/notes/route').GET
   let noteIdGET: typeof import('@/app/api/notes/[id]/route').GET
+  let noteIdPATCH: typeof import('@/app/api/notes/[id]/route').PATCH
   let noteIdDELETE: typeof import('@/app/api/notes/[id]/route').DELETE
   let cardsPOST: typeof import('@/app/api/memory-cards/route').POST
   let cardsGET: typeof import('@/app/api/memory-cards/route').GET
+  let cardIdPATCH: typeof import('@/app/api/memory-cards/[id]/route').PATCH
   let cardIdDELETE: typeof import('@/app/api/memory-cards/[id]/route').DELETE
   let subjectsGET: typeof import('@/app/api/subjects/route').GET
   let subjectsPOST: typeof import('@/app/api/subjects/route').POST
@@ -30,9 +35,14 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
 
   beforeAll(async () => {
     ;({ POST: notesPOST, GET: notesGET } = await import('@/app/api/notes/route'))
-    ;({ GET: noteIdGET, DELETE: noteIdDELETE } = await import('@/app/api/notes/[id]/route'))
+    ;({
+      GET: noteIdGET,
+      PATCH: noteIdPATCH,
+      DELETE: noteIdDELETE,
+    } = await import('@/app/api/notes/[id]/route'))
     ;({ POST: cardsPOST, GET: cardsGET } = await import('@/app/api/memory-cards/route'))
-    ;({ DELETE: cardIdDELETE } = await import('@/app/api/memory-cards/[id]/route'))
+    ;({ PATCH: cardIdPATCH, DELETE: cardIdDELETE } =
+      await import('@/app/api/memory-cards/[id]/route'))
     ;({ GET: subjectsGET, POST: subjectsPOST } = await import('@/app/api/subjects/route'))
     ;({ PATCH: subjectIdPATCH, DELETE: subjectIdDELETE } =
       await import('@/app/api/subjects/[id]/route'))
@@ -402,5 +412,164 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect((await noteIdGET(getReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
     expect((await noteIdDELETE(delReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
     expect((await subjectsPOST(getReq(null, '/api/subjects'))).status).toBe(401)
+  })
+
+  // ---- Phase 2: note/card PATCH with subject-switching (the linked/unlinked invariant) ----
+
+  // Seed a note that owns one attached card, plus a fresh target subject to move into. Returns the
+  // note id, the (note-attached) card id, and the target subject id.
+  async function seedNoteWithCard(u: {
+    token: string
+  }): Promise<{ noteId: string; cardId: string; targetSubjectId: string }> {
+    const { id: noteId } = (await (
+      await notesPOST(
+        postReq(u.token, '/api/notes', {
+          note: { title: 'P2', content: 'body', subject_title: `from-${Date.now()}-${seq++}` },
+          checks: [{ prompt: 'linked?', example: '', code_context: '' }],
+        }),
+      )
+    ).json()) as { id: string }
+    const { cards } = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as { cards: { id: string }[] }
+    const { id: targetSubjectId } = (await (
+      await subjectsPOST(postReq(u.token, '/api/subjects', { title: `to-${Date.now()}-${seq++}` }))
+    ).json()) as { id: string }
+    return { noteId, cardId: cards[0].id, targetSubjectId }
+  }
+
+  it('PATCH /api/notes/:id move-all default: a subject change carries the linked cards along', async () => {
+    const u = await userWithToken()
+    const { noteId, cardId, targetSubjectId } = await seedNoteWithCard(u)
+
+    const res = await noteIdPATCH(
+      patchReq(u.token, `/api/notes/${noteId}`, {
+        title: 'P2',
+        content: 'body',
+        subject_id: targetSubjectId,
+      }),
+      idCtx(noteId),
+    )
+    expect(res.status).toBe(200)
+
+    // The card moved to the new subject AND stayed linked (note_id intact).
+    const { note, cards } = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as {
+      note: { subject_id: string | null }
+      cards: { id: string; subject_id: string | null; note_id: string | null }[]
+    }
+    expect(note.subject_id).toBe(targetSubjectId)
+    expect(cards).toHaveLength(1)
+    expect(cards[0].id).toBe(cardId)
+    expect(cards[0].subject_id).toBe(targetSubjectId)
+    expect(cards[0].note_id).toBe(noteId)
+  })
+
+  it('PATCH /api/notes/:id with card_actions.unlink detaches the named cards (note_id → null)', async () => {
+    const u = await userWithToken()
+    const { noteId, cardId, targetSubjectId } = await seedNoteWithCard(u)
+
+    const res = await noteIdPATCH(
+      patchReq(u.token, `/api/notes/${noteId}`, {
+        title: 'P2',
+        content: 'body',
+        subject_id: targetSubjectId,
+        card_actions: { move: [], unlink: [cardId] },
+      }),
+      idCtx(noteId),
+    )
+    expect(res.status).toBe(200)
+
+    // The note now owns no cards; the card survives, unlinked (visible via the unfiled filter only if
+    // its own subject is null — it was, so it lands there).
+    const { cards } = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as { cards: unknown[] }
+    expect(cards).toHaveLength(0)
+    const unfiled = (await (
+      await cardsGET(getReq(u.token, '/api/memory-cards?unfiled=true'))
+    ).json()) as { cards: { id: string }[] }
+    expect(unfiled.cards.some((c) => c.id === cardId)).toBe(true)
+  })
+
+  it('PATCH /api/memory-cards/:id changing an attached card subject forces an unlink; field-only edit keeps the link', async () => {
+    const u = await userWithToken()
+    const { noteId, cardId, targetSubjectId } = await seedNoteWithCard(u)
+
+    // Field-only edit (subject unchanged, still null) → stays linked.
+    const fieldOnly = await cardIdPATCH(
+      patchReq(u.token, `/api/memory-cards/${cardId}`, {
+        prompt: 'edited prompt',
+        example: '',
+        code_context: '',
+        subject_id: null,
+      }),
+      idCtx(cardId),
+    )
+    expect(fieldOnly.status).toBe(200)
+    const stillLinked = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as { cards: { id: string; prompt: string }[] }
+    expect(stillLinked.cards).toHaveLength(1)
+    expect(stillLinked.cards[0].prompt).toBe('edited prompt')
+
+    // Subject change on the (still attached) card → forced unlink (note_id → null), new subject kept.
+    const moved = await cardIdPATCH(
+      patchReq(u.token, `/api/memory-cards/${cardId}`, {
+        prompt: 'edited prompt',
+        example: '',
+        code_context: '',
+        subject_id: targetSubjectId,
+      }),
+      idCtx(cardId),
+    )
+    expect(moved.status).toBe(200)
+    const afterMove = (await (
+      await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
+    ).json()) as { cards: unknown[] }
+    expect(afterMove.cards).toHaveLength(0) // unlinked
+    const bySubject = (await (
+      await cardsGET(getReq(u.token, `/api/memory-cards?subject=${targetSubjectId}`))
+    ).json()) as { cards: { id: string }[] }
+    expect(bySubject.cards.some((c) => c.id === cardId)).toBe(true)
+  })
+
+  it('PATCH id routes: foreign id → 404, malformed body → 400, no token → 401', async () => {
+    const u = await userWithToken()
+    const { noteId, cardId } = await seedNoteWithCard(u)
+    const other = await userWithToken()
+
+    // Foreign caller can't touch either row → 404 (RLS-invisible, don't leak existence).
+    expect(
+      (
+        await noteIdPATCH(
+          patchReq(other.token, `/api/notes/${noteId}`, { title: 'x', content: '' }),
+          idCtx(noteId),
+        )
+      ).status,
+    ).toBe(404)
+    expect(
+      (
+        await cardIdPATCH(
+          patchReq(other.token, `/api/memory-cards/${cardId}`, {
+            prompt: 'x',
+            example: '',
+            code_context: '',
+            subject_id: null,
+          }),
+          idCtx(cardId),
+        )
+      ).status,
+    ).toBe(404)
+
+    // Malformed body (missing required title) → 400.
+    expect(
+      (await noteIdPATCH(patchReq(u.token, `/api/notes/${noteId}`, { content: '' }), idCtx(noteId)))
+        .status,
+    ).toBe(400)
+    // No token → 401.
+    expect((await noteIdPATCH(delReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
+    expect((await cardIdPATCH(delReq(null, '/api/memory-cards/x'), idCtx('x'))).status).toBe(401)
   })
 })

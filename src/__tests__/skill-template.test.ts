@@ -28,6 +28,14 @@ describe('CLC_SKILL_TEMPLATE', () => {
     expect(CLC_SKILL_TEMPLATE).toContain('DELETE /api/subjects/:id')
   })
 
+  it('documents the Phase-2 PATCH endpoints + the linked/unlinked card invariant', () => {
+    expect(CLC_SKILL_TEMPLATE).toContain('PATCH /api/notes/:id')
+    expect(CLC_SKILL_TEMPLATE).toContain('PATCH /api/memory-cards/:id')
+    // The move-all default + the explicit per-card override must both be taught.
+    expect(CLC_SKILL_TEMPLATE).toContain('card_actions')
+    expect(CLC_SKILL_TEMPLATE).toContain('Linked vs standalone cards')
+  })
+
   it('warns about the delete cascade / unfile semantics', () => {
     expect(CLC_SKILL_TEMPLATE).toContain('Deleting a note also deletes all of its cards')
     expect(CLC_SKILL_TEMPLATE).toContain('Deleting a subject does NOT delete its notes or cards')

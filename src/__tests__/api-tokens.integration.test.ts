@@ -18,6 +18,9 @@ describe.skipIf(!RUN)('api token pipeline (integration)', () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL ??= SUPABASE_URL
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= ANON_KEY
   process.env.SUPABASE_JWT_SECRET ??= JWT_SECRET
+  // The client env (env.ts) eager-parses every NEXT_PUBLIC_* on import — incl. the contact-form sender
+  // — so importing any route handler needs this set even though these tests send no email.
+  process.env.NEXT_PUBLIC_EMAIL_USER ??= 'noreply@example.com'
 
   let authenticateRequest: typeof import('@/features/api-tokens/authenticate-request').authenticateRequest
   let generateToken: typeof import('@/features/api-tokens/token').generateToken

@@ -100,6 +100,33 @@ curl -s -H "$AUTH" "$BASE/api/notes/<note-uuid>"
 #   }
 ```
 
+### `PATCH /api/notes/:id` — edit a note / move it between subjects
+
+Send the full note fields (`title` required, `content` required — may be `""`). Set `subject_id` to move the
+note to another subject (a uuid), to `null` to unfile it, or **omit it** to leave the subject unchanged.
+
+When you change `subject_id`, the note's linked cards come along by default (they keep sharing the note's
+subject). Override that per-card with an optional `card_actions`:
+
+- `move` — card ids that follow the note to the new subject (stay linked).
+- `unlink` — card ids that detach instead (`note_id` → `null`), keeping their current subject as standalone.
+
+Omitting `card_actions` on a subject change = **move all** the note's linked cards. A non-existent or
+not-yours id returns `404`. See ["Linked vs standalone cards"](#linked-vs-standalone-cards) for the rule.
+
+```bash
+# move the note (and all its cards) to another subject
+curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
+  -d '{"title":"Ownership basics","content":"# Ownership","subject_id":"<subject-uuid>"}' \
+  "$BASE/api/notes/<note-uuid>"
+# → 200 { "id": "<note-uuid>" }
+
+# move the note but DETACH one card instead of moving it
+curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
+  -d '{"title":"Ownership basics","content":"# Ownership","subject_id":"<subject-uuid>","card_actions":{"move":[],"unlink":["<card-uuid>"]}}' \
+  "$BASE/api/notes/<note-uuid>"
+```
+
 ### `POST /api/notes` — create a note (+ optional cards)
 
 ````jsonc
@@ -168,6 +195,34 @@ curl -s -H "$AUTH" "$BASE/api/memory-cards?unfiled=true"
 # → { "cards": [ { "id": "<uuid>", "prompt": "...", "example": "...|null",
 #                 "code_context": "...|null", "note_id": "<uuid>|null", "subject_id": "<uuid>|null" }, ... ] }
 ```
+
+### `PATCH /api/memory-cards/:id` — edit a card / change its subject
+
+Send the full card field set (`prompt`, `example`, `code_context` — same string rules as on create) plus
+`subject_id` (a uuid or `null`). Editing only the text fields leaves any note link intact. **Changing the
+subject of a card that is attached to a note UNLINKS it** (`note_id` → `null`) — see
+["Linked vs standalone cards"](#linked-vs-standalone-cards). A non-existent or not-yours id returns `404`.
+
+```bash
+curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
+  -d '{"prompt":"Borrow vs move?","example":"","code_context":"","subject_id":"<subject-uuid>"}' \
+  "$BASE/api/memory-cards/<card-uuid>"
+# → 200 { "id": "<card-uuid>" }
+```
+
+## Linked vs standalone cards
+
+A card is either **linked** to a note (`note_id` set) or **standalone** (`note_id: null`). One rule the app
+enforces everywhere — including this API — governs the difference:
+
+- A **linked** card always shares its note's subject. You don't set its subject independently; it follows
+  the note.
+- Moving a note (`PATCH /api/notes/:id` with a new `subject_id`) moves its linked cards too, by default. Use
+  `card_actions.unlink` to peel specific cards off instead — they become standalone, keeping their subject.
+- Changing the subject of a **linked** card (`PATCH /api/memory-cards/:id` with a different `subject_id`)
+  **unlinks it**: a card can't both stay attached and carry a different subject than its note, so it detaches
+  and becomes standalone under the new subject. Editing only its text fields keeps the link.
+- A **standalone** card owns its subject freely (a uuid, or `null` for unfiled).
 
 ### Deleting — `DELETE /api/notes/:id` · `DELETE /api/memory-cards/:id` · `DELETE /api/subjects/:id`
 

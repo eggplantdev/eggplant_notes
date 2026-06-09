@@ -2,16 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { updateMemoryCardCore } from '@/features/memory-cards/update-memory-card-core'
 import { cardWithSubjectSchema, memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// Hand-rolls the envelope (not runTableAction) because it reads the card's current note for
-// revalidation and can clear the link in the same write. Invariant: a linked card shares its note's
-// subject, so changing its subject must unlink it — `unlinkFromNote` then sets `note_id = null`
-// alongside the new subject. RLS scopes the update to the owner.
+// Cookie-client entry point for the card edit form. The field write + forced-unlink live in
+// updateMemoryCardCore (shared with PATCH /api/memory-cards/:id); the caller-computed `unlinkFromNote`
+// comes from the form. This wrapper validates, then revalidates the old note page (if any) + redirects.
 export async function updateMemoryCard(
   id: string,
   input: unknown,
@@ -23,26 +23,10 @@ export async function updateMemoryCard(
   if (!parsed.success) return parsed
 
   const supabase = await createClient()
-  // Read note_id before the write — lost from the row once we unlink.
-  const { data: current } = await supabase
-    .from('memory_cards')
-    .select('note_id')
-    .eq('id', parsedId.data)
-    .maybeSingle()
+  const result = await updateMemoryCardCore(supabase, parsedId.data, parsed.data, unlinkFromNote)
+  if ('error' in result) return { success: false, error: result.error }
 
-  const patch = unlinkFromNote ? { ...parsed.data, note_id: null } : parsed.data
-  const { error } = await supabase
-    .from('memory_cards')
-    .update(patch)
-    .eq('id', parsedId.data)
-    .select('id')
-    .single()
-  if (error) {
-    console.error('[updateMemoryCard] PostgREST error', error)
-    return { success: false, error: error.message }
-  }
-
-  if (current?.note_id) revalidatePath(`/notes/${current.note_id}`)
+  if (result.previousNoteId) revalidatePath(`/notes/${result.previousNoteId}`)
   revalidatePath('/memory-cards')
   toastRedirect('/memory-cards', 'card-saved')
 }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { TOKEN_NAME_MAX_LENGTH, mintTokenSchema } from '@/features/api-tokens/schemas'
+import {
+  TOKEN_NAME_MAX_LENGTH,
+  mintTokenSchema,
+  patchNoteBodySchema,
+} from '@/features/api-tokens/schemas'
 import { validateInput } from '@/lib/validate'
 
 // The mint form's field validator and the mint action both run the name through these schemas, so this
@@ -28,5 +32,41 @@ describe('validateInput + mintTokenSchema', () => {
   it(`accepts a name at exactly ${TOKEN_NAME_MAX_LENGTH} characters`, () => {
     const result = validateInput(mintTokenSchema, { name: 'x'.repeat(TOKEN_NAME_MAX_LENGTH) })
     expect(result.success).toBe(true)
+  })
+})
+
+// PATCH /api/notes/:id body. `card_actions` is optional; when present, both arrays must hold
+// uuid-SHAPED ids (z.guid — see the DB-id lesson). A version-0 seed id must pass (z.uuid would reject).
+describe('patchNoteBodySchema', () => {
+  it('accepts the note fields with no card_actions', () => {
+    expect(validateInput(patchNoteBodySchema, { title: 'T', content: '' }).success).toBe(true)
+  })
+
+  it('accepts a subject move with explicit card_actions (incl. a non-RFC version-0 id)', () => {
+    const result = validateInput(patchNoteBodySchema, {
+      title: 'T',
+      content: '',
+      subject_id: '11111111-0000-0000-0000-000000000000',
+      card_actions: { move: ['22222222-0000-0000-0000-000000000000'], unlink: [] },
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a malformed card id in card_actions', () => {
+    const result = validateInput(patchNoteBodySchema, {
+      title: 'T',
+      content: '',
+      card_actions: { move: ['not-a-uuid'], unlink: [] },
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects card_actions missing a required array', () => {
+    const result = validateInput(patchNoteBodySchema, {
+      title: 'T',
+      content: '',
+      card_actions: { move: [] },
+    })
+    expect(result.success).toBe(false)
   })
 })
