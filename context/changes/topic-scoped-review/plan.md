@@ -189,9 +189,9 @@ None — no schema change. `memory_cards.subject_id` already exists and is index
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes on memory-cards/page.tsx
-- [x] 2.3 Build succeeds: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — 11f5e71
+- [x] 2.2 Linting passes on memory-cards/page.tsx — 11f5e71
+- [x] 2.3 Build succeeds: `pnpm build` — 11f5e71
 
 #### Manual
 
