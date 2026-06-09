@@ -182,8 +182,8 @@ None — no schema change. `memory_cards.subject_id` already exists and is index
 
 #### Manual
 
-- [ ] 1.4 Dashboard review unregressed (rate → next due card appears)
-- [ ] 1.5 Standalone `/memory-cards/[id]` queue walk still advances
+- [x] 1.4 Dashboard review unregressed (rate → next due card appears)
+- [x] 1.5 Standalone `/memory-cards/[id]` queue walk still advances
 
 ### Phase 2: Page wiring
 
@@ -195,9 +195,9 @@ None — no schema change. `memory_cards.subject_id` already exists and is index
 
 #### Manual
 
-- [ ] 2.4 No-filter panel card matches the dashboard's due card
-- [ ] 2.5 Subject filter scopes the panel; subtitle + count correct
-- [ ] 2.6 Rating advances in-filter; exhausting shows CaughtUpNotice, list still renders
-- [ ] 2.7 Goal-crossing celebration dialog shows on `/memory-cards`
-- [ ] 2.8 No-match search shows list empty state and no Review panel
-- [ ] 2.9 Combined filters scope the due queue by all simultaneously
+- [x] 2.4 No-filter panel card matches the dashboard's due card
+- [x] 2.5 Subject filter scopes the panel; subtitle + count correct
+- [x] 2.6 Rating advances in-filter; exhausting shows CaughtUpNotice, list still renders
+- [x] 2.7 Goal-crossing celebration dialog shows on `/memory-cards`
+- [x] 2.8 No-match search shows list empty state and no Review panel
+- [x] 2.9 Combined filters scope the due queue by all simultaneously
