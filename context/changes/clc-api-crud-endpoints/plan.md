@@ -265,16 +265,16 @@ None — no schema change. The cores are a behavior-preserving refactor of exist
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `pnpm typecheck`
-- [x] 2.2 Linting passes: `pnpm lint`
-- [x] 2.3 Unit tests pass (incl. unchanged action tests): `pnpm test`
-- [x] 2.4 Integration tests pass (move-all + forced-unlink): `pnpm test:integration`
-- [x] 2.5 Skill-template pinning test passes: `pnpm test src/__tests__/skill-template.test.ts`
-- [x] 2.6 Production build succeeds: `pnpm build`
+- [x] 2.1 Type checking passes: `pnpm typecheck` — a4bb2e6
+- [x] 2.2 Linting passes: `pnpm lint` — a4bb2e6
+- [x] 2.3 Unit tests pass (incl. unchanged action tests): `pnpm test` — a4bb2e6
+- [x] 2.4 Integration tests pass (move-all + forced-unlink): `pnpm test:integration` — a4bb2e6
+- [x] 2.5 Skill-template pinning test passes: `pnpm test src/__tests__/skill-template.test.ts` — a4bb2e6
+- [x] 2.6 Production build succeeds: `pnpm build` — a4bb2e6
 
 #### Manual
 
-- [x] 2.7 PATCH note subject (no card_actions) → linked cards moved, still linked — integration-covered (move-all default reads back subject_id + note_id)
-- [x] 2.8 PATCH note with card_actions.unlink → those cards note_id null, old subject kept — integration-covered
-- [x] 2.9 PATCH attached card's subject → unlinked (note_id null); field-only edit keeps link — integration-covered (forced-unlink + field-only)
-- [x] 2.10 UI note/card edit + note-move dialog behave identically post-refactor — E2E-verified (`notes.spec.ts` green; the 2 late-run failures were a server-died `ERR_CONNECTION_REFUSED`, confirmed passing on isolated re-run)
+- [x] 2.7 PATCH note subject (no card_actions) → linked cards moved, still linked — integration-covered (move-all default reads back subject_id + note_id) — a4bb2e6
+- [x] 2.8 PATCH note with card_actions.unlink → those cards note_id null, old subject kept — integration-covered — a4bb2e6
+- [x] 2.9 PATCH attached card's subject → unlinked (note_id null); field-only edit keeps link — integration-covered (forced-unlink + field-only) — a4bb2e6
+- [x] 2.10 UI note/card edit + note-move dialog behave identically post-refactor — E2E-verified (`notes.spec.ts` green; the 2 late-run failures were a server-died `ERR_CONNECTION_REFUSED`, confirmed passing on isolated re-run) — a4bb2e6
