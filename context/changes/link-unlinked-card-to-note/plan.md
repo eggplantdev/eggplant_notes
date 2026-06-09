@@ -327,15 +327,15 @@ None — both `note_id` and `subject_id` columns already exist; no data backfill
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `pnpm typecheck`
-- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.1 Type checking passes: `pnpm typecheck` — fd04b3b
+- [x] 1.2 Linting passes: `pnpm lint` — fd04b3b
 
 ### Phase 2: Shared dialog component
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `pnpm typecheck`
-- [ ] 2.2 Linting passes: `pnpm lint`
+- [x] 2.1 Type checking passes: `pnpm typecheck`
+- [x] 2.2 Linting passes: `pnpm lint`
 
 ### Phase 3: Wire the three triggers
 
