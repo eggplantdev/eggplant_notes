@@ -2,33 +2,30 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { insertNoteWithChecks } from '@/features/notes/insert-note-with-checks'
 import { createNoteWithChecksSchema } from '@/features/notes/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// `user_id` is NOT sent — the DB defaults it to auth.uid() and RLS `with check` guards it, so a
-// client can't spoof ownership. `position = Date.now()` appends to the subject's end without a
-// max() read (no append race); unassigned notes have null position. Uses an RPC (not
-// runTableAction, which is single-table) to insert the note + its checks in one transaction, so
-// the envelope is hand-rolled. redirect throws, so the form only ever observes the failure branch.
+// Cookie-client entry point for the create-note form. The actual note+checks write lives in
+// insertNoteWithChecks (shared with POST /api/notes); here we just validate, run it, and redirect.
+// redirect throws, so the form only ever observes the failure branch.
 export async function createNote(input: unknown): Promise<ActionResultT> {
   const parsed = validateInput(createNoteWithChecksSchema, input)
   if (!parsed.success) return parsed
-  const { note, checks } = parsed.data
 
   const supabase = await createClient()
-  // Append (position = epoch ms) when the note lands in ANY subject — existing id or a new title the
-  // RPC will create; unassigned notes get null position. The RPC resolves subject_id|subject_title.
-  const hasSubject = Boolean(note.subject_id || note.subject_title)
-  const { data: newId, error } = await supabase.rpc('create_note_with_checks', {
-    p_note: { ...note, position: hasSubject ? Date.now() : null },
-    p_checks: checks,
-  })
-  if (error) {
+  let newId: string
+  try {
+    newId = await insertNoteWithChecks(supabase, parsed.data)
+  } catch (error) {
     console.error('[createNote] create_note_with_checks error', error)
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create note',
+    }
   }
 
   revalidatePath('/notes')

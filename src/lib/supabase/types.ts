@@ -28,6 +28,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          scopes: string[]
+          token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          token_hash: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          token_hash?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       memory_cards: {
         Row: {
           code_context: string | null
@@ -319,6 +355,7 @@ export type Database = {
         Args: { p_card: Json; p_memory_card_id: string; p_rating: number }
         Returns: undefined
       }
+      resolve_api_token: { Args: { p_hash: string }; Returns: string }
       review_day_counts: {
         Args: { p_since?: string; p_time_zone: string }
         Returns: {

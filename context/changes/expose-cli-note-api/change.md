@@ -1,11 +1,21 @@
 ---
 change_id: expose-cli-note-api
 title: Expose a CLI/agent HTTP API to add notes + cards via personal API tokens
-status: new
+status: implementing
 created: 2026-06-06
-updated: 2026-06-06
+updated: 2026-06-09
 archived_at: null
 ---
+
+## Plan refinements (2026-06-08) — supersede where they conflict with Notes below
+
+Two settled deviations from the original Notes, decided during `/10x-plan`:
+
+1. **Service-role DROPPED from the write path (keep RLS).** The original Notes said this would be "the first service-role code path" with the ownership wall in app code. It isn't needed. The repo's own `create_note_with_checks` is `SECURITY INVOKER` and there is no service-role client anywhere — we keep it that way. The ONLY elevated surface is a single `anon`-granted `SECURITY DEFINER` function `resolve_api_token(p_hash) → user_id` (returns a uuid only to a caller already holding the correct token; bumps `last_used_at`). After that we mint a short-lived user-scoped JWT (`jose`, HS256 via `SUPABASE_JWT_SECRET` locally + legacy hosted; asymmetric ES256 is a deploy-time key swap), build a supabase-js client with the `accessToken` option, and reuse the existing INVOKER RPC/actions UNCHANGED so RLS (`user_id = auth.uid()`) is the ownership wall. No `SUPABASE_SERVICE_ROLE_KEY` enters the app.
+
+2. **Surface expanded from "add note (+cards)" to 4 endpoints** — an agent must read structure to decide placement: `GET /api/subjects`, `GET /api/notes` (titles, optional `?subject`), `POST /api/notes` (note + optional cards), `POST /api/memory-cards` (body discriminates: `note_id` → attach to note; `subject_id` → standalone). All four ride the one auth pipeline; reads are RLS-scoped to the token's user by the same minted JWT.
+
+Other settled choices: token = `clc_` + 32 random bytes (base64url), store only `sha256`; `scopes` column stored-not-enforced in Phase 1; rate limiting deferred to Phase 2 (cheap defenses only: short token expiry, non-enumerable hash, Supabase's own limits); the load-bearing isolation gate is a Vitest integration test against local Supabase with two real users.
 
 ## Notes
 
