@@ -35,11 +35,7 @@ export async function POST(request: Request) {
   const parsed = validateInput(subjectInputSchema, parsedBody.body)
   if (!parsed.success) return errorJson(400, parsed.error)
 
-  try {
-    const { id } = await createSubjectCore(auth.supabase, parsed.data)
-    return NextResponse.json({ id }, { status: 201 })
-  } catch (error) {
-    console.error('[POST /api/subjects] insert error', error)
-    return errorJson(500, 'Failed to create subject')
-  }
+  const result = await createSubjectCore(auth.supabase, parsed.data)
+  if ('error' in result) return errorJson(500, 'Failed to create subject')
+  return NextResponse.json({ id: result.id }, { status: 201 })
 }

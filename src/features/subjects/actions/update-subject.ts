@@ -20,17 +20,8 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
   if (!parsed.success) return parsed
 
   const supabase = await createClient()
-  let row: { id: string } | undefined
-  try {
-    row = await updateSubjectCore(supabase, parsedId.data, parsed.data)
-  } catch (error) {
-    console.error('[updateSubject] update error', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to update subject',
-    }
-  }
-  if (!row) return { success: false, error: 'Subject not found' }
+  const result = await updateSubjectCore(supabase, parsedId.data, parsed.data)
+  if ('error' in result) return { success: false, error: result.error }
 
   revalidatePath('/subjects')
   revalidatePath(`/subjects/${parsedId.data}`)

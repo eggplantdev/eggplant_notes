@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
-import { authError, errorJson, readJsonBody } from '@/features/api-tokens/route-helpers'
+import {
+  authError,
+  deleteRowResponse,
+  errorJson,
+  readJsonBody,
+} from '@/features/api-tokens/route-helpers'
 import { patchNoteBodySchema } from '@/features/api-tokens/schemas'
 import { noteIdSchema } from '@/features/notes/schemas'
 import { updateNoteCore, type CardActionsT } from '@/features/notes/update-note-core'
@@ -59,19 +64,11 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/notes/[id]
   const { card_actions, ...noteInput } = parsed.data
 
   // Move-all default: a subject change with no explicit plan moves every linked card with the note.
-  // Reading the linked card ids here (not in the core) keeps "cards follow their note" a route concern
-  // — the UI passes its own per-card decisions and never hits this branch.
+  // The `move: 'all'` sentinel lets the core do that by `note_id` alone — no pre-read to enumerate ids.
+  // The UI passes its own per-card decisions and never hits this branch.
   let cardActions: CardActionsT | undefined = card_actions
   if (noteInput.subject_id !== undefined && !cardActions) {
-    const { data: linked, error: linkedError } = await auth.supabase
-      .from('memory_cards')
-      .select('id')
-      .eq('note_id', parsedId.data)
-    if (linkedError) {
-      console.error('[PATCH /api/notes/:id] linked-card read error', linkedError)
-      return errorJson(500, 'Failed to read linked cards')
-    }
-    cardActions = { move: linked.map((c) => c.id), unlink: [] }
+    cardActions = { move: 'all', unlink: [] }
   }
 
   const result = await updateNoteCore(auth.supabase, parsedId.data, noteInput, cardActions)
@@ -92,16 +89,5 @@ export async function DELETE(request: Request, ctx: RouteContext<'/api/notes/[id
   const parsedId = validateInput(noteIdSchema, id)
   if (!parsedId.success) return errorJson(400, parsedId.error)
 
-  const { data, error } = await auth.supabase
-    .from('notes')
-    .delete()
-    .eq('id', parsedId.data)
-    .select('id')
-    .maybeSingle()
-  if (error) {
-    console.error('[DELETE /api/notes/:id] delete error', error)
-    return errorJson(500, 'Failed to delete note')
-  }
-  if (!data) return errorJson(404, 'Note not found')
-  return NextResponse.json({ id: data.id })
+  return deleteRowResponse(auth.supabase, 'notes', parsedId.data, 'Note')
 }

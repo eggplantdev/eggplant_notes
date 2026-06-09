@@ -17,17 +17,9 @@ export async function createSubject(input: unknown): Promise<ActionResultT> {
   if (!parsed.success) return parsed
 
   const supabase = await createClient()
-  let id: string
-  try {
-    ;({ id } = await createSubjectCore(supabase, parsed.data))
-  } catch (error) {
-    console.error('[createSubject] insert error', error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create subject',
-    }
-  }
+  const result = await createSubjectCore(supabase, parsed.data)
+  if ('error' in result) return { success: false, error: result.error }
 
   revalidatePath('/subjects')
-  toastRedirect(`/subjects/${id}`, 'subject-saved')
+  toastRedirect(`/subjects/${result.id}`, 'subject-saved')
 }

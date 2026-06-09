@@ -86,20 +86,20 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     },
     onSubmit: async ({ value }) => {
       // A linked card shares its note's subject, so changing its subject must unlink it — confirm
-      // before saving.
+      // before saving. (The core re-derives the unlink server-side; this gate is purely the UX warning.)
       if (card?.note_id && value.subject_id !== card.subject_id) {
         setPendingValues(value)
         return
       }
-      await submitCard(value, false)
+      await submitCard(value)
     },
   })
 
   // Success redirects (throws), so only the failure branch is observed.
-  async function submitCard(values: CardFormValuesT, unlinkFromNote: boolean) {
+  async function submitCard(values: CardFormValuesT) {
     setPendingValues(undefined)
     const result = card
-      ? await updateMemoryCard(card.id, values, unlinkFromNote)
+      ? await updateMemoryCard(card.id, values)
       : await createStandaloneCard(values)
     reportResult(result)
   }
@@ -260,7 +260,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 data-testid="card-unlink-confirm"
-                onClick={() => submitCard(pendingValues, true)}
+                onClick={() => submitCard(pendingValues)}
               >
                 Unlink &amp; save
               </AlertDialogAction>

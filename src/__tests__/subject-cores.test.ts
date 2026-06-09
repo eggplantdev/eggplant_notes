@@ -48,9 +48,9 @@ describe('createSubjectCore', () => {
     expect(calls.insert).toEqual(data)
   })
 
-  it('throws the PostgREST error so the caller can shape the result', async () => {
+  it('returns the error as a value so the caller can shape the result', async () => {
     const { client } = fakeClient({ data: null, error: { message: 'boom' } })
-    await expect(createSubjectCore(client, data)).rejects.toMatchObject({ message: 'boom' })
+    await expect(createSubjectCore(client, data)).resolves.toEqual({ error: 'boom' })
   })
 })
 
@@ -65,13 +65,16 @@ describe('updateSubjectCore', () => {
     expect(calls.eq).toEqual(['id', 's1'])
   })
 
-  it('resolves undefined when RLS matches no row (not-found, not an error)', async () => {
+  it('returns notFound when RLS matches no row (not-found, not an error)', async () => {
     const { client } = fakeClient({ data: null, error: null })
-    await expect(updateSubjectCore(client, 'missing', data)).resolves.toBeUndefined()
+    await expect(updateSubjectCore(client, 'missing', data)).resolves.toEqual({
+      error: 'Subject not found',
+      notFound: true,
+    })
   })
 
-  it('throws on a real PostgREST error', async () => {
+  it('returns the error as a value on a real PostgREST error', async () => {
     const { client } = fakeClient({ data: null, error: { message: 'boom' } })
-    await expect(updateSubjectCore(client, 's1', data)).rejects.toMatchObject({ message: 'boom' })
+    await expect(updateSubjectCore(client, 's1', data)).resolves.toEqual({ error: 'boom' })
   })
 })

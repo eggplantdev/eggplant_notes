@@ -86,6 +86,27 @@ describe('updateNoteCore', () => {
     expect(cardUpdates[1].args[0]).toEqual({ note_id: null }) // unlink detaches
   })
 
+  it('move: "all" moves every linked card by note_id without enumerating ids', async () => {
+    const { client, calls } = fakeClient([
+      { data: { subject_id: 'A' } },
+      { data: { id: 'n1' } },
+      { error: null }, // card move-all (awaited .update().eq('note_id') chain)
+    ])
+    const result = await updateNoteCore(
+      client,
+      'n1',
+      { ...noteInput, subject_id: 'B' },
+      { move: 'all', unlink: [] },
+    )
+
+    expect(result).toEqual({ id: 'n1', subjectChanged: true })
+    const cardUpdates = calls.filter((c) => c.from === 'memory_cards' && c.op === 'update')
+    expect(cardUpdates).toHaveLength(1)
+    expect(cardUpdates[0].args[0]).toEqual({ subject_id: 'B' })
+    // Moved by note_id alone — no `id IN (…)` filter.
+    expect(calls.some((c) => c.from === 'memory_cards' && c.op === 'in')).toBe(false)
+  })
+
   it('move to None nulls position', async () => {
     const { client, calls } = fakeClient([{ data: { subject_id: 'A' } }, { data: { id: 'n1' } }])
     await updateNoteCore(client, 'n1', { ...noteInput, subject_id: null })
@@ -102,17 +123,25 @@ describe('updateNoteCore', () => {
 describe('updateMemoryCardCore', () => {
   const cardInput = { prompt: 'Q?', example: null, code_context: null, subject_id: 'B' }
 
-  it('forced unlink adds note_id:null to the patch and reports the previous note', async () => {
-    const { client, calls } = fakeClient([{ data: { note_id: 'n1' } }, { data: { id: 'c1' } }])
-    const result = await updateMemoryCardCore(client, 'c1', cardInput, true)
+  it('self-detects the forced unlink (linked card, subject changed) and reports the previous note', async () => {
+    // current row: linked to n1, on subject A; input moves it to B → must unlink.
+    const { client, calls } = fakeClient([
+      { data: { note_id: 'n1', subject_id: 'A' } },
+      { data: { id: 'c1' } },
+    ])
+    const result = await updateMemoryCardCore(client, 'c1', cardInput)
 
     expect(result).toEqual({ id: 'c1', previousNoteId: 'n1' })
     expect(updatePatch(calls, 'memory_cards')).toMatchObject({ note_id: null, subject_id: 'B' })
   })
 
-  it('without unlink leaves the link intact', async () => {
-    const { client, calls } = fakeClient([{ data: { note_id: 'n1' } }, { data: { id: 'c1' } }])
-    const result = await updateMemoryCardCore(client, 'c1', cardInput, false)
+  it('leaves the link intact when the subject is unchanged', async () => {
+    // current row: linked to n1, already on subject B; input keeps B → no unlink.
+    const { client, calls } = fakeClient([
+      { data: { note_id: 'n1', subject_id: 'B' } },
+      { data: { id: 'c1' } },
+    ])
+    const result = await updateMemoryCardCore(client, 'c1', cardInput)
 
     expect(result).toEqual({ id: 'c1', previousNoteId: 'n1' })
     expect(updatePatch(calls, 'memory_cards')).not.toHaveProperty('note_id')
@@ -120,7 +149,7 @@ describe('updateMemoryCardCore', () => {
 
   it('returns notFound when the update matches no row', async () => {
     const { client } = fakeClient([{ data: null }, { data: null }])
-    const result = await updateMemoryCardCore(client, 'missing', cardInput, false)
+    const result = await updateMemoryCardCore(client, 'missing', cardInput)
     expect(result).toEqual({ error: 'Card not found', notFound: true })
   })
 })

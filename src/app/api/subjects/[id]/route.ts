@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
-import { authError, errorJson, readJsonBody } from '@/features/api-tokens/route-helpers'
+import {
+  authError,
+  deleteRowResponse,
+  errorJson,
+  readJsonBody,
+} from '@/features/api-tokens/route-helpers'
 import { subjectIdSchema, subjectInputSchema } from '@/features/subjects/schemas'
 import { updateSubjectCore } from '@/features/subjects/update-subject-core'
 import { validateInput } from '@/lib/validate'
@@ -21,14 +26,12 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/subjects/[
   const parsed = validateInput(subjectInputSchema, parsedBody.body)
   if (!parsed.success) return errorJson(400, parsed.error)
 
-  try {
-    const row = await updateSubjectCore(auth.supabase, parsedId.data, parsed.data)
-    if (!row) return errorJson(404, 'Subject not found')
-    return NextResponse.json({ id: row.id })
-  } catch (error) {
-    console.error('[PATCH /api/subjects/:id] update error', error)
+  const result = await updateSubjectCore(auth.supabase, parsedId.data, parsed.data)
+  if ('error' in result) {
+    if (result.notFound) return errorJson(404, 'Subject not found')
     return errorJson(500, 'Failed to update subject')
   }
+  return NextResponse.json({ id: result.id })
 }
 
 // DELETE /api/subjects/:id — delete a subject. The FK `ON DELETE SET NULL` unfiles its member notes/cards
@@ -41,16 +44,5 @@ export async function DELETE(request: Request, ctx: RouteContext<'/api/subjects/
   const parsedId = validateInput(subjectIdSchema, id)
   if (!parsedId.success) return errorJson(400, parsedId.error)
 
-  const { data, error } = await auth.supabase
-    .from('subjects')
-    .delete()
-    .eq('id', parsedId.data)
-    .select('id')
-    .maybeSingle()
-  if (error) {
-    console.error('[DELETE /api/subjects/:id] delete error', error)
-    return errorJson(500, 'Failed to delete subject')
-  }
-  if (!data) return errorJson(404, 'Subject not found')
-  return NextResponse.json({ id: data.id })
+  return deleteRowResponse(auth.supabase, 'subjects', parsedId.data, 'Subject')
 }

@@ -6,7 +6,11 @@ import type { Database } from '@/lib/supabase/types'
 // Per-card decisions when a note's subject changes: each linked card is either MOVED to the new
 // subject (stays linked — preserves the invariant that a linked card shares its note's subject)
 // or UNLINKED (note_id → null, kept on its current subject as standalone).
-export type CardActionsT = { move: string[]; unlink: string[] }
+// `move: 'all'` is the move-everything default (the common case: subject change with no explicit plan)
+// — it lets the core move by `note_id` alone instead of the caller pre-reading every linked id only to
+// hand them back as an `id IN (…)` filter the `note_id` match already covers. `'all'` only ever pairs
+// with `unlink: []`; explicit per-card plans always use an id array.
+export type CardActionsT = { move: string[] | 'all'; unlink: string[] }
 
 // Shared note-update core — patch derivation, subject-change detection, the position rule, and the
 // per-card move/unlink fan-out. Everything from the updateNote action minus revalidate/redirect, so
@@ -52,7 +56,17 @@ export async function updateNoteCore(
 
   // Per-card decisions apply only on a real subject change.
   if (subjectChanged && cardActions) {
-    if (cardActions.move.length > 0) {
+    if (cardActions.move === 'all') {
+      // Move every linked card by note_id — no id enumeration needed.
+      const { error: moveError } = await supabase
+        .from('memory_cards')
+        .update({ subject_id: input.subject_id })
+        .eq('note_id', id)
+      if (moveError) {
+        console.error('[updateNoteCore] card move error', moveError)
+        return { error: moveError.message }
+      }
+    } else if (cardActions.move.length > 0) {
       const { error: moveError } = await supabase
         .from('memory_cards')
         .update({ subject_id: input.subject_id })
