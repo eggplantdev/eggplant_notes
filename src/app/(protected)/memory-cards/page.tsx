@@ -98,7 +98,13 @@ export default async function MemoryCardsPage({
           list's own empty state below, not a misleading "caught up". When cards exist but none are
           due, ReviewPanel's CaughtUpNotice branch renders. The filter/due-count context rides in as
           the panel's subtitle. */}
-      {total > 0 && <ReviewPanel card={dueCard} goal={dailyGoal} subtitle={reviewDescription} />}
+      {total > 0 && (
+        // The page is width="full" for the card grid; cap the review panel so it stays a
+        // comfortable reading width instead of stretching across the whole deck width.
+        <div className="mx-auto my-12 w-full max-w-3xl">
+          <ReviewPanel card={dueCard} goal={dailyGoal} subtitle={reviewDescription} />
+        </div>
+      )}
 
       {total === 0 ? (
         <EmptyState
