@@ -1,6 +1,6 @@
 'use client'
 
-import { type ChartConfig } from '@/components/ui/chart'
+import type { ChartConfig } from '@/types/chart'
 import { RadialCountChart } from '@/features/memory-cards/components/radial-count-chart'
 
 // Data order puts mature on the inner ring (recharts renders the last datum as the outer ring).

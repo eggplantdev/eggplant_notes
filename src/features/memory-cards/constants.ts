@@ -1,4 +1,4 @@
-import type { MultiSelectOptionT } from '@/components/ui/multi-select'
+import type { MultiSelectOptionT } from '@/types/multi-select'
 
 // FSRS card states (ts-fsrs State enum). Index = memory_cards.state integer.
 // 0 New · 1 Learning · 2 Review · 3 Relearning. Drives the cards-by-state breakdown.

@@ -15,7 +15,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
-export type ComboboxOptionT = { value: string; label: string }
+// Local to this primitive — no external consumer; callers pass plain `{value,label}` literals.
+type ComboboxOptionT = { value: string; label: string }
 
 type ComboboxPropsT = {
   options: readonly ComboboxOptionT[]

@@ -5,7 +5,8 @@ import { useState, useTransition } from 'react'
 
 import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
-import { SegmentedToggle, type SegmentedOptionT } from '@/components/ui/segmented-toggle'
+import { SegmentedToggle } from '@/components/ui/segmented-toggle'
+import type { SegmentedOptionT } from '@/types/segmented-toggle'
 import {
   Command,
   CommandEmpty,

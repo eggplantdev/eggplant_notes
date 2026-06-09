@@ -2,12 +2,8 @@
 
 import { Cell, PolarGrid, RadialBar, RadialBarChart } from 'recharts'
 
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import type { ChartConfig } from '@/types/chart'
 
 export type RadialDatumT = { key: string; value: number }
 
