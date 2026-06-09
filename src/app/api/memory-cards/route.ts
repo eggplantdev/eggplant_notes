@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 
-import { apiMemoryCardBodySchema } from '@/features/api-tokens/schemas'
+import { noteAttachCardsSchema } from '@/features/api-tokens/schemas'
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
 import { authError, errorJson, readJsonBody } from '@/features/api-tokens/route-helpers'
+import { cardWithSubjectSchema } from '@/features/memory-cards/schemas'
 import { insertCardsForNote } from '@/features/memory-cards/insert-cards-for-note'
 import { insertStandaloneCard } from '@/features/memory-cards/insert-standalone-card'
 import { validateInput } from '@/lib/validate'
@@ -15,8 +16,15 @@ export async function POST(request: Request) {
 
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return parsedBody.res
+  const body = parsedBody.body
 
-  const parsed = validateInput(apiMemoryCardBodySchema, parsedBody.body)
+  // Select the branch by the raw presence of `note_id`, then validate against that one schema. A union
+  // would let a note-attach body with a malformed `cards` array fall through to the standalone branch
+  // (which strips `note_id`) and silently create a standalone card; this routes such a body to a 400.
+  const wantsNoteAttach = typeof body === 'object' && body !== null && 'note_id' in body
+  const parsed = wantsNoteAttach
+    ? validateInput(noteAttachCardsSchema, body)
+    : validateInput(cardWithSubjectSchema, body)
   if (!parsed.success) return errorJson(400, parsed.error)
 
   try {

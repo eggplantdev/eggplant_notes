@@ -108,6 +108,28 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect(ids).toHaveLength(1)
   })
 
+  it('POST /api/memory-cards 400s a note-attach body with a malformed cards array (no silent misroute)', async () => {
+    const u = await userWithToken()
+    const noteRes = await notesPOST(
+      postReq(u.token, '/api/notes', { note: { title: 'NM', content: '' }, checks: [] }),
+    )
+    const { id: noteId } = (await noteRes.json()) as { id: string }
+
+    // note_id present + bad `cards` + otherwise-valid standalone fields: pre-F1 this fell through the
+    // z.union to the standalone branch (note_id stripped) and created a 201 card. The fix must 400 it.
+    const res = await cardsPOST(
+      postReq(u.token, '/api/memory-cards', {
+        note_id: noteId,
+        cards: 'garbage',
+        prompt: 'sneaky standalone',
+        example: '',
+        code_context: '',
+        subject_id: null,
+      }),
+    )
+    expect(res.status).toBe(400)
+  })
+
   it("GET /api/subjects returns only the caller's subjects", async () => {
     const a = await userWithToken()
     const b = await userWithToken()
