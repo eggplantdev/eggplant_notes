@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { TOAST_MESSAGES, type ToastKey } from '@/components/toast-messages'
 import { toastMessage } from '@/components/toasts'
@@ -14,9 +14,18 @@ export function ActionToast() {
   const router = useRouter()
   const pathname = usePathname()
   const key = searchParams.get('toast')
+  // Fire once per key. `searchParams` is a fresh object each render, so the effect re-runs before
+  // router.replace lands (and twice under dev StrictMode) — without this guard the same key toasts
+  // twice. Reset when the param clears so a later genuine repeat (e.g. two saves) still toasts.
+  const toastedKey = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!key || !(key in TOAST_MESSAGES)) return
+    if (!key) {
+      toastedKey.current = null
+      return
+    }
+    if (!(key in TOAST_MESSAGES) || toastedKey.current === key) return
+    toastedKey.current = key
     toastMessage(TOAST_MESSAGES[key as ToastKey], 'success')
     const next = new URLSearchParams(searchParams)
     next.delete('toast')
