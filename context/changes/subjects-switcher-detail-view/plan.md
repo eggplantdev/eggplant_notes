@@ -241,9 +241,9 @@ the `/subjects` redirect; confirm nav active-state still highlights under `/subj
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes: `pnpm lint`
-- [ ] 1.3 Production build compiles: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.3 Production build compiles: `pnpm build`
 
 #### Manual
 
