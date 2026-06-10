@@ -4,6 +4,15 @@
 
 @plugin '@tailwindcss/typography';
 
+/* @tailwindcss/typography wraps inline <code> in literal backtick glyphs via ::before/::after
+   pseudo-content, so `lru_cache` renders as `` `lru_cache` ``. Strip them — the <code> already has
+   its own background/padding, so the backticks are pure noise. Unlayered + higher specificity than
+   the plugin's `:where()` selector, so it wins the cascade. Affects every prose surface (notes + cards). */
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
