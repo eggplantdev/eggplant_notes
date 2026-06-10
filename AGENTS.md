@@ -36,12 +36,13 @@ The feature-first **decision procedure** — the tiers, the promotion rule, the 
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
 - Foundation docs: `@context/foundation/prd.md`, `@context/foundation/tech-stack.md`.
 
-## API contract — three surfaces move together
+## API contract — four surfaces move together
 
-The token HTTP API (`src/app/api/{subjects,notes,memory-cards}/**`) has **three consumers that must change in lockstep**. Touching a route, payload shape, or data-layer rule (e.g. reshaping the subjects API) means updating all three in the same change:
+The token HTTP API (`src/app/api/{subjects,notes,memory-cards}/**`) has **four consumers that must change in lockstep**. Touching a route, payload shape, or data-layer rule (e.g. reshaping the subjects API) means updating all four in the same change:
 
 - **In-app UI ↔ route handlers** — both call the shared `*-core.ts` mutation modules (`src/features/{notes,memory-cards,subjects}/*-core.ts`). Put new mutation/validation logic there, never in one surface only, so a Server Action can't drift from its API route.
 - **The downloadable agent skill** — `GET /api/skill` serves the `clc-note-api` skill that documents the whole API to external agents. Its source of truth is `@context/changes/cli-token-ui-and-skill-download/clc-note-api.skill.md`; `@src/features/api-tokens/skill-template.ts` is a **byte-exact generated mirror** — edit the `.md`, then regenerate via its `gen-skill-template.mjs` (steps in the `.ts` header). `@src/__tests__/skill-template.test.ts` only pins the placeholder + endpoint list, so **semantic drift** (field rules, cascades, status codes, new endpoints) ships a _lying_ skill silently unless you update that prose yourself.
+- **The in-app FAQ** — `@src/features/faq/faq-data.ts` is the user-facing summary of the same API + AI features (endpoint table, auth, BYOK, agent-skill download). No test pins its prose, so a new endpoint or capability change leaves it telling users something false unless you update its table/copy in the same change.
 
 ## Commands
 
