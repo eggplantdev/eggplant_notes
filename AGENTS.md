@@ -31,6 +31,7 @@ The feature-first **decision procedure** — the tiers, the promotion rule, the 
 
 - **`container-shell` `@utility`** (`globals.css`, max-w 120rem) is the one source for page width/padding — used by both the nav bar and `PageShell`'s `<main>`. Reuse it; never re-roll `mx-auto max-w-* px-*`.
 - Shared primitives that already exist — reach for these before building: `components/layout/PageShell`, `components/forms/` (TanStack `useAppForm`), `components/app-nav/`, `src/stores/` (Zustand, cross-feature only).
+- **Loaders use the gradient `Spinner`** (`@src/components/ui/spinner.tsx`, brand green→cyan ring) — never `bg-muted`/`animate-pulse` skeletons. Applies to inline, button, and `next/dynamic` `loading:` states.
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
 - Foundation docs: `@context/foundation/prd.md`, `@context/foundation/tech-stack.md`.
 
