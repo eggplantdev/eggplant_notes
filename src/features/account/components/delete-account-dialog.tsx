@@ -9,12 +9,14 @@ import { deleteAccount } from '@/features/account/actions/delete-account'
 
 const CONFIRM_WORD = 'DELETE'
 
-// Type-to-confirm gate fronting the irreversible delete. Owns the confirm-word state and feeds the
-// input through DeleteButton's extra-body slot, gating its confirm button via `confirmDisabled`.
-// Success redirects + signs out server-side, so there's no client success path here.
+// Two-gate guard fronting the irreversible delete: type-to-confirm (prevents an accidental click)
+// plus the current password (step-up re-auth — the server re-verifies it so a hijacked session
+// can't destroy the account). Both feed DeleteButton's extra-body slot and gate its confirm button
+// via `confirmDisabled`. Success redirects + signs out server-side, so there's no client success path.
 export function DeleteAccountDialog() {
   const [confirmText, setConfirmText] = useState('')
-  const isConfirmed = confirmText === CONFIRM_WORD
+  const [password, setPassword] = useState('')
+  const isConfirmed = confirmText === CONFIRM_WORD && password.length > 0
 
   return (
     <DeleteButton
@@ -24,7 +26,7 @@ export function DeleteAccountDialog() {
       description="This permanently deletes your account and all your notes, memory cards, and review history. This cannot be undone."
       confirmLabel="Delete account"
       confirmDisabled={!isConfirmed}
-      action={() => deleteAccount()}
+      action={() => deleteAccount({ password })}
     >
       <div className="grid gap-2">
         <Label htmlFor="confirm-delete">
@@ -37,6 +39,16 @@ export function DeleteAccountDialog() {
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="confirm-password">Current password</Label>
+        <Input
+          id="confirm-password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
         />
       </div>
     </DeleteButton>

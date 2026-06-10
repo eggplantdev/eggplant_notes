@@ -1,20 +1,36 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { deleteAccountSchema } from '@/features/account/schemas'
+import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { toastRedirect } from '@/lib/toast-redirect'
+import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
 // Deletes the caller's account via the SECURITY DEFINER `delete_account()` RPC
 // (no service-role key); F-02's on-delete-cascade tears down all owned rows.
+// Step-up re-auth first: a live session alone must not be enough to destroy the
+// account, so we re-verify the current password (guards a hijacked/left-open session).
 // On success the session is torn down and we redirect; on failure we return the
 // error and DO NOT sign out (the account still exists).
-export async function deleteAccount(): Promise<ActionResultT> {
+export async function deleteAccount(input: unknown): Promise<ActionResultT> {
+  const parsed = validateInput(deleteAccountSchema, input)
+  if (!parsed.success) return parsed
+
+  const user = await getCurrentUser()
+  if (!user?.email) return { success: false, error: 'Not authenticated' }
+
   const supabase = await createClient()
+
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: parsed.data.password,
+  })
+  if (reauthError) return { success: false, error: 'Incorrect password' }
 
   const { error } = await supabase.rpc('delete_account')
   if (error) {
     console.error('delete_account RPC failed:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: 'Could not delete your account. Please try again.' }
   }
 
   // Supabase JWTs are stateless: the access token lives until expiry, so clear
