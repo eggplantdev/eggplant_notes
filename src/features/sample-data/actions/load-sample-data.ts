@@ -3,20 +3,47 @@
 import { isAccountEmpty } from '@/features/sample-data/queries'
 import { remapSampleData } from '@/features/sample-data/remap'
 import { SAMPLE_DATA } from '@/features/sample-data/sample-data'
-import { deleteSeededRows, revalidateSeedPaths } from '@/features/sample-data/seed-rows'
+import { loadSampleDataSchema } from '@/features/sample-data/schemas'
+import {
+  deleteAllUserContent,
+  deleteSeededRows,
+  revalidateSeedPaths,
+} from '@/features/sample-data/seed-rows'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
-// Guard → remap → ordered insert → rollback-on-failure. Every row is flagged is_seeded.
-export async function loadSampleData(): Promise<ActionResultT> {
+// Empty account → remap → ordered insert → rollback-on-failure (every row flagged is_seeded).
+// Non-empty account → password step-up re-auth → wipe ALL content → same load. The wipe restores
+// the empty-account state, so the blanket is_seeded rollback below stays safe either way.
+export async function loadSampleData(input?: unknown): Promise<ActionResultT> {
+  const parsed = validateInput(loadSampleDataSchema, input ?? {})
+  if (!parsed.success) return parsed
+
   const user = await getCurrentUser()
   if (!user) return { success: false, error: 'Not authenticated' }
 
   const supabase = await createClient()
 
-  // Empty-account guard also makes the blanket is_seeded rollback safe: no pre-existing seeded rows to delete.
   if (!(await isAccountEmpty(supabase))) {
-    return { success: false, error: 'Sample data can only be loaded into an empty account.' }
+    if (!user.email) return { success: false, error: 'Not authenticated' }
+
+    const { password } = parsed.data
+    if (!password) return { success: false, error: 'Password is required' }
+
+    // Step-up re-auth: a live session alone must not be enough to wipe existing data (mirrors the
+    // account-delete guard — protects a hijacked/left-open session).
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password,
+    })
+    if (reauthError) return { success: false, error: 'Incorrect password' }
+
+    const wipe = await deleteAllUserContent(supabase, user.id)
+    if (wipe.error) {
+      console.error('[loadSampleData] wipe failed:', wipe.error)
+      return { success: false, error: wipe.error }
+    }
   }
 
   // Memoized id generator: same ref → same fresh id, so child FKs resolve to their parent's id.

@@ -5,13 +5,18 @@ import { getApiTokens } from '@/features/api-tokens/queries'
 import { ConnectCard } from '@/features/openrouter/components/connect-card'
 import { getOpenRouterStatus } from '@/features/openrouter/queries'
 import { SampleDataSection } from '@/features/sample-data/components/sample-data-section'
+import { isAccountEmpty } from '@/features/sample-data/queries'
 import { DailyGoalForm } from '@/features/settings/components/daily-goal-form'
 import { SettingsSection } from '@/features/settings/components/settings-section'
 import { getDailyGoal } from '@/features/settings/queries'
 
 export default async function SettingsPage() {
-  const [dailyGoal, { connected: openRouterConnected, defaultModel: openRouterModel }, apiTokens] =
-    await Promise.all([getDailyGoal(), getOpenRouterStatus(), getApiTokens()])
+  const [
+    dailyGoal,
+    { connected: openRouterConnected, defaultModel: openRouterModel },
+    apiTokens,
+    accountEmpty,
+  ] = await Promise.all([getDailyGoal(), getOpenRouterStatus(), getApiTokens(), isAccountEmpty()])
 
   return (
     <PageShell title="Settings" width="prose">
@@ -26,7 +31,7 @@ export default async function SettingsPage() {
         title="Sample data"
         description="Load a representative set of subjects, notes, and memory cards to explore the app — then clear it whenever you like."
       >
-        <SampleDataSection />
+        <SampleDataSection accountEmpty={accountEmpty} />
       </SettingsSection>
 
       <SettingsSection
