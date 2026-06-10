@@ -243,6 +243,14 @@ otp_expiry = 3600
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
 
+# Signup confirmation must use the same /api/auth/confirm token-exchange route as recovery
+# (token_hash + @supabase/ssr), not the default GoTrue verify endpoint — otherwise the link lands
+# with no token_hash and GoTrue redirects to Site URL (localhost). The route reads ?type=email,
+# matching the emailRedirectTo set in sign-up.ts.
+[auth.email.template.confirmation]
+subject = "Confirm your email"
+content_path = "./supabase/templates/confirmation.html"
+
 # Recovery email must link to the /auth/confirm token-exchange route (server-side
 # session via @supabase/ssr), not the default GoTrue verify endpoint. See F-01 plan.
 [auth.email.template.recovery]
