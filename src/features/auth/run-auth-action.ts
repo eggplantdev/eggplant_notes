@@ -12,13 +12,21 @@ export async function runAuthAction<T>(
   schema: ZodType<T>,
   input: unknown,
   call: (supabase: SupabaseServerT, data: T) => Promise<{ error: { message: string } | null }>,
+  // Optional sanitizer for the auth-layer error only (validation errors are always user-safe).
+  // Sign-up uses it to collapse "User already registered" into a neutral message (no enumeration).
+  sanitizeAuthError?: (message: string) => string,
 ): Promise<ActionResultT> {
   const parsed = validateInput(schema, input)
   if (!parsed.success) return parsed
 
   const supabase = await createClient()
   const { error } = await call(supabase, parsed.data)
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    return {
+      success: false,
+      error: sanitizeAuthError ? sanitizeAuthError(error.message) : error.message,
+    }
+  }
 
   return { success: true }
 }
