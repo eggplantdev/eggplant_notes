@@ -1,6 +1,7 @@
 'use client'
 
 import { AccordionArrow } from '@/components/ui/accordion-arrow'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Label } from '@/components/ui/label'
 import { MutedText } from '@/components/ui/muted-text'
 import { Textarea } from '@/components/ui/textarea'
@@ -60,20 +61,19 @@ export function SourceInput({
           {pdfName ? ` Selected: ${pdfName}` : ''}
         </MutedText>
       </div>
-      <div className="grid gap-2">
-        <button
-          type="button"
-          onClick={onTogglePaste}
-          aria-expanded={isPasteOpen}
-          aria-controls="import-paste"
-          className="group flex w-full cursor-pointer items-center gap-1.5 pb-2"
-        >
-          <Label htmlFor="import-paste" className="pointer-events-none">
-            …or paste markdown
-          </Label>
-          <AccordionArrow isOpen={isPasteOpen} className="duration-300" />
-        </button>
-        {isPasteOpen && (
+      <Collapsible open={isPasteOpen} onOpenChange={onTogglePaste} className="grid gap-2">
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="group flex w-full cursor-pointer items-center gap-1.5 pb-2"
+          >
+            <Label htmlFor="import-paste" className="pointer-events-none">
+              …or paste markdown
+            </Label>
+            <AccordionArrow isOpen={isPasteOpen} className="duration-300" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
           <Textarea
             id="import-paste"
             data-testid="import-paste"
@@ -82,8 +82,8 @@ export function SourceInput({
             placeholder="# Heading&#10;Notes go here…"
             className="min-h-40 font-mono"
           />
-        )}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { MutedText } from '@/components/ui/muted-text'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { buildPreviews } from '@/features/review/build-previews'
@@ -48,15 +49,22 @@ export function ReviewPanel({ card, goal, provideCelebration = true, subtitle }:
       <CardContent className="flex flex-col gap-4">
         <RenderMarkdown content={card.prompt} />
         {(card.example || card.code_context) && (
-          <details className="border-t pt-3">
-            <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none">
-              Show answer
-            </summary>
-            <div className="mt-3 flex flex-col gap-3">
-              {card.example && <RenderMarkdown content={card.example} />}
-              {card.code_context && <RenderMarkdown content={card.code_context} />}
-            </div>
-          </details>
+          <Collapsible className="border-t pt-3">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none"
+              >
+                Show answer
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-3 flex flex-col gap-3">
+                {card.example && <RenderMarkdown content={card.example} />}
+                {card.code_context && <RenderMarkdown content={card.code_context} />}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
         <RatingButtons
           memoryCardId={card.id}

@@ -7,6 +7,7 @@ import { useStore, withForm } from '@/components/forms/hooks/form-hooks'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Reveal } from '@/components/ui/reveal'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
@@ -41,7 +42,9 @@ function CodeContextField({
           </Button>
         )}
       </div>
-      {showCode && <EditorWithPreview value={value} onChange={onChange} />}
+      <Reveal open={showCode}>
+        <EditorWithPreview value={value} onChange={onChange} />
+      </Reveal>
     </div>
   )
 }

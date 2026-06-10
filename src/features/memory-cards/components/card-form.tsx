@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Combobox } from '@/components/ui/combobox'
+import { Reveal } from '@/components/ui/reveal'
 import { Label } from '@/components/ui/label'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
@@ -182,9 +183,9 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
                 </Button>
               )}
             </div>
-            {showCode && (
+            <Reveal open={showCode}>
               <EditorWithPreview value={field.state.value} onChange={field.handleChange} />
-            )}
+            </Reveal>
           </div>
         )}
       </form.Field>
