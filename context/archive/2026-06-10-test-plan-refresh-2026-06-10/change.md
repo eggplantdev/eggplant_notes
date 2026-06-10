@@ -1,10 +1,10 @@
 ---
 change_id: test-plan-refresh-2026-06-10
 title: Test plan refresh 2026 06 10
-status: implemented
+status: archived
 created: 2026-06-10
 updated: 2026-06-10
-archived_at: null
+archived_at: 2026-06-10T07:33:25Z
 ---
 
 ## Notes
