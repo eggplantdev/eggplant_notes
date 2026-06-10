@@ -37,6 +37,10 @@ const eslintConfig = defineConfig([
     // The prod-build-server skill builds into .next-prodtest (distDir override) — same
     // generated output as .next, never lint it.
     ".next-prodtest/**",
+    // Other distDir-override build outputs (perf audits, webpack-vs-turbopack comparisons) —
+    // same generated output as .next, gitignored, never lint them.
+    ".next-perf/**",
+    ".next-webpack/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
