@@ -27,9 +27,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // 307 (not 308): keeps `/` reroutable. A 308 is browser-cached permanently, so a future
+        // landing page / unauthenticated root would be unreachable for returning users.
         source: '/',
         destination: '/dashboard',
-        permanent: true,
+        permanent: false,
       },
       {
         // /review was relocated onto /dashboard. 307 (not 308) — a relocation that could
