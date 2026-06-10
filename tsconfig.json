@@ -34,7 +34,13 @@
     ".next-prodtest/types/**/*.ts",
     ".next-prodtest/dev/types/**/*.ts",
     ".next-review/types/**/*.ts",
-    ".next-review/dev/types/**/*.ts"
+    ".next-review/dev/types/**/*.ts",
+    ".next-implcheck/types/**/*.ts",
+    ".next-implcheck/dev/types/**/*.ts",
+    ".next-perf/types/**/*.ts",
+    ".next-perf/dev/types/**/*.ts",
+    ".next-webpack/types/**/*.ts",
+    ".next-webpack/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
