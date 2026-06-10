@@ -77,7 +77,9 @@ export const MemoryCardsField = withForm({
       <form.Field name="checks" mode="array">
         {(checksField) => (
           <Box>
-            <div className="flex items-center justify-between gap-2">
+            {/* Stack on mobile: at ~390px the label column + the two buttons crowd on one row, so
+                the label sits above the buttons below `sm` and restores the side-by-side row at `sm`+. */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-2">
                 <Label>Memory cards (optional)</Label>
                 <span className="text-muted-foreground text-sm">
