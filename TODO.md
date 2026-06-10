@@ -15,7 +15,7 @@
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **User account page** — deferred ("konto usera").
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
-- [ ] **Test/cleanup debt** (2 items — see bottom): `revalidate-prompt-surfaces.ts` verify-or-delete, topic-scoped-review E2E.
+- [ ] **Code-health debt** (1 item — see bottom): `revalidate-prompt-surfaces.ts` no-op verify → delete-or-`revalidateTag` + `systemDefaults` prop-drill thin. (topic-scoped-review E2E ✅ done; revalidate _test_ angle closed — no test warranted.)
 
 **Done** (shipped off this backlog)
 
@@ -32,6 +32,7 @@
 - [x] Settings model picker — sort by price + alphabetical, per-user pins (model-picker-sort-favorites).
 - [x] Split `openrouter/prompts.ts` grab-bag — now `prompt-schemas` / `system-prompts` / `build-prompt` / `preview-prompt`.
 - [x] ~~Branded loader (bouncing eggplant)~~ — superseded: gradient `Spinner` is the project-wide loader standard.
+- [x] topic-scoped-review E2E — `e2e/topic-scoped-review.spec.ts` (filtered review-panel scoping; deliberate-break verified). Test-plan §8 + §6.3.
 
 ---
 
@@ -60,8 +61,8 @@
 
 ### Test & code-health debt
 
-- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — it `revalidatePath`s four always-dynamic (`cookies()`) pages, so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to `revalidateTag('user-prompts')` on the data. Also: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
-- [ ] **E2E for `topic-scoped-review`** (deferred at the 2026-06-09 review gate; unit not high-value — the filter builder is a thin PostgREST wrapper). Drive via `/10x-e2e`: seed cards across two subjects with known due dates → filter `/memory-cards` to subject A → assert the reviewed card belongs to A → rate → assert the next card is also from A → exhaust → `CaughtUpNotice` with the list still present. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`.
+- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — **code-health, not test-debt** (the _test_ angle is closed: no test warranted — branchless plumbing, test-plan §7 won't-do). Still open: it `revalidatePath`s four always-dynamic (`cookies()`) pages, so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to `revalidateTag('user-prompts')` on the data. Also: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
+- [x] **E2E for `topic-scoped-review`** — shipped `e2e/topic-scoped-review.spec.ts` (2026-06-10): two subjects, an "intruder" global-soonest card in B; filter to A and assert B never surfaces + the panel's due-count subtitle tracks the filtered queue (3→2→1→caught-up) with the list surviving. Deliberate-break verified. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`; test-plan §8 + §6.3.
 
 ### Loose ideas (unsorted)
 
