@@ -137,12 +137,13 @@ test('a standalone card can be linked to an existing note and adopts the note’
   const dialog = page.getByRole('dialog')
   await dialog.getByRole('combobox', { name: 'Subject' }).click()
   await page.getByRole('option', { name: subjectTitle, exact: true }).click()
-  // The Note combobox mounts right after the async note fetch resolves (spinner → combobox), so its
-  // popover is still settling; filter by typing and select with Enter rather than clicking the
-  // freshly-rendered (briefly unstable) option node.
+  // The Note combobox only mounts once the async note fetch resolves (spinner → combobox), so the
+  // click auto-waits for it. Then filter by typing and — rather than racing Enter against cmdk's
+  // filter (it intermittently selects nothing, leaving Link disabled) — wait for the filtered
+  // option to render and click it.
   await dialog.getByRole('combobox', { name: 'Note' }).click()
   await page.getByPlaceholder('Search notes…').fill(noteTitle)
-  await page.getByPlaceholder('Search notes…').press('Enter')
+  await page.getByRole('option', { name: noteTitle, exact: true }).click()
   await page.getByTestId('link-card-confirm').click()
 
   // The card adopted the note: note_id points at that note and subject_id is the note's subject

@@ -357,7 +357,7 @@ None — both `note_id` and `subject_id` columns already exist; no data backfill
 
 #### Automated
 
-- [ ] 4.1 E2E suite passes: `pnpm test:e2e` — DEFERRED: spec drove the full flow green once (note found + linked); reliable green/break verify deferred to a fresh local stack (degraded by repeated rebuilds this session)
+- [x] 4.1 E2E suite passes: `pnpm test:e2e` — green 3× on fresh stacks; flake root-caused to a `modal`-popover-in-modal-dialog dismissal race, fixed by an `onInteractOutside` guard (243c4c7) + deterministic note-select in the spec
 - [x] 4.2 Type checking passes: `pnpm typecheck` — c2c6d74
 - [x] 4.3 Linting passes: `pnpm lint` — c2c6d74
 
