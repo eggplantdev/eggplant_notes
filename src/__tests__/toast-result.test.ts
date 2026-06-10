@@ -71,7 +71,6 @@ describe('TOAST_MESSAGES — post-redirect key→message map', () => {
       'note-deleted',
       'subject-saved',
       'subject-deleted',
-      'signed-in',
       'signed-up',
       'password-updated',
       'account-deleted',

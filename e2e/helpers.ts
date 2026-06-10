@@ -19,9 +19,10 @@ export function uniqueEmail(tag = '') {
   return `e2e-${prefix}${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
 }
 
-// Assert we've landed on the dashboard after an auth action. Sign-up/in/password-update redirect
-// to `/dashboard?toast=<kind>`, a transient query the client strips after mount — so match with or
-// without it rather than racing the strip, and allow for GoTrue/hydration latency under full-suite
+// Assert we've landed on the dashboard after an auth action. Sign-up/password-update redirect
+// to `/dashboard?toast=<kind>`, a transient query the client strips after mount (sign-in lands on a
+// bare `/dashboard`) — so match with or without it rather than racing the strip, and allow for
+// GoTrue/hydration latency under full-suite
 // load (the bare-`/dashboard`, default-5s form flaked once the local stack degraded over a long run).
 export async function expectDashboard(page: Page) {
   await expect(page).toHaveURL(/\/dashboard(\?|$)/, { timeout: 15_000 })
