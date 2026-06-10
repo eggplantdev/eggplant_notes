@@ -33,14 +33,6 @@ export default async function SubjectLayout({
   return (
     <PageShell
       title={subject.title}
-      eyebrow={
-        <div className="flex items-center gap-2">
-          <SubjectSwitcher subjects={subjects} currentId={id} />
-          <ButtonLink href="/subjects/new" variant="outline" size="sm">
-            New subject
-          </ButtonLink>
-        </div>
-      }
       subtitle={
         <>
           <span className="block">{pluralize(summaries.length, 'note')}</span>
@@ -51,26 +43,35 @@ export default async function SubjectLayout({
       }
       width="full"
       fill
-      actions={
-        <>
+    >
+      {/* Full-width toolbar: select on the left, subject/note actions pushed to the right edge.
+          Lives here (not PageShell's header) because that header column hugs its content, so
+          justify-between there can't spread. */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SubjectSwitcher subjects={subjects} currentId={id} />
+        <div className="flex flex-wrap items-center gap-2">
+          <ButtonLink href="/subjects/new" variant="outline" size="sm">
+            New subject
+          </ButtonLink>
           <ButtonLink href={`/subjects/${id}?edit`} variant="outline" size="sm">
             Edit subject
           </ButtonLink>
           <DeleteSubjectButton id={id} />
-        </>
-      }
-    >
+          <ButtonLink href={`/notes/new?subject=${id}`} size="sm">
+            Add note
+          </ButtonLink>
+        </div>
+      </div>
+
       <Separator className="my-2" />
 
       {/* Single 1fr track so the sidebar and content pane each scroll on their own
           (md:overflow-y-auto below) while the page itself never scrolls. */}
-      <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[15rem_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
-        {/* Wrapper is the grid cell: a fixed add-note button atop the scrollable notes list, so
-            only the list (md:flex-1 md:overflow-y-auto in the sidebar's nav) scrolls — not the page. */}
-        <div className="flex flex-col gap-2 md:min-h-0">
-          <ButtonLink href={`/notes/new?subject=${id}`} variant="outline" size="sm">
-            Add note to this subject
-          </ButtonLink>
+      <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[fit-content(24rem)_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
+        {/* Wrapper is the grid cell holding the notes list (md:flex-1 md:overflow-y-auto in the
+            sidebar's nav scrolls; the page stays put). md:min-w-60 floors the fit-content column so
+            it never collapses below 15rem for short titles. */}
+        <div className="flex flex-col gap-2 md:min-h-0 md:min-w-60">
           <SubjectNoteSidebar subjectId={id} notes={summaries} />
         </div>
         <div className="min-w-0 md:min-h-0 md:overflow-y-auto">{children}</div>

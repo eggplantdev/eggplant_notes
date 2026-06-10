@@ -19,7 +19,7 @@ export function SubjectSwitcher({ subjects, currentId }: SubjectSwitcherPropsT) 
       onChange={(id) => router.push(`/subjects/${id}`)}
       searchPlaceholder="Search subjects…"
       emptyMessage="No subjects."
-      className="w-48"
+      className="w-72"
     />
   )
 }
