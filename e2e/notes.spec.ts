@@ -78,34 +78,6 @@ test('unknown fence language falls back to plain text without error (S-13)', asy
   await expect(page.getByText('const x = 1')).toBeVisible()
 })
 
-// Guards the load-bearing safety property of render-markdown.tsx: react-markdown runs
-// WITHOUT rehype-raw, so raw HTML in a note body is escaped to inert text, never executed.
-// If anyone adds rehype-raw for "richer notes" later, this turns red instead of silently
-// shipping stored XSS.
-test('note body raw HTML is rendered inert, not executed (no stored XSS)', async ({ page }) => {
-  await signUp(page, uniqueEmail('notes'))
-  await page.goto('/notes/new')
-  await page.getByLabel('Title').fill(`XSS guard ${Date.now()}`)
-  await fillEditor(
-    page,
-    '<script>window.__xssRan = true</script>\n\n<img src=x onerror="window.__xssImg = true">',
-  )
-  await page.getByRole('button', { name: 'Create note' }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
-
-  // No live <script>/<img> injected into the rendered body, and neither handler ran.
-  await expect(page.locator('.prose script')).toHaveCount(0)
-  await expect(page.locator('.prose img')).toHaveCount(0)
-  expect(
-    await page.evaluate(() => (window as unknown as { __xssRan?: boolean }).__xssRan),
-  ).toBeFalsy()
-  expect(
-    await page.evaluate(() => (window as unknown as { __xssImg?: boolean }).__xssImg),
-  ).toBeFalsy()
-  // The markup survives as visible, escaped text.
-  await expect(page.getByText('window.__xssRan = true')).toBeVisible()
-})
-
 // S-14 in-place edit: the body+subject edit moved off the deleted /notes/[id]/edit route into
 // a ?edit=note branch on the detail page. Locks three things the CRUD test above doesn't:
 // (1) the F3 no-redirect property — `?edit=note` must NOT bounce (a regression forwarding

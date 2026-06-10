@@ -23,6 +23,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
+import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
@@ -85,20 +86,20 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     },
     onSubmit: async ({ value }) => {
       // A linked card shares its note's subject, so changing its subject must unlink it — confirm
-      // before saving.
+      // before saving. (The core re-derives the unlink server-side; this gate is purely the UX warning.)
       if (card?.note_id && value.subject_id !== card.subject_id) {
         setPendingValues(value)
         return
       }
-      await submitCard(value, false)
+      await submitCard(value)
     },
   })
 
   // Success redirects (throws), so only the failure branch is observed.
-  async function submitCard(values: CardFormValuesT, unlinkFromNote: boolean) {
+  async function submitCard(values: CardFormValuesT) {
     setPendingValues(undefined)
     const result = card
-      ? await updateMemoryCard(card.id, values, unlinkFromNote)
+      ? await updateMemoryCard(card.id, values)
       : await createStandaloneCard(values)
     reportResult(result)
   }
@@ -215,6 +216,16 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
         </div>
       )}
 
+      {/* Mirror of the source-note row for an UNLINKED card. `sourceNote` is present iff note_id is
+          set, so the two rows are mutually exclusive. Linking refreshes the page (in the dialog), so
+          this row is then replaced by the Unlink row above. */}
+      {card && !card.note_id && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
+          <span className="text-muted-foreground">No source note</span>
+          <LinkCardButton cardId={card.id} cardSubjectId={card.subject_id} subjects={subjects} />
+        </div>
+      )}
+
       <FormError message={formError} />
 
       <div className="flex items-center gap-2">
@@ -249,7 +260,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 data-testid="card-unlink-confirm"
-                onClick={() => submitCard(pendingValues, true)}
+                onClick={() => submitCard(pendingValues)}
               >
                 Unlink &amp; save
               </AlertDialogAction>

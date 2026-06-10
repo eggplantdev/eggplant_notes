@@ -4,6 +4,7 @@ import type { NoteListItemT } from '@/features/notes/types'
 import type { NoteT } from '@/types/note'
 import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
+import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -52,4 +53,21 @@ export async function getNote(
 ): Promise<NoteT | undefined> {
   const supabase = client ?? (await createClient())
   return runMaybeSingle('getNote', supabase.from('notes').select('*').eq('id', id).maybeSingle())
+}
+
+// Slim note options for the card→note link dialog's note-select. Scoped to one subject (or unfiled
+// notes when `subjectId` is null — the IS NULL branch getNotes lacks), id/title only. The 200 cap
+// bounds the payload; subject-scoping is the primary bound, so a generous cap is fine for a personal
+// deck. RLS scopes to the owner.
+export async function getNotesForLinking(
+  subjectId: string | null,
+  client?: SupabaseClient<Database>,
+): Promise<{ id: string; title: string | null }[]> {
+  const supabase = client ?? (await createClient())
+  return runTableQuery(supabase, (c) => {
+    const filtered = c.from('notes').select('id, title')
+    const scoped =
+      subjectId === null ? filtered.is('subject_id', null) : filtered.eq('subject_id', subjectId)
+    return scoped.order('created_at', { ascending: false }).limit(200)
+  })
 }

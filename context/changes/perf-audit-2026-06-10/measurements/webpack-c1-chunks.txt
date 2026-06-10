@@ -1,0 +1,21 @@
+distDir: .next-webpack
+chunk files: 492
+TOTAL raw:      13484.1 kB
+TOTAL gzipped:  3140.8 kB   <-- shipped bytes
+
+Top 15 chunks by gzipped size:
+      225.0 kB  f4bf7a28.6ab382b0b32aa022.js
+      191.5 kB  fbd0dcbb.786c2bbe0801f623.js
+      153.2 kB  5242.d0712678cff38c46.js
+      104.3 kB  6109-698f0efe1ba3baf1.js
+       86.5 kB  862-58835a4c64742384.js
+       75.4 kB  f2442412.4e30a3fb6d7ed178.js
+       61.4 kB  b7da7f58-94c4305055bb64fc.js
+       59.8 kB  8000-a8715f42a74e208f.js
+       59.7 kB  b56efd7f.de5f33ef7e511e36.js
+       58.1 kB  framework-b88c5ba3473af048.js
+       39.1 kB  main-4878c6212f3cde41.js
+       38.7 kB  polyfills-42372ed130431b0a.js
+       38.6 kB  8546-497e692973d47f69.js
+       35.3 kB  1284-2a5d54b0b0c7f4de.js
+       33.6 kB  5155.c26c29356c7a27e2.js

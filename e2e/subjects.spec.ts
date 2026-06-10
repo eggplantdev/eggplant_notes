@@ -29,7 +29,13 @@ async function createAssignedNote(
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(title)
   if (content) await fillEditor(page, content)
-  await page.getByRole('combobox', { name: 'Subject' }).click()
+  // SubjectSelect defaults to "Existing subject" mode; its Combobox is unlabeled (name comes from the
+  // selected value, "None"), so scope to it via the sibling "Subject mode" radiogroup, not by name.
+  await page
+    .getByRole('radiogroup', { name: 'Subject mode' })
+    .locator('..')
+    .getByRole('combobox')
+    .click()
   await page.getByRole('option', { name: subjectTitle, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })

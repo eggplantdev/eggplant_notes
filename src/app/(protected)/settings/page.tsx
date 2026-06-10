@@ -1,5 +1,7 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { DeleteAccountDialog } from '@/features/account/components/delete-account-dialog'
+import { ApiTokensSection } from '@/features/api-tokens/components/api-tokens-section'
+import { getApiTokens } from '@/features/api-tokens/queries'
 import { ConnectCard } from '@/features/openrouter/components/connect-card'
 import { getOpenRouterStatus } from '@/features/openrouter/queries'
 import { SampleDataSection } from '@/features/sample-data/components/sample-data-section'
@@ -8,8 +10,8 @@ import { SettingsSection } from '@/features/settings/components/settings-section
 import { getDailyGoal } from '@/features/settings/queries'
 
 export default async function SettingsPage() {
-  const [dailyGoal, { connected: openRouterConnected, defaultModel: openRouterModel }] =
-    await Promise.all([getDailyGoal(), getOpenRouterStatus()])
+  const [dailyGoal, { connected: openRouterConnected, defaultModel: openRouterModel }, apiTokens] =
+    await Promise.all([getDailyGoal(), getOpenRouterStatus(), getApiTokens()])
 
   return (
     <PageShell title="Settings" width="prose">
@@ -33,6 +35,13 @@ export default async function SettingsPage() {
         className="gradient-border"
       >
         <ConnectCard connected={openRouterConnected} defaultModel={openRouterModel} />
+      </SettingsSection>
+
+      <SettingsSection
+        title="CLI Tokens"
+        description="Create personal API tokens to use the HTTP API from a CLI or agent. A token is shown once at creation — copy it then. Revoke any token to disable it immediately."
+      >
+        <ApiTokensSection tokensResult={apiTokens} />
       </SettingsSection>
 
       <SettingsSection

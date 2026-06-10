@@ -17,6 +17,8 @@
 /.next/
 /.next-e2e/
 /.next-prodtest/
+/.next-perf/
+/.next-webpack/
 /out/
 
 # production

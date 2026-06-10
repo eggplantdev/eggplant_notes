@@ -6,9 +6,12 @@ import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { SectionLabel } from '@/components/ui/section-label'
 import { HardestCards } from '@/features/dashboard/components/hardest-cards'
 import { StatCard } from '@/features/dashboard/components/stat-card'
+import { WelcomeDialog } from '@/features/dashboard/components/welcome-dialog'
+import { WELCOME_SEEN_COOKIE } from '@/features/dashboard/welcome-dialog-cookie'
 import { TitledCard } from '@/components/ui/titled-card'
 import { ReviewPanel } from '@/features/review/components/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
+import { cookies } from 'next/headers'
 import { getDashboardPageData } from './loader'
 
 // em-dash when there's no data yet (null fraction).
@@ -24,7 +27,11 @@ export default async function DashboardPage() {
     currentStreak,
     dailyGoal,
     card,
+    isEmpty,
   } = await getDashboardPageData()
+
+  // One-time onboarding: show only while empty AND not yet dismissed (cookie set by the dialog).
+  const welcomeSeen = (await cookies()).get(WELCOME_SEEN_COOKIE)?.value === '1'
 
   const columns = buildHeatmapMatrix(activity, {
     today: todayInZone(APP_TIME_ZONE),
@@ -52,6 +59,7 @@ export default async function DashboardPage() {
         </div>
       }
     >
+      {isEmpty && !welcomeSeen && <WelcomeDialog />}
       {/* Card-less hero stat: StatCard's type scale without the chrome. */}
       <div>
         <SectionLabel>Current streak</SectionLabel>

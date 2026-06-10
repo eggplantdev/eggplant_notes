@@ -3,9 +3,9 @@ import { test, expect } from '@playwright/test'
 import { PASSWORD, signUp, uniqueEmail } from './helpers'
 
 // The account-lifecycle contract as an executable test: a user signs up, deletes
-// their account from /settings behind the type-to-confirm gate, lands on
-// /sign-in with the "Account deleted" toast (S-16 ?toast flag), and can no longer
-// sign in (account is gone).
+// their account from /settings behind the type-to-confirm + password re-auth gate,
+// lands on /sign-in with the "Account deleted" toast (S-16 ?toast flag), and can no
+// longer sign in (account is gone).
 // Sign-up goes through the real UI (F-01 auth/cookie/proxy path); deletion runs
 // the SECURITY DEFINER delete_account() RPC + cascade under the hood. Shared helpers: ./helpers.
 
@@ -13,12 +13,15 @@ test('account self-deletion: sign up -> delete -> cannot sign in again', async (
   const email = uniqueEmail('del')
   await signUp(page, email)
 
-  // Open the Danger zone; the confirm button is armed only after typing DELETE.
+  // Open the Danger zone; the confirm button is armed only after typing DELETE *and* re-entering
+  // the password (step-up re-auth). Typing DELETE alone leaves it disabled.
   await page.goto('/settings')
   await page.getByRole('button', { name: 'Delete account' }).click()
   const confirm = page.getByRole('alertdialog').getByRole('button', { name: 'Delete account' })
   await expect(confirm).toBeDisabled()
   await page.getByLabel('Type DELETE to confirm').fill('DELETE')
+  await expect(confirm).toBeDisabled()
+  await page.getByLabel('Current password').fill(PASSWORD)
   await expect(confirm).toBeEnabled()
   await confirm.click()
 

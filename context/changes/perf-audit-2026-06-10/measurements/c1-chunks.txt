@@ -1,0 +1,21 @@
+distDir: .next-perf
+chunk files: 471
+TOTAL raw:      15205.3 kB
+TOTAL gzipped:  3441.6 kB   <-- shipped bytes
+
+Top 15 chunks by gzipped size:
+      225.1 kB  0u5im3s~52iig.js
+      191.5 kB  0scuocvz4-tzm.js
+      106.6 kB  0ck9cgwfkk_66.js
+       98.6 kB  0~d.cq8j83yg2.js
+       84.2 kB  14cu6r.tt5rjv.js
+       79.8 kB  0cvd5tk9vj8zz.js
+       75.4 kB  0pk38jv16j78z.js
+       69.4 kB  0-k0h5e3m.k3h.js
+       43.9 kB  0vv2ys2xe71a0.js
+       43.5 kB  0e52qs3eor455.js
+       38.7 kB  03~yq9q893hmn.js
+       33.7 kB  0bj3r-pu97_7p.js
+       33.7 kB  0z4re~jbfutn0.js
+       30.0 kB  03vtrjgh0o75a.js
+       28.7 kB  0hzalp_9qdlry.js

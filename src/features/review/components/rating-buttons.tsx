@@ -24,7 +24,7 @@ export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
           <Button
             key={grade}
             variant={variant}
-            size="lg"
+            size="sm"
             disabled={isPending}
             onClick={() =>
               run(() => rateMemoryCard(memoryCardId, grade, goal, Boolean(advance)), {

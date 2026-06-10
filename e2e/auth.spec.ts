@@ -53,9 +53,9 @@ test('3.6 sign-out returns to sign-in, then sign-in lands on the dashboard', asy
 test('3.8 inline validation error renders for a too-short password', async ({ page }) => {
   await page.goto('/sign-up')
   await page.getByLabel('Email').fill(uniqueEmail())
-  await page.getByLabel('Password').fill('123') // below minimum_password_length (6)
+  await page.getByLabel('Password').fill('123') // below minimum_password_length (8)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByText(/at least 6/i)).toBeVisible()
+  await expect(page.getByText(/at least 8/i)).toBeVisible()
   await expect(page).toHaveURL('/sign-up') // no navigation on invalid submit
 })
 

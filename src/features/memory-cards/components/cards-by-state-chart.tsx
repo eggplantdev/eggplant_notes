@@ -1,7 +1,7 @@
 'use client'
 
 import { type ChartConfig } from '@/components/ui/chart'
-import { RadialCountChart } from '@/features/memory-cards/components/radial-count-chart'
+import { LazyRadialCountChart } from '@/features/memory-cards/components/radial-count-chart-lazy'
 import { FSRS_STATE_LABELS } from '@/features/memory-cards/constants'
 
 // Keys match FSRS_STATE_LABELS lowercased.
@@ -20,5 +20,5 @@ export function CardsByStateChart({ stateCounts }: { stateCounts: number[] }) {
     value: stateCounts[i],
   }))
 
-  return <RadialCountChart data={data} config={chartConfig} glow />
+  return <LazyRadialCountChart data={data} config={chartConfig} glow />
 }

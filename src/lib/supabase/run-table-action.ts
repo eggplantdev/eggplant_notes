@@ -23,8 +23,10 @@ export async function runTableAction<TInput, TRow>(
   const supabase = await createClient()
   const { data, error } = await call(supabase, parsed.data)
   if (error) {
+    // Log the real PostgREST error server-side; return a generic message so DB internals
+    // (constraint/column/table names) never leak to the client.
     console.error('[runTableAction] PostgREST error', error)
-    return { success: false, error: error.message }
+    return { success: false, error: 'Something went wrong. Please try again.' }
   }
   return { success: true, data }
 }

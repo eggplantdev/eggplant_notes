@@ -30,6 +30,9 @@ type ComboboxPropsT = {
   emptyMessage?: string
   className?: string
   disabled?: boolean
+  // Set when the combobox lives inside a modal Dialog, so clicking an option (its popover portals
+  // outside the dialog) isn't treated as an outside-click that dismisses the dialog.
+  modal?: boolean
 }
 
 // Trigger width drives popover width via the Radix CSS var, so size it through `className`.
@@ -43,12 +46,13 @@ export function Combobox({
   emptyMessage = 'No results.',
   className,
   disabled,
+  modal,
 }: ComboboxPropsT) {
   const [open, setOpen] = useState(false)
   const selectedLabel = options.find((option) => option.value === value)?.label
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={modal}>
       <PopoverTrigger asChild>
         <Button
           type="button"

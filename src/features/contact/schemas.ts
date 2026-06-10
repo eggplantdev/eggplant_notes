@@ -6,7 +6,10 @@ export const contactSchema = z.object({
   subject: z
     .string()
     .min(1, 'Subject is required')
-    .max(120, 'Subject must be 120 characters or fewer'),
+    .max(120, 'Subject must be 120 characters or fewer')
+    // Subject is interpolated into the email's Subject header; reject CR/LF so it can't be used to
+    // inject extra headers (defense-in-depth — nodemailer also encodes header values).
+    .refine((s) => !/[\r\n]/.test(s), 'Subject cannot contain line breaks'),
   message: z
     .string()
     .min(1, 'Message is required')

@@ -50,9 +50,13 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const isAuthRoute = AUTH_ROUTES.some((route) => matchesPath(pathname, route))
-  // update-password is reached via a recovery session, so it must stay public too.
+  // Every /api/* route self-enforces auth in its handler and must answer with JSON, never a 307 to the
+  // HTML sign-in page — so the proxy refreshes their cookie but never gates them. Token routes
+  // (/api/subjects, /api/notes, /api/memory-cards) carry a `Bearer clc_…` header and NO session cookie,
+  // so gating them here would bounce the agent before authenticateRequest ever runs; /api/skill 401s
+  // itself via getCurrentUser. update-password is reached via a recovery session, so it stays public too.
   const isPublic =
-    isAuthRoute || pathname.startsWith('/api/auth/') || matchesPath(pathname, '/update-password')
+    isAuthRoute || pathname.startsWith('/api/') || matchesPath(pathname, '/update-password')
 
   // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)
@@ -63,9 +67,10 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Matches everything except _next assets/images. /api IS intentionally included — the
-    // /api/auth/confirm callback must run through the proxy to propagate its session cookie, so
-    // any future /api/* route also runs here; add it to `isPublic` if it must work signed-out.
+    // Matches everything except _next assets/images. /api IS intentionally included so the proxy can
+    // refresh the session cookie (e.g. the /api/auth/confirm callback) — but every /api/* route is
+    // treated as public at the gate (see isPublic) and enforces its own auth in the handler, so an API
+    // request is never 307'd to the HTML sign-in page.
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

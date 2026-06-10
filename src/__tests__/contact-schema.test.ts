@@ -50,4 +50,12 @@ describe('validateInput + contactSchema', () => {
     const result = validateInput(contactSchema, { subject: 'Hi', message: 'x'.repeat(2000) })
     expect(result.success).toBe(true)
   })
+
+  it('rejects a subject with a newline (email header injection)', () => {
+    const result = validateInput(contactSchema, {
+      subject: 'Hi\r\nBcc: attacker@evil.com',
+      message: 'body',
+    })
+    expect(result).toEqual({ success: false, error: 'Subject cannot contain line breaks' })
+  })
 })
