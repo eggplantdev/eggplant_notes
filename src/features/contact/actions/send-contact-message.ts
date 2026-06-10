@@ -31,7 +31,7 @@ export async function sendContactMessage(input: ContactInputT): Promise<ActionRe
       from: EMAIL_USER,
       to: serverEnv.EMAIL_TO,
       replyTo: user.email,
-      subject: `Contact: ${parsed.data.subject}`,
+      subject: `Eggplant_ai_notes contact: ${parsed.data.subject}`,
       text: [
         `From: ${user.email}`,
         `Subject: ${parsed.data.subject}`,
