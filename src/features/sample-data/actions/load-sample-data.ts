@@ -25,7 +25,17 @@ export async function loadSampleData(input?: unknown): Promise<ActionResultT> {
 
   const supabase = await createClient()
 
-  if (!(await isAccountEmpty(supabase))) {
+  // Fail closed: isAccountEmpty THROWS on a DB error. Unhandled, that rejects the Server Action and the
+  // client transition never resolves — the dialog hangs in isPending. Surface a generic error instead.
+  let accountEmpty: boolean
+  try {
+    accountEmpty = await isAccountEmpty(supabase)
+  } catch (probeError) {
+    console.error('[loadSampleData] account-state probe failed:', probeError)
+    return { success: false, error: 'Could not verify your account state. Please try again.' }
+  }
+
+  if (!accountEmpty) {
     if (!user.email) return { success: false, error: 'Not authenticated' }
 
     const { password } = parsed.data

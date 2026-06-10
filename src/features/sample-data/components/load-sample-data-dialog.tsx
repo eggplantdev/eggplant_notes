@@ -17,15 +17,20 @@ import { useActionTransition } from '@/hooks/use-action-transition'
 export function LoadSampleDataDialog() {
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
-  const { error, isPending, run } = useActionTransition()
+  const { error, isPending, reset, run } = useActionTransition()
+
+  // Drop the typed password AND any prior error on every close (Cancel/Esc/success), so a wrong-password
+  // attempt doesn't leave a stale pre-fill or error flashing when the dialog is reopened.
+  function closeAndReset() {
+    setOpen(false)
+    setPassword('')
+    reset()
+  }
 
   function handleConfirm() {
     run(() => loadSampleData({ password }), { successMessage: 'Sample data loaded' }).then(
       (result) => {
-        if (result.success) {
-          setOpen(false)
-          setPassword('')
-        }
+        if (result.success) closeAndReset()
       },
     )
   }
@@ -37,7 +42,7 @@ export function LoadSampleDataDialog() {
       </Button>
       <ConfirmDeleteDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(next) => (next ? setOpen(true) : closeAndReset())}
         title="Replace your data with sample data?"
         description="This permanently deletes all your current subjects, notes, memory cards, and review history, then loads the sample set. This cannot be undone."
         isPending={isPending}

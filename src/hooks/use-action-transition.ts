@@ -27,5 +27,11 @@ export function useActionTransition() {
     })
   }
 
-  return { error, isPending, run }
+  // Clear a stale inline error without firing the action — e.g. when a dialog closes on Cancel/Esc so
+  // a prior failure doesn't flash on reopen. `run` already resets on its own start.
+  function reset() {
+    setError(undefined)
+  }
+
+  return { error, isPending, reset, run }
 }
