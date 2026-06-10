@@ -28,6 +28,7 @@
 - [x] Create notes from a markdown/any file — S-19 import.
 - [x] Create notes by asking AI — S-19 gen-notes/gen-cards.
 - [x] Update a note by agent over HTTP (CLI/webhook-style API) — expose-cli-note-api + clc-api-crud-endpoints.
+- [x] Sample data into a non-empty account — wipe-then-load behind a current-password ceremony (`load-sample-data-dialog.tsx`); empty accounts keep the one-click path. Commit `c0a5400`.
 - [x] Settings model picker — sort by price + alphabetical, per-user pins (model-picker-sort-favorites).
 - [x] Split `openrouter/prompts.ts` grab-bag — now `prompt-schemas` / `system-prompts` / `build-prompt` / `preview-prompt`.
 - [x] ~~Branded loader (bouncing eggplant)~~ — superseded: gradient `Spinner` is the project-wide loader standard.
@@ -51,6 +52,10 @@
 ### AI / OpenRouter polish
 
 - [ ] **Stream AI generation (perf-audit H3).** `generate-notes.ts`/`generate-cards.ts` use `generateObject`, which resolves only when the whole object is done → a 30–60s opaque spinner for big inputs (50k chars / 10MB PDF). Switch to `streamObject` + render incrementally (first note in ~1–3s). Not XS: Server Actions don't stream cleanly — intended path is a Route Handler returning a streamed response consumed via `useObject`, touching `note-form.tsx`/`import-panel.tsx` + `GENERATION_TIMEOUT_MS`. Source: `context/changes/perf-audit-2026-06-10/findings.md` (H3).
+
+### Sample data UX
+
+- [ ] **Make wipe-then-load atomic (follow-up to `c0a5400`).** The shipped `loadSampleData` wipes existing content (`deleteAllUserContent`) then seeds across separate supabase-js calls — not one transaction. If a seed insert fails _after_ the wipe succeeds, the user's data is gone and the `is_seeded` rollback can't restore it. Fix = do wipe+seed inside one Postgres transaction via an RPC (the pattern `delete_account` uses). Low priority: the seed payload is a fixed, validated fixture that has always inserted cleanly, so the failure window is narrow.
 
 ### Test & code-health debt
 
