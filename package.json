@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "test:integration": "RUN_INTEGRATION=1 vitest run src/__tests__/api-tokens.integration.test.ts src/__tests__/api-routes.integration.test.ts src/__tests__/delete-account.integration.test.ts src/__tests__/rls-isolation.integration.test.ts",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/types.ts",
+    "db:push:safe": "bash scripts/db-push-safe.sh",
     "seed:dump-fixture": "node supabase/seed-scripts/dump-sample-fixture.mjs",
     "prepare": "husky"
   },

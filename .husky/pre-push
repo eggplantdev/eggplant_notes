@@ -1,5 +1,45 @@
+# Capture the refs git is about to push (stdin) BEFORE any command can consume it.
+# Per line: <local ref> <local sha> <remote ref> <remote sha>. The remote ref is
+# the destination branch — that's how we differentiate a prod push (main) from a
+# preview/feature push, before anything reaches the remote.
+PROD_BRANCH=main
+push_to_prod= sha_from= sha_to=
+while read -r _local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/$PROD_BRANCH" ]; then
+    push_to_prod=1; sha_from=$remote_sha; sha_to=$local_sha
+  fi
+done
+
 pnpm run typecheck
 pnpm exec vitest run
+
+# Prod-migrate guard (supabase-prod-migrate skill): only on a push to main that
+# ships new supabase/migrations/, interactively offer to apply them to prod
+# (backup → db push) BEFORE the deploy, so schema lands first. y/N is read from
+# /dev/tty (stdin holds the ref list); no tty (agent/CI) → default "no" =
+# code-only deploy, never migrates prod silently. Fail-closed: a failed migration
+# aborts the push.
+if [ -n "$push_to_prod" ]; then
+  if [ "$sha_from" = "0000000000000000000000000000000000000000" ]; then
+    sha_from=$(git hash-object -t tree /dev/null)   # new branch: diff vs empty tree
+  fi
+  if git diff --name-only "$sha_from" "$sha_to" -- supabase/migrations/ | grep -q .; then
+    reply=n
+    if { : < /dev/tty; } 2>/dev/null; then
+      printf '\n⚠  Push to %s includes new supabase/migrations/.\n   Migrate the PROD database now (backup-first)? [y/N] ' "$PROD_BRANCH" > /dev/tty
+      read -r reply < /dev/tty || reply=n
+    fi
+    case "$reply" in
+      [Yy]*)
+        echo "→ migrating prod (pnpm db:push:safe)…" >&2
+        pnpm db:push:safe < /dev/tty || { echo "✗ migration failed — aborting push" >&2; exit 1; }
+        ;;
+      *)
+        echo "→ skipping migration; deploying code only" >&2
+        ;;
+    esac
+  fi
+fi
 
 # Background watcher: prints Vercel deployment state transitions to this terminal.
 # Detached subshell so `git push` returns immediately when the hook exits.

@@ -79,3 +79,6 @@ reports/
 
 # AI generation debug logs (Phase 5 — best-effort local prompt-refinement trail)
 .ai-debug/
+
+# Pre-migration prod DB snapshots from db:push:safe — contain real data, never commit
+backups/
