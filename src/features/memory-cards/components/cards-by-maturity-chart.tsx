@@ -1,7 +1,7 @@
 'use client'
 
 import { type ChartConfig } from '@/components/ui/chart'
-import { RadialCountChart } from '@/features/memory-cards/components/radial-count-chart'
+import { LazyRadialCountChart } from '@/features/memory-cards/components/radial-count-chart-lazy'
 
 // Data order puts mature on the inner ring (recharts renders the last datum as the outer ring).
 const chartConfig = {
@@ -12,7 +12,7 @@ const chartConfig = {
 
 export function CardsByMaturityChart({ mature, young }: { mature: number; young: number }) {
   return (
-    <RadialCountChart
+    <LazyRadialCountChart
       data={[
         { key: 'mature', value: mature },
         { key: 'young', value: young },
