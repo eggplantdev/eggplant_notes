@@ -257,10 +257,10 @@ the `/subjects` redirect; confirm nav active-state still highlights under `/subj
 
 #### Automated
 
-- [ ] 2.1 No dangling references: `grep -rn "SubjectsList\|getSubjectsList\|SubjectListItemT" src` empty
-- [ ] 2.2 Type checking passes: `pnpm typecheck`
-- [ ] 2.3 Linting passes: `pnpm lint`
-- [ ] 2.4 Production build compiles: `pnpm build`
+- [x] 2.1 No dangling references: `grep -rn "SubjectsList\|getSubjectsList\|SubjectListItemT" src` empty
+- [x] 2.2 Type checking passes: `pnpm typecheck`
+- [x] 2.3 Linting passes: `pnpm lint`
+- [x] 2.4 Production build compiles: `pnpm build`
 
 #### Manual
 

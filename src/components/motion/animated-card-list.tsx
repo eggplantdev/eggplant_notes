@@ -43,7 +43,7 @@ type PropsT<T> = {
 }
 
 // Client component because callers pass render functions, which can't cross the RSC boundary —
-// so the per-feature wrappers (NotesList, SubjectsList) must also be 'use client'.
+// so per-feature wrappers (e.g. NotesList) must also be 'use client'.
 export function AnimatedCardList<T>({
   items,
   getKey,
