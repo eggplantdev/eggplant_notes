@@ -9,6 +9,14 @@ import { Button } from '@/components/ui/button'
 import { TitledCard } from '@/components/ui/titled-card'
 import { signUp } from '@/features/auth/actions/sign-up'
 import { emailSchema, passwordSchema } from '@/features/auth/schemas'
+import { EMAIL_USER } from '@/lib/env'
+
+// mailto (not the auth-gated Contact action) because the user is logged out here — a pre-login report
+// has no session to attach. Targets the public sender address; EMAIL_TO is server-only, unreachable from
+// this client bundle.
+const REPORT_MAILTO = `mailto:${EMAIL_USER}?subject=${encodeURIComponent(
+  'Sign-up problem report',
+)}&body=${encodeURIComponent('Describe what went wrong:\n\n')}`
 
 export default function SignUpPage() {
   const [formError, setFormError] = useState<string | undefined>(undefined)
@@ -56,6 +64,12 @@ export default function SignUpPage() {
         <Link href="/sign-in" className="underline">
           Sign in
         </Link>
+      </p>
+      <p className="text-muted-foreground mt-2 text-sm">
+        Having trouble?{' '}
+        <a href={REPORT_MAILTO} className="underline">
+          Report a problem
+        </a>
       </p>
     </TitledCard>
   )
