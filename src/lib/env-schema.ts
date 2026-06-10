@@ -20,7 +20,7 @@ const httpUrl = z
 export const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: httpUrl,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  NEXT_PUBLIC_SITE_URL: httpUrl.default('http://127.0.0.1:3000'),
+  NEXT_PUBLIC_SITE_URL: httpUrl,
   NEXT_PUBLIC_EMAIL_USER: z.email(),
 })
 
@@ -32,4 +32,8 @@ export const serverSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().min(32),
   EMAIL_PASS: z.string().min(1),
   EMAIL_TO: z.email(),
+  // AES-256-GCM master key for the per-user OpenRouter key at rest (aes-gcm.ts). Build-validated for
+  // presence here so a missing key fails `next build` instead of throwing only when a user first
+  // connects/uses a key; the 32-byte base64 decode is still checked at call time in getKey().
+  OPENROUTER_ENC_KEY: z.string().min(1),
 })
