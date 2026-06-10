@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { cache } from 'react'
 
 import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
@@ -57,31 +58,32 @@ export async function getSubjectsList(
 
 // Single subject by id. Missing OR not-owned both resolve to `undefined` (caller
 // decides 404), via `maybeSingle` — same contract as getNote.
-export async function getSubject(
-  id: string,
-  client?: SupabaseClient<Database>,
-): Promise<SubjectT | undefined> {
-  const supabase = client ?? (await createClient())
-  return runMaybeSingle(
-    'getSubject',
-    supabase.from('subjects').select('*').eq('id', id).maybeSingle(),
-  )
-}
+// cache()-wrapped: the /subjects/[id] layout and page both call this per request;
+// cache() keys on args, dedupes them to one round-trip. The injected `client` (E2E
+// only) defeats dedup harmlessly since prod calls pass none.
+export const getSubject = cache(
+  async (id: string, client?: SupabaseClient<Database>): Promise<SubjectT | undefined> => {
+    const supabase = client ?? (await createClient())
+    return runMaybeSingle(
+      'getSubject',
+      supabase.from('subjects').select('*').eq('id', id).maybeSingle(),
+    )
+  },
+)
 
 // Lightweight list for the docs-style sidebar nav: id/title/position only, never `content`.
 // Ordered by `position` (nulls last, created_at tie-break; members always have a position, so
 // nulls-last is defensive).
-export async function getSubjectNoteSummaries(
-  subjectId: string,
-  client?: SupabaseClient<Database>,
-): Promise<SubjectNoteSummaryT[]> {
-  const supabase = client ?? (await createClient())
-  return runTableQuery(supabase, (c) =>
-    c
-      .from('notes')
-      .select('id, title, position')
-      .eq('subject_id', subjectId)
-      .order('position', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: true }),
-  )
-}
+export const getSubjectNoteSummaries = cache(
+  async (subjectId: string, client?: SupabaseClient<Database>): Promise<SubjectNoteSummaryT[]> => {
+    const supabase = client ?? (await createClient())
+    return runTableQuery(supabase, (c) =>
+      c
+        .from('notes')
+        .select('id, title, position')
+        .eq('subject_id', subjectId)
+        .order('position', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: true }),
+    )
+  },
+)
