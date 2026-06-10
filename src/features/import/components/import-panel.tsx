@@ -248,15 +248,6 @@ export function ImportPanel({
             </MutedText>
           )
         )}
-
-        {/* Own row so the split-control fold above can't reflow it.
-            PDF path: the base64 file rides the Server Action request body, which Next caps at
-            `experimental.serverActions.bodySizeLimit` (set to 14mb in next.config.ts — default is
-            1 MB). The action's own Zod cap is 10 MB raw (~13.4 MB base64), so the config limit must
-            stay above it. If we ever need larger PDFs (or streaming/progress), the body-limit ceiling
-            is the signal to move this upload to a dedicated Route Handler under src/app/api/ instead
-            of a Server Action — Route Handlers parse the request stream themselves and aren't bound
-            by serverActions.bodySizeLimit. */}
       </div>
 
       {drafts.length > 0 && (

@@ -8,7 +8,7 @@ export function SiteFooter() {
       <div className="container-shell flex flex-col items-center justify-between gap-3 py-6 text-sm sm:flex-row">
         <ContactDialog />
         <div className="text-muted-foreground flex items-center gap-3">
-          <span>© 2026 eggplantdev.com</span>
+          <span>© 2026 eggplant_dev.com 🍆</span>
         </div>
       </div>
     </footer>

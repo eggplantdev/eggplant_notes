@@ -50,16 +50,12 @@ export default async function SubjectLayout({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <SubjectSwitcher subjects={subjects} currentId={id} />
         <div className="flex flex-wrap items-center gap-2">
-          <ButtonLink href="/subjects/new" variant="outline" size="sm">
-            New subject
-          </ButtonLink>
-          <ButtonLink href={`/subjects/${id}?edit`} variant="outline" size="sm">
+          <ButtonLink href="/subjects/new">New subject</ButtonLink>
+          <ButtonLink href={`/subjects/${id}?edit`} variant="outline">
             Edit subject
           </ButtonLink>
           <DeleteSubjectButton id={id} />
-          <ButtonLink href={`/notes/new?subject=${id}`} size="sm">
-            Add note
-          </ButtonLink>
+          <ButtonLink href={`/notes/new?subject=${id}`}>Add note</ButtonLink>
         </div>
       </div>
 

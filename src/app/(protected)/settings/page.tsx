@@ -28,13 +28,6 @@ export default async function SettingsPage() {
       </SettingsSection>
 
       <SettingsSection
-        title="Sample data"
-        description="Load a representative set of subjects, notes, and memory cards to explore the app — then clear it whenever you like."
-      >
-        <SampleDataSection accountEmpty={accountEmpty} />
-      </SettingsSection>
-
-      <SettingsSection
         title="AI (OpenRouter)"
         description="Bring your own OpenRouter key to generate notes and cards with AI. The key is encrypted and used only on the server."
         className="gradient-border"
@@ -47,6 +40,13 @@ export default async function SettingsPage() {
         description="Create personal API tokens to use the HTTP API from a CLI or agent. A token is shown once at creation — copy it then. Revoke any token to disable it immediately."
       >
         <ApiTokensSection tokensResult={apiTokens} />
+      </SettingsSection>
+
+      <SettingsSection
+        title="Sample data"
+        description="Load a representative set of subjects, notes, and memory cards to explore the app — then clear it whenever you like."
+      >
+        <SampleDataSection accountEmpty={accountEmpty} />
       </SettingsSection>
 
       <SettingsSection
