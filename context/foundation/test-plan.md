@@ -8,6 +8,34 @@
 >
 > Last updated: 2026-06-10
 
+## ✅ At a glance
+
+Risk-by-risk coverage — each line is one failure scenario. Detail in §2 (Risk Map) / §3 (Phased Rollout). _Snapshot: 2026-06-10._
+
+**Covered**
+
+- [x] **R1 cross-user IDOR** — E2E `isolation` + per-feature `LEAK:` checks; API IDOR via `api-*.integration` (gated). _Dedicated per-table sweep still pending — see below._
+- [x] **R2 FSRS reschedule** — unit `review-scheduling` + E2E `review` / `memory-card-review-page`.
+- [x] **R3 AI schema + preview gate** — 7 unit specs + E2E `create-note-with-checks`.
+- [x] **R4 AI per-request size cap** — unit `generate-caps` (notes/cards over-limit refusal, model never called).
+- [x] **R5 BYOK key lifecycle** — `aes-gcm` + `delete-account.spec` + `delete-account.integration` (cascade-gone) + `credential-leak` (error echo + `server-only` boundary).
+- [x] **R6 silent mutation failure** — unit `toast-result` + E2E `action-feedback-toasts`.
+- [x] **R7 markdown XSS** — E2E `markdown-xss` (Phase 7 complete).
+- [x] **R8 ordering math** — unit `midpoint`.
+- [x] **Hardening (2)–(5)** — error-mask `run-table-action`, delete re-auth, password length 8, contact CRLF.
+
+**Left to test**
+
+- [ ] **R4 loop/repeat guard** — no rate limiter in code (shelved nice-to-have in `TODO.md`; BYOK-mitigated, not a test gap).
+- [ ] **R5 full production-bundle grep** — CI gate (§5), not wired; the `server-only` source-pin is the proxy until then.
+- [ ] **Hardening (1) sign-up enumeration** — neutral-message guard untested (needs e2e).
+- [ ] **R1 dedicated two-user RLS-per-table sweep** — and the API IDOR specs are default-skipped (not in the `pnpm test` gate).
+- [ ] **R2 due-query timezone / day-boundary** — integration due-set membership across a day rollover.
+- [ ] **R8 e2e reorder-degeneracy** — collisions / precision loss / un-re-savable order.
+- [ ] **Phase debt** — `topic-scoped-review` E2E; `revalidate-prompt-surfaces` verify-or-delete.
+
+---
+
 ## 1. Strategy
 
 Tests follow four non-negotiable principles for this project:
