@@ -52,6 +52,7 @@
 ### AI / OpenRouter polish
 
 - [ ] **Stream AI generation (perf-audit H3).** `generate-notes.ts`/`generate-cards.ts` use `generateObject`, which resolves only when the whole object is done → a 30–60s opaque spinner for big inputs (50k chars / 10MB PDF). Switch to `streamObject` + render incrementally (first note in ~1–3s). Not XS: Server Actions don't stream cleanly — intended path is a Route Handler returning a streamed response consumed via `useObject`, touching `note-form.tsx`/`import-panel.tsx` + `GENERATION_TIMEOUT_MS`. Source: `context/changes/perf-audit-2026-06-10/findings.md` (H3).
+- [ ] **Generation rate limiter (nice-to-have — NOT building now).** Caps repeat/loop calls on `generateNotes`/`generateCards`; token-bucket/fixed-window keyed on `auth.uid()`, checked at the action entry _before_ key-decrypt + DB reads. Shelved on purpose: the per-request size cap already exists + is tested (`generate-caps.test.ts`); BYOK means a loop burns the user's _own_ OpenRouter credits, so this protects mainly _our_ Vercel/Supabase load + accidental self-harm, not a money leak. Worth it only at a second user / real traffic. Closes the R4 loop dimension recorded in `context/foundation/test-plan.md` §2. Build = Upstash Redis + `@upstash/ratelimit` + a loop-guard test.
 
 ### Sample data UX
 
