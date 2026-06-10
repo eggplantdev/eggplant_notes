@@ -1,71 +1,76 @@
-# Coding Learning Companion — Backlog (operator triage)
+# Coding Learning Companion — Backlog
 
 > Markdown notes grouped into subjects + spaced-repetition recall cards. Eggplant-branded.
-> **Deadline 2026-06-10 · today 2026-06-04 (~6 days slack).**
->
-> **Status: the product WORKS.** North Star (recall loop) + every v1-usable slice + both fast-follow slices are shipped. All roadmap slices **S-01..S-10 done**. Only unstarted roadmap item is **S-11** (perf, status `proposed`).
-> This backlog is **post-deadline-subset polish + new features — NOT critical-path work.**
+> **The product WORKS** — roadmap S-01..S-10 shipped. This backlog is post-deadline polish + new features, not critical-path.
+> _Status snapshot: 2026-06-10._
 
 ---
 
-## Cluster 1 — Branding / identity ("eggplant_notes")
+## ✅ At a glance
 
-_App currently has no name/logo/footer._
+**Left to do**
 
-- [ ] Rename app to `eggplant_notes` — replace placeholder app title across UI/metadata.
+- [ ] **Eggplant logo** — brand mark for nav / landing / favicon (no asset yet).
+- [ ] **Performance / route caching (S-11)** — has a real architectural blocker (per-user cache vs RLS cookie).
+- [ ] **Mobile pass** — check + fix layouts on small screens.
+- [ ] **User account page** — deferred ("konto usera").
+- [ ] **AI: default models setting** — let user pin default model(s).
+- [ ] **AI: conditional "Connect" CTA** — show OpenRouter connect button whenever not connected.
+- [ ] **AI: in-context instructions/help text** — explain note/card AI features at point of use.
+- [ ] **Test/cleanup debt** (3 items — see bottom): `revalidate-prompt-surfaces.ts` verify-or-delete, prompts E2E, topic-scoped-review E2E.
+
+**Done** (shipped off this backlog)
+
+- [x] Rename app → `eggplant_ai_notes` — `layout.tsx` metadata title + real description (closes perf-audit **L2**). Nav has no wordmark and `/` redirects to `/dashboard`, so metadata was the only name surface.
+- [x] Footer — `site-footer.tsx` (carries the Contact dialog).
+- [x] Connect external LLM via OpenRouter (BYOK, PKCE) — S-19.
+- [x] Create notes from a markdown/any file — S-19 import.
+- [x] Create notes by asking AI — S-19 gen-notes/gen-cards.
+- [x] Update a note by agent over HTTP (CLI/webhook-style API) — expose-cli-note-api + clc-api-crud-endpoints.
+- [x] Settings model picker — sort by price + alphabetical, per-user pins (model-picker-sort-favorites).
+- [x] Split `openrouter/prompts.ts` grab-bag — now `prompt-schemas` / `system-prompts` / `build-prompt` / `preview-prompt`.
+- [x] ~~Branded loader (bouncing eggplant)~~ — superseded: gradient `Spinner` is the project-wide loader standard.
+
+---
+
+## Details — open items
+
+### Branding / identity
+
 - [ ] Eggplant logo — brand mark for nav/landing/favicon.
-- [ ] Branded loader (bouncing eggplant) — replace remaining loaders/spinners.
-- [ ] Footer (copyright etc.).
 
-## Cluster 4 — Performance (= roadmap S-11, already scoped)
+### Performance (= roadmap S-11)
 
-- [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation).
+- [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation). In-flight audits: `context/changes/perf-audit-2026-06-10`, `context/changes/query-performance-audit`.
 
-## Cluster 6 — Later (explicitly deferred)
+### Later (explicitly deferred)
 
 - [ ] User account page ("konto usera — na później").
-- [ ] **Connect an external LLM via OpenRouter (BYOK, PKCE)** — do this **LAST**. Largest new surface: external dependency, credential storage, new auth flow.
 
-## Cluster 7 — Code health (dedup / simplification)
+### AI / OpenRouter polish
 
-- [ ] **Split `src/features/openrouter/prompts.ts`** — grab-bag flagged by both `feature-first-structure` + `module-cohesion-audit` at the `editable-system-prompts` review gate (2026-06-08). Mixes 4 concerns: persistence Zod schemas, system-prompt constants + `resolveSystemPrompts`, pure prompt builders, preview-routing helpers. Split into `prompt-schemas.ts` / `system-prompts.ts` / `build-prompt.ts` / `preview-prompt.ts`, keeping `PROMPT_KEYS`/`PromptKeyT` as the shared const→type source. Deferred from the slice: behavior-neutral, touches cross-feature import sites (memory-cards/notes/import), and the parallel openrouter session was live — do it once that work settles.
-- [ ] **Behavioral coverage for `editable-system-prompts`** (deferred at the 2026-06-08 review gate; unit logic is covered by `user-prompts.test.ts`, the rest isn't). The DB read (`getResolvedSystemPrompts`), both Save/Reset actions, and the dialog wiring have zero behavioral tests — `plan.md` Progress rows 2.4–2.5, 3.4–3.6, 4.5–4.8 stayed `[ ]` by design. Drive via `/10x-e2e`: save → cross-surface reopen → generate-honors-saved-prompt → reset-confirm → built-in; plus the programmatic two-client RLS isolation check.
-- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — it `revalidatePath`s four pages that are always-dynamic (`cookies()`), so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to a `revalidateTag('user-prompts')` on the data. Also noted: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
-- [ ] **E2E for `topic-scoped-review`** (deferred at the 2026-06-09 review gate; unit not high-value — the filter builder is a thin PostgREST wrapper). Drive via `/10x-e2e`: seed cards across two subjects with known due dates → filter `/memory-cards` to subject A → assert the reviewed card belongs to A → rate → assert the next card is also from A (advance stays in-filter) → exhaust → `CaughtUpNotice` with the list still present. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`.
+- [ ] Allow setting default model(s) in settings.
+- [ ] OpenRouter "Connect" button visible conditionally whenever not connected.
+- [ ] AI instructions / help text everywhere the AI features surface.
+
+### Test & code-health debt
+
+- [ ] **Behavioral coverage for `editable-system-prompts`** (deferred at the 2026-06-08 review gate). Unit logic is covered (`user-prompts.test.ts`, `prompts.test.ts`); the DB read (`getResolvedSystemPrompts`), both Save/Reset actions, and dialog wiring still have no behavioral tests. Drive via `/10x-e2e`: save → cross-surface reopen → generate-honors-saved-prompt → reset-confirm → built-in; plus the two-client RLS isolation check.
+- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — it `revalidatePath`s four always-dynamic (`cookies()`) pages, so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to `revalidateTag('user-prompts')` on the data. Also: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
+- [ ] **E2E for `topic-scoped-review`** (deferred at the 2026-06-09 review gate; unit not high-value — the filter builder is a thin PostgREST wrapper). Drive via `/10x-e2e`: seed cards across two subjects with known due dates → filter `/memory-cards` to subject A → assert the reviewed card belongs to A → rate → assert the next card is also from A → exhaust → `CaughtUpNotice` with the list still present. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`.
+
+### Loose ideas (unsorted)
+
+- [ ] "Adding notes" onboarding instruction.
+- [ ] Update note by agent via webhook — _basic HTTP path shipped (CLI API); a true push/webhook trigger is still an idea._
 
 ---
 
 ## Suggested sequencing
 
-1. **Seed / dogfood now** (Cluster 5, already in progress)
-2. **Branding** (Cluster 1)
-3. **UI polish** (Cluster 2)
-4. **Dashboard features** (Cluster 3)
-5. **Performance** (Cluster 4 / S-11)
-6. **LLM connect** (Cluster 6) — last
-
-**Rationale:** polish + real data is what makes the operator actually keep using the app and is low-risk, so it goes first. S-11 has a genuine architectural blocker (per-user cache keying vs RLS cookie) so it gets its own focused change later. The LLM connect is the biggest/newest surface — last.
-
-check on mobile
-
-create notes out of markdown file or any file
-create notes by asking ai
-
-update note by agent via webhook?
-
-Adding notes instruction
-
-Na kiedyś
-
-ai
-
-- instructions everywhere
-- open router connect button visible all the time conditionally when not connected
--
-
-# Settings
-
-Settings model pickder
-Allow setting default models
-Sort by price
-Sort alphabeticall
+1. **Branding** (rename + logo) — low-risk, high-visibility.
+2. **Mobile pass.**
+3. **AI polish** (default models, conditional connect CTA, help text).
+4. **Test/cleanup debt** — clear before more features pile on.
+5. **Performance** (S-11) — own focused change; has the cache-vs-RLS blocker.
+6. **User account page** — last of the deferred set.
