@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-09
+> Last updated: 2026-06-10
 
 ## 1. Strategy
 
@@ -59,6 +59,14 @@ research's job, see §1 principle #3).
 
 **Abuse / security lens.** The product has auth and accepts user input (markdown upload), and will hold a BYOK secret. Coverage: authorization/IDOR → R1; untrusted input / validation parity → R3; secret/PII leakage → R5; resource abuse → R4.
 
+**Security-hardening pass (2026-06-10) — landed by parallel agents as standalone commits (no change folder).** Five findings were fixed on the auth / account / error surfaces these risks cover. They are **code fixes, not tests** — so the surfaces are hardened but still **untested**; each is a regression-test candidate for the Phase 4/5 rollout, and the refresh's `/10x-research` must ground the **current (hardened) state**, not the pre-fix code:
+
+- (1) sign-up errors collapsed to a neutral message — no user enumeration (`7f56b2b`) → R1 / auth-abuse.
+- (2) `runTableAction` returns a generic error instead of the raw PostgREST message — no schema/constraint leak to the client (`e82c5b5`) → **R5 error-leak surface** (the token-API `*-core` path has its own contract + tests and was intentionally left untouched).
+- (3) account deletion now requires password re-auth (`af5cab3`) → R5 / S-05 account surface (`update-password` left recovery-only by design — the email link is itself the re-auth).
+- (4) minimum password length 6 → 8, NIST baseline, app + Supabase config in sync (`b0c4120`) → auth.
+- (5) contact email subject rejects CR/LF — header-injection defense (`5814a55`) → untrusted-input / injection lens.
+
 ### Risk Response Guidance
 
 | Risk | What would prove protection                                                                                                                                                                                               | Must challenge                                                                                                                                                                                        | Context `/10x-research` must ground                                                                                                                                                                                                                                                 | Likely cheapest layer                                                                                                           | Anti-pattern to avoid                                                                                                                                                                                    |
@@ -89,7 +97,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 **Status vocabulary** (fixed — parser literals): `not started` → `change opened` → `researched` → `planned` → `implementing` → `complete`.
 
-Phases 1–3 are testable against today's code. Phases 4–5 cover the AI generation + credential surface, which **has now landed** (S-19, archived 2026-06-07) — they remain `not started` as test phases but are **no longer gated**; a `/10x-test-plan --refresh` should re-ground and activate them (see §8). This ordering was deliberate: the operator's top fears lived in then-unbuilt code, so the plan named them early and attacks them now that the code exists.
+Phases 1–3 are testable against today's code. Phases 4–5 cover the AI generation + credential surface, which **has now landed** (S-19, archived 2026-06-07) — they remain `not started` as test phases but are **no longer gated**; the `test-plan-refresh-2026-06-10` change (opened via `/10x-test-plan --refresh`) re-grounds and activates them (R4-first per the operator interview). This ordering was deliberate: the operator's top fears lived in then-unbuilt code, so the plan named them early and attacks them now that the code exists. **Note:** the parallel **2026-06-10 security-hardening pass** (see §2 Abuse / security lens) already hardened parts of the R5 error-leak + account-delete surface — Phase 5's tests target the current hardened state, and several of those fixes are regression-test candidates.
 
 Phase 6 is **out-of-band regression coverage**, registered post-hoc for an already-shipped feature (`memory-card-state-maturity-filters`, committed d822d67 + 34fd528). It does not map to a §2 top risk — it is a read-side correctness guard for the filter surface. Its E2E (`e2e/memory-card-filters.spec.ts`) is authored as that change's Phase 3, **after** its `/simplify` pass per the per-slice review gate.
 
@@ -200,6 +208,7 @@ should respect these unless the underlying assumption changes.
 - Strategy (§1–§5) last reviewed: 2026-06-06
 - Stack versions last verified: 2026-06-06
 - AI-native tool references last verified: 2026-06-06
+- 2026-06-10: parallel security-hardening pass landed (5 fixes — see §2 Abuse / security lens); `test-plan-refresh-2026-06-10` change opened to re-ground + activate Phases 4–5 (R3/R4/R5).
 
 Refresh (`/10x-test-plan --refresh`) when:
 
