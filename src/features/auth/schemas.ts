@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-// min 6 must match Supabase `minimum_password_length` (supabase/config.toml).
-export const passwordSchema = z.string().min(6, 'Password must be at least 6 characters')
+// min 8 must match Supabase `minimum_password_length` (supabase/config.toml) — NIST-8 baseline.
+export const passwordSchema = z.string().min(8, 'Password must be at least 8 characters')
 
 export const emailSchema = z.email('Enter a valid email address')
 

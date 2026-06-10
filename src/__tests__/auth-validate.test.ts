@@ -7,18 +7,18 @@ describe('validateInput + credentialsSchema', () => {
   it('accepts a valid email and password', () => {
     const result = validateInput(credentialsSchema, {
       email: 'user@example.com',
-      password: 'secret6',
+      password: 'secret88',
     })
     expect(result).toEqual({
       success: true,
-      data: { email: 'user@example.com', password: 'secret6' },
+      data: { email: 'user@example.com', password: 'secret88' },
     })
   })
 
   it('rejects a malformed email', () => {
     const result = validateInput(credentialsSchema, {
       email: 'not-an-email',
-      password: 'secret6',
+      password: 'secret88',
     })
     expect(result).toEqual({
       success: false,
@@ -26,14 +26,14 @@ describe('validateInput + credentialsSchema', () => {
     })
   })
 
-  it('rejects a password shorter than 6 characters', () => {
+  it('rejects a password shorter than 8 characters', () => {
     const result = validateInput(credentialsSchema, {
       email: 'user@example.com',
       password: 'short',
     })
     expect(result).toEqual({
       success: false,
-      error: 'Password must be at least 6 characters',
+      error: 'Password must be at least 8 characters',
     })
   })
 })
