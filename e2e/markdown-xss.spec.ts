@@ -30,7 +30,7 @@ const PAYLOAD = [
   '[click-data](data:text/html,<script>window.__xssData=true</script>)',
 ].join('\n\n')
 
-type XssFlags = {
+type XssFlagsT = {
   __xssRan?: boolean
   __xssImg?: boolean
   __xssLink?: boolean
@@ -44,7 +44,7 @@ async function expectInertRender(page: Page) {
   await expect(page.locator('.prose img')).toHaveCount(0)
 
   const flags = await page.evaluate(() => {
-    const w = window as unknown as XssFlags
+    const w = window as unknown as XssFlagsT
     return { ran: w.__xssRan, img: w.__xssImg, link: w.__xssLink, data: w.__xssData }
   })
   expect(flags.ran).toBeFalsy()
