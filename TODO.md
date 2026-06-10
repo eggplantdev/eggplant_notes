@@ -17,6 +17,7 @@
 - [ ] **AI: default models setting** — let user pin default model(s).
 - [ ] **AI: conditional "Connect" CTA** — show OpenRouter connect button whenever not connected.
 - [ ] **AI: in-context instructions/help text** — explain note/card AI features at point of use.
+- [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
 - [ ] **Test/cleanup debt** (3 items — see bottom): `revalidate-prompt-surfaces.ts` verify-or-delete, prompts E2E, topic-scoped-review E2E.
 
 **Done** (shipped off this backlog)
@@ -52,6 +53,7 @@
 - [ ] Allow setting default model(s) in settings.
 - [ ] OpenRouter "Connect" button visible conditionally whenever not connected.
 - [ ] AI instructions / help text everywhere the AI features surface.
+- [ ] **Stream AI generation (perf-audit H3).** `generate-notes.ts`/`generate-cards.ts` use `generateObject`, which resolves only when the whole object is done → a 30–60s opaque spinner for big inputs (50k chars / 10MB PDF). Switch to `streamObject` + render incrementally (first note in ~1–3s). Not XS: Server Actions don't stream cleanly — intended path is a Route Handler returning a streamed response consumed via `useObject`, touching `note-form.tsx`/`import-panel.tsx` + `GENERATION_TIMEOUT_MS`. Source: `context/changes/perf-audit-2026-06-10/findings.md` (H3).
 
 ### Test & code-health debt
 
