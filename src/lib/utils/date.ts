@@ -74,10 +74,13 @@ export function formatFullDate(isoDate: string): string {
   })
 }
 
+// Locale + timeZone are pinned so SSR (UTC, runtime locale) and the client (browser zone/locale)
+// render byte-identical text — an unpinned toLocale* call differs between the two and trips React
+// hydration error #418 on any page that prints these (e.g. /notes).
 export function formatLocaleDate(value: string | number | Date): string {
-  return new Date(value).toLocaleDateString()
+  return new Date(value).toLocaleDateString('en-US', { timeZone: APP_TIME_ZONE })
 }
 
 export function formatLocaleDateTime(value: string | number | Date): string {
-  return new Date(value).toLocaleString()
+  return new Date(value).toLocaleString('en-US', { timeZone: APP_TIME_ZONE })
 }
