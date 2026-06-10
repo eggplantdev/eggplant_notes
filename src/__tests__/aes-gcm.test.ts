@@ -1,10 +1,18 @@
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// aes-gcm now sources the master key from the validated server env (serverEnv.OPENROUTER_ENC_KEY),
+// not raw process.env. Mock that module so importing aes-gcm doesn't trigger a real serverSchema.parse
+// and so we control the key per test — getKey() reads the property at call time, so mutating it
+// between tests is enough.
+vi.mock('@/lib/env.server', () => ({ serverEnv: { OPENROUTER_ENC_KEY: '' } }))
 
 import { decryptSecret, encryptSecret } from '@/lib/crypto/aes-gcm'
+import { serverEnv } from '@/lib/env.server'
 
-// A deterministic 32-byte key (base64) for the test; the module reads it lazily at call time.
-beforeAll(() => {
-  process.env.OPENROUTER_ENC_KEY = Buffer.alloc(32, 7).toString('base64')
+const VALID_KEY = Buffer.alloc(32, 7).toString('base64') // deterministic 32-byte key (base64)
+
+beforeEach(() => {
+  serverEnv.OPENROUTER_ENC_KEY = VALID_KEY
 })
 
 describe('aes-gcm encryptSecret / decryptSecret', () => {
@@ -28,9 +36,7 @@ describe('aes-gcm encryptSecret / decryptSecret', () => {
   })
 
   it('throws when the key is the wrong length', () => {
-    const saved = process.env.OPENROUTER_ENC_KEY
-    process.env.OPENROUTER_ENC_KEY = Buffer.alloc(16).toString('base64')
+    serverEnv.OPENROUTER_ENC_KEY = Buffer.alloc(16).toString('base64')
     expect(() => encryptSecret('x')).toThrow(/32 bytes/)
-    process.env.OPENROUTER_ENC_KEY = saved
   })
 })

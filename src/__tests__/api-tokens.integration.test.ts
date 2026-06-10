@@ -15,9 +15,15 @@ describe.skipIf(!RUN)('api token pipeline (integration)', () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL ??= SUPABASE_URL
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= ANON_KEY
   process.env.SUPABASE_JWT_SECRET ??= JWT_SECRET
-  // The client env (env.ts) eager-parses every NEXT_PUBLIC_* on import — incl. the contact-form sender
-  // — so importing any route handler needs this set even though these tests send no email.
+  // env.ts (client) AND env.server.ts both eager-parse their whole schema on import, and importing a
+  // route handler pulls both in (the token pipeline's mint-user-jwt reads env.server). So every schema
+  // var must be set before the dynamic imports below — even though these tests send no email and never
+  // decrypt a key.
   process.env.NEXT_PUBLIC_EMAIL_USER ??= 'noreply@example.com'
+  process.env.EMAIL_HOST ??= 'localhost'
+  process.env.EMAIL_PASS ??= 'x'
+  process.env.EMAIL_TO ??= 'noreply@example.com'
+  process.env.OPENROUTER_ENC_KEY ??= Buffer.alloc(32).toString('base64')
 
   let authenticateRequest: typeof import('@/features/api-tokens/authenticate-request').authenticateRequest
   let generateToken: typeof import('@/features/api-tokens/token').generateToken
