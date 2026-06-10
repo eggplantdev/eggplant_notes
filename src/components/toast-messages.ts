@@ -11,7 +11,6 @@ export const TOAST_MESSAGES = {
   'subject-deleted': 'Subject deleted',
   'notes-imported': 'Notes imported',
   'openrouter-connected': 'OpenRouter connected',
-  'signed-up': 'Account created',
   'password-updated': 'Password updated',
   'account-deleted': 'Account deleted',
 } as const
