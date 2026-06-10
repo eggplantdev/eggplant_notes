@@ -1,3 +1,4 @@
+import { PostgrestError } from '@supabase/supabase-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
@@ -14,12 +15,14 @@ const schema = z.object({ name: z.string() })
 const GENERIC_ERROR = 'Something went wrong. Please try again.'
 
 // A realistic PostgREST unique-violation — the kind of payload that leaks schema names if echoed.
-const leakyError = {
+// A real PostgrestError instance (postgrest-js 2.106 made the response a discriminated union whose
+// failure branch types `error` as the PostgrestError class, which a plain literal can't satisfy).
+const leakyError = new PostgrestError({
   message: 'duplicate key value violates unique constraint "notes_user_id_title_key"',
-  code: '23505',
   details: 'Key (user_id, title)=(abc, Foo) already exists.',
-  hint: null,
-}
+  hint: '',
+  code: '23505',
+})
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -29,6 +32,7 @@ beforeEach(() => {
 describe('runTableAction — error masking (R5 leak surface)', () => {
   it('returns the generic message on a PostgREST error, never the DB internals', async () => {
     const result = await runTableAction(schema, { name: 'Foo' }, async () => ({
+      success: false,
       data: null,
       error: leakyError,
       count: null,
@@ -46,6 +50,7 @@ describe('runTableAction — error masking (R5 leak surface)', () => {
 
   it('still logs the real PostgREST error server-side (mask the client, not the logs)', async () => {
     await runTableAction(schema, { name: 'Foo' }, async () => ({
+      success: false,
       data: null,
       error: leakyError,
       count: null,
@@ -59,6 +64,7 @@ describe('runTableAction — error masking (R5 leak surface)', () => {
   it('returns the affected row on success', async () => {
     const row = { id: '1', name: 'Foo' }
     const result = await runTableAction(schema, { name: 'Foo' }, async () => ({
+      success: true,
       data: row,
       error: null,
       count: 1,
