@@ -16,6 +16,16 @@ top_blocker: time
 > Rows are ordered by execution: done block first, then the v1-usable subset in dependency order, then fast-follow.
 > **Band** marks the deadline split: `v1-usable` must ship by 2026-06-10; `fast-follow` lands right after; `v2` is post-deadline.
 
+## TL;DR
+
+**The product WORKS** — F-01..F-02 + S-01..S-10 shipped, all `v1-usable`/`fast-follow` slices done, and most `v2` extras (subjects, sidebar, import, CLI API) too. _Snapshot: 2026-06-10._
+
+**Left on the roadmap**
+
+- **S-11 data-fetching-efficiency** (`proposed`) — the only slice not done; real blocker (Next 16 `'use cache'` can't read the RLS auth cookie, so per-user cache keying must be solved first).
+
+Post-deadline polish + new features not tracked as slices (logo, mobile pass, user account page, AI stream generation, test/cleanup debt) live in `@TODO.md`, not here.
+
 ## Vision recap
 
 A personal coding-learning tool: organize markdown notes into **subjects** (a subject reads as one continuous document split into note-sections), attach recall cards to notes, and review them on an adaptive schedule that lengthens after good recalls and shortens after failures. The product **wedge** — the trait that, if removed, leaves a generic notes app — is twofold: the adaptive recall loop (the scheduling rule _is_ the product, not a bolt-on), and keeping each recall card bound to its source note with a card→note path so knowledge stays linked rather than scattered across files. v2 re-shapes the live v1 (flat, ungrouped notes) into this subject-grouped, card-linked shape. Web-only, multi-user with strict per-user isolation, solo-built against a hard 2026-06-10 deadline for a genuinely usable subset.
