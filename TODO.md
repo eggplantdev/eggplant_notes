@@ -10,7 +10,7 @@
 
 **Left to do**
 
-- [ ] **Eggplant logo** — brand mark for nav / landing / favicon (no asset yet).
+- [ ] **Eggplant logo** — brand mark for nav / landing (favicon ✅ done). Asset now in `public/logos/eggplant-logo.png`; nav/landing wordmark still open.
 - [ ] **Performance / route caching (S-11)** — has a real architectural blocker (per-user cache vs RLS cookie).
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **User account page** — deferred ("konto usera").
@@ -40,7 +40,7 @@
 
 ### Branding / identity
 
-- [ ] Eggplant logo — brand mark for nav/landing/favicon.
+- [ ] Eggplant logo — brand mark for nav/landing. Favicon ✅ shipped via `src/app/icon.tsx` (generated from `public/logos/eggplant-logo.png`, mirrors the portfolio repo). Nav/landing wordmark still open.
 
 ### Performance (= roadmap S-11)
 

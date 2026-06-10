@@ -76,7 +76,7 @@ Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under
 ## Commits & CI
 
 - Commit style (from `git log`): lowercase imperative subject, no Conventional-Commits prefix — e.g. `add supabase cli dev-dep + fix arm64 binary resolution`.
-- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/coding-learning-companion` (public).
+- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/eggplant_ai_notes` (public). **The repo was renamed from `coding-learning-companion`, but the Vercel project + `package.json` name are still `coding-learning-companion`** — so the repo slug intentionally diverges from both (the `vercel link --project` name below is the old one, on purpose).
 
 ## Tooling tripwires
 
