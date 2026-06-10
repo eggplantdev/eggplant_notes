@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { toastActionResult } from '@/components/forms/toast-result'
 import { AccordionArrow } from '@/components/ui/accordion-arrow'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { SegmentedToggle } from '@/components/ui/segmented-toggle'
@@ -180,6 +181,30 @@ export function ImportPanel({
         />
       </div>
 
+      <div>
+        <GenerateDialog<GeneratedNoteT>
+          connected={aiEnabled}
+          defaultModel={pdf ? DEFAULT_OPENROUTER_FILE_MODEL : defaultModel}
+          modelFilter={pdf ? 'file' : 'text'}
+          previewInput={pdf ? { task: 'notes', file: true } : { task: 'notes', text }}
+          action={(modelId, promptOverride) =>
+            pdf
+              ? generateNotes({
+                  file: { ...pdf, mediaType: 'application/pdf' },
+                  modelId,
+                  promptOverride,
+                })
+              : generateNotes({ text, modelId, promptOverride })
+          }
+          onResult={applyDecomposition}
+          triggerLabel="Generate notes with AI"
+          triggerTestId="import-decompose-ai"
+          dialogTitle="Generate notes from this source with AI"
+          resultNoun="note"
+          applyHint="Notes ready in the preview below — review, then Import to save."
+        />
+      </div>
+
       <SourceInput
         value={text}
         onChange={handleSource}
@@ -190,57 +215,24 @@ export function ImportPanel({
       />
 
       <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* The deterministic split needs markdown text — hidden for a PDF, which only AI can read;
-              and it folds together with the paste box (one authoring strip, one toggle). */}
-          {!pdf && isPasteOpen && (
-            <>
-              <span className="text-muted-foreground text-sm">Split on heading level:</span>
-              <SegmentedToggle
-                size="sm"
-                ariaLabel="Split heading level"
-                value={String(level)}
-                onChange={(v) => handleLevel(Number(v) as SplitLevelT)}
-                options={LEVELS.map((l) => ({
-                  value: String(l),
-                  label: `H${l}`,
-                  testId: `import-level-h${l}`,
-                }))}
-              />
-            </>
-          )}
-          {/*
-            PDF path: the base64 file rides the Server Action request body, which Next caps at
-            `experimental.serverActions.bodySizeLimit` (set to 14mb in next.config.ts — default is
-            1 MB). The action's own Zod cap is 10 MB raw (~13.4 MB base64), so the config limit must
-            stay above it. If we ever need larger PDFs (or streaming/progress), the body-limit ceiling
-            is the signal to move this upload to a dedicated Route Handler under src/app/api/ instead
-            of a Server Action — Route Handlers parse the request stream themselves and aren't bound
-            by serverActions.bodySizeLimit.
-          */}
-          <GenerateDialog<GeneratedNoteT>
-            connected={aiEnabled}
-            defaultModel={pdf ? DEFAULT_OPENROUTER_FILE_MODEL : defaultModel}
-            modelFilter={pdf ? 'file' : 'text'}
-            previewInput={pdf ? { task: 'notes', file: true } : { task: 'notes', text }}
-            action={(modelId, promptOverride) =>
-              pdf
-                ? generateNotes({
-                    file: { ...pdf, mediaType: 'application/pdf' },
-                    modelId,
-                    promptOverride,
-                  })
-                : generateNotes({ text, modelId, promptOverride })
-            }
-            onResult={applyDecomposition}
-            triggerLabel="Generate notes with AI"
-            triggerTestId="import-decompose-ai"
-            validate={() => (pdf || text.trim().length > 0 ? undefined : NO_SOURCE_MSG)}
-            dialogTitle="Generate notes from this source with AI"
-            resultNoun="note"
-            applyHint="Notes ready in the preview below — review, then Import to save."
-          />
-        </div>
+        {/* The deterministic split needs markdown text — hidden for a PDF, which only AI can read;
+            folds with the paste box. */}
+        {!pdf && isPasteOpen && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground text-sm">Split on heading level:</span>
+            <SegmentedToggle
+              size="sm"
+              ariaLabel="Split heading level"
+              value={String(level)}
+              onChange={(v) => handleLevel(Number(v) as SplitLevelT)}
+              options={LEVELS.map((l) => ({
+                value: String(l),
+                label: `H${l}`,
+                testId: `import-level-h${l}`,
+              }))}
+            />
+          </div>
+        )}
 
         {pdf ? (
           <MutedText>
@@ -256,33 +248,39 @@ export function ImportPanel({
             </MutedText>
           )
         )}
+
+        {/* Own row so the split-control fold above can't reflow it.
+            PDF path: the base64 file rides the Server Action request body, which Next caps at
+            `experimental.serverActions.bodySizeLimit` (set to 14mb in next.config.ts — default is
+            1 MB). The action's own Zod cap is 10 MB raw (~13.4 MB base64), so the config limit must
+            stay above it. If we ever need larger PDFs (or streaming/progress), the body-limit ceiling
+            is the signal to move this upload to a dedicated Route Handler under src/app/api/ instead
+            of a Server Action — Route Handlers parse the request stream themselves and aren't bound
+            by serverActions.bodySizeLimit. */}
       </div>
 
       {drafts.length > 0 && (
         <>
-          <div>
-            <button
-              type="button"
-              onClick={() => setIsPreviewOpen((open) => !open)}
-              aria-expanded={isPreviewOpen}
-              aria-controls="import-preview-list"
-              className="group flex w-full cursor-pointer items-center gap-1.5"
-            >
-              <h2 className="text-lg font-semibold">
-                Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
-              </h2>
-              <AccordionArrow isOpen={isPreviewOpen} />
-            </button>
-            {isPreviewOpen && (
-              <div id="import-preview-list">
-                <p className="text-muted-foreground mt-1 mb-3 text-sm">
-                  Edit any title or body, or skip notes you don&apos;t want, before importing.
-                  Changing the split level re-splits and discards these edits.
-                </p>
-                <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
-              </div>
-            )}
-          </div>
+          <Collapsible open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="group flex w-full cursor-pointer items-center gap-1.5"
+              >
+                <h2 className="text-lg font-semibold">
+                  Preview — {keptCount} note{keptCount === 1 ? '' : 's'}
+                </h2>
+                <AccordionArrow isOpen={isPreviewOpen} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <p className="text-muted-foreground mt-1 mb-3 text-sm">
+                Edit any title or body, or skip notes you don&apos;t want, before importing.
+                Changing the split level re-splits and discards these edits.
+              </p>
+              <NotePreviewList drafts={drafts} onPatch={patchDraft} onToggleSkip={toggleSkip} />
+            </CollapsibleContent>
+          </Collapsible>
 
           <FormError message={formError} />
 
