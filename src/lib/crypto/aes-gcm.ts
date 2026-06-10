@@ -1,9 +1,11 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 
+import { serverEnv } from '@/lib/env.server'
+
 // Server-only AES-256-GCM for secrets at rest (the per-user OpenRouter key). node:crypto makes this
 // unusable in the browser by construction; the key never reaches the client. The 32-byte master key
-// comes from OPENROUTER_ENC_KEY (base64) and is read lazily at call time — so importing this module
-// never crashes a context where the var is absent, and tests can set it before calling.
+// is sourced from the validated server env (serverEnv.OPENROUTER_ENC_KEY) — never raw process.env —
+// so presence is guaranteed at build by serverSchema and getKey only verifies the decoded length.
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_BYTES = 12 // GCM standard nonce length
@@ -15,9 +17,9 @@ export type EncryptedSecretT = {
 }
 
 function getKey(): Buffer {
-  const raw = process.env.OPENROUTER_ENC_KEY
-  if (!raw) throw new Error('OPENROUTER_ENC_KEY is not set')
-  const key = Buffer.from(raw, 'base64')
+  // serverEnv.OPENROUTER_ENC_KEY is validated for presence by serverSchema at build (env-schema.ts),
+  // so it's a guaranteed string here; we only verify the 32-byte base64 decode.
+  const key = Buffer.from(serverEnv.OPENROUTER_ENC_KEY, 'base64')
   if (key.length !== 32) throw new Error('OPENROUTER_ENC_KEY must decode to 32 bytes (base64)')
   return key
 }
