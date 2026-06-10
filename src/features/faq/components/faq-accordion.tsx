@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { AccordionArrow } from '@/components/ui/accordion-arrow'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { type FaqSectionT } from '@/features/faq/faq-data'
 
-type PropsT = { sections: readonly FaqSectionT[] }
+// `slots` maps an item's `slot` key (e.g. 'skill', 'contact') to a rendered node injected below its
+// prose — the agent-skill preview, the contact-dialog trigger, etc. Passed as props (not imported
+// here) so Server Components can cross into this Client boundary.
+type PropsT = { sections: readonly FaqSectionT[]; slots?: Record<string, ReactNode> }
 
-// Multi-open disclosure: each item tracks its own open state by `${sectionId}:${index}` key,
-// so opening one answer never closes another. Mirrors the group-button + AccordionArrow idiom
-// used elsewhere (e.g. import/source-input) rather than pulling in a new accordion dependency.
-export function FaqAccordion({ sections }: PropsT) {
+// Multi-open disclosure: a Set of open item keys means each item is its own controlled `Collapsible`,
+// so opening one answer never closes another. The expand animation is baked into CollapsibleContent.
+export function FaqAccordion({ sections, slots }: PropsT) {
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set())
 
   const toggle = (key: string) =>
@@ -32,53 +35,54 @@ export function FaqAccordion({ sections }: PropsT) {
               const itemId = `faq-${section.id}-${index}`
               const isOpen = open.has(itemId)
               return (
-                <div key={itemId}>
-                  <button
-                    type="button"
-                    onClick={() => toggle(itemId)}
-                    aria-expanded={isOpen}
-                    aria-controls={itemId}
-                    className="group flex w-full cursor-pointer items-center justify-between gap-3 py-4 text-left"
-                  >
-                    <span className="font-medium">{item.question}</span>
-                    <AccordionArrow isOpen={isOpen} className="shrink-0 duration-300" />
-                  </button>
-                  {/* Always mounted so the trigger's aria-controls always resolves; hidden when closed. */}
-                  <div id={itemId} hidden={!isOpen} className="flex flex-col gap-4 pb-4">
-                    <p className="text-muted-foreground text-sm">{item.answer}</p>
-                    {item.endpoints && (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                          <thead>
-                            <tr className="text-muted-foreground border-b">
-                              <th scope="col" className="py-2 pr-4 font-medium">
-                                Method
-                              </th>
-                              <th scope="col" className="py-2 pr-4 font-medium">
-                                Endpoint
-                              </th>
-                              <th scope="col" className="py-2 font-medium">
-                                Purpose
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {item.endpoints.map((row) => (
-                              <tr
-                                key={`${row.method} ${row.endpoint}`}
-                                className="border-b last:border-b-0"
-                              >
-                                <td className="py-2 pr-4 font-mono">{row.method}</td>
-                                <td className="py-2 pr-4 font-mono">{row.endpoint}</td>
-                                <td className="text-muted-foreground py-2">{row.purpose}</td>
+                <Collapsible key={itemId} open={isOpen} onOpenChange={() => toggle(itemId)}>
+                  <CollapsibleTrigger asChild>
+                    <button
+                      type="button"
+                      className="group flex w-full cursor-pointer items-center justify-between gap-3 py-4 text-left"
+                    >
+                      <span className="font-medium">{item.question}</span>
+                      <AccordionArrow isOpen={isOpen} className="shrink-0 duration-300" />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="flex flex-col gap-4 pb-4">
+                      <p className="text-muted-foreground text-sm">{item.answer}</p>
+                      {item.slot && slots?.[item.slot]}
+                      {item.endpoints && (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-sm">
+                            <thead>
+                              <tr className="text-muted-foreground border-b">
+                                <th scope="col" className="py-2 pr-4 font-medium">
+                                  Method
+                                </th>
+                                <th scope="col" className="py-2 pr-4 font-medium">
+                                  Endpoint
+                                </th>
+                                <th scope="col" className="py-2 font-medium">
+                                  Purpose
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                            </thead>
+                            <tbody>
+                              {item.endpoints.map((row) => (
+                                <tr
+                                  key={`${row.method} ${row.endpoint}`}
+                                  className="border-b last:border-b-0"
+                                >
+                                  <td className="py-2 pr-4 font-mono">{row.method}</td>
+                                  <td className="py-2 pr-4 font-mono">{row.endpoint}</td>
+                                  <td className="text-muted-foreground py-2">{row.purpose}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )
             })}
           </div>
