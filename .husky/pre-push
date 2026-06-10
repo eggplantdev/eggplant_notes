@@ -10,17 +10,17 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
   fi
 done
 
-pnpm run typecheck
-pnpm exec vitest run
-
-# Prod-migrate guard (supabase-prod-migrate skill): the HUMAN gate. Only on a
-# push to main that ships new supabase/migrations/, interactively offer to apply
-# them to prod (backup → db push) BEFORE the deploy, so schema lands first.
-# Decline the migration → a SECOND prompt confirms you really want to ship code
-# against the current (un-migrated) prod schema; "no" aborts the whole push.
-# Both prompts read /dev/tty (stdin holds the ref list). This is a human
-# convenience gate — agent enforcement is the global PreToolUse hook, which
-# blocks the agent's `git push` before this ever runs. No tty (CI) → code-only.
+# Prod-migrate guard (supabase-prod-migrate skill): the HUMAN gate. Only on a push
+# to main that ships new supabase/migrations/, ASK up front (before the test wait)
+# whether to apply them to prod. Decline → a SECOND prompt confirms you really want
+# to ship code against the current (un-migrated) prod schema; "no" aborts the push
+# now, before tests even run. We only record the decision here and ACT on it after
+# tests pass (below) — so a test failure can never leave prod migrated but the code
+# un-deployed (schema ahead of code). Both prompts read /dev/tty (stdin holds the
+# ref list). This is a human convenience gate — agent enforcement is the global
+# PreToolUse hook, which blocks the agent's `git push` before this runs. No tty
+# (CI) → code-only.
+do_migrate=
 if [ -n "$push_to_prod" ]; then
   if [ "$sha_from" = "0000000000000000000000000000000000000000" ]; then
     sha_from=$(git hash-object -t tree /dev/null)   # new branch: diff vs empty tree
@@ -30,24 +30,30 @@ if [ -n "$push_to_prod" ]; then
       printf '\n⚠  Push to %s includes new supabase/migrations/.\n   Migrate the PROD database now (backup-first)? [y/N] ' "$PROD_BRANCH" > /dev/tty
       read -r reply < /dev/tty || reply=n
       case "$reply" in
-        [Yy]*)
-          echo "→ migrating prod (pnpm db:push:safe)…" >&2
-          pnpm db:push:safe < /dev/tty || { echo "✗ migration failed — aborting push" >&2; exit 1; }
-          ;;
+        [Yy]*) do_migrate=1 ;;
         *)
-          # Declined: confirm before shipping code against the un-migrated schema.
           printf '   Migration declined. Push code to %s ANYWAY (deploys against the current prod schema)? [y/N] ' "$PROD_BRANCH" > /dev/tty
           read -r go < /dev/tty || go=n
           case "$go" in
-            [Yy]*) echo "→ pushing code only; prod schema unchanged" >&2 ;;
+            [Yy]*) echo "→ will push code only; prod schema unchanged" >&2 ;;
             *)     echo "✗ aborted — neither migrated nor pushed" >&2; exit 1 ;;
           esac
           ;;
       esac
     else
-      echo "→ no terminal to confirm migration; deploying code only (agent pushes are blocked upstream by the PreToolUse hook)" >&2
+      echo "→ no terminal to confirm migration; deploying code only" >&2
     fi
   fi
+fi
+
+pnpm run typecheck
+pnpm exec vitest run
+
+# Act on the migrate decision only now — after tests pass — so we never migrate
+# prod and then abort the push on a test failure.
+if [ -n "$do_migrate" ]; then
+  echo "→ migrating prod (pnpm db:push:safe)…" >&2
+  pnpm db:push:safe < /dev/tty || { echo "✗ migration failed — aborting push" >&2; exit 1; }
 fi
 
 # Background watcher: prints Vercel deployment state transitions to this terminal.
