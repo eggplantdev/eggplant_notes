@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import { ALL_NAV_ITEMS } from '@/components/app-nav/nav-items'
+import { useFadeSlideUp } from '@/components/motion/fade-slide-up'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -46,7 +47,6 @@ export function PageShell({
   fill = false,
   children,
 }: PropsT) {
-  const shouldReduceMotion = useReducedMotion()
   const pathname = usePathname()
   const router = useRouter()
   // Hides the mobile <h1> only on nav-root routes (CurrentPageLabel pins those). Exact match,
@@ -62,9 +62,7 @@ export function PageShell({
       )}
     >
       <motion.div
-        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
-        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: 'easeInOut' }}
+        {...useFadeSlideUp({ y: 20, transition: { duration: 0.4, ease: 'easeInOut' } })}
         className={cn('flex flex-col gap-6', fill && 'md:min-h-0 md:flex-1', WIDTH_CLASS[width])}
       >
         {(backHref || backHistory) && (

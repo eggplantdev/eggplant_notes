@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { type MouseEvent, type ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 import { AnimatedListItem } from '@/components/motion/animated-list-item'
 import {
@@ -60,6 +60,7 @@ export function AnimatedCardList<T>({
   // popLayout FLIP tries to reshuffle an entirely new key-set and looks janky. Stable within a page
   // (add/delete with no URL change), so the inner FLIP still animates those.
   const navKey = useSearchParams().toString()
+  const shouldReduceMotion = useReducedMotion()
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
@@ -67,7 +68,7 @@ export function AnimatedCardList<T>({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
         className={cn('gap-3', gridLayout ? 'grid md:grid-cols-2 xl:grid-cols-3' : 'flex flex-col')}
       >
         <AnimatePresence mode="popLayout" initial={false}>

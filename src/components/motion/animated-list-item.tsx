@@ -1,8 +1,9 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
+import { useFadeSlideUp } from '@/components/motion/fade-slide-up'
 import { cn } from '@/lib/utils'
 
 type AnimatedListItemPropsT = {
@@ -21,16 +22,10 @@ export function AnimatedListItem({
   layoutId,
   layout = false,
 }: AnimatedListItemPropsT) {
-  const shouldReduceMotion = useReducedMotion()
-
   return (
     <motion.div
-      layout={layout && !shouldReduceMotion}
       layoutId={layoutId}
-      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+      {...useFadeSlideUp({ exitY: -8, transition: { duration: 0.2, ease: 'easeOut' }, layout })}
       className={cn(className)}
     >
       {children}
