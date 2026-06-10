@@ -1,10 +1,10 @@
 ---
 change_id: subjects-switcher-detail-view
 title: Replace the subjects list with an in-detail subject switcher
-status: planned
+status: archived
 created: 2026-06-10
 updated: 2026-06-10
-archived_at: null
+archived_at: 2026-06-10T11:23:06Z
 ---
 
 ## Notes
