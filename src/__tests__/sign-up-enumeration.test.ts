@@ -18,6 +18,12 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+// signUp reads the request origin to build the confirmation link; outside a request scope the real
+// headers() throws. Stub it — the origin value is irrelevant to the enumeration behavior under test.
+vi.mock('next/headers', () => ({
+  headers: vi.fn(async () => new Headers({ origin: 'http://localhost:3000' })),
+}))
+
 import { signUp } from '@/features/auth/actions/sign-up'
 
 const VALID = { email: 'user@example.com', password: 'secret88' }
