@@ -71,7 +71,6 @@ export function GoalProgressBar({
           {reviewed} / {goal}
         </span>
       </div>
-      {/* Track sets the 100% reference width; the inner line is the fill. */}
       <div
         role="progressbar"
         aria-label={label}

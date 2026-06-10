@@ -9,10 +9,7 @@ import { deleteAccount } from '@/features/account/actions/delete-account'
 
 const CONFIRM_WORD = 'DELETE'
 
-// Two-gate guard fronting the irreversible delete: type-to-confirm (prevents an accidental click)
-// plus the current password (step-up re-auth — the server re-verifies it so a hijacked session
-// can't destroy the account). Both feed DeleteButton's extra-body slot and gate its confirm button
-// via `confirmDisabled`. Success redirects + signs out server-side, so there's no client success path.
+// Success redirects + signs out server-side; no client success path exists.
 export function DeleteAccountDialog() {
   const [confirmText, setConfirmText] = useState('')
   const [password, setPassword] = useState('')

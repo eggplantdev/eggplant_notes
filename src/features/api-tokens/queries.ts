@@ -15,7 +15,7 @@ export type ApiTokenListItemT = Pick<
 // `{ ok: false }` lets the section distinguish "you have none" from "we couldn't load them".
 export type GetApiTokensResultT = { ok: true; tokens: ApiTokenListItemT[] } | { ok: false }
 
-// RLS scopes the select to the owner, so no user_id filter. Active tokens only (revoked_at is null).
+// RLS scopes the select to the owner, so no user_id filter.
 export async function getApiTokens(): Promise<GetApiTokensResultT> {
   const supabase = await createClient()
   const { data, error } = await supabase

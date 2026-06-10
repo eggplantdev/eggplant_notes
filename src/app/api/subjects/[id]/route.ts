@@ -34,8 +34,7 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/subjects/[
   return NextResponse.json({ id: result.id })
 }
 
-// DELETE /api/subjects/:id — delete a subject. The FK `ON DELETE SET NULL` unfiles its member notes/cards
-// (no app-side fan-out). RLS-scoped: non-owned/nonexistent → 404.
+// FK ON DELETE SET NULL unfiles member notes/cards; no app-side fan-out. RLS-scoped: non-owned/nonexistent → 404.
 export async function DELETE(request: Request, ctx: RouteContext<'/api/subjects/[id]'>) {
   const auth = await authenticateRequest(request)
   if ('error' in auth) return authError(auth.error)

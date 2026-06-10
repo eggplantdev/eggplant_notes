@@ -20,12 +20,9 @@ export const noteInputSchema = z.object({
   subject_id: noteSubjectIdSchema,
 })
 
-// Validates the `id` route param / form value for update + delete actions.
 export const noteIdSchema = z.guid('Invalid note id')
 
-// Create-only note shape: the base note input plus an optional `subject_title` for creating a NEW
-// subject inline. The create_note_with_checks RPC resolves subject_id (existing) OR subject_title
-// (new) atomically; the two are mutually exclusive, so reject both-at-once here.
+// Extends noteInput with subject_title for inline-create. Rejects subject_id + subject_title together — the RPC resolves one or the other.
 export const createNoteInputSchema = noteInputSchema
   .extend({ subject_title: subjectTitleSchema.optional() })
   .refine((n) => !(n.subject_id && n.subject_title), {
@@ -33,8 +30,7 @@ export const createNoteInputSchema = noteInputSchema
     path: ['subject_title'],
   })
 
-// Reuses memory-card's own input schema (memory-cards owns that contract). `checks` is capped to
-// bound the RPC's bulk insert.
+// checks capped to bound the RPC's bulk insert.
 export const createNoteWithChecksSchema = z.object({
   note: createNoteInputSchema,
   checks: z.array(memoryCardInputSchema).max(50, 'At most 50 memory cards per note'),
@@ -43,6 +39,5 @@ export const createNoteWithChecksSchema = z.object({
 export type NoteInputT = z.infer<typeof noteInputSchema>
 export type CreateNoteInputT = z.infer<typeof createNoteInputSchema>
 export type CreateNoteWithChecksT = z.infer<typeof createNoteWithChecksSchema>
-// The pre-transform (form-side) shape of one staged check — all strings, before `optionalText`
-// coerces blanks to null. Derived from the schema so it can never drift from the write-contract.
+// Form-side (pre-transform) shape — z.input keeps it in sync with memoryCardInputSchema without drift.
 export type StagedCheckInputT = z.input<typeof memoryCardInputSchema>

@@ -61,7 +61,6 @@ export default async function MemoryCardsPage({
     <PageShell
       title="Memory cards"
       subtitle={pluralize(total, 'memory card')}
-      // 'full' so the card grid can fan out to three columns on wide screens.
       width="full"
       actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >

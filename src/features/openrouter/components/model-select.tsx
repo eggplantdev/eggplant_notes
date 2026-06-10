@@ -30,8 +30,6 @@ import { cn } from '@/lib/utils'
 // same ids also seed a new account's pinned set (DB default), so the seed and the pins stay aligned.
 const RECOMMENDED_SEED = RECOMMENDED_FALLBACK
 
-// Sort field shown as a segmented control so all options are visible at once; direction (asc/desc)
-// is a separate toggle. See sortModels.
 const SORT_OPTIONS: SegmentedOptionT<ModelSortT>[] = [
   { value: 'name', label: 'Name' },
   { value: 'input', label: 'Input $' },

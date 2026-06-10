@@ -3,21 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { NoteInputT } from '@/features/notes/schemas'
 import type { Database } from '@/lib/supabase/types'
 
-// Per-card decisions when a note's subject changes: each linked card is either MOVED to the new
-// subject (stays linked — preserves the invariant that a linked card shares its note's subject) or
-// UNLINKED (note_id → null, kept on its current subject as standalone). Unlink is applied FIRST so a
-// detached card keeps its old subject even under the `'all'` sweep (once note_id is null it falls out
-// of the `note_id` match the move uses).
-// `move: 'all'` moves every still-linked card by `note_id` alone — no pre-read to enumerate ids. It
-// pairs with any `unlink` list: the token API sends `{ move: 'all', unlink }` (everything follows the
-// note except the peeled-off ids); the UI sends explicit disjoint `move`/`unlink` id arrays.
+// Unlink is applied first so detached cards keep their old subject (they fall out of the note_id match before move runs). 'all' moves every still-linked card by note_id — no id enumeration.
 export type CardActionsT = { move: string[] | 'all'; unlink: string[] }
 
-// Shared note-update core — patch derivation, subject-change detection, the position rule, and the
-// per-card move/unlink fan-out. Everything from the updateNote action minus revalidate/redirect, so
-// the cookie action (UI) and the PATCH route (token API) share one implementation of the invariant.
-// Errors are returned as values (never thrown); `notFound` lets the route 404 without leaking
-// existence. `subjectChanged` is echoed so the action can replicate its conditional revalidation.
+// Shared by cookie action and PATCH route. Errors returned as values (never thrown); notFound prevents existence leak.
 export async function updateNoteCore(
   supabase: SupabaseClient<Database>,
   id: string,
@@ -55,7 +44,6 @@ export async function updateNoteCore(
   }
   if (!updated) return { error: 'Note not found', notFound: true }
 
-  // Per-card decisions apply only on a real subject change.
   if (subjectChanged && cardActions) {
     // Unlink FIRST so detached cards keep their OLD subject: once note_id is null they no longer match
     // the `note_id` filter below, so the move never restamps them. (Move-first would stamp the new
@@ -72,7 +60,6 @@ export async function updateNoteCore(
       }
     }
     if (cardActions.move === 'all') {
-      // Move every still-linked card by note_id — no id enumeration needed.
       const { error: moveError } = await supabase
         .from('memory_cards')
         .update({ subject_id: input.subject_id })

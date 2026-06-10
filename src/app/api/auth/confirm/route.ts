@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/server'
 // Allowlist so an unexpected `type` from the query string is rejected, not cast through blindly.
 const ALLOWED_OTP_TYPES = ['recovery', 'email'] as const
 
-// Exchanges an email-link token for a session.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')

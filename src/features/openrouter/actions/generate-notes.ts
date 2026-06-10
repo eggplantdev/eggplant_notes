@@ -19,11 +19,10 @@ import { validateInput } from '@/lib/validate'
 const MAX_PDF_BYTES = 10 * 1024 * 1024
 const MAX_PDF_BASE64_CHARS = Math.ceil(MAX_PDF_BYTES / 3) * 4
 
-// gen-notes source: grounded decomposition of prose into MANY notes (#3), an ungrounded single note
-// on a topic (#5), or a PDF read by a vision model (#PDF, Phase 8). Optional `modelId` overrides the
-// settings default for this generation only. Optional `promptOverride`: the dialog's edited
-// {system,prompt}, sent+logged verbatim when present (Phase 7). All return note candidates to the
-// caller's preview — nothing is inserted.
+// gen-notes source: grounded decomposition of prose into MANY notes, an ungrounded single note on a
+// topic, or a PDF read by a vision model. Optional `modelId` overrides the settings default for this
+// generation only. Optional `promptOverride`: the dialog's edited {system,prompt}, sent+logged
+// verbatim when present. All return note candidates to the caller's preview — nothing is inserted.
 const sourceSchema = z.union([
   z.object({
     text: z.string().trim().min(1, 'Paste some text').max(50_000),
@@ -81,8 +80,6 @@ export async function generateNotes(input: unknown): Promise<GenerateResultT<Gen
       system = (await getResolvedSystemPrompts())[key]
     }
     const startedAt = Date.now()
-    // PDF path attaches the file as a vision content part; text/topic send the prompt as-is. Both
-    // extract the same notes schema and capture usage identically.
     const { object, usage } = await generateObject({
       model: bound.model,
       schema: generatedNotesSchema,

@@ -16,8 +16,7 @@ export const importSubjectSchema = z
     message: 'Pick an existing subject or name a new one',
   })
 
-// One previewed note. Reuses notes' own title/content contracts so the import write can't drift from
-// the manual-create write.
+// Reuses notes' own title/content schemas — import and manual-create share one contract, can't drift.
 export const importNoteSchema = z.object({
   title: titleSchema,
   content: contentSchema,

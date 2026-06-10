@@ -36,7 +36,7 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/memory-car
   return NextResponse.json({ id: result.id })
 }
 
-// DELETE /api/memory-cards/:id — delete a card. RLS-scoped: non-owned/nonexistent → 404.
+// RLS-scoped: non-owned/nonexistent → 404.
 export async function DELETE(request: Request, ctx: RouteContext<'/api/memory-cards/[id]'>) {
   const auth = await authenticateRequest(request)
   if ('error' in auth) return authError(auth.error)

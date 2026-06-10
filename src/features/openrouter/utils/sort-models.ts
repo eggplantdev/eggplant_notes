@@ -10,7 +10,6 @@ export function sortModels(
   dir: SortDirT = 'asc',
 ): OpenRouterModelT[] {
   const byLabel = (a: OpenRouterModelT, b: OpenRouterModelT) => a.label.localeCompare(b.label)
-  // Direction switch: ×1 keeps ascending order, ×-1 flips the comparator's sign to descending.
   const mul = dir === 'asc' ? 1 : -1
   return models.toSorted((a, b) => {
     if (sort === 'name') return mul * byLabel(a, b)

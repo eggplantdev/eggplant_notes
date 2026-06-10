@@ -27,7 +27,6 @@ export type HeatVariantT = keyof typeof HEAT_VARIANTS
 
 export const DEFAULT_HEAT_VARIANT: HeatVariantT = 'neon-cyan'
 
-// Rolling window (days) for retention / lapse-rate / review-volume stats.
 export const STATS_WINDOW_DAYS = 30
 
 export const MONTHS = [

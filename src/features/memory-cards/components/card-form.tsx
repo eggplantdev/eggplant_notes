@@ -96,7 +96,6 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     },
   })
 
-  // Success redirects (throws), so only the failure branch is observed.
   async function submitCard(values: CardFormValuesT) {
     setPendingValues(undefined)
     const result = card

@@ -81,8 +81,7 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/notes/[id]
   return NextResponse.json({ id: result.id })
 }
 
-// DELETE /api/notes/:id — delete a note. The FK `ON DELETE CASCADE` removes its cards (no app-side
-// fan-out). RLS-scoped: non-owned/nonexistent → 404.
+// FK ON DELETE CASCADE removes linked cards; no app-side fan-out. RLS-scoped: non-owned/nonexistent → 404.
 export async function DELETE(request: Request, ctx: RouteContext<'/api/notes/[id]'>) {
   const auth = await authenticateRequest(request)
   if ('error' in auth) return authError(auth.error)

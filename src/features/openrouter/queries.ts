@@ -8,9 +8,8 @@ import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
-// Whether the caller has connected OpenRouter — drives the gating of every AI surface. Used by the
-// nav (which only needs the boolean). Backed by the request-cached credential row, so this shares
-// one read with the page status + credits badge instead of issuing its own.
+// Backed by the request-cached credential row — shares one read with the page status + credits badge
+// instead of issuing its own.
 export async function isOpenRouterConnected(): Promise<boolean> {
   return Boolean(await getCredentialRow())
 }

@@ -1,6 +1,5 @@
 import type { OpenRouterModelT } from '@/features/openrouter/types'
 
-// Per-token USD → conventional "$X.XX/1M" display.
 export function formatPricePerM(price: number): string {
   return `$${(price * 1e6).toFixed(2)}/1M`
 }

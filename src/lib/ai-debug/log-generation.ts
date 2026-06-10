@@ -39,7 +39,6 @@ export async function logGeneration(entry: GenerationLogT): Promise<void> {
   try {
     const day = toISODate(Date.now())
     await mkdir(LOG_DIR, { recursive: true })
-    // The two channels write to different files — append them concurrently.
     await Promise.all([
       appendFile(
         path.join(LOG_DIR, `${day}.jsonl`),

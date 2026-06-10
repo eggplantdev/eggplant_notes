@@ -1,5 +1,4 @@
 // Static FAQ content for the in-app /faq page. First pass: hardcoded copy, no DB.
-// Edit this array to change the FAQ. Types colocate here — they describe this data's shape.
 
 export type FaqEndpointRowT = { method: string; endpoint: string; purpose: string }
 
@@ -17,7 +16,6 @@ export type FaqItemT = {
 export type FaqSectionT = {
   id: string
   title: string
-  // Optional framing shown once above the section's items (e.g. the BYOK note).
   intro?: string
   items: readonly FaqItemT[]
 }

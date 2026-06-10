@@ -18,8 +18,7 @@ const transport = nodemailer.createTransport({
   auth: { user: EMAIL_USER, pass: serverEnv.EMAIL_PASS },
 })
 
-// Auth gate is the spam control (no captcha/rate-limit). The session email becomes Reply-To so the
-// owner can reply straight to the sender from their inbox.
+// Auth gate is the spam control (no captcha/rate-limit).
 export async function sendContactMessage(input: ContactInputT): Promise<ActionResultT> {
   const user = await getCurrentUser()
   if (!user?.email) return { success: false, error: 'Not authenticated' }

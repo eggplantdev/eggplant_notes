@@ -1,7 +1,6 @@
 import type { NoteT } from '@/types/note'
 import type { SubjectT } from '@/types/subject'
 
-// Lightweight note shape for the sidebar nav: titles + ordering only, no `content`.
 export type SubjectNoteSummaryT = Pick<NoteT, 'id' | 'title' | 'position'>
 
 // Subject shape for picker `<select>`s, the `/notes`+`/memory-cards` filter, and the detail-view

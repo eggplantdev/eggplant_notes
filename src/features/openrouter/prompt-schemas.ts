@@ -10,9 +10,8 @@ import { PROMPT_KEYS } from '@/features/openrouter/constants'
 // payloads, not normal refinement.
 const MAX_PROMPT_CHARS = 100_000
 
-// Validates the dialog's editable prompt before it reaches `generateObject` (Phase 7): both halves
-// must be non-empty after trim and within the cap. `generateObject`'s Zod schema still constrains the
-// OUTPUT regardless of how the input prompt is edited — this only sanity-checks the input blob.
+// Validates the dialog's editable prompt before it reaches `generateObject`: both halves must be
+// non-empty after trim and within the cap.
 export const promptOverrideSchema = z.object({
   system: z.string().trim().min(1, 'System prompt is empty').max(MAX_PROMPT_CHARS),
   prompt: z.string().trim().min(1, 'Prompt is empty').max(MAX_PROMPT_CHARS),
@@ -20,7 +19,7 @@ export const promptOverrideSchema = z.object({
 
 // Validates a Save-prompt mutation (editable-system-prompts): which prompt to override + the
 // replacement system text. Only the system half is persisted — the user-message half stays a
-// per-generation override (see generate-dialog). Reuses the generous MAX_PROMPT_CHARS cap.
+// per-generation override (see generate-dialog).
 export const userPromptSchema = z.object({
   promptKey: z.enum(PROMPT_KEYS),
   system: z.string().trim().min(1, 'Prompt is empty').max(MAX_PROMPT_CHARS),

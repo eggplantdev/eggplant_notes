@@ -64,7 +64,6 @@ export function daysUntilDue(dueAt: string, timeZone: string): number {
   )
 }
 
-// e.g. "Wed, Jun 3, 2025" — heatmap tooltip.
 export function formatFullDate(isoDate: string): string {
   return parseIsoDateUtc(isoDate).toLocaleDateString('en-US', {
     weekday: 'short',

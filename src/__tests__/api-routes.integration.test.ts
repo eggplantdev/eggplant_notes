@@ -229,8 +229,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     )
   })
 
-  // ---- Phase 1: reads, subject CRUD, deletes (clc-api-crud-endpoints) ----
-
   it('GET /api/notes/:id returns the note content + its cards; foreign id → 404; bad id → 400', async () => {
     const u = await userWithToken()
     const { id } = (await (
@@ -255,7 +253,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     // Another user can't read it → 404 (don't leak existence), not 403.
     const other = await userWithToken()
     expect((await noteIdGET(getReq(other.token, `/api/notes/${id}`), idCtx(id))).status).toBe(404)
-    // Malformed uuid → 400.
     expect(
       (await noteIdGET(getReq(u.token, '/api/notes/not-a-uuid'), idCtx('not-a-uuid'))).status,
     ).toBe(400)
@@ -280,7 +277,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     }
     expect(subjects.find((s) => s.id === id)?.title).toBe(newTitle)
 
-    // A foreign PATCH can't touch it → 404.
     const other = await userWithToken()
     expect(
       (
@@ -301,7 +297,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await subjectsPOST(postReq(u.token, '/api/subjects', { title: `flt-${Date.now()}` }))
     ).json()) as { id: string }
 
-    // filed standalone card (own subject = subjectId)
     await cardsPOST(
       postReq(u.token, '/api/memory-cards', {
         prompt: 'filed-card',
@@ -310,7 +305,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         subject_id: subjectId,
       }),
     )
-    // unfiled standalone card (subject_id null)
     await cardsPOST(
       postReq(u.token, '/api/memory-cards', {
         prompt: 'unfiled-card',
@@ -319,7 +313,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         subject_id: null,
       }),
     )
-    // note-attached card (note_id set; its own subject_id is null by the RPC)
     const { id: noteId } = (await (
       await notesPOST(
         postReq(u.token, '/api/notes', {
@@ -373,7 +366,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect(del.status).toBe(200)
     expect((await del.json()).id).toBe(id)
 
-    // Note gone (404), and its cards cascaded away (filter returns empty).
     expect((await noteIdGET(getReq(u.token, `/api/notes/${id}`), idCtx(id))).status).toBe(404)
     const cards = (await (
       await cardsGET(getReq(u.token, `/api/memory-cards?note=${id}`))
@@ -402,7 +394,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         .status,
     ).toBe(200)
 
-    // Note survives but is now unfiled.
     const back = (await (
       await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
     ).json()) as { note: { subject_id: string | null } }
@@ -437,8 +428,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect((await noteIdDELETE(delReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
     expect((await subjectsPOST(getReq(null, '/api/subjects'))).status).toBe(401)
   })
-
-  // ---- Phase 2: note/card PATCH with subject-switching (the linked/unlinked invariant) ----
 
   // Seed a note that owns one attached card, plus a fresh target subject to move into. Returns the
   // note id, the (note-attached) card id, and the target subject id.
@@ -481,7 +470,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     )
     expect(res.status).toBe(200)
 
-    // The card moved to the new subject AND stayed linked (note_id intact).
     const { note, cards } = (await (
       await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))
     ).json()) as {
@@ -594,12 +582,10 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       ).status,
     ).toBe(404)
 
-    // Malformed body (missing required title) → 400.
     expect(
       (await noteIdPATCH(patchReq(u.token, `/api/notes/${noteId}`, { content: '' }), idCtx(noteId)))
         .status,
     ).toBe(400)
-    // No token → 401.
     expect((await noteIdPATCH(delReq(null, '/api/notes/x'), idCtx('x'))).status).toBe(401)
     expect((await cardIdPATCH(delReq(null, '/api/memory-cards/x'), idCtx('x'))).status).toBe(401)
   })

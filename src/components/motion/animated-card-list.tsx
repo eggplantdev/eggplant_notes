@@ -95,7 +95,6 @@ export function AnimatedCardList<T>({
                         <CardAction onClick={blockCardNav}>{renderAction(item)}</CardAction>
                       )}
                     </CardHeader>
-                    {/* Subtitle pinned to the bottom (mt-auto) so tags align across a grid row. */}
                     {renderSubtitle && (
                       <CardContent className="mt-auto">{renderSubtitle(item)}</CardContent>
                     )}

@@ -10,8 +10,6 @@ import {
 // the shown prompt can never drift from the sent one. Pure — the caller passes material it already
 // has (the grounded-cards caller passes the note it already loaded), so there's no DB fetch here.
 
-// gen-cards #1 grounded source assembly. Note is already fetched (the IO stays in the caller); this
-// keeps material assembly identical between the action and the preview.
 export function cardsMaterialFromNote(note: Pick<NoteT, 'title' | 'content'>): string {
   return `Note title: ${note.title ?? 'Untitled'}\n\n${note.content}`
 }

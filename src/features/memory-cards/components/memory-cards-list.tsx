@@ -48,7 +48,6 @@ export function MemoryCardsList({
       )}
       renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
       renderEyebrow={(card) => (
-        // Overdue cards color just the status text red as a gentle "act now" cue.
         <span
           className={cn(
             'text-xs',

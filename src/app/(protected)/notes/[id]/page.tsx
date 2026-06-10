@@ -27,7 +27,6 @@ export default async function NotePage({
 }) {
   const { id } = await params
   const { edit } = await searchParams
-  // Independent RLS-scoped reads run concurrently to avoid serial round-trips.
   const [note, memoryCards, subjects, { connected: aiEnabled, defaultModel }, systemDefaults] =
     await Promise.all([
       getNote(id),
@@ -39,7 +38,6 @@ export default async function NotePage({
   assertFound(note)
 
   const isEditingNote = edit === 'note'
-  // Resolved from the already-fetched subjects list, so no extra round-trip.
   const subject = note.subject_id ? subjects.find((s) => s.id === note.subject_id) : undefined
 
   return (

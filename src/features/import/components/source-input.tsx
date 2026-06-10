@@ -8,10 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { PdfSourceT } from '@/features/import/types'
 import { isPdfFile, readFileAsBase64 } from '@/features/import/utils/read-file-base64'
 
-// Three read sources feeding the import pipeline: a markdown/txt file (read client-side as text via
-// the File API — no storage bucket), a paste textarea, and a PDF (read as base64 and handed to a
-// vision model, Phase 8). Markdown/paste produce text the deterministic splitter can use; a PDF has
-// no text here, so it routes only through AI decompose.
+// Three read sources: markdown/txt file (File API → text), paste textarea, and PDF (base64 for AI vision).
 export function SourceInput({
   value,
   onChange,
@@ -24,9 +21,7 @@ export function SourceInput({
   onChange: (text: string) => void
   // Called when a PDF is chosen (the only AI-vision source). The parent clears it when text is typed.
   onPdf?: (pdf: PdfSourceT) => void
-  // Name of the currently-selected PDF, shown as confirmation; undefined when the source is text.
   pdfName?: string
-  // Fold state is owned by the parent so the split-level controls collapse in lockstep with the paste box.
   isPasteOpen: boolean
   onTogglePaste: () => void
 }) {

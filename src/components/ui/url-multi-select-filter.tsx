@@ -65,7 +65,7 @@ export function UrlMultiSelectFilter({
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
-      setLocalSelected(selectedValues) // reseed from the URL each time we open
+      setLocalSelected(selectedValues)
       setOpen(true)
       return
     }

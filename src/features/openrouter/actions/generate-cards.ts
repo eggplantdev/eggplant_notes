@@ -20,10 +20,10 @@ import { getNote } from '@/features/notes/queries'
 import { logGeneration } from '@/lib/ai-debug/log-generation'
 import { validateInput } from '@/lib/validate'
 
-// gen-cards source: grounded on a saved note (#1) or ungrounded on a topic string (#2). Optional
-// `modelId` overrides the settings default for this generation only (validated server-side).
-// Optional `promptOverride`: the dialog's edited {system,prompt} — when present it REPLACES the built
-// prompt (and the note fetch), so the user's refinement is exactly what's sent and logged (Phase 7).
+// gen-cards source: grounded on a saved note or ungrounded on a topic string. Optional `modelId`
+// overrides the settings default for this generation only (validated server-side). Optional
+// `promptOverride`: the dialog's edited {system,prompt} — when present it REPLACES the built prompt
+// (and the note fetch), so the user's refinement is exactly what's sent and logged.
 const sourceSchema = z.union([
   z.object({
     noteId: z.guid('Invalid note id'),

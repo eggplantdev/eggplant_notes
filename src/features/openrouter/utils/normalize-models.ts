@@ -14,8 +14,7 @@ function toPrice(value: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-// Pure: map the raw `/models` `data[]` to our trimmed shape, dropping entries without a usable id.
-// Kept pure (no fetch) so it's unit-testable and client-importable.
+// Pure (no fetch) — unit-testable and client-importable.
 export function normalizeModels(data: RawModelT[]): OpenRouterModelT[] {
   return data
     .filter((m): m is RawModelT & { id: string } => typeof m.id === 'string' && m.id.length > 0)

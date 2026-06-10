@@ -27,8 +27,6 @@ import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
 import type { ActionResultT } from '@/types/action'
 
-// `note` present discriminates edit (action takes the id) from create. Create saves the note +
-// staged checks atomically; edit is note-only plus optional per-card move/unlink actions.
 type NoteFormPropsT =
   | {
       action: (input: CreateNoteWithChecksT) => Promise<ActionResultT>
@@ -51,7 +49,6 @@ type NoteFormPropsT =
       linkedCards: LinkedCardT[]
     }
 
-// On success the server action redirects (throws), so the form only ever sees the failure branch.
 export function NoteForm(props: NoteFormPropsT) {
   const { note } = props
   const { formError, clearError, reportResult } = useFormError()
@@ -61,7 +58,6 @@ export function NoteForm(props: NoteFormPropsT) {
   // before saving. Create mode only; the generator itself gates on OpenRouter connection.
   const isCreateMode = !props.note
 
-  // Memoized so the form's frequent re-renders (typing) don't re-allocate the option list each keystroke.
   const subjectOptions = useMemo(
     () => [
       { value: NO_SUBJECT, label: 'None' },
@@ -71,9 +67,7 @@ export function NoteForm(props: NoteFormPropsT) {
   )
 
   const defaultSubjectId = props.note ? null : (props.defaultSubjectId ?? null)
-  // Create-mode subject choice (existing/None or a new subject by name) lives outside the form: it's a
-  // two-field control and resolves to subject_id OR subject_title at submit. Edit mode keeps the plain
-  // subject_id Combobox below (no inline new-subject need there).
+  // Outside the form because it's a two-field control that resolves to subject_id OR subject_title at submit.
   const [subjectChoice, setSubjectChoice] = useState<SubjectChoiceT>({
     mode: 'existing',
     subjectId: defaultSubjectId,
@@ -83,15 +77,11 @@ export function NoteForm(props: NoteFormPropsT) {
     defaultValues: {
       title: note?.title ?? '',
       content: note?.content ?? '',
-      // Edit-only field: the create path resolves its subject from `subjectChoice`, never this. So it
-      // seeds from the note (edit) and is otherwise null — `defaultSubjectId` feeds `subjectChoice`.
       subject_id: note?.subject_id ?? null,
       checks: [] as StagedCheckInputT[],
     },
     onSubmit: async ({ value }) => {
       if (!props.note) {
-        // Resolve the subject choice into the create payload: an existing id (or null = None), or a
-        // new subject title the RPC will create. A new-mode choice with no name is a validation stop.
         let subjectFields: { subject_id?: string | null; subject_title?: string }
         if (subjectChoice.mode === 'new') {
           const newTitle = subjectChoice.title.trim()
@@ -115,7 +105,6 @@ export function NoteForm(props: NoteFormPropsT) {
         content: value.content,
         subject_id: value.subject_id,
       }
-      // A subject change on a note with linked cards opens the move/unlink dialog before saving.
       const subjectChanged = value.subject_id !== props.note.subject_id
       if (subjectChanged && props.linkedCards.length > 0) {
         setPendingInput(noteInput)
@@ -202,7 +191,6 @@ export function NoteForm(props: NoteFormPropsT) {
         {(field) => <EditorWithPreview value={field.state.value} onChange={field.handleChange} />}
       </form.Field>
 
-      {/* Inline memory-card staging — create mode only; edit manages cards on the detail page. */}
       {!note && (
         <MemoryCardsField
           form={form}
@@ -221,7 +209,7 @@ export function NoteForm(props: NoteFormPropsT) {
         )}
       </form.Subscribe>
 
-      {/* Mounted only while pending so it starts fresh each time; Cancel aborts the save. */}
+      {/* Mounted only while pending — unmount resets choices state so each subject-change starts fresh. */}
       {props.note && pendingInput && (
         <MoveLinkedCardsDialog
           cards={props.linkedCards}

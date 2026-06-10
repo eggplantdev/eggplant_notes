@@ -38,7 +38,6 @@ export function TopicGenerator<T>({
     promptOverride?: PromptT,
   ) => Promise<GenerateResultT<T[]>>
   onResult: (item: T) => void
-  // Forwarded to GenerateDialog for the success + apply toasts (see its props).
   resultNoun?: string
   applyHint?: string
 }) {

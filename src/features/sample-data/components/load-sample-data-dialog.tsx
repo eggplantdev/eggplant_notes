@@ -9,11 +9,9 @@ import { Label } from '@/components/ui/label'
 import { loadSampleData } from '@/features/sample-data/actions/load-sample-data'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-// Non-empty-account path: loading the sample set WIPES all existing content first, so it's fronted by
-// the same step-up re-auth as account deletion — confirm with the current password (the server
-// re-verifies it). No type-to-confirm word (unlike delete-account): this is recoverable, not terminal,
-// so the password gate alone suffices. Closed explicitly on success — the trigger persists across
-// revalidation (it isn't a list row that disappears), so nothing else would dismiss it.
+// No type-to-confirm (unlike delete-account): this is recoverable, not terminal, so the password
+// gate alone suffices. Closed explicitly on success — the trigger persists across revalidation
+// (it isn't a list row that disappears), so nothing else would dismiss it.
 export function LoadSampleDataDialog() {
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')

@@ -60,7 +60,7 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
       timer.current = null
       if (local !== null) commit(local)
     }
-    setLocal(null) // hand control back to the URL prop
+    setLocal(null)
   }
 
   // Cleanup-only: clear a pending debounce on unmount so it can't router.replace from a dead component.

@@ -96,7 +96,7 @@ export function GenerateDialog<T>({
   // owns it. This is what's sent to the action — undefined lets the action build the prompt itself.
   const [override, setOverride] = useState<PromptT | undefined>(undefined)
 
-  // Which overridable system prompt this surface uses — derived from the previewInput, so no key prop.
+  // Derived from previewInput, not a separate prop — avoids a second steering source.
   const promptKey = promptKeyFromPreviewInput(previewInput)
   const builtinSystem = BUILTIN_SYSTEM[promptKey]
   const systemDefault = usePromptDefault(promptKey)
@@ -123,8 +123,6 @@ export function GenerateDialog<T>({
   // runs while an error is actually showing, and converges (the set makes the guard false).
   if (triggerError && !validate?.()) setTriggerError(undefined)
 
-  // Trigger click: validate input first (feedback beside the button if missing), then gate on the
-  // connection, then open.
   function handleTrigger() {
     const message = validate?.()
     setTriggerError(message)
@@ -156,7 +154,6 @@ export function GenerateDialog<T>({
         )
         setOpen(false)
       } else {
-        // Stay open so the user can retry / tweak the prompt; toast + inline FormError both carry it.
         setError(outcome.error)
         toastMessage(outcome.error, 'error')
       }

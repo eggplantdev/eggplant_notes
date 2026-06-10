@@ -64,7 +64,7 @@ describe.skipIf(!RUN)('account deletion — OpenRouter credential cascade (integ
     const { error: delErr } = await user.client.rpc('delete_account')
     expect(delErr).toBeNull()
 
-    // Post-delete: the credential row is GONE under a service-role read (not merely RLS-hidden).
+    // Confirmed gone via service-role read, not RLS-hidden.
     const after = await serviceClient
       .from('openrouter_credentials')
       .select('user_id')

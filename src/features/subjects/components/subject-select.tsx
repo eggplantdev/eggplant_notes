@@ -16,8 +16,7 @@ export type SubjectChoiceT =
 // note form's edit-mode Combobox (which doesn't use SubjectSelect) shares the one sentinel.
 export const NO_SUBJECT = 'none'
 
-// Default existing-mode combobox sizing, matched to the create-note title Input (h-8) so toggling
-// modes doesn't shift the field. Overridable via `className`.
+// Matched to the create-note title Input (h-8); overridable via className.
 const COMBOBOX_CLASS = 'h-8 w-full rounded-lg text-base font-normal sm:w-72 md:text-sm'
 
 export function SubjectSelect({
@@ -34,7 +33,6 @@ export function SubjectSelect({
   // When true the existing-mode combobox offers a "None" option (unassigned) — notes allow it; the
   // import flow does not (it always commits under a subject).
   allowNone?: boolean
-  // Prefixes the segment + input testids (`<prefix>-new-mode`, `<prefix>-existing-mode`, `<prefix>-title`).
   testIdPrefix: string
   className?: string
 }) {

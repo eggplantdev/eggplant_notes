@@ -10,11 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { pageRange } from '@/lib/utils/pagination'
 
-// RLS scopes rows to the owner — no explicit `user_id` filter. Selects only the list-card columns
-// (never `content`) so payloads stay slim. Hand-rolls the query rather than using runTableQuery
-// because it needs the full match `total` off one `count: 'exact'` response (returns rows + total).
-// The optional client is injectable so the isolation E2E can drive the same path with a per-account
-// supabase-js client; app code passes none and gets the per-request server one.
+// RLS scopes to owner — no user_id filter. Omits content intentionally (list-card columns only). Injectable client for E2E isolation.
 export async function getNotes(
   opts?: { subjectIds?: string[]; q?: string; page?: number; limit?: number },
   client?: SupabaseClient<Database>,
@@ -55,10 +51,7 @@ export async function getNote(
   return runMaybeSingle('getNote', supabase.from('notes').select('*').eq('id', id).maybeSingle())
 }
 
-// Slim note options for the card→note link dialog's note-select. Scoped to one subject (or unfiled
-// notes when `subjectId` is null — the IS NULL branch getNotes lacks), id/title only. The 200 cap
-// bounds the payload; subject-scoping is the primary bound, so a generous cap is fine for a personal
-// deck. RLS scopes to the owner.
+// Scoped to one subject or IS NULL (unfiled) — getNotes lacks the IS NULL variant. Capped at 200 (subject scope is the real bound).
 export async function getNotesForLinking(
   subjectId: string | null,
   client?: SupabaseClient<Database>,

@@ -3,10 +3,8 @@ import { ConnectOpenRouterButton } from '@/features/openrouter/components/connec
 import { SettingsModelSelect } from '@/features/openrouter/components/settings-model-select'
 import { Button } from '@/components/ui/button'
 
-// Connect/disconnect surface for OpenRouter BYOK. Both are Server Actions used as form actions:
-// connect redirects to OpenRouter's OAuth page; disconnect deletes the credential row and
-// revalidates. The API key is never rendered — only the connected/not-connected status. When
-// connected, the model picker persists the default model used for all AI generation.
+// The API key is never rendered — connect redirects to OAuth; disconnect deletes the credential row
+// and revalidates. When connected, the model picker persists the default model for all AI generation.
 export function ConnectCard({
   connected,
   defaultModel,

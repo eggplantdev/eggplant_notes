@@ -10,9 +10,7 @@ export type UsageT = {
 // dialog and written to the local ai-debug log. Not gated — present on every successful call.
 export type GenerateDebugT = { system: string; prompt: string; model: string; usage: UsageT }
 
-// Shared result envelope for the AI generation actions (gen-cards, gen-notes): a typed data payload
-// on success, an error string on failure. Lives here (not in an action file) because more than one
-// action returns it. Distinct from the project's bare ActionResultT — this carries `data`.
+// Distinct from ActionResultT — carries a typed data payload.
 export type GenerateResultT<T> =
   | { success: true; data: T; debug: GenerateDebugT }
   | { success: false; error: string }
@@ -28,7 +26,6 @@ export type OpenRouterModelT = {
   inputModalities: string[]
 }
 
-// How the picker orders a group: by label, or by either price axis. Direction is orthogonal.
 export type ModelSortT = 'name' | 'input' | 'output'
 export type SortDirT = 'asc' | 'desc'
 

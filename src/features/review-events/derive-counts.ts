@@ -16,17 +16,16 @@ export function reviewWindowKeys(): { todayStr: string; weekStartStr: string } {
   }
 }
 
-// Heatmap/streak shape: distinct cards per day.
 export function toActivity(rows: ReviewDayCountT[]): ActivityDayT[] {
   return rows.map((r) => ({ date: r.date, count: r.distinctCards }))
 }
 
-// Distinct cards reviewed on `todayStr` (YYYY-MM-DD). Missing day → 0.
+// Missing day → 0.
 export function reviewedTodayCount(rows: ReviewDayCountT[], todayStr: string): number {
   return rows.find((r) => r.date === todayStr)?.distinctCards ?? 0
 }
 
-// Total review EVENTS (re-reviews counted) on or after `weekStartStr` (YYYY-MM-DD).
+// re-reviews counted separately (total events, not distinct cards).
 export function reviewsThisWeekCount(rows: ReviewDayCountT[], weekStartStr: string): number {
   return rows.reduce((sum, r) => (r.date >= weekStartStr ? sum + r.totalEvents : sum), 0)
 }

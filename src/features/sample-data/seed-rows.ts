@@ -3,7 +3,6 @@ import { revalidatePath } from 'next/cache'
 
 import type { Database } from '@/lib/supabase/types'
 
-// Every page whose content derives from seeded rows; load and clear both revalidate the whole set.
 const SEED_REVALIDATE_PATHS = ['/notes', '/subjects', '/dashboard', '/settings', '/review']
 
 export function revalidateSeedPaths(): void {

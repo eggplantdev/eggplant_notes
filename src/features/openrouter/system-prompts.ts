@@ -12,7 +12,6 @@ export const CARDS_SYSTEM = [
   'Produce 3 to 7 focused cards; keep prompts answerable and examples concise.',
 ].join(' ')
 
-// gen-notes: decompose prose into MANY notes (#3) vs a single note on a topic (#5).
 export const NOTES_DECOMPOSE_SYSTEM = [
   'You split source material into multiple focused study notes.',
   'Each note has a "title" and markdown "content".',

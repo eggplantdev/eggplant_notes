@@ -19,9 +19,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { sendContactMessage } from '@/features/contact/actions/send-contact-message'
 import { contactSchema } from '@/features/contact/schemas'
 
-// Owns its trigger + open state + the form (mirrors DeleteAccountDialog). The sender's email is not
-// a field — the action derives it from the session. Success closes + resets; failure keeps the
-// dialog open with an inline error so the user doesn't lose their message.
+// The sender's email is not a field — the action derives it from the session. Success closes +
+// resets; failure keeps the dialog open with an inline error so the user doesn't lose their message.
 export function ContactDialog() {
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | undefined>(undefined)

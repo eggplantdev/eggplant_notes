@@ -4,7 +4,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AuthErrorT } from '@/features/api-tokens/authenticate-request'
 import type { Database } from '@/lib/supabase/types'
 
-// Shared JSON helpers for the token API routes — uniform error envelope `{ error }` + status.
 export function errorJson(status: number, message: string): NextResponse {
   return NextResponse.json({ error: message }, { status })
 }

@@ -11,9 +11,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import type { ImportDraftT } from '@/features/import/types'
 
-// Editable, skippable preview of the split result. The preview IS the human-in-the-loop gate: nothing
-// commits until the user has seen (and can edit/skip) each note — so a bad split or a duplicate is a
-// manual fix here, never silent garbage under RLS.
+// Human-in-the-loop gate: nothing commits until the user has reviewed, edited, or skipped each note.
 export function NotePreviewList({
   drafts,
   onPatch,
@@ -23,7 +21,6 @@ export function NotePreviewList({
   onPatch: (id: string, patch: Partial<Pick<ImportDraftT, 'title' | 'content'>>) => void
   onToggleSkip: (id: string) => void
 }) {
-  // Per-note collapse, default expanded; a Set of collapsed ids keeps the common (all-open) case empty.
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   function toggleCollapsed(id: string) {
     setCollapsed((prev) => {

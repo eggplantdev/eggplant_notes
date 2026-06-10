@@ -67,8 +67,6 @@ export default async function SubjectLayout({
           past 15rem once the node has hit its ceiling. Each pane scrolls on its own
           (md:overflow-y-auto below) while the page itself never scrolls. */}
       <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[minmax(15rem,1fr)_minmax(36rem,64rem)] md:grid-rows-[minmax(0,1fr)]">
-        {/* Wrapper is the grid cell holding the notes list (md:flex-1 md:overflow-y-auto in the
-            sidebar's nav scrolls; the page stays put). The 15rem floor lives in the track above. */}
         <div className="flex flex-col gap-2 md:min-h-0">
           <SubjectNoteSidebar subjectId={id} notes={summaries} />
         </div>

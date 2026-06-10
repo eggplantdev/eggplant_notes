@@ -10,8 +10,6 @@ import { originFromHeaders } from '@/lib/request-origin'
 
 type ApiTokensSectionPropsT = { tokensResult: GetApiTokensResultT }
 
-// Composes the CLI-token lifecycle inside the Settings "CLI Tokens" SettingsSection: mint form
-// (+ its show-once modal) above the active-token list, then the agent-skill copy/download.
 export async function ApiTokensSection({ tokensResult }: ApiTokensSectionPropsT) {
   // Inject the origin here (server) so Copy can hand the client a ready string and write it to the
   // clipboard synchronously within the click gesture. Download re-injects via /api/skill — both go

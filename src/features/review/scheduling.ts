@@ -46,13 +46,12 @@ export function previewIntervals(row: MemoryCardT, now: Date): Record<number, Da
   return Object.fromEntries(GRADES.map(({ grade }) => [grade, preview[grade as Grade].card.due]))
 }
 
-// Apply the chosen grade -> the next Card state to persist. `rating` is the validated 1..4
-// number from the action boundary; cast to Grade keeps ts-fsrs types isolated to this module.
+// Cast to Grade keeps ts-fsrs types isolated to this module; 1..4 already validated at the action boundary.
 export function applyRating(row: MemoryCardT, rating: number, now: Date): Card {
   return scheduler.next(toCard(row), now, rating as Grade).card
 }
 
-// Serialize a Card to the jsonb shape record_review unpacks (Dates -> ISO strings).
+// Dates → ISO strings for record_review's p_card jsonb param.
 export function serializeCard(card: Card): SerializedCardT {
   return {
     stability: card.stability,

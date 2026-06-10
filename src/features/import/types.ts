@@ -1,5 +1,4 @@
-// A previewed note row in the import panel before commit: a stable client id (React key) and a skip
-// toggle alongside the editable title/content. Skipped rows are excluded from the committed payload.
+// Client-side draft: id is a crypto.randomUUID() React key, not a DB id; skip excludes the row from the committed payload.
 export type ImportDraftT = {
   id: string
   title: string
@@ -7,6 +6,5 @@ export type ImportDraftT = {
   skip: boolean
 }
 
-// A PDF chosen as the import source: base64 bytes for the wire + the original filename. Read by
-// SourceInput, held by ImportPanel, sent to the vision generateNotes path (Phase 8).
+// Base64-encoded PDF for the vision-model wire payload, plus the original filename for UI confirmation.
 export type PdfSourceT = { dataBase64: string; filename: string }

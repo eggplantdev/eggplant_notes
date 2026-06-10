@@ -13,7 +13,6 @@ export function pageRange(opts?: { page?: number; limit?: number }): {
   return { offset: (page - 1) * limit, limit }
 }
 
-// `totalDocs` is the full match count (the query's `total`), not the page length.
 export type PaginationMetaT = {
   currentPage: number
   totalPages: number
