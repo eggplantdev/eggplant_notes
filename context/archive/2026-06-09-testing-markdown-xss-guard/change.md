@@ -1,10 +1,10 @@
 ---
 change_id: testing-markdown-xss-guard
 title: Markdown render XSS guard — prove note bodies render inert (test-plan Phase 7)
-status: implemented
+status: archived
 created: 2026-06-09
-updated: 2026-06-09
-archived_at: null
+updated: 2026-06-10
+archived_at: 2026-06-10T06:49:19Z
 ---
 
 ## Notes
