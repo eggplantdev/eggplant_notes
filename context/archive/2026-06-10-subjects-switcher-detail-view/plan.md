@@ -241,30 +241,30 @@ the `/subjects` redirect; confirm nav active-state still highlights under `/subj
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `pnpm typecheck`
-- [ ] 1.2 Linting passes: `pnpm lint`
-- [ ] 1.3 Production build compiles: `pnpm build`
+- [x] 1.1 Type checking passes: `pnpm typecheck`
+- [x] 1.2 Linting passes: `pnpm lint`
+- [x] 1.3 Production build compiles: `pnpm build`
 
 #### Manual
 
-- [ ] 1.4 Switcher shows current subject; selecting another navigates
-- [ ] 1.5 "New subject" → create → lands on new subject
-- [ ] 1.6 "Edit subject" / "Delete subject" both work
-- [ ] 1.7 "Add note to this subject" atop notes list, opens subject-scoped new-note form
-- [ ] 1.8 Notes list scrolls independently; page does not scroll; mobile reachable
+- [x] 1.4 Switcher shows current subject; selecting another navigates — E2E `subject switcher` test
+- [x] 1.5 "New subject" → create → lands on new subject — E2E create-from-empty flow (lands on new subject)
+- [x] 1.6 "Edit subject" / "Delete subject" both work — E2E `subject switcher` (delete) + `?edit` test #2
+- [x] 1.7 "Add note to this subject" atop notes list, opens subject-scoped new-note form — E2E notes-subject-filter
+- [x] 1.8 Notes list scrolls independently; page does not scroll; mobile reachable — static review (wrapper `md:min-h-0` + nav `md:flex-1`); not browser-asserted
 
 ### Phase 2: Collapse the listing page + remove dead code
 
 #### Automated
 
-- [ ] 2.1 No dangling references: `grep -rn "SubjectsList\|getSubjectsList\|SubjectListItemT" src` empty
-- [ ] 2.2 Type checking passes: `pnpm typecheck`
-- [ ] 2.3 Linting passes: `pnpm lint`
-- [ ] 2.4 Production build compiles: `pnpm build`
+- [x] 2.1 No dangling references: `grep -rn "SubjectsList\|getSubjectsList\|SubjectListItemT" src` empty
+- [x] 2.2 Type checking passes: `pnpm typecheck`
+- [x] 2.3 Linting passes: `pnpm lint`
+- [x] 2.4 Production build compiles: `pnpm build`
 
 #### Manual
 
-- [ ] 2.5 `/subjects` and the nav item land on the first subject's detail
-- [ ] 2.6 Delete current subject → lands on next remaining subject
-- [ ] 2.7 Delete last subject → "No subjects yet" empty state
-- [ ] 2.8 Empty state → "Create your first subject" → create → lands on new subject
+- [x] 2.5 `/subjects` and the nav item land on the first subject's detail — E2E `subject switcher` test
+- [x] 2.6 Delete current subject → lands on next remaining subject — E2E `subject switcher` test
+- [x] 2.7 Delete last subject → "No subjects yet" empty state — E2E `subject switcher` test
+- [x] 2.8 Empty state → "Create your first subject" → create → lands on new subject — E2E `subject switcher` test

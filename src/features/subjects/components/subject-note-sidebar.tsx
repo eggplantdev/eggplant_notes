@@ -280,11 +280,12 @@ export function SubjectNoteSidebar({
 
   return (
     <>
-      {/* The layout's app-shell row bounds this cell to the viewport, so it fills the row and
-          scrolls its own list when long — the content pane and page stay put. */}
+      {/* The layout wraps this in a flex column (add-note button + this nav); md:flex-1 makes the
+          nav fill the remaining height and scroll its own list when long — the content pane and
+          page stay put. */}
       <nav
         aria-label="Notes in this subject"
-        className="hidden md:block md:min-h-0 md:overflow-y-auto"
+        className="hidden md:block md:min-h-0 md:flex-1 md:overflow-y-auto"
       >
         <SidebarFilter value={term} onChange={setTerm} />
         {renderList('subject-sidebar-desktop')}

@@ -34,9 +34,9 @@ test('create note tied to a subject + filter the notes list by subject', async (
 
   // (1) Create note A from subject A's detail page → pre-tied to A (no manual picker step).
   await page.goto(subjAUrl)
-  // The subject detail page renders two "New note" links (PageShell action + CTA), both
-  // pointing at /notes/new?subject=<id>; either reaches the goal, so take the first.
-  await page.getByRole('link', { name: 'New note' }).first().click()
+  // The detail view's notes column carries "Add note to this subject" → /notes/new?subject=<id>
+  // (an empty subject also shows a "New note" empty-state CTA to the same place; either works).
+  await page.getByRole('link', { name: 'Add note to this subject' }).click()
   await expect(page).toHaveURL(/\/notes\/new\?subject=[0-9a-f-]+$/)
   await page.getByLabel('Title').fill(noteA)
   await page.getByRole('button', { name: 'Create note' }).click()
@@ -52,10 +52,16 @@ test('create note tied to a subject + filter the notes list by subject', async (
       .getByRole('link', { name: noteA }),
   ).toBeVisible({ timeout: 15_000 })
 
-  // Create note B assigned to subject B via the note-form picker.
+  // Create note B assigned to subject B via the note-form picker. SubjectSelect's combobox is
+  // unlabeled (its accessible name is the selected value, "None"), so scope to it via the sibling
+  // "Subject mode" radiogroup rather than by name — same pattern as subjects.spec's createAssignedNote.
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(noteB)
-  await page.getByRole('combobox', { name: 'Subject' }).click()
+  await page
+    .getByRole('radiogroup', { name: 'Subject mode' })
+    .locator('..')
+    .getByRole('combobox')
+    .click()
   await page.getByRole('option', { name: subjB, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })

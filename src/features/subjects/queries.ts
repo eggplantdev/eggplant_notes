@@ -2,57 +2,21 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { cache } from 'react'
 
 import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
-import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
-import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { pageRange } from '@/lib/utils/pagination'
-import type {
-  SubjectListItemT,
-  SubjectNoteSummaryT,
-  SubjectOptionT,
-} from '@/features/subjects/types'
+import type { SubjectNoteSummaryT, SubjectOptionT } from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'
 
 // RLS scopes every row to the owner; the optional client is injectable so the isolation E2E can
 // drive the same path with a per-account supabase-js client.
 
-// Full unpaginated set for the subject `<select>`s + filter options — id/title only (every consumer
-// maps to {value, label}, never reads other columns). The /subjects list page uses getSubjectsList.
+// Full unpaginated set for the subject `<select>`s, filter options, and the detail-view switcher —
+// id/title only (every consumer maps to {value, label}, never reads other columns).
 export async function getSubjects(client?: SupabaseClient<Database>): Promise<SubjectOptionT[]> {
   const supabase = client ?? (await createClient())
   return runTableQuery(supabase, (c) =>
     c.from('subjects').select('id, title').order('created_at', { ascending: false }),
-  )
-}
-
-// Backs the /subjects list page: slim columns, optional `?q=` search, paginated. Hand-rolled (not
-// runTableQuery) to return the full match `total` off one `count: 'exact'` response. Separate from
-// getSubjects, which must keep its full-set shape for its other callers.
-export async function getSubjectsList(
-  opts?: { q?: string; page?: number; limit?: number },
-  client?: SupabaseClient<Database>,
-): Promise<{ rows: SubjectListItemT[]; total: number }> {
-  const supabase = client ?? (await createClient())
-  const { offset, limit } = pageRange(opts)
-  const orFilter = opts?.q ? searchOr(['title', 'description'], opts.q) : null
-
-  // Build the filtered query; `head` toggles the rows-vs-count-only variant the 416 fallback reuses.
-  const filtered = (head: boolean) => {
-    let query = supabase
-      .from('subjects')
-      .select('id, title, description, created_at', { count: 'exact', head })
-    if (orFilter) query = query.or(orFilter)
-    return query
-  }
-
-  return runPaginatedQuery(
-    'getSubjectsList',
-    filtered(false)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1),
-    () => filtered(true),
   )
 }
 

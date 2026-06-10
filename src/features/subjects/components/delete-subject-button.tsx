@@ -13,7 +13,7 @@ export function DeleteSubjectButton({ id }: DeleteSubjectButtonPropsT) {
   return (
     <>
       <Button variant="glowy-red" size="sm" onClick={() => setOpen(true)}>
-        Delete
+        Delete subject
       </Button>
       <DeleteSubjectDialog subjectId={open ? id : null} onOpenChange={setOpen} />
     </>

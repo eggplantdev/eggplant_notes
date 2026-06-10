@@ -5,8 +5,9 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { MutedText } from '@/components/ui/muted-text'
 import { Separator } from '@/components/ui/separator'
 import { SubjectNoteSidebar } from '@/features/subjects/components/subject-note-sidebar'
+import { SubjectSwitcher } from '@/features/subjects/components/subject-switcher'
 import { DeleteSubjectButton } from '@/features/subjects/components/delete-subject-button'
-import { getSubject, getSubjectNoteSummaries } from '@/features/subjects/queries'
+import { getSubject, getSubjectNoteSummaries, getSubjects } from '@/features/subjects/queries'
 import { assertFound } from '@/lib/assert-found'
 import { pluralize } from '@/lib/utils/pluralize'
 
@@ -22,12 +23,24 @@ export default async function SubjectLayout({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [subject, summaries] = await Promise.all([getSubject(id), getSubjectNoteSummaries(id)])
+  const [subject, summaries, subjects] = await Promise.all([
+    getSubject(id),
+    getSubjectNoteSummaries(id),
+    getSubjects(),
+  ])
   assertFound(subject)
 
   return (
     <PageShell
       title={subject.title}
+      eyebrow={
+        <div className="flex items-center gap-2">
+          <SubjectSwitcher subjects={subjects} currentId={id} />
+          <ButtonLink href="/subjects/new" variant="outline" size="sm">
+            New subject
+          </ButtonLink>
+        </div>
+      }
       subtitle={
         <>
           <span className="block">{pluralize(summaries.length, 'note')}</span>
@@ -36,17 +49,12 @@ export default async function SubjectLayout({
           </MutedText>
         </>
       }
-      backHref="/subjects"
-      backLabel="Subjects"
       width="full"
       fill
       actions={
         <>
-          <ButtonLink href={`/notes/new?subject=${id}`} size="sm">
-            New note
-          </ButtonLink>
           <ButtonLink href={`/subjects/${id}?edit`} variant="outline" size="sm">
-            Edit
+            Edit subject
           </ButtonLink>
           <DeleteSubjectButton id={id} />
         </>
@@ -57,7 +65,14 @@ export default async function SubjectLayout({
       {/* Single 1fr track so the sidebar and content pane each scroll on their own
           (md:overflow-y-auto below) while the page itself never scrolls. */}
       <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[15rem_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
-        <SubjectNoteSidebar subjectId={id} notes={summaries} />
+        {/* Wrapper is the grid cell: a fixed add-note button atop the scrollable notes list, so
+            only the list (md:flex-1 md:overflow-y-auto in the sidebar's nav) scrolls — not the page. */}
+        <div className="flex flex-col gap-2 md:min-h-0">
+          <ButtonLink href={`/notes/new?subject=${id}`} variant="outline" size="sm">
+            Add note to this subject
+          </ButtonLink>
+          <SubjectNoteSidebar subjectId={id} notes={summaries} />
+        </div>
         <div className="min-w-0 md:min-h-0 md:overflow-y-auto">{children}</div>
       </div>
     </PageShell>

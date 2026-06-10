@@ -150,42 +150,66 @@ test('subject in-place edit: rename + description via ?edit, lands back on the s
   await expect(page).not.toHaveURL(/\?edit$/)
 })
 
-// Card Edit/Delete shortcuts on the subjects list mirror the notes list (S-17): each subject
-// card carries Edit + Delete whose clicks must NOT trigger the card's own navigation. Edit jumps
-// into the subject's ?edit form; Delete opens the shared confirm dialog (no nav) and removes the
-// row; clicking the card body still opens the subject. "New note" is no longer on the card.
-test('subjects list cards have working Edit/Delete shortcuts; card body still navigates', async ({
+// subjects-switcher-detail-view: the standalone /subjects card list is gone. /subjects now
+// redirects into a subject detail (the newest, via getSubjects' created_at-desc order) or shows an
+// empty state when there are none. Within the detail view, a switcher Combobox in the eyebrow
+// navigates between subjects, and "Delete subject" lands on the next remaining subject (or the
+// empty state). Covers the routing risk: redirect, switch, delete-to-next, delete-to-empty,
+// create-from-empty.
+test('subject switcher + /subjects redirect: navigate, delete-to-next, empty state, create-first', async ({
   page,
 }) => {
-  await signUp(page, uniqueEmail('subj-list-actions'))
-  const title = `List actions ${Date.now()}`
+  await signUp(page, uniqueEmail('subj-switch'))
+  const stamp = Date.now()
 
+  // Empty account: /subjects is no longer a list — it shows the "no subjects" empty state.
+  await page.goto('/subjects')
+  await expect(page).toHaveURL('/subjects')
+  await expect(page.getByText('No subjects yet.')).toBeVisible()
+
+  // Two subjects; Beta is created last, so it is newest and the redirect target.
   await page.goto('/subjects/new')
-  await page.getByLabel('Title').fill(title)
+  await page.getByLabel('Title').fill(`Alpha ${stamp}`)
   await page.getByRole('button', { name: 'Create subject' }).click()
   await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
+  const alphaUrl = page.url()
 
-  // The card no longer offers "New note" — that shortcut was removed when mirroring the notes view.
+  await page.goto('/subjects/new')
+  await page.getByLabel('Title').fill(`Beta ${stamp}`)
+  await page.getByRole('button', { name: 'Create subject' }).click()
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
+  const betaUrl = page.url()
+
+  // /subjects redirects into the newest subject's detail (Beta).
   await page.goto('/subjects')
-  await expect(page.getByText(title)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'New note' })).toHaveCount(0)
+  await expect(page).toHaveURL(betaUrl, { timeout: 15_000 })
 
-  // Card body still navigates to the subject (no notes → bare subject page, no redirect).
-  await page.getByText(title).click()
-  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/)
+  // The switcher (the only combobox in the detail eyebrow) reads the current subject and navigates
+  // on pick: Beta → Alpha.
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: `Alpha ${stamp}`, exact: true }).click()
+  await expect(page).toHaveURL(alphaUrl, { timeout: 15_000 })
+  await expect(page.getByRole('heading', { name: `Alpha ${stamp}` })).toBeVisible()
 
-  // Edit shortcut → straight into the subject's ?edit form, not just the view.
-  await page.goto('/subjects')
-  await page.getByRole('button', { name: 'Edit' }).click()
-  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+\?edit$/)
-  await expect(page.getByLabel('Title')).toBeVisible()
-
-  // Delete shortcut → dialog opens WITHOUT navigating off the list, then confirm removes the row.
-  await page.goto('/subjects')
-  await page.getByRole('button', { name: 'Delete' }).click()
-  await expect(page).toHaveURL('/subjects')
+  // Delete the current subject (Alpha) → delete redirects to /subjects, which redirects on to the
+  // one remaining subject (Beta).
+  await page.locator('header').getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
-  await expect(page.getByText(title)).toHaveCount(0, { timeout: 15_000 })
+  await expect(page).toHaveURL(betaUrl, { timeout: 15_000 })
+
+  // Delete the last subject (Beta) → /subjects has nothing to redirect to → empty state.
+  await page.locator('header').getByRole('button', { name: 'Delete subject' }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+  await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
+  await expect(page.getByText('No subjects yet.')).toBeVisible()
+
+  // Empty state CTA → create → lands on the new subject's detail.
+  await page.getByRole('link', { name: 'Create your first subject' }).click()
+  await expect(page).toHaveURL('/subjects/new')
+  await page.getByLabel('Title').fill(`Gamma ${stamp}`)
+  await page.getByRole('button', { name: 'Create subject' }).click()
+  await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
+  await expect(page.getByRole('heading', { name: `Gamma ${stamp}` })).toBeVisible()
 })
 
 test('subjects are isolated by account, and a note cannot be assigned to a foreign subject (F1)', async ({

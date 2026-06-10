@@ -1,57 +1,22 @@
-import { PageShell } from '@/components/layout/page-shell'
-import { ButtonLink } from '@/components/ui/button-link'
-import { EmptyState } from '@/components/ui/empty-state'
-import { PaginationFooter } from '@/components/ui/pagination-footer'
-import { SearchFilterInput } from '@/components/ui/search-filter-input'
-import { SubjectsList } from '@/features/subjects/components/subjects-list'
-import { getSubjectsList } from '@/features/subjects/queries'
-import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
-import { pluralize } from '@/lib/utils/pluralize'
+import { redirect } from 'next/navigation'
 
-// Empty state keys off `total === 0` so an out-of-range deep page still renders the footer.
-export default async function SubjectsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; page?: string }>
-}) {
-  const sp = await searchParams
-  const q = sp.q ?? ''
-  const { page, limit } = parsePagination(sp)
-  const { rows: subjects, total } = await getSubjectsList({ q, page, limit })
-  const isFiltered = Boolean(q)
-  const paginationMeta = buildPaginationMeta(total, page, limit)
+import { PageShell } from '@/components/layout/page-shell'
+import { EmptyState } from '@/components/ui/empty-state'
+import { getSubjects } from '@/features/subjects/queries'
+
+// No longer a list — the in-detail subject switcher replaced it. Redirect into the first subject's
+// detail; with zero subjects, offer to create one. `delete-subject` redirects here, so deleting the
+// current subject lands on the next remaining one (or this empty state when none are left).
+export default async function SubjectsPage() {
+  const subjects = await getSubjects()
+  if (subjects.length > 0) redirect(`/subjects/${subjects[0].id}`)
 
   return (
-    <PageShell
-      title="Subjects"
-      subtitle={pluralize(total, 'subject')}
-      width="prose"
-      actions={
-        <>
-          <ButtonLink href="/import" variant="outline">
-            Import
-          </ButtonLink>
-          <ButtonLink href="/subjects/new">New subject</ButtonLink>
-        </>
-      }
-    >
-      {(total > 0 || isFiltered) && <SearchFilterInput placeholder="Search subjects…" />}
-
-      {total === 0 ? (
-        <EmptyState
-          message={
-            isFiltered
-              ? 'No subjects match your search.'
-              : 'No subjects yet. Group your notes under one.'
-          }
-          action={isFiltered ? undefined : { label: 'Create a subject', href: '/subjects/new' }}
-        />
-      ) : (
-        <>
-          <SubjectsList subjects={subjects} />
-          <PaginationFooter paginationMeta={paginationMeta} baseUrl="/subjects" />
-        </>
-      )}
+    <PageShell title="Subjects" width="prose">
+      <EmptyState
+        message="No subjects yet. Group your notes under one."
+        action={{ label: 'Create your first subject', href: '/subjects/new' }}
+      />
     </PageShell>
   )
 }
