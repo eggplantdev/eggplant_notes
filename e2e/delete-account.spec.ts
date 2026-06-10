@@ -34,9 +34,8 @@ test('account self-deletion: sign up -> delete -> cannot sign in again', async (
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(PASSWORD)
   await page.getByRole('button', { name: 'Sign in' }).click()
-  // S-16 surfaces an action error in BOTH channels (inline <FormError> + a toast), so the text
-  // now matches two elements — pin the inline form error (DOM-order first; the toast container
-  // is mounted last in <body>) to dodge the strict-mode violation.
-  await expect(page.getByText('Invalid login credentials').first()).toBeVisible()
+  // The sign-in error surfaces inline via <FormError> only — no toast (it would just repeat the
+  // visible message), so the text matches a single element.
+  await expect(page.getByText('Invalid login credentials')).toBeVisible()
   await expect(page).toHaveURL(/\/sign-in/)
 })

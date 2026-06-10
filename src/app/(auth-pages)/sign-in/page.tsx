@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { TitledCard } from '@/components/ui/titled-card'
 import { signIn } from '@/features/auth/actions/sign-in'
@@ -18,8 +17,9 @@ export default function SignInPage() {
     defaultValues: { email: '', password: '' },
     onSubmit: async ({ value }) => {
       const result = await signIn(value)
-      // Success redirects (throws), so this branch only sees failure.
-      if (!toastActionResult(result)) setFormError(result.error)
+      // Success redirects (throws), so this branch only sees failure. The error shows inline via
+      // <FormError> below — no toast, which would just repeat the visible message.
+      if (!result.success) setFormError(result.error)
     },
   })
 

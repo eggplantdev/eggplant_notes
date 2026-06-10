@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { toastActionResult } from '@/components/forms/toast-result'
 import { Button } from '@/components/ui/button'
 import { TitledCard } from '@/components/ui/titled-card'
 import { resetPassword } from '@/features/auth/actions/reset-password'
@@ -19,8 +18,9 @@ export default function ResetPasswordPage() {
     defaultValues: { email: '' },
     onSubmit: async ({ value }) => {
       const result = await resetPassword(value)
-      // Unlike the other auth flows, success doesn't redirect — it keeps the inline "check your email" confirmation.
-      if (!toastActionResult(result)) {
+      // Unlike the other auth flows, success doesn't redirect — it keeps the inline "check your email"
+      // confirmation. The error shows inline via <FormError> — no toast repeating the visible message.
+      if (!result.success) {
         setFormError(result.error)
         return
       }
