@@ -49,7 +49,10 @@ export function ReviewPanel({ card, goal, provideCelebration = true, subtitle }:
       <CardContent className="flex flex-col gap-4">
         <RenderMarkdown content={card.prompt} />
         {(card.example || card.code_context) && (
-          <Collapsible className="border-t pt-3">
+          // key={card.id}: the panel advances in place, so without a per-card key React reuses the
+          // same Collapsible instance and its uncontrolled open state leaks — the next card would
+          // load with the answer already revealed, defeating recall.
+          <Collapsible key={card.id} className="border-t pt-3">
             <CollapsibleTrigger asChild>
               <button
                 type="button"
