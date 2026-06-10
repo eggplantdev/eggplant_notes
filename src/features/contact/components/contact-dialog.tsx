@@ -42,7 +42,7 @@ export function ContactDialog() {
   return (
     <>
       <Button variant="ghost" size="sm" data-testid="contact-trigger" onClick={() => setOpen(true)}>
-        Contact me
+        Contact
       </Button>
       <Dialog
         open={open}
@@ -54,10 +54,9 @@ export function ContactDialog() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Contact me</DialogTitle>
+            <DialogTitle>Contact</DialogTitle>
             <DialogDescription>
-              Send a message — it lands straight in my inbox and I&apos;ll reply to your account
-              email.
+              Send a message to eggplant_dev admin. I&apos;ll get back to you as soon as possible.
             </DialogDescription>
           </DialogHeader>
 

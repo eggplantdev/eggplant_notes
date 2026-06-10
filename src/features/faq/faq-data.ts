@@ -26,7 +26,7 @@ export const FAQ_SECTIONS: readonly FaqSectionT[] = [
       {
         question: 'Can I export or send my data out?',
         answer:
-          'Not yet — there is no export or download today. The "Contact me" button in the footer sends a message to the operator; it does not export your data.',
+          'Not yet — there is no export or download today. The "Contact" button in the footer sends a message to the operator; it does not export your data.',
       },
       {
         question: 'How do I delete my data?',
