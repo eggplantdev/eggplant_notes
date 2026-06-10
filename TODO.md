@@ -14,17 +14,17 @@
 - [ ] **Performance / route caching (S-11)** — has a real architectural blocker (per-user cache vs RLS cookie).
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **User account page** — deferred ("konto usera").
-- [ ] **AI: default models setting** — let user pin default model(s).
-- [ ] **AI: conditional "Connect" CTA** — show OpenRouter connect button whenever not connected.
-- [ ] **AI: in-context instructions/help text** — explain note/card AI features at point of use.
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
-- [ ] **Test/cleanup debt** (3 items — see bottom): `revalidate-prompt-surfaces.ts` verify-or-delete, prompts E2E, topic-scoped-review E2E.
+- [ ] **Test/cleanup debt** (2 items — see bottom): `revalidate-prompt-surfaces.ts` verify-or-delete, topic-scoped-review E2E.
 
 **Done** (shipped off this backlog)
 
 - [x] Rename app → `eggplant_ai_notes` — `layout.tsx` metadata title + real description (closes perf-audit **L2**). Nav has no wordmark and `/` redirects to `/dashboard`, so metadata was the only name surface.
 - [x] Footer — `site-footer.tsx` (carries the Contact dialog).
 - [x] Connect external LLM via OpenRouter (BYOK, PKCE) — S-19.
+- [x] AI: default model setting — `settings-model-select.tsx` + `set-model.ts` persist `model` on `openrouter_credentials`; `getOpenRouterStatus` returns `defaultModel`. Distinct from favorites/pins.
+- [x] AI: conditional "Connect" CTA — `connect-card.tsx` shows `ConnectOpenRouterButton` only when `!connected`; `use-ai-gate.tsx` gates AI triggers with `ConnectGateDialog` when disconnected.
+- [x] AI: in-context help text — copy across `generate-dialog.tsx`, `import-panel.tsx`, `connect-gate-dialog.tsx`, `settings-model-select.tsx`, `generate-cards-button.tsx`.
 - [x] Create notes from a markdown/any file — S-19 import.
 - [x] Create notes by asking AI — S-19 gen-notes/gen-cards.
 - [x] Update a note by agent over HTTP (CLI/webhook-style API) — expose-cli-note-api + clc-api-crud-endpoints.
@@ -50,14 +50,10 @@
 
 ### AI / OpenRouter polish
 
-- [ ] Allow setting default model(s) in settings.
-- [ ] OpenRouter "Connect" button visible conditionally whenever not connected.
-- [ ] AI instructions / help text everywhere the AI features surface.
 - [ ] **Stream AI generation (perf-audit H3).** `generate-notes.ts`/`generate-cards.ts` use `generateObject`, which resolves only when the whole object is done → a 30–60s opaque spinner for big inputs (50k chars / 10MB PDF). Switch to `streamObject` + render incrementally (first note in ~1–3s). Not XS: Server Actions don't stream cleanly — intended path is a Route Handler returning a streamed response consumed via `useObject`, touching `note-form.tsx`/`import-panel.tsx` + `GENERATION_TIMEOUT_MS`. Source: `context/changes/perf-audit-2026-06-10/findings.md` (H3).
 
 ### Test & code-health debt
 
-- [ ] **Behavioral coverage for `editable-system-prompts`** (deferred at the 2026-06-08 review gate). Unit logic is covered (`user-prompts.test.ts`, `prompts.test.ts`); the DB read (`getResolvedSystemPrompts`), both Save/Reset actions, and dialog wiring still have no behavioral tests. Drive via `/10x-e2e`: save → cross-surface reopen → generate-honors-saved-prompt → reset-confirm → built-in; plus the two-client RLS isolation check.
 - [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — it `revalidatePath`s four always-dynamic (`cookies()`) pages, so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to `revalidateTag('user-prompts')` on the data. Also: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
 - [ ] **E2E for `topic-scoped-review`** (deferred at the 2026-06-09 review gate; unit not high-value — the filter builder is a thin PostgREST wrapper). Drive via `/10x-e2e`: seed cards across two subjects with known due dates → filter `/memory-cards` to subject A → assert the reviewed card belongs to A → rate → assert the next card is also from A → exhaust → `CaughtUpNotice` with the list still present. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`.
 
@@ -72,7 +68,7 @@
 
 1. **Branding** (rename + logo) — low-risk, high-visibility.
 2. **Mobile pass.**
-3. **AI polish** (default models, conditional connect CTA, help text).
+3. **AI polish** — only **stream generation (H3)** left; default-model, conditional connect CTA, and help text are shipped.
 4. **Test/cleanup debt** — clear before more features pile on.
 5. **Performance** (S-11) — own focused change; has the cache-vs-RLS blocker.
 6. **User account page** — last of the deferred set.
