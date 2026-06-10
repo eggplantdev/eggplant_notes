@@ -24,6 +24,11 @@ vi.mock('next/headers', () => ({
   headers: vi.fn(async () => new Headers({ origin: 'http://localhost:3000' })),
 }))
 
+// sign-up.ts imports SITE_URL from env.ts, whose module-load Zod parse needs the NEXT_PUBLIC_* vars —
+// absent in the pre-push/CI shell. Mock the module so the real parse never runs (mirrors
+// sign-up-email-redirect.test.ts); SITE_URL is irrelevant to the enumeration assertions.
+vi.mock('@/lib/env', () => ({ SITE_URL: 'http://localhost:3000' }))
+
 import { signUp } from '@/features/auth/actions/sign-up'
 
 const VALID = { email: 'user@example.com', password: 'secret88' }
