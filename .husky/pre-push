@@ -25,7 +25,11 @@ if [ -n "$push_to_prod" ]; then
   if [ "$sha_from" = "0000000000000000000000000000000000000000" ]; then
     sha_from=$(git hash-object -t tree /dev/null)   # new branch: diff vs empty tree
   fi
-  if git diff --name-only "$sha_from" "$sha_to" -- supabase/migrations/ | grep -q .; then
+  # --diff-filter=A: only ADDED migration files are pending applies. Without it a
+  # rename/edit or a *deletion* of a migration (e.g. removing a smoke-test file)
+  # trips the guard as a false positive — git diff reports D/M lines too, and a
+  # removed file is never something prod needs to migrate.
+  if git diff --name-only --diff-filter=A "$sha_from" "$sha_to" -- supabase/migrations/ | grep -q .; then
     if { : < /dev/tty; } 2>/dev/null; then
       printf '\n⚠  Push to %s includes new supabase/migrations/.\n   Migrate the PROD database now (backup-first)? [y/N] ' "$PROD_BRANCH" > /dev/tty
       read -r reply < /dev/tty || reply=n

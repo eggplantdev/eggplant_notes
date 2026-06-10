@@ -17,6 +17,11 @@
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
 - [ ] **Code-health debt** (1 optional item — see bottom): `systemDefaults` prop-drill thin. (`revalidate-prompt-surfaces.ts` ✅ deleted — verified no-op; topic-scoped-review E2E ✅ done.)
 
+supabase connection
+
+Welcome text needs refining
+This app is a simple loop: write a note, turn it into memory cards, then review them a little each day. Head to Settings to get started — you can load sample data to explore, or connect an OpenRouter account to generate cards with AI. You can even download a skill that lets an AI agent connect over CLI/HTTP and author notes and cards for you.
+
 **Done** (shipped off this backlog)
 
 - [x] Rename app → `eggplant_ai_notes` — `layout.tsx` metadata title + real description (closes perf-audit **L2**). Nav has no wordmark and `/` redirects to `/dashboard`, so metadata was the only name surface.
