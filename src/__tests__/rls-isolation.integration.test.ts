@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { ANON_KEY, SERVICE_ROLE_KEY, SUPABASE_URL } from './local-supabase-creds'
 
 // R1 (test-plan §2 / Risk Response #1): the dedicated two-user, per-table RLS sweep the plan flagged
 // as still-pending. For EVERY owner-scoped table, a second authenticated user must be denied both READ
@@ -16,11 +17,6 @@ import { beforeAll, describe, expect, it } from 'vitest'
 //    affects zero rows SILENTLY (no error), so only a service-role read proves the row is unchanged /
 //    still present. A read through the intruder's own session would pass even if the write had landed.
 const RUN = !!process.env.RUN_INTEGRATION
-const SUPABASE_URL = 'http://127.0.0.1:54321'
-const ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-const SERVICE_ROLE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
 
 type SeededRow = { filter: Record<string, unknown>; mutation: Record<string, string | number> }
 

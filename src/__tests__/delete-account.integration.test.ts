@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { ANON_KEY, SERVICE_ROLE_KEY, SUPABASE_URL } from './local-supabase-creds'
 
 // Integration gate for R5 (test-plan §2 / Risk Response #5): prove the BYOK OpenRouter credential is
 // GONE after account deletion — the FR-006 removal guarantee. The row's teardown rides entirely on
@@ -12,11 +13,6 @@ import { beforeAll, describe, expect, it } from 'vitest'
 // (RLS hides it from a dead session) — that is the R5 anti-pattern ("RLS hides it" ≠ "it is gone").
 // Only a service-role read proves the cascade physically removed the row.
 const RUN = !!process.env.RUN_INTEGRATION
-const SUPABASE_URL = 'http://127.0.0.1:54321'
-const ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-const SERVICE_ROLE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
 
 describe.skipIf(!RUN)('account deletion — OpenRouter credential cascade (integration, R5)', () => {
   let serviceClient: SupabaseClient

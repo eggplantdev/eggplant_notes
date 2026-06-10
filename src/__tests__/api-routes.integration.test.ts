@@ -1,14 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { ANON_KEY, JWT_SECRET, SUPABASE_URL } from './local-supabase-creds'
 
 // Integration for the token API ROUTES: imports the real route handlers and drives them with minted
 // tokens against the local Supabase stack. Skipped unless RUN_INTEGRATION=1. Run: pnpm test:integration
-// (requires `supabase start`). Local deterministic creds inlined (the spec process loads no env).
+// (requires `supabase start`). Local deterministic creds come from ./local-supabase-creds (not secrets).
 const RUN = !!process.env.RUN_INTEGRATION
-const SUPABASE_URL = 'http://127.0.0.1:54321'
-const ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-const JWT_SECRET = 'super-secret-jwt-token-with-at-least-32-characters-long'
 
 describe.skipIf(!RUN)('token API routes (integration)', () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL ??= SUPABASE_URL

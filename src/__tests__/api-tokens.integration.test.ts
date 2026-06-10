@@ -1,18 +1,15 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { ANON_KEY, JWT_SECRET, SUPABASE_URL } from './local-supabase-creds'
 
 // Integration gate for expose-cli-note-api: exercises the REAL pipeline (resolve_api_token DEFINER +
 // minted JWT + RLS) against the local Supabase stack — the only layer that actually owns the ownership
 // guarantee. Skipped unless RUN_INTEGRATION=1, so the default `vitest run` stays network-free.
 // Run with: pnpm test:integration  (requires `supabase start`).
 //
-// Local deterministic creds are inlined (lessons §"signInWithPassword/two-user": the spec process loads
-// no env). App modules read these via process.env, set below before they are dynamically imported.
+// Local deterministic creds come from ./local-supabase-creds (minted demo keys, not secrets — see that
+// file). App modules read these via process.env, set below before they are dynamically imported.
 const RUN = !!process.env.RUN_INTEGRATION
-const SUPABASE_URL = 'http://127.0.0.1:54321'
-const ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-const JWT_SECRET = 'super-secret-jwt-token-with-at-least-32-characters-long'
 
 describe.skipIf(!RUN)('api token pipeline (integration)', () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL ??= SUPABASE_URL
