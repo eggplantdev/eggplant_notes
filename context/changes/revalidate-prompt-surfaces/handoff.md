@@ -1,6 +1,6 @@
 # Handoff — `revalidate-prompt-surfaces.ts`: no-op verify → delete
 
-> Status: **investigated + verified this session (2026-06-10); ready to execute the deletion.**
+> Status: **DONE (2026-06-10, `13db3a6`)** — investigated, verified (docs + Playwright), and the deletion executed this session. File + both call sites removed; a one-line "no revalidate needed" comment left in each action. `systemDefaults` prop-drill thin (below) left as an optional follow-up.
 > Source task: `TODO.md` → "Verify/fix `revalidate-prompt-surfaces.ts`" (review-gate altitude proposal, 2026-06-08).
 > This is **code-health, not test-debt** — the test angle is already closed (no test warranted; `test-plan.md` §7 won't-do, branchless plumbing).
 

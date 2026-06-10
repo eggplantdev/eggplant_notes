@@ -15,7 +15,7 @@
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **User account page** — deferred ("konto usera").
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
-- [ ] **Code-health debt** (1 item — see bottom): `revalidate-prompt-surfaces.ts` no-op verify → delete-or-`revalidateTag` + `systemDefaults` prop-drill thin. (topic-scoped-review E2E ✅ done; revalidate _test_ angle closed — no test warranted.)
+- [ ] **Code-health debt** (1 optional item — see bottom): `systemDefaults` prop-drill thin. (`revalidate-prompt-surfaces.ts` ✅ deleted — verified no-op; topic-scoped-review E2E ✅ done.)
 
 **Done** (shipped off this backlog)
 
@@ -61,7 +61,8 @@
 
 ### Test & code-health debt
 
-- [ ] **Verify/fix `revalidate-prompt-surfaces.ts`** (review-gate altitude proposal, 2026-06-08) — **code-health, not test-debt** (the _test_ angle is closed: no test warranted — branchless plumbing, test-plan §7 won't-do). Still open: it `revalidatePath`s four always-dynamic (`cookies()`) pages, so it may be a no-op. Confirm (Save prompt → navigate to a 2nd surface → new baseline shows with the helper removed) → delete it, or switch to `revalidateTag('user-prompts')` on the data. Also: `systemDefaults` is prop-drilled through 6 wrappers but each dialog reads one key — thin to a string or resolve at the leaf.
+- [x] **`revalidate-prompt-surfaces.ts` — DELETED (2026-06-10, `13db3a6`).** Verified a no-op: the four paths are dynamic (Supabase `cookies()`), supabase-js reads aren't Data-Cached, and Next 16 `staleTimes.dynamic=0` (no override) means dynamic pages refetch on soft-nav — nothing for `revalidatePath` to bust. Confirmed by a Playwright probe (out-of-band `user_prompts` change reflected after soft-nav, no revalidate). `revalidateTag` would also be a no-op (no tagged Data-Cache entry). Full record: `context/changes/revalidate-prompt-surfaces/handoff.md`.
+- [ ] **`systemDefaults` prop-drill thin** (optional, low-value; same origin as the deleted item) — `systemDefaults` is prop-drilled through ~6 wrappers but each dialog reads a single key; thin to a string or resolve at the leaf via `usePromptDefault`. Do only when touching that area.
 - [x] **E2E for `topic-scoped-review`** — shipped `e2e/topic-scoped-review.spec.ts` (2026-06-10): two subjects, an "intruder" global-soonest card in B; filter to A and assert B never surfaces + the panel's due-count subtitle tracks the filtered queue (3→2→1→caught-up) with the list surviving. Deliberate-break verified. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`; test-plan §8 + §6.3.
 
 ### Loose ideas (unsorted)
