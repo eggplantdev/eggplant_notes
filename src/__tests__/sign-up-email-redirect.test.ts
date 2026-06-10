@@ -8,7 +8,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // observable in a unit (nor in E2E — there's no mailbox in the flow). The oracle is the requirement
 // (link points at the request origin's confirm route), not the call's current shape.
 const { signUpSpy, headerStore } = vi.hoisted(() => ({
-  signUpSpy: vi.fn(async () => ({ error: null })),
+  // Typed to take one arg so `mock.calls[0][0]` is the signUp payload, not an out-of-range index on
+  // a zero-param tuple (TS2493).
+  signUpSpy: vi.fn(async (_payload?: unknown) => ({ error: null })),
   headerStore: { current: new Map<string, string>() },
 }))
 
