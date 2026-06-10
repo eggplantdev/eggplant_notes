@@ -51,6 +51,13 @@ Scripts: `@package.json`. Run `mise install` once to provision the toolchain (`@
 
 **Before adding or changing any test, read `@context/foundation/test-plan.md`** — the risk-first phased test rollout and quality contract (what's worth testing here, the cheapest layer per risk, and what's deliberately not tested).
 
+**Don't hand-roll tests or pick the layer by feel — route to a skill.** Always start from a risk in `test-plan.md`, never from "cover this file"; the cheapest layer that gives a real signal wins. The trap behind every bad test — assert observable behavior, not the implementation under test — and the full anti-pattern lists are owned by the skills (`/10x-tdd`, `/10x-e2e`'s `references/`) and `test-plan.md`; don't restate them here.
+
+- **New code, test-first** → **`/10x-tdd`** (when you can name the first failing test in one sentence and the impl isn't written yet).
+- **Browser-level / multi-boundary risk** (auth + routing + API + DB, or UI-only behavior) → **`/10x-e2e`** (full workflow below).
+- **Protecting existing code** → `/10x-research` → `/10x-plan` → `/10x-implement`, anchored on the risk.
+- **A bug that slipped past the tests (test-driven debugging) — mandatory, not optional.** Reproduce it with a **failing test first**, then fix — never silently patch. Drive the red test with `/10x-tdd` (or `/10x-e2e` when the repro needs a browser). Assert the **persisted / observable state, not the API response** — a `200` can hide a failed write. The repro test stays as the regression guard for the path that had none.
+
 Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under `e2e/**/*.spec.ts` (`pnpm test:e2e`) — requires the local Supabase stack (`supabase start`) up; the config auto-runs a **production build** (`pnpm build && pnpm start`, not `next dev` — avoids hydration races) and uses **system Chrome** (`channel: 'chrome'`, no bundled browser). Commands in `@package.json`.
 
 **E2E authoring → use the `/10x-e2e` skill** for the full workflow (risk → seed → generate → review → verify) and its quality rules — locators, wait-for-state over `waitForTimeout`, test independence, DOM-vs-`--caps=vision`, the auto-heal boundary. Its `references/` carry the complete rules + prompt templates. An agent that can't load the skill should STOP per the rule at the top, not improvise its own E2E conventions.
