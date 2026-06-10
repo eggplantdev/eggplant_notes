@@ -9,7 +9,8 @@ export type RemappedRowsT = {
 
 // Pure transform: fixture → insert-ready rows. `idFor` MUST be memoized by the caller (same ref →
 // same id) so a note's subjectRef and a card's noteRef resolve to their parent's assigned id.
-// Cards get no id — nothing references them, so the DB default supplies one.
+// Cards get ids too — keyed by index since they carry no `ref` — so the loader can attach synthetic
+// review history (review_events.memory_card_id) to them.
 export function remapSampleData(
   fixture: SampleDataT,
   userId: string,
@@ -33,7 +34,8 @@ export function remapSampleData(
     is_seeded: true,
   }))
 
-  const cards = fixture.cards.map((c) => ({
+  const cards = fixture.cards.map((c, i) => ({
+    id: idFor(`card:${i}`),
     user_id: userId,
     note_id: idFor(c.noteRef),
     prompt: c.prompt,

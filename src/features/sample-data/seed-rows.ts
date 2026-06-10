@@ -9,8 +9,9 @@ export function revalidateSeedPaths(): void {
   SEED_REVALIDATE_PATHS.forEach((path) => revalidatePath(path))
 }
 
-// Notes first (their memory_cards cascade via the note_id FK), then subjects. Shared by Clear and
-// the loader's rollback. Returns an error string instead of throwing so rollback needs no try/catch.
+// Notes first (their memory_cards cascade via the note_id FK — and seeded review_events cascade from
+// those cards), then subjects. Shared by Clear and the loader's rollback. Returns an error string
+// instead of throwing so rollback needs no try/catch.
 export async function deleteSeededRows(
   supabase: SupabaseClient<Database>,
 ): Promise<{ error?: string }> {

@@ -2,6 +2,7 @@
 
 import { isAccountEmpty } from '@/features/sample-data/queries'
 import { remapSampleData } from '@/features/sample-data/remap'
+import { generateReviewHistory } from '@/features/sample-data/review-history'
 import { SAMPLE_DATA } from '@/features/sample-data/sample-data'
 import { loadSampleDataSchema } from '@/features/sample-data/schemas'
 import {
@@ -68,12 +69,19 @@ export async function loadSampleData(input?: unknown): Promise<ActionResultT> {
 
   const { subjects, notes, cards } = remapSampleData(SAMPLE_DATA, user.id, idFor)
 
-  // FK order: subjects → notes → cards. supabase-js inserts are NOT one transaction, so any failure
-  // rolls back via the shared clear path — a failed load must never leave a half-seeded account.
+  // remap assigns every card an id, so this never narrows the set — the filter just satisfies the
+  // optional-id type without a non-null assertion.
+  const cardIds = cards.map((c) => c.id).filter((id): id is string => Boolean(id))
+  const reviewEvents = generateReviewHistory(cardIds, user.id, new Date())
+
+  // FK order: subjects → notes → cards → review_events (events reference card ids). supabase-js
+  // inserts are NOT one transaction, so any failure rolls back via the shared clear path — a failed
+  // load must never leave a half-seeded account. (review_events cascade from memory_cards on delete.)
   const steps = [
     () => supabase.from('subjects').insert(subjects),
     () => supabase.from('notes').insert(notes),
     () => supabase.from('memory_cards').insert(cards),
+    () => supabase.from('review_events').insert(reviewEvents),
   ]
   for (const step of steps) {
     const { error } = await step()
