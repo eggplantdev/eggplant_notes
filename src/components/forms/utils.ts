@@ -8,6 +8,10 @@ function toMessage(error: unknown): string | undefined {
   return undefined
 }
 
+// Dedupe: a field that wires the SAME schema to both `onBlur` and `onSubmit` (the intentional
+// pattern — live-validate touched fields, still catch never-blurred ones at submit) accumulates one
+// identical issue per validator, so without this the message renders twice ("X, X").
 export function getFieldErrorText(errors: readonly unknown[]): string {
-  return errors.map(toMessage).filter(Boolean).join(', ')
+  const messages = errors.map(toMessage).filter(Boolean) as string[]
+  return [...new Set(messages)].join(', ')
 }

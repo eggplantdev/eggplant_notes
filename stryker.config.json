@@ -22,6 +22,7 @@
     "src/features/openrouter/preview-prompt.ts",
     "src/lib/utils/build-url-with-params.ts",
     "src/lib/utils/date.ts",
+    "src/components/forms/utils.ts",
     "src/lib/utils/pagination.ts",
     "src/lib/validate.ts",
     "src/components/forms/toast-result.ts",
