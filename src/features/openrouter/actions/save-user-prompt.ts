@@ -2,7 +2,6 @@
 
 import { isBuiltinSystem } from '@/features/openrouter/system-prompts'
 import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
-import { revalidatePromptSurfaces } from '@/features/openrouter/actions/revalidate-prompt-surfaces'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
@@ -38,6 +37,8 @@ export async function saveUserPrompt(input: unknown): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  revalidatePromptSurfaces()
+  // No revalidate: the prompt surfaces are dynamic (Supabase cookies), so each navigation re-reads
+  // user_prompts fresh — staleTimes.dynamic=0 means there's no client-cache payload to bust. (Verified
+  // 2026-06-10; the old revalidatePromptSurfaces helper was a confirmed no-op.)
   return { success: true }
 }

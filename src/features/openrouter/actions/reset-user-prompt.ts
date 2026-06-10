@@ -1,7 +1,6 @@
 'use server'
 
 import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
-import { revalidatePromptSurfaces } from '@/features/openrouter/actions/revalidate-prompt-surfaces'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
@@ -29,6 +28,6 @@ export async function resetUserPrompt(input: unknown): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  revalidatePromptSurfaces()
+  // No revalidate: see save-user-prompt.ts — dynamic surfaces re-read user_prompts on navigation.
   return { success: true }
 }
