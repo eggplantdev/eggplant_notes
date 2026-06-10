@@ -36,6 +36,13 @@ The feature-first **decision procedure** — the tiers, the promotion rule, the 
 - `supabase/` — `config.toml` + `migrations/`; every row scoped by `auth.uid()` (RLS).
 - Foundation docs: `@context/foundation/prd.md`, `@context/foundation/tech-stack.md`.
 
+## API contract — three surfaces move together
+
+The token HTTP API (`src/app/api/{subjects,notes,memory-cards}/**`) has **three consumers that must change in lockstep**. Touching a route, payload shape, or data-layer rule (e.g. reshaping the subjects API) means updating all three in the same change:
+
+- **In-app UI ↔ route handlers** — both call the shared `*-core.ts` mutation modules (`src/features/{notes,memory-cards,subjects}/*-core.ts`). Put new mutation/validation logic there, never in one surface only, so a Server Action can't drift from its API route.
+- **The downloadable agent skill** — `GET /api/skill` serves the `clc-note-api` skill that documents the whole API to external agents. Its source of truth is `@context/changes/cli-token-ui-and-skill-download/clc-note-api.skill.md`; `@src/features/api-tokens/skill-template.ts` is a **byte-exact generated mirror** — edit the `.md`, then regenerate via its `gen-skill-template.mjs` (steps in the `.ts` header). `@src/__tests__/skill-template.test.ts` only pins the placeholder + endpoint list, so **semantic drift** (field rules, cascades, status codes, new endpoints) ships a _lying_ skill silently unless you update that prose yourself.
+
 ## Commands
 
 Scripts: `@package.json`. Run `mise install` once to provision the toolchain (`@mise.toml`). The Supabase CLI (`supabase start`, migrations) runs on the **host**, not in the devcontainer — it is **not** an npm dependency; `mise install` provisions it.
