@@ -229,3 +229,10 @@
 - **Problem**: Raw `process.env.X` skips the build-time schema gate (`env-schema.ts` via `next.config.ts`), so a missing var ships silently — caused the `OPENROUTER_ENC_KEY` prod outage and the `SUPABASE_JWT_SECRET` token-API 500.
 - **Rule**: Read env only via `src/lib/env.ts` (public) / `env.server.ts` (server) — never raw `process.env` (`NODE_ENV` exempt). A prod-required var must have no `.default()` (defaults aren't build-gated). Enforced by `no-restricted-syntax` in `eslint.config.mjs`.
 - **Applies to**: implement, impl-review, plan-review
+
+## Mock `@/lib/env` in unit tests that import env-touching server actions
+
+- **Context**: Any vitest unit test that imports (directly or transitively) a server action which reads `@/lib/env` / `@/lib/env.server` — e.g. importing `sign-up.ts` because it now uses `SITE_URL`. Also triggered the moment you ADD an env import to a server action that tests already import.
+- **Problem**: `env.ts` eager-parses `process.env` with Zod at module load. The husky pre-push hook runs `tsc` + `vitest run` in a bare shell where `.env.local` is NOT exported (only Next/vitest's own loaders read it, not the subshell), so the parse throws `ZodError: NEXT_PUBLIC_* expected string, received undefined` before any test body runs — failing the test and blocking the push. Hit twice in one session when `sign-up.ts` gained a `SITE_URL` import and its two importing tests weren't updated.
+- **Rule**: A unit test importing an env-touching server action MUST `vi.mock('@/lib/env', () => ({ /* only the consts used */ }))` so the module-load parse never runs (mirror `sign-up-email-redirect.test.ts`). And when you add an env import to a server action, run `tsc --noEmit` + the unit suite before committing — the pre-push hook runs them envless, so a missing mock fails there, not locally-with-env. Sibling Playwright variant above: "spec process loads no env".
+- **Applies to**: implement, impl-review
