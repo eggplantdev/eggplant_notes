@@ -1,11 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { ANON_KEY, JWT_SECRET, SUPABASE_URL } from './local-supabase-creds'
-
-// The mutating handlers now call revalidatePath('/', 'layout') on success (nav-cache-staletimes). These
-// tests drive the handlers IN-PROCESS, with no Next request scope, where the real revalidatePath throws.
-// Stub it — the bust is a side effect these route tests don't assert on (E2E covers cache freshness).
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 // Integration for the token API ROUTES: imports the real route handlers and drives them with minted
 // tokens against the local Supabase stack. Skipped unless RUN_INTEGRATION=1. Run: pnpm test:integration

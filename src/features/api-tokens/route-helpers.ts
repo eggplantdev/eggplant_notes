@@ -1,4 +1,3 @@
-import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -52,9 +51,5 @@ export async function deleteRowResponse(
     return errorJson(500, `Failed to delete ${label.toLowerCase()}`)
   }
   if (!data) return errorJson(404, `${label} not found`)
-  // Token-API delete succeeded: reset server caches so the next request (from any session) renders
-  // fresh. A route-handler revalidate only MARKS paths — it can't push into a live browser tab, which
-  // converges within the staleTimes window. Shared by all three [id] DELETE routes.
-  revalidatePath('/', 'layout')
   return NextResponse.json({ id: data.id })
 }

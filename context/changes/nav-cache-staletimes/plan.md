@@ -4,6 +4,8 @@
 
 Enable the client Router Cache for dynamic routes by setting `experimental.staleTimes.dynamic = 300` in `next.config.ts`, so repeat navigation between authed pages is served from in-browser memory instead of a fresh server round-trip. Because enabling that cache makes stale data possible after a write, every mutation surface must bust it. Ship in two phases: **Phase 1** = config + a uniform nuclear bust (`revalidatePath('/', 'layout')`) at every mutation surface (correctness-first, shippable alone); **Phase 2** = replace the nuclear bust with per-domain path sets that evict only the routes that display the changed data.
 
+> **Revision (2026-06-11, during Phase 1 impl): route-handler busts dropped; only Server Action busts remain.** A route handler's `revalidatePath` cannot evict a browser's client Router Cache (no Router channel), and this all-dynamic app has no server-side Full Route / Data Cache for it to mark — so the planned **token-API route-handler busts (§3 below), the `deleteRowResponse` bust, and the OpenRouter-callback bust are no-ops** and were **removed**. The 28 **Server Action** busts are the load-bearing protection. **E2E spec (c)** ("API write → revisit → fresh") is unverifiable (no valid form survives a deliberate-break) and was **dropped** — Phase-1 E2E is specs (a) cache-on + (b) in-app-write-busts. Full rationale: `design.md` "Revision" + `lessons.md`. §3 below is superseded; kept for history.
+
 ## Current State Analysis
 
 - Dynamic (cookie-bound) authed pages render fresh on every soft-nav: `staleTimes.dynamic` defaults to **0**, so the client Router Cache never reuses them (`next.config.ts` has no `staleTimes`).
@@ -215,7 +217,7 @@ The win is removing the per-nav server round-trip on repeat visits within 5 minu
 - [x] 1.1 Type checking passes (`next typegen` + `pnpm typecheck`)
 - [x] 1.2 Lint passes on touched files
 - [x] 1.3 Unit suite still green
-- [ ] 1.4 E2E passes (`e2e/nav-cache.spec.ts`)
+- [x] 1.4 E2E passes (`e2e/nav-cache.spec.ts`)
 
 #### Manual
 

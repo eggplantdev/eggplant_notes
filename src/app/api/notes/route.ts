@@ -1,4 +1,3 @@
-import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -22,8 +21,6 @@ export async function POST(request: Request) {
 
   try {
     const id = await insertNoteWithChecks(auth.supabase, parsed.data)
-    // Token-API write: reset server caches so the next request renders fresh (marks paths, no live push).
-    revalidatePath('/', 'layout')
     return NextResponse.json({ id }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/notes] insert error', error)

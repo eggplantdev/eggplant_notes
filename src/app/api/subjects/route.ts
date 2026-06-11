@@ -1,4 +1,3 @@
-import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
@@ -38,7 +37,5 @@ export async function POST(request: Request) {
 
   const result = await createSubjectCore(auth.supabase, parsed.data)
   if ('error' in result) return errorJson(500, 'Failed to create subject')
-  // Token-API write: reset server caches so the next request renders fresh (marks paths, no live push).
-  revalidatePath('/', 'layout')
   return NextResponse.json({ id: result.id }, { status: 201 })
 }

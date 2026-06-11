@@ -103,3 +103,14 @@ Staleness is a browser behavior; unit tests cannot see the client cache. Per `co
 ## Open questions
 
 None.
+
+## Revision — route-handler busts dropped (2026-06-11, during Phase 1 implementation)
+
+The original design put `revalidatePath('/', 'layout')` at **both** surfaces (Server Action **and** route handler). Implementation + the E2E gate proved the **route-handler half is a no-op** and it was removed. Why:
+
+- A **route handler**'s `revalidatePath` returns a plain HTTP response with no Router channel back to the browser, so it can only mark **server-side** caches — it can never evict a browser's client Router Cache. Only a **Server Action**'s `revalidatePath` reaches the calling browser (fact 4, re-read correctly).
+- This app is **all-dynamic** (cookie + supabase-js), so there is **no** Full Route Cache and **no** Data Cache to mark either. The route-handler call therefore resets _nothing that exists_ — a complete no-op (same family as `lessons.md` "`revalidatePath` on a dynamic page is a no-op").
+- The token API is hit by external agents (no browser/client cache in play). The OAuth callback is doubly moot — it's a route handler **and** the full-page OAuth redirect already clears the entire client cache on return; the earlier "connect → bust in the callback" decision was based on a staleness that does not occur.
+- The **"sync guard" E2E** (spec c, "API write → revisit → fresh") has no valid form: within the window an open tab stays stale (this design's own "Key limitation"), and a cold visit to a dynamic page is always fresh regardless of the bust — so a deliberate-break check can never make it red. Dropped.
+
+**Net:** only the **28 Server Action busts** remain (load-bearing, proven by spec b). The 6 token-API route-handler busts + `deleteRowResponse` + the callback bust were removed. Cross-actor (token-API) freshness on an open tab remains bounded by the `staleTimes.dynamic` window — the accepted limitation, now the _only_ mechanism, not a bust. Lesson captured in `lessons.md`. If any route ever serves a server-cached output (static/ISR/`'use cache'`), revisit. Phase-1 E2E = specs (a) cache-on + (b) in-app-write-busts only.
