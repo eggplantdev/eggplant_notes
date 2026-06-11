@@ -76,7 +76,7 @@ Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under
 ## Commits & CI
 
 - Commit style (from `git log`): lowercase imperative subject, no Conventional-Commits prefix — e.g. `add supabase cli dev-dep + fix arm64 binary resolution`.
-- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/eggplant_notes` (public). The repo, the Vercel project, and the `package.json` name are all `eggplant_notes` (formerly `coding-learning-companion`; GitHub auto-redirects the old URLs). The auto-assigned prod URL stays `eggplant-ai-notes.vercel.app` — renaming the Vercel project does not move its `.vercel.app` domain.
+- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/eggplant_notes` (public). The repo, the Vercel project, and the `package.json` name are all `eggplant_notes` (formerly `coding-learning-companion`; GitHub auto-redirects the old URLs). Prod URL is `eggplant-notes.vercel.app` (added as a project domain 2026-06-11; the old `eggplant-ai-notes.vercel.app` now 404s). Lesson: a project rename does **not** move the `.vercel.app` domain — you must add the new subdomain explicitly, then re-point `NEXT_PUBLIC_SITE_URL` (prod) + Supabase auth `site_url`/`uri_allow_list` to it.
 
 ## Tooling tripwires
 
