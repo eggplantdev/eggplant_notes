@@ -19,13 +19,12 @@ export async function AppNav() {
     <>
       <header className="bg-background sticky top-0 z-40 hidden border-b md:block">
         <div className="container-shell flex items-center justify-between gap-2 py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <BrandMark
               href="/dashboard"
-              interactive
               aria-label="eggplant_notes — dashboard"
               className="focus-ring rounded-md"
-              wordmarkClassName="hidden lg:inline"
+              wordmarkClassName="hidden"
             />
             <nav className="flex items-center gap-1">
               {NAV_ITEMS.map((item) => (
@@ -49,13 +48,12 @@ export async function AppNav() {
       </header>
 
       {/* Mobile-only fixed brand, mirroring the floating hamburger on the right — the logo is the dashboard link. */}
-      <Link
+      <BrandMark
         href="/dashboard"
         aria-label="eggplant_notes — dashboard"
         className="focus-ring fixed top-4 left-4 z-50 flex size-8 items-center justify-center rounded-md md:hidden"
-      >
-        <BrandLogo className="size-8" />
-      </Link>
+        wordmarkClassName="hidden"
+      />
       <CurrentPageLabel />
       <MobileNav
         connected={connected}

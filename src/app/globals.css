@@ -41,6 +41,11 @@
   --color-neon-fuchsia: #d946ef;
   /* AI-accent glow for interactive affordances (e.g. accordion arrow hover) — generates `drop-shadow-neon-cyan`. */
   --drop-shadow-neon-cyan: 0 0 6px var(--color-neon-cyan);
+  /* BrandMark hover glow (logo + wordmark). The `-off` base is a same-blur *transparent* shadow so the
+     colour fades in instead of snapping from `filter: none`. Single shadow only — Tailwind wraps the
+     value in one `drop-shadow()`, so a comma-stacked value compiles to invalid CSS. */
+  --drop-shadow-glow-cyan-soft-off: 0 0 5px transparent;
+  --drop-shadow-glow-cyan-soft: 0 0 5px #00e5ff80;
   --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
   --font-heading: var(--font-sans);
