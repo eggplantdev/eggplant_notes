@@ -214,10 +214,10 @@ The win is removing the per-nav server round-trip on repeat visits within 5 minu
 
 #### Automated
 
-- [x] 1.1 Type checking passes (`next typegen` + `pnpm typecheck`)
-- [x] 1.2 Lint passes on touched files
-- [x] 1.3 Unit suite still green
-- [x] 1.4 E2E passes (`e2e/nav-cache.spec.ts`)
+- [x] 1.1 Type checking passes (`next typegen` + `pnpm typecheck`) — aa0578b
+- [x] 1.2 Lint passes on touched files — aa0578b
+- [x] 1.3 Unit suite still green — aa0578b
+- [x] 1.4 E2E passes (`e2e/nav-cache.spec.ts`) — 22d1a78
 
 #### Manual
 
