@@ -225,7 +225,9 @@ The win is removing the per-nav server round-trip on repeat visits within 5 minu
 - [ ] 1.6 UI create/edit shows the change on the next navigation
 - [ ] 1.7 No regression in rate-card / delete-subject / daily-goal flows
 
-### Phase 2: granular per-domain busting
+### Phase 2: granular per-domain busting — DEFERRED (2026-06-11)
+
+> **Decision: not building Phase 2 now; moved to the TODO backlog as a future item.** For a solo app the nuclear bust is correct + simple, writes are infrequent (one cold nav after a write is imperceptible), and granular busting adds a standing drift liability (the gap-map path sets must be hand-maintained as routes are added). Revisit only at real multi-user traffic. Rationale recorded in `TODO.md` (Performance section) + `handoff.md`.
 
 #### Automated
 

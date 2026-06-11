@@ -12,7 +12,7 @@ export type BrandMarkPropsT = ComponentProps<typeof Link> & {
 }
 
 // Literal lookups so Tailwind can scan the size classes (it can't read `size-${x}`).
-const LOGO_SIZE = { sm: 'size-8 md:size-9', lg: 'size-14 md:size-16' } as const
+const LOGO_SIZE = { sm: 'size-11', lg: 'size-14 md:size-16' } as const
 const TEXT_SIZE = { sm: 'text-sm md:text-base', lg: 'text-2xl md:text-3xl' } as const
 
 // Hover glow: transparent base → soft-cyan on group-hover, fading over 300ms. Tokens in globals.css.

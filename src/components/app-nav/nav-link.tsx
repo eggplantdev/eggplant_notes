@@ -16,7 +16,7 @@ export function NavLink({ href, label }: NavLinkPropsT) {
   const isActive = isNavActive(pathname, href)
 
   return (
-    <Button asChild variant={isActive ? 'secondary' : 'ghost'} size="sm">
+    <Button asChild variant={'ghost'} size="sm">
       <Link href={href} aria-current={isActive ? 'page' : undefined}>
         {label}
       </Link>

@@ -35,6 +35,12 @@ After this handoff, one more tiny commit lands the Progress SHA write-back + thi
 - `clientFor` client must `db.auth.stopAutoRefresh()` after use or the worker hangs 5 min → nonzero exit. (Pre-existing `isolation.spec.ts` has the same untidy pattern.)
 - Requires local Supabase up (`supabase start`) — it was **down** at session start; started it this session. The E2E flakes occasionally on the GoTrue local-stack race (retries:2 absorbs it).
 
+## Phase 2 — DEFERRED (decided 2026-06-11)
+
+**Not building Phase 2.** Moved to the `TODO.md` Performance backlog as a future item. The open question below ("is granular worth it for a solo app?") was answered **no for now**: nuclear is correct + simple, writes are infrequent, and granular busting adds a standing path-set drift liability. Revisit only at real multi-user traffic. The revised-scope notes below are retained for whoever picks it up later.
+
+---
+
 ## Phase 2 — REVISED scope (read before resuming)
 
 The plan's original Phase 2 ("per-domain `revalidate.ts` shared by **both** the action and the route handler") is **partly obsolete**: route handlers no longer bust. Revised Phase 2:

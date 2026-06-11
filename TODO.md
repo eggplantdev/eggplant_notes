@@ -10,8 +10,8 @@
 
 **Left to do**
 
-- [ ] **Eggplant logo** — brand mark for nav / landing (favicon ✅ done). Asset now in `public/logos/eggplant-logo.png`; nav/landing wordmark still open.
-- [ ] **Performance / route caching (S-11)** — has a/cl real architectural blocker (per-user cache vs RLS cookie).
+- [x] **Eggplant logo** — brand mark for nav / landing (favicon ✅ done). Asset now in `public/logos/eggplant-logo.png`; nav/landing wordmark still open.
+- [ ] **Performance / route caching (S-11)** — client Router Cache shipped (`nav-cache-staletimes` Phase 1, `staleTimes.dynamic=300` + nuclear bust); Phase 2 (granular busting) deferred — see Performance detail below.
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
 
@@ -51,7 +51,8 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 
 ### Performance (= roadmap S-11)
 
-- [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation). **Reframe (2026-06-11):** the felt cost is the per-nav _server round-trip_, not the query (reads are already lean — see below) — a _client_ Router Cache problem, which is per-user in the browser and has no RLS/cookie blocker. The `'use cache'` blocker is an artifact of the chosen tool, not the problem. Closed audits (both resolved, no open code actions): `context/changes/perf-audit-2026-06-10` (CLOSED), `context/changes/query-performance-audit` (RESOLVED — column-slimming done).
+- [x] **Caching between route navigations — SHIPPED (`nav-cache-staletimes` Phase 1, 2026-06-11).** The felt cost was the per-nav _server round-trip_, not the query (reads already lean) — a _client_ Router Cache problem (per-user in the browser, no RLS/cookie blocker, unlike the `'use cache'` server-cache dead-end). Fix: `experimental.staleTimes.dynamic=300` in `next.config.ts` + a nuclear `revalidatePath('/', 'layout')` on every state-mutating **Server Action** (28). Route-handler busts were dropped as no-ops (all-dynamic app, no server cache + no Router channel to a browser). E2E-verified (`e2e/nav-cache.spec.ts`). Closed audits feeding this: `context/changes/perf-audit-2026-06-10` (CLOSED), `context/changes/query-performance-audit` (RESOLVED — column-slimming done).
+- [ ] **Phase 2 — granular per-domain busting (deferred, future).** Replace the nuclear `revalidatePath('/', 'layout')` with per-domain path sets so a write only evicts routes that display the changed data (unrelated routes keep cache hits across writes). Deferred for a solo app: nuclear is correct + simple, writes are infrequent so the only cost is one cold nav after each write, and granular adds a standing **drift liability** (every new route showing a shared read — `getSubjects`/`getDailyGoal`/`getOpenRouterStatus` — must be hand-added to a path set or it silently goes stale). Full design + gap map: `context/changes/nav-cache-staletimes/design.md` (§Phase 2 + gap map) and `handoff.md`. Revisit only at real multi-user traffic.
 
 ### AI / OpenRouter polish
 

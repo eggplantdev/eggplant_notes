@@ -17,7 +17,7 @@ export async function AppNav() {
     <>
       <header className="bg-background sticky top-0 z-40 hidden border-b md:block">
         <div className="container-shell flex items-center justify-between gap-2 py-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <BrandMark
               href="/dashboard"
               aria-label="eggplant_notes — dashboard"
