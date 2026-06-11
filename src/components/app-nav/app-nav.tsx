@@ -1,7 +1,5 @@
 import { Suspense } from 'react'
-import Link from 'next/link'
 
-import { BrandLogo } from '@/components/brand/brand-logo'
 import { BrandMark } from '@/components/brand/brand-mark'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
 import { NavConnectButton } from '@/features/openrouter/components/nav-connect-button'
