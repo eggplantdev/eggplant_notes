@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { MutedText } from '@/components/ui/muted-text'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
+import { AnswerDisclosure } from '@/features/review/components/answer-disclosure'
 import { buildPreviews } from '@/features/review/build-previews'
 import { CaughtUpNotice } from '@/features/review/components/caught-up-notice'
 import { RatingButtons } from '@/features/review/components/rating-buttons'
@@ -52,22 +52,12 @@ export function ReviewPanel({ card, goal, provideCelebration = true, subtitle }:
           // key={card.id}: the panel advances in place, so without a per-card key React reuses the
           // same Collapsible instance and its uncontrolled open state leaks — the next card would
           // load with the answer already revealed, defeating recall.
-          <Collapsible key={card.id} className="border-t pt-3">
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className="text-muted-foreground hover:text-foreground cursor-pointer text-sm select-none"
-              >
-                Show answer
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="mt-3 flex flex-col gap-3">
-                {card.example && <RenderMarkdown content={card.example} />}
-                {card.code_context && <RenderMarkdown content={card.code_context} />}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <AnswerDisclosure key={card.id}>
+            <div className="mt-3 flex flex-col gap-3">
+              {card.example && <RenderMarkdown content={card.example} />}
+              {card.code_context && <RenderMarkdown content={card.code_context} />}
+            </div>
+          </AnswerDisclosure>
         )}
         <RatingButtons
           memoryCardId={card.id}
