@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MenuIcon, XIcon } from 'lucide-react'
 
-import { BrandLogo } from '@/components/brand/brand-logo'
+import { BrandMark } from '@/components/brand/brand-mark'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
@@ -52,13 +52,11 @@ export function MobileNav({
             <XIcon />
           </Button>
         </SheetClose>
-        <nav className="flex flex-col gap-1 p-4 pt-16">
-          <SheetClose asChild>
-            <Link href="/dashboard" className="focus-ring mb-3 flex items-center gap-2 rounded-md">
-              <BrandLogo className="size-8" />
-              <span className="font-mono text-sm font-semibold">eggplant_notes</span>
-            </Link>
-          </SheetClose>
+        {/* Brand sits on the same row as the close button (top-4) — not styled as an interactive nav item. */}
+        <SheetClose asChild>
+          <BrandMark href="/dashboard" className="absolute top-4 left-4 h-7" />
+        </SheetClose>
+        <nav className="flex h-full flex-col gap-1 p-4 pt-16">
           {ALL_NAV_ITEMS.map((item) => {
             const isActive = isNavActive(pathname, item.href)
             return (
@@ -75,8 +73,11 @@ export function MobileNav({
               </SheetClose>
             )
           })}
-          {connected ? credits : <NavConnectButton className="mt-2 w-full justify-start" />}
-          <SignOutButton className="mt-2 w-full justify-start" />
+          {/* Balance/connect + sign-out pinned to the bottom of the sheet. */}
+          <div className="mt-auto flex flex-col gap-2">
+            {connected ? credits : <NavConnectButton className="w-full justify-start" />}
+            <SignOutButton className="w-full justify-start" />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

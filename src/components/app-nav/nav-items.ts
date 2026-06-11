@@ -1,5 +1,5 @@
+// The brand logo (AppNav / MobileNav) is the dashboard link, so no separate Dashboard tab here.
 export const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard' },
   { href: '/notes', label: 'Notes' },
   { href: '/memory-cards', label: 'Memory cards' },
   { href: '/subjects', label: 'Subjects' },

@@ -12,7 +12,7 @@ export function CurrentPageLabel() {
   if (!current) return null
 
   return (
-    <span className="fixed top-4 left-4 z-50 flex h-8 items-center text-sm font-semibold md:hidden">
+    <span className="fixed top-4 left-1/2 z-50 flex h-8 -translate-x-1/2 items-center text-sm font-semibold md:hidden">
       {current.label}
     </span>
   )
