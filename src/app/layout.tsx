@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'eggplant_notes',
-  description: 'Markdown coding notes grouped into subjects, with spaced-repetition recall cards.',
+  description: 'AI powered notes with spaced-repetition recall cards.',
 }
 
 export default function RootLayout({
