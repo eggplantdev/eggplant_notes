@@ -56,7 +56,11 @@ export async function proxy(request: NextRequest) {
   // so gating them here would bounce the agent before authenticateRequest ever runs; /api/skill 401s
   // itself via getCurrentUser. update-password is reached via a recovery session, so it stays public too.
   const isPublic =
-    isAuthRoute || pathname.startsWith('/api/') || matchesPath(pathname, '/update-password')
+    isAuthRoute ||
+    pathname.startsWith('/api/') ||
+    matchesPath(pathname, '/update-password') ||
+    // /logo is a standalone brand-exploration gallery with no user data — viewable signed-out.
+    matchesPath(pathname, '/logo')
 
   // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)
