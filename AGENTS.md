@@ -99,6 +99,8 @@ Vercel is the canonical surface for deploys, env, logs, domains, linking. Use ve
 
 > The user's path-scoped global rules in `~/.claude/rules/*` (typescript/react/styling conventions + general/general_persona/learning/english_refinement) are the **single source** — this file deliberately does not restate them.
 
+> **Workflow = 10x, not superpowers** — use the `/10x-*` skills for research/plan/implement/review, not the auto-loaded superpowers skills.
+
 ### Per-change review gate
 
 Close out **every change that has its own `context/changes/<id>/` folder** — a roadmap slice, a foundation, or any standalone change (a hardening pass, a refactor, a bugfix that earned a plan) — by running the **`slice-review-gate`** skill. Having a change folder _is_ the trigger; only trivial folder-less edits skip it. The skill carries the review checks, unit-of-work, full suite, and archive step as conditional defaults — it detects the 10x + pnpm + Supabase pattern this project is on — so none of that is restated here. This project matches the pattern, so the defaults apply as-is.
