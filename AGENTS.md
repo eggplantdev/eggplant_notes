@@ -8,7 +8,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Repository Guidelines
 
-`coding-learning-companion` — a personal coding-learning web app (markdown notes + spaced-repetition "memory cards"), deployed on Vercel. Solo MVP. Full stack/versions in `@package.json`. This is the canonical, cross-tool agent onboarding file; Claude Code inherits it via `@AGENTS.md` in `CLAUDE.md`.
+`eggplant_notes` — a personal coding-learning web app (markdown notes + spaced-repetition "memory cards"), deployed on Vercel. Solo MVP. Full stack/versions in `@package.json`. This is the canonical, cross-tool agent onboarding file; Claude Code inherits it via `@AGENTS.md` in `CLAUDE.md`.
 
 > **⚠ Most-broken rule — consult before writing code:** _where_ any new file, component, hook, type, or helper goes is decided by the **`feature-first-structure`** skill. Invoke it; don't guess placement. The project-specific placement facts the skill can't know are under **Project structure** below.
 
@@ -76,7 +76,7 @@ Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under
 ## Commits & CI
 
 - Commit style (from `git log`): lowercase imperative subject, no Conventional-Commits prefix — e.g. `add supabase cli dev-dep + fix arm64 binary resolution`.
-- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/eggplant_ai_notes` (public). **The repo was renamed from `coding-learning-companion`, but the Vercel project + `package.json` name are still `coding-learning-companion`** — so the repo slug intentionally diverges from both (the `vercel link --project` name below is the old one, on purpose).
+- CI gate is **Vercel's GitHub integration**, not GitHub Actions (no `.github/workflows/*`): push → preview deploy; merge to `main` → production. Remote: `github.com/ex-Plant/eggplant_notes` (public). The repo, the Vercel project, and the `package.json` name are all `eggplant_notes` (formerly `coding-learning-companion`; GitHub auto-redirects the old URLs). The auto-assigned prod URL stays `eggplant-ai-notes.vercel.app` — renaming the Vercel project does not move its `.vercel.app` domain.
 
 ## Tooling tripwires
 
@@ -88,7 +88,7 @@ Vitest 4 for unit specs under `src/__tests__/**/*.test.ts`. Playwright E2E under
 
 Vercel is the canonical surface for deploys, env, logs, domains, linking. Use vercel skills to talk with vercel and to get latest vercel api.
 
-- **Account/link state:** CLI user `eggplantdev` (hobby), **personal** scope (not a team), repo-level link (`.vercel/repo.json`, not `project.json`), prod region `fra1` (EU, co-located with Supabase). Confirm: `vercel whoami` → expect `eggplantdev`. If it returns `Not authorized`, `.vercel/` is stale-linked — `rm -rf .vercel && vercel link --yes --project coding-learning-companion` (no `--scope`; personal accounts reject it).
+- **Account/link state:** CLI user `eggplantdev` (hobby), **personal** scope (not a team), repo-level link (`.vercel/repo.json`, not `project.json`), prod region `fra1` (EU, co-located with Supabase). Confirm: `vercel whoami` → expect `eggplantdev`. If it returns `Not authorized`, `.vercel/` is stale-linked — `rm -rf .vercel && vercel link --yes --project eggplant_notes` (no `--scope`; personal accounts reject it).
 
 ## Linear (issue tracking)
 

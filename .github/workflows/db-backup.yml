@@ -101,7 +101,7 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
-          REMOTE_DIR: /db_backup_eggplant_ai_notes/
+          REMOTE_DIR: /db_backup_eggplant_notes/
         run: |
           # --- Upload ---
           # ssl:verify-certificate no — many shared hosting providers have mismatched certs.
