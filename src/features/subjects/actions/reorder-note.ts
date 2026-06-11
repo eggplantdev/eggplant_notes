@@ -25,8 +25,6 @@ export async function reorderNote(noteId: string, position: number): Promise<Act
   )
   if (!result.success) return result
 
-  // 'layout' revalidates the whole subtree: the ordered sidebar list lives in the /subjects/[id]
-  // layout, so this covers both the index and the active [noteId] segment (else stale order on reload).
-  revalidatePath('/subjects/[id]', 'layout')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

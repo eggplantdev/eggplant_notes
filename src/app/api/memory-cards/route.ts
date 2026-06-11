@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 import { noteAttachCardsSchema } from '@/features/api-tokens/schemas'
@@ -33,6 +34,8 @@ export async function POST(request: Request) {
       'note_id' in parsed.data
         ? await insertCardsForNote(auth.supabase, parsed.data.note_id, parsed.data.cards)
         : [await insertStandaloneCard(auth.supabase, parsed.data)]
+    // Token-API write: reset server caches so the next request renders fresh (marks paths, no live push).
+    revalidatePath('/', 'layout')
     return NextResponse.json({ ids }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/memory-cards] insert error', error)

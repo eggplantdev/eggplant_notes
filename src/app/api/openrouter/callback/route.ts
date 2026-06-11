@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { type NextRequest } from 'next/server'
@@ -51,6 +52,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (connected) toastRedirect('/settings', 'openrouter-connected')
+  if (connected) {
+    // This (not the connect action, which only redirects out to OpenRouter) is where the credential is
+    // written, so this is where getOpenRouterStatus() flips. Bust the client Router Cache so the cached
+    // generate-button state (disabled → enabled) on /import + the new-note/new-card pages refreshes.
+    // Before redirect — toastRedirect throws to unwind.
+    revalidatePath('/', 'layout')
+    toastRedirect('/settings', 'openrouter-connected')
+  }
   redirect('/settings?error=Could not connect OpenRouter')
 }

@@ -20,6 +20,6 @@ export async function createSubject(input: unknown): Promise<ActionResultT> {
   const result = await createSubjectCore(supabase, parsed.data)
   if ('error' in result) return { success: false, error: result.error }
 
-  revalidatePath('/subjects')
+  revalidatePath('/', 'layout')
   toastRedirect(`/subjects/${result.id}`, 'subject-saved')
 }

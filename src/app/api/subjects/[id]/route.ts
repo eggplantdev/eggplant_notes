@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
@@ -31,6 +32,8 @@ export async function PATCH(request: Request, ctx: RouteContext<'/api/subjects/[
     if (result.notFound) return errorJson(404, 'Subject not found')
     return errorJson(500, 'Failed to update subject')
   }
+  // Token-API write: reset server caches so the next request renders fresh (marks paths, no live push).
+  revalidatePath('/', 'layout')
   return NextResponse.json({ id: result.id })
 }
 

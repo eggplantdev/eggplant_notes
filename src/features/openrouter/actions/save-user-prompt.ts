@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { isBuiltinSystem } from '@/features/openrouter/system-prompts'
 import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
@@ -37,8 +39,9 @@ export async function saveUserPrompt(input: unknown): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  // No revalidate: the prompt surfaces are dynamic (Supabase cookies), so each navigation re-reads
-  // user_prompts fresh — staleTimes.dynamic=0 means there's no client-cache payload to bust. (Verified
-  // 2026-06-10; the old revalidatePromptSurfaces helper was a confirmed no-op.)
+  // Bust the client Router Cache: the resolved prompt is rendered into the generation dialogs
+  // (settings + the import/new-note/new-card surfaces), and staleTimes.dynamic is now non-zero, so a
+  // saved override would otherwise show stale on a cached revisit within the window.
+  revalidatePath('/', 'layout')
   return { success: true }
 }

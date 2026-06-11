@@ -22,6 +22,6 @@ export async function revokeApiToken(tokenId: string): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/settings')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

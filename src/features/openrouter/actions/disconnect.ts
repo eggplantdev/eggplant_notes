@@ -19,6 +19,6 @@ export async function disconnectOpenRouter(): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/settings')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

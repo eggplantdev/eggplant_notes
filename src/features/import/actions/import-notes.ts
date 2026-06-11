@@ -26,7 +26,6 @@ export async function importNotes(input: unknown): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/notes')
-  revalidatePath('/subjects')
+  revalidatePath('/', 'layout')
   toastRedirect(`/subjects/${subjectId}`, 'notes-imported')
 }

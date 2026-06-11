@@ -36,6 +36,6 @@ export async function mintApiToken(input: MintTokenInputT): Promise<MintTokenRes
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/settings')
+  revalidatePath('/', 'layout')
   return { success: true, rawToken: raw }
 }

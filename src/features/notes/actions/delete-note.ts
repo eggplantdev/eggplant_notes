@@ -9,13 +9,11 @@ import type { ActionResultT } from '@/types/action'
 
 // Attached memory_cards (and their review_events) cascade at the DB FK — no app-side cascade.
 // `.select().single()` returns the deleted row so runTableAction confirms a row was removed.
-// A caller-supplied redirectTo (subject view) revalidates the subjects subtree too, so the
-// sidebar drops the gone note.
+// redirectTo (default /notes, or the subject view) is just the post-delete destination.
 export async function deleteNote(id: string, redirectTo = '/notes'): Promise<ActionResultT> {
   const result = await runDeleteRow(noteIdSchema, 'notes', id)
   if (!result.success) return result
 
-  revalidatePath('/notes')
-  if (redirectTo !== '/notes') revalidatePath('/subjects', 'layout')
+  revalidatePath('/', 'layout')
   toastRedirect(redirectTo, 'note-deleted')
 }

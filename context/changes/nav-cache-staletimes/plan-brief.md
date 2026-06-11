@@ -48,7 +48,7 @@ One config line enables the client cache. Phase 1 puts an identical `revalidateP
 ## Open Risks & Assumptions
 
 - Cross-actor staleness ≤5 min on an open tab is accepted (token-API edits can't push to a live browser).
-- `generate-cards`/`generate-notes` get a bust only if they persist rows — verify during Phase 1.
+- `generate-cards`/`generate-notes` get **no** bust — confirmed read-only (return preview candidates, insert nothing; persistence is via the already-listed create actions).
 - `lessons.md:219` must be amended post-ship (its `dynamic = 0` premise no longer holds).
 
 ## Success Criteria (Summary)

@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { deleteAccountSchema } from '@/features/account/schemas'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { toastRedirect } from '@/lib/toast-redirect'
@@ -38,5 +40,9 @@ export async function deleteAccount(input: unknown): Promise<ActionResultT> {
   // scope: 'local' only clears the cookie — deleting the user already cascaded
   // away every server-side session, so a global revocation round-trip is moot.
   await supabase.auth.signOut({ scope: 'local' })
+  // Drop the whole client Router Cache before redirecting — a shared browser must not serve this
+  // (now-deleted) user's cached authed pages to whoever signs in next. revalidatePath must precede
+  // the redirect; toastRedirect throws to unwind.
+  revalidatePath('/', 'layout')
   toastRedirect('/sign-in', 'account-deleted')
 }

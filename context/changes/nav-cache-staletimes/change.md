@@ -1,7 +1,7 @@
 ---
 id: nav-cache-staletimes
 title: Navigation cache via staleTimes + mutation busting
-status: planned
+status: implementing
 created: 2026-06-11
 updated: 2026-06-11
 roadmap: S-11 (caching half)

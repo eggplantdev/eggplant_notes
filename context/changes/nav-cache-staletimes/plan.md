@@ -72,7 +72,7 @@ Enable the client cache and guarantee no post-write staleness by nuking the whol
 - `import/import-notes`
 - `memory-cards/create-cards-for-note`, `create-memory-card`, `create-standalone-card`, `delete-memory-card`, `link-card-to-note`, `unlink-card-from-note`, `update-memory-card`
 - `notes/create-note`, `delete-note`, `update-note`
-- `openrouter/connect` (before redirect), `disconnect`, `set-model`, `toggle-favorite`, `save-user-prompt`, `reset-user-prompt`, and `generate-cards`/`generate-notes` **only if they persist rows** (verify; skip if they only return text to a form)
+- `openrouter/connect` (before redirect), `disconnect`, `set-model`, `toggle-favorite`, `save-user-prompt`, `reset-user-prompt` — **but NOT `generate-cards`/`generate-notes`**: both are read-only (they return candidates to a preview and insert nothing; persistence happens later via `create-note`/`create-cards-for-note`, already listed). A bust there would purge the cache on every AI generation for no write.
 - `review/rate-memory-card`
 - `settings/update-daily-goal`
 - `subjects/create-subject`, `update-subject`, `delete-subject`, `reorder-note`
@@ -212,9 +212,9 @@ The win is removing the per-nav server round-trip on repeat visits within 5 minu
 
 #### Automated
 
-- [ ] 1.1 Type checking passes (`next typegen` + `pnpm typecheck`)
-- [ ] 1.2 Lint passes on touched files
-- [ ] 1.3 Unit suite still green
+- [x] 1.1 Type checking passes (`next typegen` + `pnpm typecheck`)
+- [x] 1.2 Lint passes on touched files
+- [x] 1.3 Unit suite still green
 - [ ] 1.4 E2E passes (`e2e/nav-cache.spec.ts`)
 
 #### Manual

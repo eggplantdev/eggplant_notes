@@ -24,7 +24,6 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
   const result = await updateSubjectCore(supabase, parsedId.data, parsed.data)
   if ('error' in result) return { success: false, error: result.error }
 
-  revalidatePath('/subjects')
-  revalidatePath(`/subjects/${parsedId.data}`)
+  revalidatePath('/', 'layout')
   toastRedirect(`/subjects/${parsedId.data}`, 'subject-saved')
 }

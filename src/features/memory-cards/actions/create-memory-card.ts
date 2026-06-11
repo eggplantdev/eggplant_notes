@@ -29,7 +29,6 @@ export async function createMemoryCard(noteId: string, input: unknown): Promise<
   })
   if (!result.success) return result
 
-  revalidatePath(`/notes/${parsedNoteId.data}`)
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

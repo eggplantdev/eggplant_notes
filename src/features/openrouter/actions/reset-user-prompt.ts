@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
@@ -28,6 +30,8 @@ export async function resetUserPrompt(input: unknown): Promise<ActionResultT> {
     return { success: false, error: error.message }
   }
 
-  // No revalidate: see save-user-prompt.ts — dynamic surfaces re-read user_prompts on navigation.
+  // Bust the client Router Cache so the reverted-to-default prompt shows on the next cached revisit.
+  // See save-user-prompt.ts — staleTimes.dynamic is now non-zero, so this is load-bearing.
+  revalidatePath('/', 'layout')
   return { success: true }
 }

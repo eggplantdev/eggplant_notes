@@ -26,6 +26,6 @@ export async function createStandaloneCard(input: unknown): Promise<ActionResult
     }
   }
 
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
   toastRedirect('/memory-cards', 'card-created')
 }

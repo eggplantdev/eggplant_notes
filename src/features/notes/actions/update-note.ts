@@ -26,9 +26,6 @@ export async function updateNote(
   const result = await updateNoteCore(supabase, parsedId.data, parsed.data, cardActions)
   if ('error' in result) return { success: false, error: result.error }
 
-  // Card moves/unlinks happened only on a real subject change with actions provided.
-  if (result.subjectChanged && cardActions) revalidatePath('/memory-cards')
-  revalidatePath('/notes')
-  revalidatePath(`/notes/${parsedId.data}`)
+  revalidatePath('/', 'layout')
   toastRedirect(`/notes/${parsedId.data}`, 'note-saved')
 }

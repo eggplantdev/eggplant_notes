@@ -3,10 +3,10 @@ import { revalidatePath } from 'next/cache'
 
 import type { Database } from '@/lib/supabase/types'
 
-const SEED_REVALIDATE_PATHS = ['/notes', '/subjects', '/dashboard', '/settings', '/review']
-
+// Seed/clear touches notes, subjects, cards, and review history at once, so bust the whole tree.
+// Phase 2 may swap this for an explicit consumer-path list (see context/changes/nav-cache-staletimes/).
 export function revalidateSeedPaths(): void {
-  SEED_REVALIDATE_PATHS.forEach((path) => revalidatePath(path))
+  revalidatePath('/', 'layout')
 }
 
 // Notes first (their memory_cards cascade via the note_id FK — and seeded review_events cascade from

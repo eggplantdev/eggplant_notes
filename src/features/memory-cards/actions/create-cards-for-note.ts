@@ -27,7 +27,6 @@ export async function createCardsForNote(noteId: unknown, cards: unknown): Promi
     }
   }
 
-  revalidatePath(`/notes/${parsedId.data}`)
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

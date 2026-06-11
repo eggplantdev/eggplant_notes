@@ -41,6 +41,6 @@ export async function setOpenRouterModel(input: unknown): Promise<ActionResultT>
   }
   if (!data) return { success: false, error: 'Connect OpenRouter first.' }
 
-  revalidatePath('/settings')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

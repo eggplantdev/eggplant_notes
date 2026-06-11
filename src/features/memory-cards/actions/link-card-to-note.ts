@@ -42,8 +42,6 @@ export async function linkCardToNote(cardId: string, noteId: string): Promise<Ac
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/memory-cards')
-  revalidatePath(`/memory-cards/${parsedCardId.data}`)
-  revalidatePath(`/notes/${parsedNoteId.data}`)
+  revalidatePath('/', 'layout')
   return { success: true }
 }

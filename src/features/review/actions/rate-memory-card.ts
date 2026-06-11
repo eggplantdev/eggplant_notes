@@ -69,11 +69,7 @@ export async function rateMemoryCard(
     dailyGoal,
   })
 
-  revalidatePath('/dashboard')
-  // Refresh the standalone card page too, for when it's rated outside the dashboard queue.
-  revalidatePath(`/memory-cards/${parsedId.data}`)
-  // And the memory-cards list page, where the filter-scoped review panel advances in place.
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
 
   // Soonest-due remaining card (excluding the one just rated) so the card page can advance the queue.
   const nextDueId = returnNextDue

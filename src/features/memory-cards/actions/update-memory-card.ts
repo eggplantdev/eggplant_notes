@@ -22,7 +22,6 @@ export async function updateMemoryCard(id: string, input: unknown): Promise<Acti
   const result = await updateMemoryCardCore(supabase, parsedId.data, parsed.data)
   if ('error' in result) return { success: false, error: result.error }
 
-  if (result.previousNoteId) revalidatePath(`/notes/${result.previousNoteId}`)
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
   toastRedirect('/memory-cards', 'card-saved')
 }

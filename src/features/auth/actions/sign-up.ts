@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -36,6 +37,9 @@ export async function signUp(input: unknown): Promise<ActionResultT> {
   )
   if (!result.success) return result
 
+  // Drop any prior session's client Router Cache in this browser before redirecting (shared-browser
+  // safety). Covers both branches; redirect() throws to unwind, so this must run first.
+  revalidatePath('/', 'layout')
   // No success toast on the logged-in branch — landing on the dashboard is self-evident, matching
   // sign-in. The other branch's "check your email" instruction lives on the page it redirects to.
   if (hasSession) {

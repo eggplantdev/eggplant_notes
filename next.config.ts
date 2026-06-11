@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
     // reject real PDFs with an opaque framework error before the action's own 10 MB Zod cap/message
     // runs. Raise it so the Zod cap is the true boundary and the friendly error fires.
     serverActions: { bodySizeLimit: '14mb' },
+    // Enable the client Router Cache for dynamic (cookie-bound) routes: repeat navigation between
+    // authed pages within 5 min is served from in-browser memory instead of a fresh server round-trip.
+    // The cost — a cached page can show stale data after a write — is paid by busting the cache at every
+    // mutation surface (revalidatePath('/', 'layout')). `static` is left at its 5-min default. This flips
+    // the premise of lessons.md "revalidatePath on a dynamic page is a no-op": once dynamic != 0, those
+    // busts become load-bearing. See context/changes/nav-cache-staletimes/.
+    staleTimes: { dynamic: 300 },
   },
   async redirects() {
     return [

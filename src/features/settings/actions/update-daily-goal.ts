@@ -24,6 +24,6 @@ export async function updateDailyGoal(input: DailyGoalInputT): Promise<ActionRes
   )
   if (!result.success) return result
 
-  revalidatePath('/dashboard')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

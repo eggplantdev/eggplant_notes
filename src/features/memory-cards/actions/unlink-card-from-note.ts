@@ -9,7 +9,8 @@ import type { ActionResultT } from '@/types/action'
 
 // Drops a card's source-note link (note_id → null); the card and its subject survive. RLS scopes
 // the update to the owner (a non-owned id matches zero rows → `.single()` errors → failure). No
-// redirect — both callers (card-edit page, note's card section) refresh their own view.
+// redirect — both callers (card-edit page, note's card section) refresh their own view. `noteId` is
+// retained for Phase 2's per-path bust; Phase 1's nuclear bust doesn't read it.
 export async function unlinkCardFromNote(id: string, noteId?: string): Promise<ActionResultT> {
   const parsedId = validateInput(memoryCardIdSchema, id)
   if (!parsedId.success) return parsedId
@@ -26,7 +27,6 @@ export async function unlinkCardFromNote(id: string, noteId?: string): Promise<A
     return { success: false, error: error.message }
   }
 
-  if (noteId) revalidatePath(`/notes/${noteId}`)
-  revalidatePath('/memory-cards')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
