@@ -1,6 +1,7 @@
 # Query / fetch performance audit
 
 **Date:** 2026-06-07
+**Status (updated 2026-06-11):** RESOLVED — nothing below is still open. **F1 applied** (`getSubjects()` now `select('id, title')` → `SubjectOptionT[]`). **F2 decided: leave** (marginal once F1 landed). F3–F5 stand as revisit-at-scale, no MVP action. The doc is kept as a finding record; do not re-propose its fixes.
 **Scope:** every Supabase read across the app (all `queries.ts`, the actions that read, and the
 route/component consumers that decide what gets fetched). Driven by the TODO:
 
@@ -54,14 +55,13 @@ consume only `id` and `title`:
 So `description` + `created_at` are pulled for every subject and never read. Same class of bug as
 the TODO, smaller magnitude (short text + a timestamp, vs note `content`).
 
-**Proposed fix** (was started, not applied):
+**Fix — APPLIED 2026-06-11** (was the only concrete code change worth doing):
 
-1. Add `SubjectOptionT = Pick<SubjectT, 'id' | 'title'>` to `src/features/subjects/types.ts`.
-2. Narrow `getSubjects()` to `select('id, title')` → returns `SubjectOptionT[]`.
-3. Update the two form prop types `subjects: SubjectT[]` → `SubjectOptionT[]`
-   (`note-form.tsx:35` and `:45`, `card-form.tsx:40`).
+1. ✅ `SubjectOptionT = Pick<SubjectT, 'id' | 'title'>` exists in `src/features/subjects/types.ts`.
+2. ✅ `getSubjects()` now `select('id, title')` → returns `SubjectOptionT[]` (`queries.ts:16`).
+3. ✅ The form prop types consume `SubjectOptionT[]`.
 
-Risk: low. No consumer reads the dropped columns. Touches 1 query + 1 type file + 2 form files.
+No consumer read the dropped columns. Closed.
 
 ### F2 — `notes/[id]/page.tsx` read mode fetches ALL subjects to resolve ONE title — LOW
 
@@ -70,9 +70,9 @@ mode it uses it only to resolve `note.subject_id` → the subject's title for th
 (`:39`). The full list is genuinely needed only in **edit** mode (the form picker). `edit` is known
 before the fetch.
 
-Marginal once F1 lands (the payload is then just `id`+`title` for all subjects). Options: leave it
-(simplest, parallel fetch is cheap at personal scale), or fetch a single subject in read mode. Lean
-toward **leave** unless subject counts grow — flag only.
+Marginal now F1 has landed (the payload is just `id`+`title` for all subjects). Options were: leave it
+(simplest, parallel fetch is cheap at personal scale), or fetch a single subject in read mode.
+**DECIDED 2026-06-11: leave** — revisit only if subject counts grow.
 
 ### F3 — text search does an un-indexed `ilike` over large columns — INFORMATIONAL (scale)
 
@@ -115,8 +115,8 @@ action now.
 
 ---
 
-## Suggested fix order (when we move to fixing)
+## Resolution (2026-06-11) — all closed
 
-1. **F1** — apply the `getSubjects` slim + `SubjectOptionT` (only concrete code change worth doing).
-2. **Tick the TODO** — the notes-list item is already satisfied; mark it done.
-3. F2–F5 — record as "revisit at scale", no change for the MVP.
+1. **F1 — DONE.** `getSubjects` slimmed to `select('id, title')` + `SubjectOptionT` shipped.
+2. **Notes-list over-fetch — already satisfied** (`8878f6d`); the column-slimming half of S-11 is complete.
+3. **F2–F5 — revisit at scale**, no change for the MVP (F2 decided: leave). No open code actions remain.

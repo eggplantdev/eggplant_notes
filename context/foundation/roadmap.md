@@ -53,7 +53,7 @@ A personal coding-learning tool: organize markdown notes into **subjects** (a su
 | S-07 | create-note-with-checks        | add memory cards inline while creating a note (no redirect first)                                                                 | S-01, S-02                         | Scope:[new] inline cards (FR-008)              | fast-follow    | done     |
 | S-09 | authoring-refinements          | defer title-validation errors; select a code language when creating                                                               | S-01                               | Scope (FR-009, FR-010)                         | fast-follow    | done\*   |
 | S-16 | action-feedback-toasts         | get a toast on every mutation — errors scream (viewport-fixed), successes confirm                                                 | F-01, S-01, S-02, S-03, S-05, S-06 | NFR (feedback/usability)                       | fast-follow    | done     |
-| S-11 | data-fetching-efficiency       | navigate between routes without refetching unchanged data; lists stop over-fetching                                               | S-01, S-02, S-06                   | NFR (responsiveness); S-01/S-02 follow-ups     | v2             | proposed |
+| S-11 | data-fetching-efficiency       | navigate between routes without refetching unchanged data (over-fetch half ✅ done 2026-06-11; caching half open)                 | S-01, S-02, S-06                   | NFR (responsiveness); S-01/S-02 follow-ups     | v2             | proposed |
 | S-12 | seed-sample-data               | one-click load + clear of the existing seed corpus, re-scoped to the current user, to demo the whole app                          | all slices / schema frozen         | US-01 (first-run); course-eval demo affordance | v2 (final)     | done     |
 | S-13 | shiki-lang-source-of-truth     | (perf) code highlighting loads a curated language set with fast cold start; picker + highlighter share one source of truth        | S-01, S-06                         | NFR (code rendering, responsiveness)           | v2             | done     |
 | S-14 | inline-edit-notes-and-subjects | edit a note or subject in place (light read-only default); no separate edit page                                                  | S-01, S-02, S-06                   | US-01 (authoring ergonomics)                   | v2             | done     |
@@ -132,7 +132,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** A note that renders code as plain text fails the product premise. The content layer the whole recall loop sits on.
-- **Follow-ups (deferred):** list-query pagination + stop over-fetching `content` — `context/archive/2026-06-03-capture-note-with-code/follow-ups/review-fixes.md`.
+- **Follow-ups:** list-query pagination ✅ + stop over-fetching `content` ✅ — both shipped `8878f6d` (2026-06-06); record at `context/archive/2026-06-03-capture-note-with-code/follow-ups/review-fixes.md`.
 - **Status:** done
 
 ### S-02: attach memory cards
@@ -278,16 +278,17 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ### S-11: data-fetching efficiency (performance — cross-cutting)
 
-- **Outcome:** navigating between product routes no longer refetches data that hasn't changed (today every tab switch re-runs the page's Supabase read because dynamic pages get no client Router Cache), and list views stop pulling columns they don't render. User-perceptible effect: navigation feels instant for unchanged data; list pages load less.
+- **Outcome:** navigating between product routes no longer refetches data that hasn't changed (today every tab switch re-runs the page's Supabase read because dynamic pages get no client Router Cache). _The column-slimming half — list views not pulling columns they don't render — is **already done** (2026-06-11, query audit F1 applied); only the navigation-caching half remains in S-11._ User-perceptible effect: navigation feels instant for unchanged data.
 - **Change ID:** data-fetching-efficiency
 - **PRD refs:** NFR (responsiveness / usable on mobile); consolidates the deferred S-01 + S-02 query follow-ups
 - **Prerequisites:** S-01, S-02, S-06 (the read paths it optimizes must exist)
 - **Parallel with:** any v2 item (touches the data-access layer, not features)
 - **Not a vertical slice:** kept on the roadmap as a cross-cutting performance change (precedent: S-10 was an off-plan item kept as a slice). Adds no new "user can …" capability.
 - **Chosen approach — Next 16 Cache Components:** wrap the per-user reads (`getNotes`, `getSubjects`, `getNotesForSubject`, `getMemoryCardsForNote`) in `'use cache'` with a per-user `cacheTag`, and invalidate precisely from the mutating Server Actions with `updateTag` (read-your-writes) — replacing today's blunt `revalidatePath`. Tag-based event-driven invalidation, not time-based guessing.
-- **Folds in (already-deferred follow-ups):**
-  - S-01 → `context/archive/2026-06-03-capture-note-with-code/follow-ups/review-fixes.md`: list pagination + stop over-fetching `content` (the notes list selects `*` but renders only titles).
-  - S-02 → unbounded per-note memory-card read + Shiki-per-check cost.
+- **Folds in (already-deferred follow-ups) — query half resolved 2026-06-11, only caching remains:**
+  - S-01 → `context/archive/2026-06-03-capture-note-with-code/follow-ups/review-fixes.md`: list pagination ✅ (`8878f6d`) + over-fetch of `content` ✅ — `getNotes` is now `Pick`-lean. **Done independently of S-11.**
+  - S-02 → unbounded per-note memory-card read + Shiki-per-check cost — _at-scale only (query audit F3–F5); no MVP action._
+  - Column-slimming across all list reads ✅ (query audit: `getSubjects` F1 applied, every other list read already lean). S-11's open scope is now **navigation caching only.**
 - **Unknowns:**
   - **RLS vs `'use cache'` cookie ban (the blocker).** `'use cache'` cannot read request cookies, but RLS scopes rows by `auth.uid()` from the auth cookie. Resolve: pass `userId` as an explicit arg + key the cache `cacheTag(\`notes-${userId}\`)`, and decide whether the cached read keeps an RLS-scoped client or moves to a filtered service-role client (which would drop the #1 guardrail — avoid unless forced). Owner: `/10x-plan`. **Block: yes** — this gates the whole approach.
   - **`cacheComponents` flag scope** — enabling it in `next.config.ts` changes default caching behavior repo-wide (dynamic pages, `<Suspense>` requirements). Confirm it doesn't regress the auth-gated routes. Owner: `/10x-plan`. Block: no.
@@ -392,7 +393,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 | S-09 | authoring-refinements | Defer validation error + code-language select | done\* | Fast-follow. **Done but not archived** (ad-hoc, no `/10x-new` folder, tests skipped). On `main`; EX-371 Done. Code-language inserter later reused in memory-card editors
 (`cd4634d`) |
-| S-11 | data-fetching-efficiency | Cache reads via Cache Components + cut over-fetch | not yet | v2. Cross-cutting perf. **Blocker for `/10x-plan`:** `'use cache'` can't read cookies, RLS needs them — resolve per-user cache keying + client choice first. Folds in S-01/S-02 query follow-ups. `staleTimes` stopgap tried + reverted 2026-06-03 (no targeted invalidation) — felt slowness rides until this slice ships |
+| S-11 | data-fetching-efficiency | Cache reads via Cache Components (over-fetch ✅ cut 2026-06-11) | partial | v2. Cross-cutting perf. **Over-fetch half DONE** (query audit F1 + notes-list slimming); open scope = navigation caching only. **Blocker for `/10x-plan`:** `'use cache'` can't read cookies, RLS needs them — but reframe 2026-06-11: felt cost is the server round-trip → a _client_ Router Cache problem (per-user in browser, no RLS blocker). `staleTimes` stopgap tried + reverted 2026-06-03 (no targeted invalidation) — felt slowness rides until this slice ships |
 | S-12 | seed-sample-data | Load + Clear sample data (course-eval demo) | **deferred — do last** | v2 (**FINAL slice**). For tutor grading — one-click full-app demo + clear. Reuses the `test@gmail.com` seed corpus re-scoped to the current user (fresh ids, `is_seeded` marker, RLS). **Deferred 2026-06-04:** the `seed_sample_data()` SQL function is column-coupled to the schema, so build it LAST (after the data model is frozen) to avoid rework. Design leanings captured in the S-12 detail section; no `change.md`/`plan.md` yet |
 | S-13 | shiki-lang-source-of-truth | Curated Shiki langs + single source of truth | done | v2 perf. Archived 2026-06-04 → `context/archive/2026-06-04-shiki-lang-source-of-truth/`. `SHIKI_LANGS` + `{lazy:true, fallbackLanguage:'text'}`; boot 3.3s→0.14s. |
 | S-14 | inline-edit-notes-and-subjects | In-place edit for notes + subjects; kill /edit routes | done | v2 UX. Archived 2026-06-04 → `context/archive/2026-06-04-inline-edit-notes-and-subjects/`. searchParam-driven; checks keep inline CRUD; both `/edit` routes removed. |

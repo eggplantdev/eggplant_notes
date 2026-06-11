@@ -11,11 +11,13 @@
 **Left to do**
 
 - [ ] **Eggplant logo** — brand mark for nav / landing (favicon ✅ done). Asset now in `public/logos/eggplant-logo.png`; nav/landing wordmark still open.
-- [ ] **Performance / route caching (S-11)** — has a real architectural blocker (per-user cache vs RLS cookie).
+- [ ] **Performance / route caching (S-11)** — has a/cl real architectural blocker (per-user cache vs RLS cookie).
 - [ ] **Mobile pass** — check + fix layouts on small screens.
-- [ ] **User account page** — deferred ("konto usera").
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
-- [ ] **Code-health debt** (1 optional item — see bottom): `systemDefaults` prop-drill thin. (`revalidate-prompt-surfaces.ts` ✅ deleted — verified no-op; topic-scoped-review E2E ✅ done.)
+
+_Code-health debt ✅ cleared — `systemDefaults` prop-drill fixed (`5e175cc`), `revalidate-prompt-surfaces.ts` deleted, topic-scoped-review E2E done._
+
+eggplant logo
 
 supabase connection
 
@@ -49,11 +51,7 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 
 ### Performance (= roadmap S-11)
 
-- [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation). In-flight audits: `context/changes/perf-audit-2026-06-10`, `context/changes/query-performance-audit`.
-
-### Later (explicitly deferred)
-
-- [ ] User account page ("konto usera — na później").
+- [ ] Caching between route navigations / revalidate strategy. **Real blocker:** Next 16 `'use cache'` can't read cookies, but RLS scopes rows by the auth cookie — must resolve per-user cache keying first. A `staleTimes` stopgap was tried and reverted (no targeted invalidation). **Reframe (2026-06-11):** the felt cost is the per-nav _server round-trip_, not the query (reads are already lean — see below) — a _client_ Router Cache problem, which is per-user in the browser and has no RLS/cookie blocker. The `'use cache'` blocker is an artifact of the chosen tool, not the problem. Closed audits (both resolved, no open code actions): `context/changes/perf-audit-2026-06-10` (CLOSED), `context/changes/query-performance-audit` (RESOLVED — column-slimming done).
 
 ### AI / OpenRouter polish
 
@@ -67,13 +65,20 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 ### Test & code-health debt
 
 - [x] **`revalidate-prompt-surfaces.ts` — DELETED (2026-06-10, `13db3a6`).** Verified a no-op: the four paths are dynamic (Supabase `cookies()`), supabase-js reads aren't Data-Cached, and Next 16 `staleTimes.dynamic=0` (no override) means dynamic pages refetch on soft-nav — nothing for `revalidatePath` to bust. Confirmed by a Playwright probe (out-of-band `user_prompts` change reflected after soft-nav, no revalidate). `revalidateTag` would also be a no-op (no tagged Data-Cache entry). Full record: `context/changes/revalidate-prompt-surfaces/handoff.md`.
-- [ ] **`systemDefaults` prop-drill thin** (optional, low-value; same origin as the deleted item) — `systemDefaults` is prop-drilled through ~6 wrappers but each dialog reads a single key; thin to a string or resolve at the leaf via `usePromptDefault`. Do only when touching that area.
+- [x] **`systemDefaults` prop-drill — FIXED (`5e175cc`).** Replaced the drill with `PromptDefaultsProvider` context (`prompt-defaults-context.tsx`): the page sets it once, `GenerateDialog` reads its one key via `usePromptDefault` — intermediate wrappers no longer carry it. (Siblings `aiEnabled`/`defaultModel` still pass through `MemoryCardsSection`→`GenerateCardsButton`, but that's a thin, stable chain — left as-is.)
 - [x] **E2E for `topic-scoped-review`** — shipped `e2e/topic-scoped-review.spec.ts` (2026-06-10): two subjects, an "intruder" global-soonest card in B; filter to A and assert B never surfaces + the panel's due-count subtitle tracks the filtered queue (3→2→1→caught-up) with the list surviving. Deliberate-break verified. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`; test-plan §8 + §6.3.
 
 ### Loose ideas (unsorted)
 
 - [ ] "Adding notes" onboarding instruction.
 - [ ] Update note by agent via webhook — _basic HTTP path shipped (CLI API); a true push/webhook trigger is still an idea._
+
+---
+
+## Future plans (nice-to-have)
+
+- [ ] **User account page** ("konto usera — na później"). Deferred — not on the current path.
+- [ ] **Landing page** — public marketing/intro page (currently `/` redirects straight to `/dashboard`).
 
 ---
 
@@ -84,4 +89,3 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 3. **AI polish** — only **stream generation (H3)** left; default-model, conditional connect CTA, and help text are shipped.
 4. **Test/cleanup debt** — clear before more features pile on.
 5. **Performance** (S-11) — own focused change; has the cache-vs-RLS blocker.
-6. **User account page** — last of the deferred set.
