@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MenuIcon, XIcon } from 'lucide-react'
 
+import { BrandLogo } from '@/components/brand/brand-logo'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
@@ -52,6 +53,12 @@ export function MobileNav({
           </Button>
         </SheetClose>
         <nav className="flex flex-col gap-1 p-4 pt-16">
+          <SheetClose asChild>
+            <Link href="/dashboard" className="focus-ring mb-3 flex items-center gap-2 rounded-md">
+              <BrandLogo className="size-8" />
+              <span className="font-mono text-sm font-semibold">eggplant_notes</span>
+            </Link>
+          </SheetClose>
           {ALL_NAV_ITEMS.map((item) => {
             const isActive = isNavActive(pathname, item.href)
             return (
