@@ -23,7 +23,11 @@ export default function UpdatePasswordPage() {
   })
 
   return (
-    <TitledCard title="Set new password" description="Enter a new password for your account.">
+    <TitledCard
+      variant="gradient"
+      title="Set new password"
+      description="Enter a new password for your account."
+    >
       <form
         className="grid gap-4"
         onSubmit={(e) => {

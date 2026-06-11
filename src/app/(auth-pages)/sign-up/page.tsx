@@ -32,7 +32,7 @@ export default function SignUpPage() {
   })
 
   return (
-    <TitledCard title="Create account" description="Sign up with your email.">
+    <TitledCard variant="gradient" title="Create account" description="Sign up with your email.">
       <form
         className="grid gap-4"
         onSubmit={(e) => {

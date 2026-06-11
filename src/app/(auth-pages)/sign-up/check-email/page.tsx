@@ -7,7 +7,11 @@ import { TitledCard } from '@/components/ui/titled-card'
 // leave the app, so it has to survive a tab-switch and stay until they navigate back.
 export default function CheckEmailPage() {
   return (
-    <TitledCard title="Check your email" description="Your account is almost ready.">
+    <TitledCard
+      variant="gradient"
+      title="Check your email"
+      description="Your account is almost ready."
+    >
       <div className="grid gap-4 text-sm">
         <p className="text-muted-foreground">
           We sent a confirmation link to your email address. Open it to activate your account, then

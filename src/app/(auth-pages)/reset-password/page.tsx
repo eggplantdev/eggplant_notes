@@ -29,7 +29,11 @@ export default function ResetPasswordPage() {
   })
 
   return (
-    <TitledCard title="Reset password" description="We'll email you a link to set a new password.">
+    <TitledCard
+      variant="gradient"
+      title="Reset password"
+      description="We'll email you a link to set a new password."
+    >
       {sent ? (
         <p className="text-sm">
           If an account exists for that email, you&apos;ll receive a password-reset link shortly.

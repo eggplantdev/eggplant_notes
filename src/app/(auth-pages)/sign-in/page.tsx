@@ -24,7 +24,7 @@ export default function SignInPage() {
   })
 
   return (
-    <TitledCard title="Sign in" description="Welcome back.">
+    <TitledCard variant="gradient" title="Sign in" description="Welcome back.">
       <form
         className="grid gap-4"
         onSubmit={(e) => {
