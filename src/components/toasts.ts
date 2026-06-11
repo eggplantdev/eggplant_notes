@@ -28,8 +28,14 @@ export function toastMessage(
   })
 }
 
+// Success confirmation toast — the ✌️ is the house style for a completed mutation. Split out so seams
+// that surface errors inline (and shouldn't double them as a toast) can fire just this.
+export function toastSuccess(message: string): void {
+  toastMessage(`${message} ✌️`, 'success')
+}
+
 // The single place a result becomes a toast, so the imperative and form seams can't drift on the branching.
 export function toastResult(result: ActionResultT, successMessage?: string): void {
   if (!result.success) toastMessage(result.error, 'error')
-  else if (successMessage) toastMessage(`${successMessage} ✌️`, 'success')
+  else if (successMessage) toastSuccess(successMessage)
 }

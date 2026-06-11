@@ -206,6 +206,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
             onClick={() =>
               runUnlink(() => unlinkCardFromNote(card.id, sourceNote.id), {
                 successMessage: 'Card unlinked',
+                toastError: true, // bare button — no inline error surface
               }).then((result) => {
                 if (result.success) router.refresh()
               })

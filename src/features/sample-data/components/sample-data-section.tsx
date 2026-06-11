@@ -23,7 +23,12 @@ export function SampleDataSection({ accountEmpty }: SampleDataSectionPropsT) {
         variant="outline"
         data-testid="sample-data-clear"
         disabled={isPending}
-        onClick={() => run(() => clearSampleData(), { successMessage: 'Sample data cleared' })}
+        onClick={() =>
+          run(() => clearSampleData(), {
+            successMessage: 'Sample data cleared',
+            toastError: true, // bare button — no inline error surface
+          })
+        }
       >
         {isPending ? 'Clearing…' : 'Clear sample data'}
       </Button>

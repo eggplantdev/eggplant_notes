@@ -17,7 +17,12 @@ export function UnlinkCardButton({ id, noteId }: UnlinkCardButtonPropsT) {
       size="sm"
       data-testid="card-unlink-note"
       disabled={isPending}
-      onClick={() => run(() => unlinkCardFromNote(id, noteId), { successMessage: 'Card unlinked' })}
+      onClick={() =>
+        run(() => unlinkCardFromNote(id, noteId), {
+          successMessage: 'Card unlinked',
+          toastError: true, // bare button — no inline error surface
+        })
+      }
     >
       {isPending ? 'Unlinking…' : 'Unlink'}
     </Button>

@@ -21,7 +21,12 @@ export function LoadSampleDataButton({
       variant={variant}
       data-testid="sample-data-load"
       disabled={isPending}
-      onClick={() => run(() => loadSampleData(), { successMessage: 'Sample data loaded' })}
+      onClick={() =>
+        run(() => loadSampleData(), {
+          successMessage: 'Sample data loaded',
+          toastError: true, // bare button — no inline error surface
+        })
+      }
     >
       {isPending ? 'Loading…' : label}
     </Button>
