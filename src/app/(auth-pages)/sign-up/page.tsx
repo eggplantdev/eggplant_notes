@@ -53,7 +53,7 @@ export default function SignUpPage() {
         <FormError message={formError} />
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" size="default" disabled={isSubmitting}>
               {isSubmitting ? 'Creating account…' : 'Create account'}
             </Button>
           )}

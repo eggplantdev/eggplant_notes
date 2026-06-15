@@ -47,7 +47,7 @@ export default function SignInPage() {
         <FormError message={formError} />
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" size="default" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
           )}
