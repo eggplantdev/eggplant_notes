@@ -84,15 +84,22 @@ export function AnimatedCardList<T>({
                       getItemClassName?.(item),
                     )}
                   >
-                    {/* gap-x-4 keeps the title column clear of the action slot; row gap stays tight via base gap-1. */}
-                    <CardHeader className="gap-x-4">
+                    {/* Single layout at every width: row 1 is the eyebrow (left) + action slot (right),
+                        row 2 is the full-width title. gap-y-4 matches the Card's gap-4 to the subtitle below,
+                        so title→buttons and title→tags spacing line up. row-span-1 keeps the action on row 1
+                        only so the col-span-2 title can take the whole second row. */}
+                    <CardHeader className="gap-x-4 gap-y-2 sm:gap-y-0">
                       {renderEyebrow?.(item)}
-                      <CardTitle>{renderTitle(item)}</CardTitle>
+                      <CardTitle className="col-span-2">{renderTitle(item)}</CardTitle>
                       {renderDescription && (
-                        <CardDescription>{renderDescription(item)}</CardDescription>
+                        <CardDescription className="col-span-2">
+                          {renderDescription(item)}
+                        </CardDescription>
                       )}
                       {renderAction && (
-                        <CardAction onClick={blockCardNav}>{renderAction(item)}</CardAction>
+                        <CardAction onClick={blockCardNav} className="row-span-1">
+                          {renderAction(item)}
+                        </CardAction>
                       )}
                     </CardHeader>
                     {renderSubtitle && (
