@@ -40,11 +40,14 @@ export function WelcomeDialog() {
         <DialogHeader>
           <DialogTitle>Welcome 👋</DialogTitle>
           <DialogDescription>
-            This app is a simple loop: write a <strong>note</strong>, turn it into{' '}
-            <strong>memory cards</strong>, then <strong>review</strong> them a little each day. Head
-            to Settings to get started — you can load sample data to explore, or connect an
-            OpenRouter account to generate cards with AI. You can even download a skill that lets an
-            AI agent connect over CLI/HTTP and author notes and cards for you.
+            A place to organize what you&apos;re learning — built mainly for{' '}
+            <strong>code notes</strong>, with <strong>syntax highlighting</strong> across many
+            languages. Group your <strong>notes</strong> into <strong>subjects</strong>, then turn
+            any note into <strong>memory cards</strong> and <strong>review</strong> a few each day —
+            a <strong>daily goal</strong> keeps you on track. With AI you can generate not just
+            cards but whole notes too. Head to Settings to load sample data, connect an OpenRouter
+            account, or download a skill that lets an AI agent author notes and cards for you over
+            CLI/HTTP. Still in active development, so expect a few rough edges.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
