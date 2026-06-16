@@ -302,6 +302,9 @@ language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
 - **`400`** — malformed JSON, or a body that fails validation (card-shape rules, the `subject_id` XOR
   `subject_title` rule, or an invalid uuid in the path or query).
 - **`500`** — unexpected server error.
+- **`308`** — a path built with an **empty `:id` segment** (e.g. `DELETE /api/subjects/`) is redirected by
+  trailing-slash normalization to the collection route, not rejected — you get a silent redirect, never a
+  `404`. Never construct a `:id` URL with a missing id; validate the id before the call.
 - **Caps:** ≤ 50 cards per note (`checks`), 1–20 cards per `note_id` attach (`cards`), `prompt` ≤ 2000 chars,
   `title` ≤ 200 chars. Batch larger imports across multiple calls.
 
