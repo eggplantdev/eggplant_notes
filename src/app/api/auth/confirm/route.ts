@@ -5,7 +5,13 @@ import { type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 // Allowlist so an unexpected `type` from the query string is rejected, not cast through blindly.
-const ALLOWED_OTP_TYPES = ['recovery', 'email'] as const
+// All email flows funnel through this one token-exchange route; every hosted template must link
+// here with `&token_hash=` (never GoTrue's default verify endpoint) for the type to be honored.
+const ALLOWED_OTP_TYPES = ['recovery', 'email', 'magiclink', 'email_change', 'invite'] as const
+
+// Flows that hand the user a session but no password yet (fresh invite, password recovery) must
+// land on /update-password; the rest are already-authenticated and go straight to the dashboard.
+const PASSWORD_SETUP_TYPES = ['recovery', 'invite'] as const
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -27,7 +33,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (verified) {
-      redirect(type === 'recovery' ? '/update-password' : '/dashboard')
+      const needsPassword = (PASSWORD_SETUP_TYPES as readonly string[]).includes(type)
+      redirect(needsPassword ? '/update-password' : '/dashboard')
     }
   }
 
