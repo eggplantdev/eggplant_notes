@@ -20,7 +20,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Imperative (procedural) programming',
       content:
-        '# Imperative (procedural) programming\n\nWe need to declare both what we want to happen and how we want it to happen.\n\nImperative:\n\n```py\ncar = create_car()\ncar.add_gas(10)\ncar.clean_windows()\n```',
+        'We need to declare both what we want to happen and how we want it to happen.\n\nImperative:\n\n```py\ncar = create_car()\ncar.add_gas(10)\ncar.clean_windows()\n```',
       position: 1,
     },
     {
@@ -28,7 +28,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Declarative programming',
       content:
-        "# Declarative programming\n\n```py\nreturn clean_windows(add_gas(create_car()))\n```\n\nWe never change the car variable, we are creating new values (immutability).\n\nFocus on `what` we want to happen not `how` it should happen.\n\nFunctional programming is all about `creating functions instead of mutating state`.\n\n`Main purpose of functional programming is to make our code more declarative.`\n\nGreat example of declarative programming is css\nWe don't care about all the steps, we just want to change the color of each button on the page.\n\n```css\nbutton {\n  color: red;\n}\n```\n\n`Hiding implementation on the low level` is declarative programming.\n\nThis is an example of imperative programming where we define each step.\n\n```py\ndef get_average(nums):\n    total = 0\n    for num in nums:\n        total += num\n    return total / len(nums)\n```\n\nAnd with declarative approach:\n\n```py\ndef get_average(nums):\n    return sum(nums) / len(nums)\n```\n\nWe do not keep track of the state (total), we only care about the result.",
+        "```py\nreturn clean_windows(add_gas(create_car()))\n```\n\nWe never change the car variable, we are creating new values (immutability).\n\nFocus on `what` we want to happen not `how` it should happen.\n\nFunctional programming is all about `creating functions instead of mutating state`.\n\n`Main purpose of functional programming is to make our code more declarative.`\n\nGreat example of declarative programming is css\nWe don't care about all the steps, we just want to change the color of each button on the page.\n\n```css\nbutton {\n  color: red;\n}\n```\n\n`Hiding implementation on the low level` is declarative programming.\n\nThis is an example of imperative programming where we define each step.\n\n```py\ndef get_average(nums):\n    total = 0\n    for num in nums:\n        total += num\n    return total / len(nums)\n```\n\nAnd with declarative approach:\n\n```py\ndef get_average(nums):\n    return sum(nums) / len(nums)\n```\n\nWe do not keep track of the state (total), we only care about the result.",
       position: 2,
     },
     {
@@ -36,7 +36,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Functional programming basic concepts',
       content:
-        '# Functional programming basic concepts\n\n- higher order functions\n- first class functions\n- pure functions\n- recursion\n- closures\n- currying',
+        '- higher order functions\n- first class functions\n- pure functions\n- recursion\n- closures\n- currying',
       position: 3,
     },
     {
@@ -44,7 +44,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Immutability',
       content:
-        "# Immutability\n\nOnce the val is created it never changes.  \nImmutable data is easier to think about and work with. When 10 different functions have access to the same variable, and you're debugging a problem with that variable, you have to consider the possibility that any of those functions could have changed the value.\n\nWhen a variable is immutable, you can be sure that it hasn't changed since it was created. It's a helluva lot easier to work with.\n\nGenerally speaking, `immutability means fewer bugs and more maintainable code.`",
+        "Once the val is created it never changes.  \nImmutable data is easier to think about and work with. When 10 different functions have access to the same variable, and you're debugging a problem with that variable, you have to consider the possibility that any of those functions could have changed the value.\n\nWhen a variable is immutable, you can be sure that it hasn't changed since it was created. It's a helluva lot easier to work with.\n\nGenerally speaking, `immutability means fewer bugs and more maintainable code.`",
       position: 4,
     },
     {
@@ -52,7 +52,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Tuples vs Lists',
       content:
-        "# Tuples vs Lists\n\nBoth ordered sets of vals but\n`tuples are immutable` - you can not append to a tuple. You can create a new copy of a tuple with added value.\n\n```py\nages = (16, 21, 30)\nmore_ages = (80,)\n# note the comma! It's required for a single-element tuple\n# 'all_ages' is a brand new tuple\nall_ages = ages + more_ages\n# (16, 21, 30, 80)\n\n# or we can even reassign the same variable to point to a new tuple:\nages = ages + more_ages\n# (16, 21, 30, 80)\n```",
+        "Both ordered sets of vals but\n`tuples are immutable` - you can not append to a tuple. You can create a new copy of a tuple with added value.\n\n```py\nages = (16, 21, 30)\nmore_ages = (80,)\n# note the comma! It's required for a single-element tuple\n# 'all_ages' is a brand new tuple\nall_ages = ages + more_ages\n# (16, 21, 30, 80)\n\n# or we can even reassign the same variable to point to a new tuple:\nages = ages + more_ages\n# (16, 21, 30, 80)\n```",
       position: 5,
     },
     {
@@ -60,7 +60,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'sorted()',
       content:
-        '# sorted()\n\nSort items in the list\n\n```py\ndef get_median_font_size(font_sizes):\n    length = len(font_sizes)\n    if length == 0 :\n        return None\n    sorted_sizes = sorted(font_sizes)\n    if length % 2 == 0:\n        return sorted_sizes[length // 2 - 1 ]\n    return sorted_sizes[length // 2]\n```',
+        'Sort items in the list\n\n```py\ndef get_median_font_size(font_sizes):\n    length = len(font_sizes)\n    if length == 0 :\n        return None\n    sorted_sizes = sorted(font_sizes)\n    if length % 2 == 0:\n        return sorted_sizes[length // 2 - 1 ]\n    return sorted_sizes[length // 2]\n```',
       position: 6,
     },
     {
@@ -68,7 +68,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Classes vs functions',
       content:
-        "# Classes vs functions\n\nFunctional programming and object-oriented programming are `styles for writing code`.\n\nOf the `four pillars of OOP (inheritance, polymorphism, abstraction encapsulation)`, inheritance is the only one that doesn't fit with functional programming.\n\nDefault to functions. If we need something stateful and long-lived we might reach for classes.\n\nClasses encourage you to think about the `world as a hierarchical collection of objects`. Objects bundle behavior, data, and state together\n\nFunctions encourage you to think about the world as a series of data transformations. Functions take data as input and return a transformed output.",
+        "Functional programming and object-oriented programming are `styles for writing code`.\n\nOf the `four pillars of OOP (inheritance, polymorphism, abstraction encapsulation)`, inheritance is the only one that doesn't fit with functional programming.\n\nDefault to functions. If we need something stateful and long-lived we might reach for classes.\n\nClasses encourage you to think about the `world as a hierarchical collection of objects`. Objects bundle behavior, data, and state together\n\nFunctions encourage you to think about the world as a series of data transformations. Functions take data as input and return a transformed output.",
       position: 7,
     },
     {
@@ -76,7 +76,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'strip() #replace() #upper()',
       content:
-        "# strip() #replace() #upper()\n\nEquivalent of trim\n\nvariations:\n\n- `lstrip()` - trims left hand side\n- `rstrip()` - trims right hand side\n\n```py\ndef format_line(line):\n    stripped = line.strip()\n    capitalized = stripped.upper()\n    removedPeriods = capitalized.replace('.', '')\n    appended = f\"{removedPeriods}...\"\n    return appended\n    # return f\"{line.rstrip().capitalize().replace(',', '')}....\"\n```",
+        "Equivalent of trim\n\nvariations:\n\n- `lstrip()` - trims left hand side\n- `rstrip()` - trims right hand side\n\n```py\ndef format_line(line):\n    stripped = line.strip()\n    capitalized = stripped.upper()\n    removedPeriods = capitalized.replace('.', '')\n    appended = f\"{removedPeriods}...\"\n    return appended\n    # return f\"{line.rstrip().capitalize().replace(',', '')}....\"\n```",
       position: 8,
     },
     {
@@ -84,7 +84,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Statements vs Expressions',
       content:
-        '# Statements vs Expressions\n\n`Statements - actions to be carried out.`  \n"Set n to 7"  \n"Define a function named greet"  \n"If x > 10, print a greeting to Alice"\n\n```py\nn = 7  # Variable assignment statement\n\ndef greet(name):  # Function definition statement\n    return f"Hello, {name}!"\n\nif x > 10:  # `if` statement\n    print(greet("Alice"))\n\nfor i in range(n):  # `for` loop statement\n    print(i)\n```\n\nExpressions are a `subset of statements that produce values`.\n\nEvery function call is an expression!  \nEven if a Python function doesn\'t have a return statement, it still implicitly returns None.\n\n```py\nresult = 2 + 2  # Arithmetic expression\nlength = len("hello")  # Function call expression\ntotal_cost = len(items) * cost  # Multiple expressions combined into one\n```\n\nBecause `expressions produce values they are reusable and declarative`.  \nIn functional programming we should aim to use expressions over statements.  \nExpression:\n\n```py\nreturn sum([1, 2, 3])\n```\n\nWe could do that in a series of steps but we would have to combine expressions:\n\n```py\ntotal = 0\nfor n in [1, 2, 3, 4]:\n    total += n\n```\n\n`Expressions are reusable, declarative, do not mutate values and minize side effects`',
+        '`Statements - actions to be carried out.`  \n"Set n to 7"  \n"Define a function named greet"  \n"If x > 10, print a greeting to Alice"\n\n```py\nn = 7  # Variable assignment statement\n\ndef greet(name):  # Function definition statement\n    return f"Hello, {name}!"\n\nif x > 10:  # `if` statement\n    print(greet("Alice"))\n\nfor i in range(n):  # `for` loop statement\n    print(i)\n```\n\nExpressions are a `subset of statements that produce values`.\n\nEvery function call is an expression!  \nEven if a Python function doesn\'t have a return statement, it still implicitly returns None.\n\n```py\nresult = 2 + 2  # Arithmetic expression\nlength = len("hello")  # Function call expression\ntotal_cost = len(items) * cost  # Multiple expressions combined into one\n```\n\nBecause `expressions produce values they are reusable and declarative`.  \nIn functional programming we should aim to use expressions over statements.  \nExpression:\n\n```py\nreturn sum([1, 2, 3])\n```\n\nWe could do that in a series of steps but we would have to combine expressions:\n\n```py\ntotal = 0\nfor n in [1, 2, 3, 4]:\n    total += n\n```\n\n`Expressions are reusable, declarative, do not mutate values and minize side effects`',
       position: 9,
     },
     {
@@ -92,7 +92,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Ternary expression',
       content:
-        '# Ternary expression\n\nWe can change\n\n```py\nresult = 0\nif number % 2 ==0:\n    result = number  / 2\nelse:\n    result = (numer * 3 ) + 1\n```\n\nTo a ternary expression and avoid mutating state!\n\n```py\nresult = number / 2 if number % 2 == 0 else (number * 3) + 1\n```\n\nLike in js we should not overuse it as they tend to be hard to read',
+        'We can change\n\n```py\nresult = 0\nif number % 2 ==0:\n    result = number  / 2\nelse:\n    result = (numer * 3 ) + 1\n```\n\nTo a ternary expression and avoid mutating state!\n\n```py\nresult = number / 2 if number % 2 == 0 else (number * 3) + 1\n```\n\nLike in js we should not overuse it as they tend to be hard to read',
       position: 10,
     },
     {
@@ -100,7 +100,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'First Class functions',
       content:
-        '# First Class functions\n\n`First class functions` means that a function in python can be treated like any other object\n\n- assigned to a value (functions as values)\n- passed as arguments to other functions\n- returned from a function\n- stored in a data structure\n\nIn python functions are just values, so we can assign a function to a variable\n\n```py\ndef foo(a, b:\n    return a + b\n\nsum_foo = foo\nprint(sum_foo(2, 2)) # 4\n```',
+        '`First class functions` means that a function in python can be treated like any other object\n\n- assigned to a value (functions as values)\n- passed as arguments to other functions\n- returned from a function\n- stored in a data structure\n\nIn python functions are just values, so we can assign a function to a variable\n\n```py\ndef foo(a, b:\n    return a + b\n\nsum_foo = foo\nprint(sum_foo(2, 2)) # 4\n```',
       position: 11,
     },
     {
@@ -108,7 +108,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Anonymous functions - lambda',
       content:
-        '# Anonymous functions - lambda\n\nIn python unnamed functions are called `lambda `.  \nExample of a functions that takes `x` as an argument and returns `x + 1`\n\n```py\nlambda x: x + 1\n```\n\nWe can assing it to a variable\n\n```py\naddone = lambda x: x + 1\n```\n\nIt is equivalent of:\n\n```js\nconst addOne = (x) => x + 1;\n```\n\nLike in js result of a function expression is returned automaticaly.\n\n```py\nmyDictionary = {\n    "name": "Konrad",\n    "age": "9"\n}\n\nget_age = lambda name: myDictionary.get(name)\nget_age = lambda name: myDictionary.get(name, \'not found\')\nprint(get_age(\'name\')) # Konrad\nprint(get_age(\'not found test \')) # not found\n```\n\nExample of function returned from another function\n\n```py\ndef file_type_getter(file_extension_tuples):\n    file_extensions_dict = {}\n    for tup in file_extension_tuples:\n        for ext in tup[1]:\n            file_extensions_dict[ext] = tup[0]\n    return lambda ext: file_extensions_dict.get(ext, "Unknown")\n\n```',
+        'In python unnamed functions are called `lambda `.  \nExample of a functions that takes `x` as an argument and returns `x + 1`\n\n```py\nlambda x: x + 1\n```\n\nWe can assing it to a variable\n\n```py\naddone = lambda x: x + 1\n```\n\nIt is equivalent of:\n\n```js\nconst addOne = (x) => x + 1;\n```\n\nLike in js result of a function expression is returned automaticaly.\n\n```py\nmyDictionary = {\n    "name": "Konrad",\n    "age": "9"\n}\n\nget_age = lambda name: myDictionary.get(name)\nget_age = lambda name: myDictionary.get(name, \'not found\')\nprint(get_age(\'name\')) # Konrad\nprint(get_age(\'not found test \')) # not found\n```\n\nExample of function returned from another function\n\n```py\ndef file_type_getter(file_extension_tuples):\n    file_extensions_dict = {}\n    for tup in file_extension_tuples:\n        for ext in tup[1]:\n            file_extensions_dict[ext] = tup[0]\n    return lambda ext: file_extensions_dict.get(ext, "Unknown")\n\n```',
       position: 12,
     },
     {
@@ -116,7 +116,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Higher order function',
       content:
-        '# Higher order function\n\n`Function that takes another function as an argument`\n\n```py\ndef square(x):\n    return x * x\n\ndef my_map(func, args):\n    result = []\n    for arg in args:\n        result.append(func(arg))\n    return result\n\nsquares = my_map(square, [1, 2, 3, 4] )\n```',
+        '`Function that takes another function as an argument`\n\n```py\ndef square(x):\n    return x * x\n\ndef my_map(func, args):\n    result = []\n    for arg in args:\n        result.append(func(arg))\n    return result\n\nsquares = my_map(square, [1, 2, 3, 4] )\n```',
       position: 13,
     },
     {
@@ -124,7 +124,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'map + list()',
       content:
-        '# map + list()\n\n`map, filter and reduce are higher order functions`\n\n```py\ndef square(x):\n    return x * x\n\nnums = [1, 2, 3, 4]\nsquared_nums = map(square, nums)\nprint(list(squared_nums))\nprint(map(square, [1, 2, 3, 4]))\n# This will not work <map object at 0x1004369a0>\n```\n\nMap returns a `map object` that is why we need a `list` constructor to convert it to list\n\n```py\ndef change_bullet_style(document):\n    lines = document.split("\\n")\n    converted = map(convert_line, lines )\n    return "\\n".join(converted)\n\ndef convert_line(line):\n    old_bullet = "-"\n    new_bullet = "*"\n    if len(line) > 0 and line[0] == old_bullet:\n        return new_bullet + line[1:]\n    return line\n```',
+        '`map, filter and reduce are higher order functions`\n\n```py\ndef square(x):\n    return x * x\n\nnums = [1, 2, 3, 4]\nsquared_nums = map(square, nums)\nprint(list(squared_nums))\nprint(map(square, [1, 2, 3, 4]))\n# This will not work <map object at 0x1004369a0>\n```\n\nMap returns a `map object` that is why we need a `list` constructor to convert it to list\n\n```py\ndef change_bullet_style(document):\n    lines = document.split("\\n")\n    converted = map(convert_line, lines )\n    return "\\n".join(converted)\n\ndef convert_line(line):\n    old_bullet = "-"\n    new_bullet = "*"\n    if len(line) > 0 and line[0] == old_bullet:\n        return new_bullet + line[1:]\n    return line\n```',
       position: 14,
     },
     {
@@ -132,7 +132,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'filter()',
       content:
-        '# filter()\n\nSimilar syntax like in map, behaviour same like in js.\nWe can even use lambda inside like we would use a callback in js\n\n```py\ndef is_even(x):\n    return x % 2 == 0\n\nnumbers = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)\n# [2, 4, 6]\n```',
+        'Similar syntax like in map, behaviour same like in js.\nWe can even use lambda inside like we would use a callback in js\n\n```py\ndef is_even(x):\n    return x % 2 == 0\n\nnumbers = [1, 2, 3, 4, 5, 6]\nevens = list(filter(lambda x: x % 2 == 0, numbers))\nprint(evens)\n# [2, 4, 6]\n```',
       position: 15,
     },
     {
@@ -140,7 +140,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'functools.reduce()',
       content:
-        '# functools.reduce()\n\n- it needs to be imported before use\n- takes two arguments\n- we can add an initial val for accumulator\n\n```py\nimport functools\ndef add(acc, x):\n    print(f"{acc}, x: {x}")\n    return acc + x\n\nnumbers = [1, 2, 3, 4]\ntotal = functools.reduce(add, numbers)\n\nprint(total)\n```\n\nlambda version  \n💡 In python lambda version can only contain single expression!  \nIt means that I can\'t for example print something and than return like I could in a js callback\n\n```py\nnumber = [1, 2, 3, 4 ]\ntotal = functools.reduce(lambda a, b: a + b, number)\n```',
+        '- it needs to be imported before use\n- takes two arguments\n- we can add an initial val for accumulator\n\n```py\nimport functools\ndef add(acc, x):\n    print(f"{acc}, x: {x}")\n    return acc + x\n\nnumbers = [1, 2, 3, 4]\ntotal = functools.reduce(add, numbers)\n\nprint(total)\n```\n\nlambda version  \n💡 In python lambda version can only contain single expression!  \nIt means that I can\'t for example print something and than return like I could in a js callback\n\n```py\nnumber = [1, 2, 3, 4 ]\ntotal = functools.reduce(lambda a, b: a + b, number)\n```',
       position: 16,
     },
     {
@@ -148,22 +148,21 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'zip',
       content:
-        "# zip\n\nTake to iterables and combine them into a new iterable where each element is a tuple containig one element from each of the original iterables\n\n```py\n    a = [1, 2, 3]\n    b = [1, 2, 3]\n\n\n    c = list(zip(a,b))\n    # [(1, 1), (2, 2), (3, 3)]\n```\n\n💡 Iterables has to be of the same len, if this is not the case, returned element will only return elements where a pair can actually be created:\n\n```py\n    a = [1, 2, 3, 4, 5]\n    b = [1, 2, 3]\n\n    zipped = zip(a,b)\n    # print(type(zipped)) # <class 'zip'>\n\n    c = list(zip(a,b))\n    # [(1, 1), (2, 2), (3, 3)]\n```",
+        "Take to iterables and combine them into a new iterable where each element is a tuple containig one element from each of the original iterables\n\n```py\n    a = [1, 2, 3]\n    b = [1, 2, 3]\n\n\n    c = list(zip(a,b))\n    # [(1, 1), (2, 2), (3, 3)]\n```\n\n💡 Iterables has to be of the same len, if this is not the case, returned element will only return elements where a pair can actually be created:\n\n```py\n    a = [1, 2, 3, 4, 5]\n    b = [1, 2, 3]\n\n    zipped = zip(a,b)\n    # print(type(zipped)) # <class 'zip'>\n\n    c = list(zip(a,b))\n    # [(1, 1), (2, 2), (3, 3)]\n```",
       position: 17,
     },
     {
       ref: '0a7e0000-0000-4000-8000-000000000018',
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'type(variable)',
-      content: '# type(variable)\n\nReturns a type of a variable',
+      content: 'Returns a type of a variable',
       position: 18,
     },
     {
       ref: '0a7e0000-0000-4000-8000-000000000019',
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'sort() vs sorted()',
-      content:
-        '# sort() vs sorted()\n\narr.sort() - mutates original arr\narr.sorted() - returns sorted arr',
+      content: 'arr.sort() - mutates original arr\narr.sorted() - returns sorted arr',
       position: 19,
     },
     {
@@ -171,7 +170,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'pure functions',
       content:
-        '# pure functions\n\nIn majority of situations you want to use pure functions.\n\n- `Always return the same values given the same arguments`\n- `Cause no side effects`\n\nThanks to this they are predictible, easy to debug, always work the same.  \n`No works on my machine problem.`\n\nExample of pure function\n\n```python\ndef add(x, y):\n    return x + y\n    # same result every time\n```\n\nExample of impure function:\n\n```python\n\ntotal = 0\ndef dirty_add(x):\n    global total\n    # global keyword is necessary to access global variable\n    total = total + x\n    return total\n\nprint(dirty_add(10)) # 10\nprint(dirty_add(10)) # 20\nprint(dirty_add(10)) # 30\n# different result every time, updating global value\n```\n\nSo why we need to use unpure functions sometimes?  \nBecause we need side effects every now and then.',
+        'In majority of situations you want to use pure functions.\n\n- `Always return the same values given the same arguments`\n- `Cause no side effects`\n\nThanks to this they are predictible, easy to debug, always work the same.  \n`No works on my machine problem.`\n\nExample of pure function\n\n```python\ndef add(x, y):\n    return x + y\n    # same result every time\n```\n\nExample of impure function:\n\n```python\n\ntotal = 0\ndef dirty_add(x):\n    global total\n    # global keyword is necessary to access global variable\n    total = total + x\n    return total\n\nprint(dirty_add(10)) # 10\nprint(dirty_add(10)) # 20\nprint(dirty_add(10)) # 30\n# different result every time, updating global value\n```\n\nSo why we need to use unpure functions sometimes?  \nBecause we need side effects every now and then.',
       position: 20,
     },
     {
@@ -179,7 +178,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Side Effects include:',
       content:
-        "# Side Effects include:\n\n`Anything that the function does, except returning a value`\n\n- printing to the console\n- updating db\n- accessing internet\n- modyfing global variables or anything outside it's scope (no state mutation)\n- modyfing it's input\n- writing to a file\n- I/O operations\n\nA program that has no side effects is effectively useless.",
+        "`Anything that the function does, except returning a value`\n\n- printing to the console\n- updating db\n- accessing internet\n- modyfing global variables or anything outside it's scope (no state mutation)\n- modyfing it's input\n- writing to a file\n- I/O operations\n\nA program that has no side effects is effectively useless.",
       position: 21,
     },
     {
@@ -187,7 +186,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'References vs Copies',
       content:
-        '# References vs Copies\n\nWorks almost like in js.\nCollections are passed as references, `except tuples!`.\n\nWhen you pass a value into a function as an argument, one of two things can happen:\n\n1. It\'s `passed by reference`: The function has access to the original value and can change it.\n2. It\'s `passed by value`: The function only has access to a copy. Changes to the copy within the function don\'t affect the original.\n\nThese types are passed by reference:\nLists  \nDictionaries  \nSets\n\nThese types are passed by value:\nIntegers  \nFloats  \nStrings  \nBooleans  \nTuples\n\nReference:\n\n```py\ndef modify_list(inner_lst):\n    inner_lst.append(4)\n    # the original "outer_lst" is updated\n    # because inner_lst is a reference to the original\n\nouter_lst = [1, 2, 3]\nmodify_list(outer_lst)\n# outer_lst = [1, 2, 3, 4]\n```\n\nNo reference\n\n```py\n\ndef attempt_to_modify(inner_num):\n    inner_num += 1\n    # the original "outer_num" is not updated\n    # because inner_num is a copy of the original\n\nouter_num = 1\nattempt_to_modify(outer_num)\n# outer_num = 1\n```',
+        'Works almost like in js.\nCollections are passed as references, `except tuples!`.\n\nWhen you pass a value into a function as an argument, one of two things can happen:\n\n1. It\'s `passed by reference`: The function has access to the original value and can change it.\n2. It\'s `passed by value`: The function only has access to a copy. Changes to the copy within the function don\'t affect the original.\n\nThese types are passed by reference:\nLists  \nDictionaries  \nSets\n\nThese types are passed by value:\nIntegers  \nFloats  \nStrings  \nBooleans  \nTuples\n\nReference:\n\n```py\ndef modify_list(inner_lst):\n    inner_lst.append(4)\n    # the original "outer_lst" is updated\n    # because inner_lst is a reference to the original\n\nouter_lst = [1, 2, 3]\nmodify_list(outer_lst)\n# outer_lst = [1, 2, 3, 4]\n```\n\nNo reference\n\n```py\n\ndef attempt_to_modify(inner_num):\n    inner_num += 1\n    # the original "outer_num" is not updated\n    # because inner_num is a copy of the original\n\nouter_num = 1\nattempt_to_modify(outer_num)\n# outer_num = 1\n```',
       position: 22,
     },
     {
@@ -195,7 +194,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'obj.copy()',
       content:
-        '# obj.copy()\n\nA way to avoid mutating original object.\n\n```py\ndef add_format(default_formats, new_format):\n    updated = default_formats.copy()\n    updated[new_format] = True\n    return updated\n```',
+        'A way to avoid mutating original object.\n\n```py\ndef add_format(default_formats, new_format):\n    updated = default_formats.copy()\n    updated[new_format] = True\n    return updated\n```',
       position: 23,
     },
     {
@@ -203,7 +202,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Copying a list - copy',
       content:
-        '# Copying a list - copy\n\nTo get a new copy of a list, use the copy() method. If you just do new_list = old_list, your new variable will just\nbe a reference to the original list.\n\n```python\n    import copy\n\n    nums = [4, 3, 2, 1]\n    nums_copy = nums.copy()\n    # nums_copy is [4, 3, 2, 1]\n\n```',
+        'To get a new copy of a list, use the copy() method. If you just do new_list = old_list, your new variable will just\nbe a reference to the original list.\n\n```python\n    import copy\n\n    nums = [4, 3, 2, 1]\n    nums_copy = nums.copy()\n    # nums_copy is [4, 3, 2, 1]\n\n```',
       position: 24,
     },
     {
@@ -211,7 +210,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Delete from a list',
       content:
-        '# Delete from a list\n\n```python\n    fruits = ["apple", "banana", "cherry", "kiwi"]\n    del fruits[1]\n    # fruits is ["apple", "cherry", "kiwi"]\n```',
+        '```python\n    fruits = ["apple", "banana", "cherry", "kiwi"]\n    del fruits[1]\n    # fruits is ["apple", "cherry", "kiwi"]\n```',
       position: 25,
     },
     {
@@ -219,7 +218,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'I/O',
       content:
-        '# I/O\n\nThe term "i/o" stands for `input/output.` In the context of writing programs, i/o refers to anything in our code that interacts with the "outside world". "Outside world" just means anything that\'s not stored in our application\'s memory (like variables).  \nAll i/o is a form of "side effect". (including print)  \nIn functional programming, i/o is viewed as dirty but necessary.',
+        'The term "i/o" stands for `input/output.` In the context of writing programs, i/o refers to anything in our code that interacts with the "outside world". "Outside world" just means anything that\'s not stored in our application\'s memory (like variables).  \nAll i/o is a form of "side effect". (including print)  \nIn functional programming, i/o is viewed as dirty but necessary.',
       position: 26,
     },
     {
@@ -227,7 +226,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'No-Op',
       content:
-        "# No-Op\n\n`Operation that does nothing`\n\nIf a function doesn't return anything it is probably impure, and is performing some side effects.\n\nNo-Op example:\n\n```py\ndef square(x):\n    x * x\n```\n\nSide effect example:\n\n```py\nmyGlobal = 0\n\ndef impure(x):\n    global myGlobal\n    myGlobal + x\n```\n\nThe global keyword just tells Python to allow modification of the outer-scoped y variable.",
+        "`Operation that does nothing`\n\nIf a function doesn't return anything it is probably impure, and is performing some side effects.\n\nNo-Op example:\n\n```py\ndef square(x):\n    x * x\n```\n\nSide effect example:\n\n```py\nmyGlobal = 0\n\ndef impure(x):\n    global myGlobal\n    myGlobal + x\n```\n\nThe global keyword just tells Python to allow modification of the outer-scoped y variable.",
       position: 27,
     },
     {
@@ -235,7 +234,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Memoization',
       content:
-        "# Memoization\n\nIn simple terms memoization is basically storing a copy (caching) of a result of a computation so that we don't have to calculate it again int the future.\n\n```py\n\ndef word_count_memo(document, memos):\n    memosCopy = memos.copy()\n\n    # Avoid counting again\n    if document in memosCopy:\n        return memosCopy[document], memosCopy\n\n    count = word_count(document)\n    memosCopy[document] = count\n    return count, memosCopy\n\ndef word_count(document):\n    count = len(document.split())\n    return count\n```\n\n`Pure functions always can be safely memoized and impure can't`\nThat is why we have dependency array to recalculate memoized val when using useMemo() in React.\n\n`Memoization is not free` - there is always a trade off between using RAM memory and speed. If function is fast enough it should'nt",
+        "In simple terms memoization is basically storing a copy (caching) of a result of a computation so that we don't have to calculate it again int the future.\n\n```py\n\ndef word_count_memo(document, memos):\n    memosCopy = memos.copy()\n\n    # Avoid counting again\n    if document in memosCopy:\n        return memosCopy[document], memosCopy\n\n    count = word_count(document)\n    memosCopy[document] = count\n    return count, memosCopy\n\ndef word_count(document):\n    count = len(document.split())\n    return count\n```\n\n`Pure functions always can be safely memoized and impure can't`\nThat is why we have dependency array to recalculate memoized val when using useMemo() in React.\n\n`Memoization is not free` - there is always a trade off between using RAM memory and speed. If function is fast enough it should'nt",
       position: 28,
     },
     {
@@ -243,14 +242,14 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Referential Transparency',
       content:
-        "# Referential Transparency\n\n`Pure functions are always referentialy transparent` meaning that pure functions can always be replaced by it's would be return value. Since this value is always the same every time.\n\nFor example:\n\n```py\nadd(2, 3)\n```\n\nCan simply be replaced with 5",
+        "`Pure functions are always referentialy transparent` meaning that pure functions can always be replaced by it's would be return value. Since this value is always the same every time.\n\nFor example:\n\n```py\nadd(2, 3)\n```\n\nCan simply be replaced with 5",
       position: 29,
     },
     {
       ref: '0a7e0000-0000-4000-8000-000000000030',
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'str to arr',
-      content: "# str to arr\n\n```py\nstr = 'str'\nprint(list(str))\n```",
+      content: "```py\nstr = 'str'\nprint(list(str))\n```",
       position: 30,
     },
     {
@@ -258,7 +257,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'sorted with a function',
       content:
-        '# sorted with a function\n\nThis will be performed on each item\nthe transformation is only temporary for sorting. The key parameter in sorted() creates a "sort key" - it transforms each element just enough to make comparisons work, but returns the original elements in the sorted order.\n\n```p6\ndef transform_date(date_str):\n    month, day, year = date_str.split("-")  # "07-21-2023" -> ["07", "21", "2023"]\n    return year + month + day               # -> "20230721"\n\ndef sort_dates(dates):\n    # sorted() calls transform_date on each date to get sort keys:\n    # \'07-21-2023\' -> \'20230721\'\n    # \'12-25-2022\' -> \'20221225\'\n    # \'01-01-2023\' -> \'20230101\'\n    # etc.\n\n    # It sorts by these keys, then returns the ORIGINAL date strings\n    return sorted(dates, key=transform_date)\n```',
+        'This will be performed on each item\nthe transformation is only temporary for sorting. The key parameter in sorted() creates a "sort key" - it transforms each element just enough to make comparisons work, but returns the original elements in the sorted order.\n\n```p6\ndef transform_date(date_str):\n    month, day, year = date_str.split("-")  # "07-21-2023" -> ["07", "21", "2023"]\n    return year + month + day               # -> "20230721"\n\ndef sort_dates(dates):\n    # sorted() calls transform_date on each date to get sort keys:\n    # \'07-21-2023\' -> \'20230721\'\n    # \'12-25-2022\' -> \'20221225\'\n    # \'01-01-2023\' -> \'20230101\'\n    # etc.\n\n    # It sorts by these keys, then returns the ORIGINAL date strings\n    return sorted(dates, key=transform_date)\n```',
       position: 31,
     },
     {
@@ -266,7 +265,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'recursion',
       content:
-        '# recursion\n\n`Function that calls itself`\n\n```py\ndef sum_nums(nums):\n    # base case\n    if len(nums) == 0:\n        return 0\n    return nums[0] + sum_nums(nums[1:])\n\nprint(sum_nums([1, 2, 3, 4, 5]))\n# 15\n\n\ndef foo_countdown(x):\n    # base case\n    if x ==0:\n        return\n    print(x)\n    foo_countdown(x-1)\n\n\n```\n\n`Base case` - without it recursive function calls would just create a `stack overflow`.\n\nRecursion is fundamental to functional programming because we do not have to create stateful loops!\n\nRecursion is often used in "tree-like" structures. For example:\n\nNested dictionaries\nFile systems\nHTML documents\nJSON objects\n\nIf iterating over a one-dimensional list then a loopis typically simpler, even if it\'s not as "pure" in the academic sense.  \nThat\'s because trees can have unknown depth. It\'s hard to write a series of loops because you don\'t know how many levels deep the tree goes.\n\n```py\nfor item in tree:\n    for nested_item in item:\n        for nested_nested_item in nested_item:\n            for nested_nested_nested_item in nested_nested_item:\n                # ... WHEN DOES IT END???\n```',
+        '`Function that calls itself`\n\n```py\ndef sum_nums(nums):\n    # base case\n    if len(nums) == 0:\n        return 0\n    return nums[0] + sum_nums(nums[1:])\n\nprint(sum_nums([1, 2, 3, 4, 5]))\n# 15\n\n\ndef foo_countdown(x):\n    # base case\n    if x ==0:\n        return\n    print(x)\n    foo_countdown(x-1)\n\n\n```\n\n`Base case` - without it recursive function calls would just create a `stack overflow`.\n\nRecursion is fundamental to functional programming because we do not have to create stateful loops!\n\nRecursion is often used in "tree-like" structures. For example:\n\nNested dictionaries\nFile systems\nHTML documents\nJSON objects\n\nIf iterating over a one-dimensional list then a loopis typically simpler, even if it\'s not as "pure" in the academic sense.  \nThat\'s because trees can have unknown depth. It\'s hard to write a series of loops because you don\'t know how many levels deep the tree goes.\n\n```py\nfor item in tree:\n    for nested_item in item:\n        for nested_nested_item in nested_item:\n            for nested_nested_nested_item in nested_nested_item:\n                # ... WHEN DOES IT END???\n```',
       position: 32,
     },
     {
@@ -274,7 +273,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Stack Overflow',
       content:
-        '# Stack Overflow\n\nStack Overflow: Each function call requires a bit of memory. So, if you recurse too deeply, you can run out of "stack" memory which will crash your program. (This is what the famous website is named after)\n\nIf you don\'t have a solid base case, you can end up in an infinite loop (which will likely lead to a stack overflow).\n\nRecursion (especially in a language like Python) is often slower than a for loop because each function call requires some memory.',
+        'Stack Overflow: Each function call requires a bit of memory. So, if you recurse too deeply, you can run out of "stack" memory which will crash your program. (This is what the famous website is named after)\n\nIf you don\'t have a solid base case, you can end up in an infinite loop (which will likely lead to a stack overflow).\n\nRecursion (especially in a language like Python) is often slower than a for loop because each function call requires some memory.',
       position: 33,
     },
     {
@@ -282,14 +281,14 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'isinstance()',
       content:
-        '# isinstance()\n\nReturns true if an element is an instance of a certain type\n\n```py\nisinstance(item, list):\n```',
+        'Returns true if an element is an instance of a certain type\n\n```py\nisinstance(item, list):\n```',
       position: 34,
     },
     {
       ref: '0a7e0000-0000-4000-8000-000000000035',
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: '.split(maxsplit=int)',
-      content: '# .split(maxsplit=int)',
+      content: '',
       position: 35,
     },
     {
@@ -297,7 +296,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'function transformations',
       content:
-        '# function transformations\n\nA specific type of higher order function - `a function that takes another function as an argument nad returns a new function.`\n\n```py\ndef multiply(x, y):\n    return x * y\n\ndef add(x, y):\n    return x + y\n\n# self_math is a higher order function\n# input: a function that takes two arguments and returns a value\n# output: a new function that takes one argument and returns a value\ndef self_math(math_func):\n    def inner_func(x):\n        return math_func(x, x)\n    return inner_func\n\nsquare_func = self_math(multiply)\ndouble_func = self_math(add)\n\nprint(square_func(5))\n# prints 25\n\nprint(double_func(5))\n# prints 10\n```\n\nYou can use .split with maxsplit=1.\nThat will split a string into a list of [first_word, rest_of_string]\n\nWhy would we even want to use function transformations?\nIn most cases it\'s because we wamnt to share some funcionality.\n\nThis formatter function. It accepts a "pattern" and returns a new function that formats text according to that pattern. Without it we would have to create three separate functions.\n\n❗️Not necessarily but it is more flexible\nWhen single function makes more sense:\nWhen patterns are dynamic or user-provided\nWhen you don\'t need to create multiple specialized functions\nWhen simplicity is preferred over partial application\n\n```py\ndef formatter(pattern):\n    def inner_func(text):\n        result = ""\n        i = 0\n        while i < len(pattern):\n            if pattern[i:i+2] == \'{}\':\n                result += text\n                i += 2\n            else:\n                result += pattern[i]\n                i += 1\n        return result\n    return inner_func\n\nbold_formatter = formatter("**{}**")\nitalic_formatter = formatter("*{}*")\nbullet_point_formatter = formatter("* {}")\n\nprint(bold_formatter("Hello"))\n# **Hello**\nprint(italic_formatter("Hello"))\n# *Hello*\nprint(bullet_point_formatter("Hello"))\n# * Hello\n```\n\n`90 % of times we want to use function transformations to create closures`.',
+        'A specific type of higher order function - `a function that takes another function as an argument nad returns a new function.`\n\n```py\ndef multiply(x, y):\n    return x * y\n\ndef add(x, y):\n    return x + y\n\n# self_math is a higher order function\n# input: a function that takes two arguments and returns a value\n# output: a new function that takes one argument and returns a value\ndef self_math(math_func):\n    def inner_func(x):\n        return math_func(x, x)\n    return inner_func\n\nsquare_func = self_math(multiply)\ndouble_func = self_math(add)\n\nprint(square_func(5))\n# prints 25\n\nprint(double_func(5))\n# prints 10\n```\n\nYou can use .split with maxsplit=1.\nThat will split a string into a list of [first_word, rest_of_string]\n\nWhy would we even want to use function transformations?\nIn most cases it\'s because we wamnt to share some funcionality.\n\nThis formatter function. It accepts a "pattern" and returns a new function that formats text according to that pattern. Without it we would have to create three separate functions.\n\n❗️Not necessarily but it is more flexible\nWhen single function makes more sense:\nWhen patterns are dynamic or user-provided\nWhen you don\'t need to create multiple specialized functions\nWhen simplicity is preferred over partial application\n\n```py\ndef formatter(pattern):\n    def inner_func(text):\n        result = ""\n        i = 0\n        while i < len(pattern):\n            if pattern[i:i+2] == \'{}\':\n                result += text\n                i += 2\n            else:\n                result += pattern[i]\n                i += 1\n        return result\n    return inner_func\n\nbold_formatter = formatter("**{}**")\nitalic_formatter = formatter("*{}*")\nbullet_point_formatter = formatter("* {}")\n\nprint(bold_formatter("Hello"))\n# **Hello**\nprint(italic_formatter("Hello"))\n# *Hello*\nprint(bullet_point_formatter("Hello"))\n# * Hello\n```\n\n`90 % of times we want to use function transformations to create closures`.',
       position: 36,
     },
     {
@@ -305,7 +304,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'closures',
       content:
-        '# closures\n\n`Function that references variables from outside this function body.`\nPut simply, a closure is just a function that keeps track of some values from the place where it was defined, no matter where it is executed later on.\n\n`The whole point of a closure is that it\'s stateful`. It\'s a function that "remembers" the values from the enclosing scope even after the enclosing scope has finished executing.\n\nIt\'s as if you\'re saving the state of a function at a particular point in time, and then you can use and update that state later on.\n\nThe concatter() function returns a function called doc_builder (yay higher-order functions!) that has a reference to an enclosed doc value.\n\n```py\ndef concatter():\n\tdoc = ""\n\tdef doc_builder(word):\n\t\t# "nonlocal" tells Python to use the \'doc\'\n\t\t# variable from the enclosing scope\n\t\tnonlocal doc\n\t\tdoc += word + " "\n\t\treturn doc\n\treturn doc_builder\n\n# save the returned \'doc_builder\' function\n# to the new function \'harry_potter_aggregator\'\nharry_potter_aggregator = concatter()\nharry_potter_aggregator("Mr.")\nharry_potter_aggregator("and")\nharry_potter_aggregator("Mrs.")\nharry_potter_aggregator("Dursley")\nharry_potter_aggregator("of")\nharry_potter_aggregator("number")\nharry_potter_aggregator("four,")\nharry_potter_aggregator("Privet")\n\nprint(harry_potter_aggregator("Drive"))\n# Mr. and Mrs. Dursley of number four, Privet Drive\n```\n\nWhen concatter() is called, it creates a new "stateful" function that remembers the value of its internal doc variable. Each successive call to harry_potter_aggregator appends to that same doc.\n\n`nonlocal`\nPython has a keyword called `nonlocal that\'s required to modify a variable from an enclosing scope`. Most programming languages don\'t require this keyword, but Python does.\nWhen variable is mutable we do not use nonlocal - we are simply changing referenced obj.\nnonlocal keyword if you are reassigning a variable instead of modifying its contents (which you must do to change immutable values such as strings and integers).\n\nNo nonlocal needed:\n\n```py\ndef new_collection(initial_docs):\n    init_copy = initial_docs.copy()\n    def foo(str):\n        init_copy.append(str)\n        return init_copy\n    return foo\n\n```',
+        '`Function that references variables from outside this function body.`\nPut simply, a closure is just a function that keeps track of some values from the place where it was defined, no matter where it is executed later on.\n\n`The whole point of a closure is that it\'s stateful`. It\'s a function that "remembers" the values from the enclosing scope even after the enclosing scope has finished executing.\n\nIt\'s as if you\'re saving the state of a function at a particular point in time, and then you can use and update that state later on.\n\nThe concatter() function returns a function called doc_builder (yay higher-order functions!) that has a reference to an enclosed doc value.\n\n```py\ndef concatter():\n\tdoc = ""\n\tdef doc_builder(word):\n\t\t# "nonlocal" tells Python to use the \'doc\'\n\t\t# variable from the enclosing scope\n\t\tnonlocal doc\n\t\tdoc += word + " "\n\t\treturn doc\n\treturn doc_builder\n\n# save the returned \'doc_builder\' function\n# to the new function \'harry_potter_aggregator\'\nharry_potter_aggregator = concatter()\nharry_potter_aggregator("Mr.")\nharry_potter_aggregator("and")\nharry_potter_aggregator("Mrs.")\nharry_potter_aggregator("Dursley")\nharry_potter_aggregator("of")\nharry_potter_aggregator("number")\nharry_potter_aggregator("four,")\nharry_potter_aggregator("Privet")\n\nprint(harry_potter_aggregator("Drive"))\n# Mr. and Mrs. Dursley of number four, Privet Drive\n```\n\nWhen concatter() is called, it creates a new "stateful" function that remembers the value of its internal doc variable. Each successive call to harry_potter_aggregator appends to that same doc.\n\n`nonlocal`\nPython has a keyword called `nonlocal that\'s required to modify a variable from an enclosing scope`. Most programming languages don\'t require this keyword, but Python does.\nWhen variable is mutable we do not use nonlocal - we are simply changing referenced obj.\nnonlocal keyword if you are reassigning a variable instead of modifying its contents (which you must do to change immutable values such as strings and integers).\n\nNo nonlocal needed:\n\n```py\ndef new_collection(initial_docs):\n    init_copy = initial_docs.copy()\n    def foo(str):\n        init_copy.append(str)\n        return init_copy\n    return foo\n\n```',
       position: 37,
     },
     {
@@ -313,7 +312,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'copy.deepcopy()',
       content:
-        '# copy.deepcopy()\n\n.copy() method will produce a shallow copy - if we need we can use deepcopy() instead.\n\n```py\n    deep_copy = copy.deepcopy(initial_styles)\n```',
+        '.copy() method will produce a shallow copy - if we need we can use deepcopy() instead.\n\n```py\n    deep_copy = copy.deepcopy(initial_styles)\n```',
       position: 38,
     },
     {
@@ -321,7 +320,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'currying',
       content:
-        "# currying\n\n`Function transformation where we transform a single function that accepts mutliple arguments into multiple functions that each accepts a single argument`\n\n```py\ndef sum(a, b):\n  return a + b\n\nprint(sum(1, 2))\n# prints 3\n```\n\nCurried:\n\n```py\ndef sum(a):\n  def inner_sum(b):\n    return a + b\n  return inner_sum\n\nprint(sum(1)(2))\n# prints 3\n```\n\nReasons for currying\n\n- Changing function signature to make it conform to a specific shape for example requrired by some external tool\n\n```py\ndef colorize(converter, doc):\n  # ...\n  converter(doc)\n  # ...\n```\n\nThe colorize function accepts a function called converter as input, and at some point during its execution, it calls converter with a single argument. That means that it expects converter to accept exactly one argument. So, if I have a conversion function like this:\n\n```py\n\ndef markdown_to_html(doc, asterisk_style):\n  # ...\n```\n\nI can't pass markdown_to_html to colorize because markdown_to_html wants two arguments. To solve this problem, I can curry markdown_to_html into a function that takes a single argument:\n\n```py\ndef markdown_to_html(asterisk_style):\n  def asterisk_md_to_html(doc):\n    # do stuff with doc and asterisk_style...\n\n  return asterisk_md_to_html\n\nmarkdown_to_html_italic = markdown_to_html('italic')\ncolorize(markdown_to_html_italic, doc)\n```\n\nIs not used very often though.\n\nWe can also store curried function calls in separate variables\n\n```py\n\ndef box_volume(length):\n  def box_volume_with_len(width):\n    def box_volume_with_len_width(height):\n      return length * width * height\n    return box_volume_with_len_width\n  return box_volume_with_len\n\n\nfinal_volume = box_volume(3)(4)(5)\nprint(final_volume)\n# 60\n\nwith_length_3 = box_volume(3)\nwith_len_3_width_4 = with_length_3(4)\nfinal_volume = with_len_3_width_4(5)\nprint(final_volume)\n# 60\n\n```",
+        "`Function transformation where we transform a single function that accepts mutliple arguments into multiple functions that each accepts a single argument`\n\n```py\ndef sum(a, b):\n  return a + b\n\nprint(sum(1, 2))\n# prints 3\n```\n\nCurried:\n\n```py\ndef sum(a):\n  def inner_sum(b):\n    return a + b\n  return inner_sum\n\nprint(sum(1)(2))\n# prints 3\n```\n\nReasons for currying\n\n- Changing function signature to make it conform to a specific shape for example requrired by some external tool\n\n```py\ndef colorize(converter, doc):\n  # ...\n  converter(doc)\n  # ...\n```\n\nThe colorize function accepts a function called converter as input, and at some point during its execution, it calls converter with a single argument. That means that it expects converter to accept exactly one argument. So, if I have a conversion function like this:\n\n```py\n\ndef markdown_to_html(doc, asterisk_style):\n  # ...\n```\n\nI can't pass markdown_to_html to colorize because markdown_to_html wants two arguments. To solve this problem, I can curry markdown_to_html into a function that takes a single argument:\n\n```py\ndef markdown_to_html(asterisk_style):\n  def asterisk_md_to_html(doc):\n    # do stuff with doc and asterisk_style...\n\n  return asterisk_md_to_html\n\nmarkdown_to_html_italic = markdown_to_html('italic')\ncolorize(markdown_to_html_italic, doc)\n```\n\nIs not used very often though.\n\nWe can also store curried function calls in separate variables\n\n```py\n\ndef box_volume(length):\n  def box_volume_with_len(width):\n    def box_volume_with_len_width(height):\n      return length * width * height\n    return box_volume_with_len_width\n  return box_volume_with_len\n\n\nfinal_volume = box_volume(3)(4)(5)\nprint(final_volume)\n# 60\n\nwith_length_3 = box_volume(3)\nwith_len_3_width_4 = with_length_3(4)\nfinal_volume = with_len_3_width_4(5)\nprint(final_volume)\n# 60\n\n```",
       position: 39,
     },
     {
@@ -329,7 +328,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'decorators',
       content:
-        '# decorators\n\nBasically a `syntactic sugar around function transformations` (returning a function by another function).  \nIt is an often simpler way of writing higher order function.\n\n```py\ndef vowel_counter(func_to_decorate):\n    vowel_count = 0\n    def wrapper(doc):\n        nonlocal vowel_count\n        vowels = "aeiou"\n        for char in doc:\n            if char.lower() in vowels:\n                vowel_count += 1\n        print(f"Vowel count: {vowel_count}")\n        return func_to_decorate(doc)\n    return wrapper\n\n\n# 1. Without decorator\ndef myFoo(val):\n    print(val)\n\ntt = vowel_counter(myFoo)\ntt(\'sialalalalala \')\n#Vowel count: 7\n# sialalalalala 🍆\n\n# 2. With decorator\n@vowel_counter\ndef myFooIsNowDecorated(val):\n    print(val)\n\nmyFooIsNowDecorated(\'sialalala 🍆\')\n# Vowel count: 5\n# sialalala 🍆\n```',
+        'Basically a `syntactic sugar around function transformations` (returning a function by another function).  \nIt is an often simpler way of writing higher order function.\n\n```py\ndef vowel_counter(func_to_decorate):\n    vowel_count = 0\n    def wrapper(doc):\n        nonlocal vowel_count\n        vowels = "aeiou"\n        for char in doc:\n            if char.lower() in vowels:\n                vowel_count += 1\n        print(f"Vowel count: {vowel_count}")\n        return func_to_decorate(doc)\n    return wrapper\n\n\n# 1. Without decorator\ndef myFoo(val):\n    print(val)\n\ntt = vowel_counter(myFoo)\ntt(\'sialalalalala \')\n#Vowel count: 7\n# sialalalalala 🍆\n\n# 2. With decorator\n@vowel_counter\ndef myFooIsNowDecorated(val):\n    print(val)\n\nmyFooIsNowDecorated(\'sialalala 🍆\')\n# Vowel count: 5\n# sialalala 🍆\n```',
       position: 40,
     },
     {
@@ -337,7 +336,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'args and kwargs',
       content:
-        '# args and kwargs\n\n`*args` - collects positional arguments into a tuple (order matters)\n`**kwargs` - collects keyword (named) arguments into a dictionary\n\n```py\ndef print_arguments(*args, **kwargs):\n    print(f"Positional arguments: {args}")\n    print(f"Keyword arguments: {kwargs}")\n\nprint_arguments("hello", "world", a=1, b=2)\n# Positional arguments: (\'hello\', \'world\')\n# Keyword arguments: {\'a\': 1, \'b\': 2}\n```\n\n`Positional arguments` - args where order of args matter, switching order might result in a different output\n\n```py\ndef sub(a, b):\n    return a - b\n\n# a=3, b=2\nres = sub(3, 2)\n# res = 1\n\n```\n\n`Keyword args` - passed by name, `order does not matter`\n\n```py\ndef sub(a, b):\n    return a - b\n\nres = sub(b=3, a=2)\n# res = -1\nres = sub(a=3, b=2)\n# res = 1\n```\n\n❗️ Any positional args must come before keyword args.\n\n```py\n# ❌ This will not work:\nres = sub(b=3, 2)\n```',
+        '`*args` - collects positional arguments into a tuple (order matters)\n`**kwargs` - collects keyword (named) arguments into a dictionary\n\n```py\ndef print_arguments(*args, **kwargs):\n    print(f"Positional arguments: {args}")\n    print(f"Keyword arguments: {kwargs}")\n\nprint_arguments("hello", "world", a=1, b=2)\n# Positional arguments: (\'hello\', \'world\')\n# Keyword arguments: {\'a\': 1, \'b\': 2}\n```\n\n`Positional arguments` - args where order of args matter, switching order might result in a different output\n\n```py\ndef sub(a, b):\n    return a - b\n\n# a=3, b=2\nres = sub(3, 2)\n# res = 1\n\n```\n\n`Keyword args` - passed by name, `order does not matter`\n\n```py\ndef sub(a, b):\n    return a - b\n\nres = sub(b=3, a=2)\n# res = -1\nres = sub(a=3, b=2)\n# res = 1\n```\n\n❗️ Any positional args must come before keyword args.\n\n```py\n# ❌ This will not work:\nres = sub(b=3, 2)\n```',
       position: 41,
     },
     {
@@ -345,15 +344,14 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'enumerate',
       content:
-        '# enumerate\n\nIf we are looping over an iterable and we need access to index we can use enumerate:\n\n```py\n   for index, item in enumerate(args):\n        print(f"{index + 1}. {item}")\n```\n\nOr we can use range, but enumerate is more readable\n\n```py\nfor i in range(len(args)):\n        print(f"Index: {i}, Item: {args[i]}")\n```\n\nEnumarate is better because:\nNo manual indexing: Direct access to both index and item\nNo length calculation: More efficient for large iterables\nImmutable pairs: Can\'t accidentally modify the wrong element\nCleaner syntax: Expresses intent more clearly',
+        'If we are looping over an iterable and we need access to index we can use enumerate:\n\n```py\n   for index, item in enumerate(args):\n        print(f"{index + 1}. {item}")\n```\n\nOr we can use range, but enumerate is more readable\n\n```py\nfor i in range(len(args)):\n        print(f"Index: {i}, Item: {args[i]}")\n```\n\nEnumarate is better because:\nNo manual indexing: Direct access to both index and item\nNo length calculation: More efficient for large iterables\nImmutable pairs: Can\'t accidentally modify the wrong element\nCleaner syntax: Expresses intent more clearly',
       position: 42,
     },
     {
       ref: '0a7e0000-0000-4000-8000-000000000043',
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'sorting by key',
-      content:
-        '# sorting by key\n\n```py\ndict = {"key": "val"}\nsorted_by_key = sorted(dict.keys())\n```',
+      content: '```py\ndict = {"key": "val"}\nsorted_by_key = sorted(dict.keys())\n```',
       position: 43,
     },
     {
@@ -361,7 +359,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'tuple unpacking',
       content:
-        '# tuple unpacking\n\n```py\ntuple = ("Konrad", "Antonik", "Scholar level 55")\nprint(*tuple)\n# Konrad Antonik Scholar level 55\n```',
+        '```py\ntuple = ("Konrad", "Antonik", "Scholar level 55")\nprint(*tuple)\n# Konrad Antonik Scholar level 55\n```',
       position: 44,
     },
     {
@@ -369,7 +367,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'dict unpacking',
       content:
-        '# dict unpacking\n\n❌ This will not work\nPrint does not have a name method\n\n```py\nmy_dict = {"name": "Konrad", "age": 38}\n\nprint(**my_dict)\n```\n\nDictionary unpacking with `**` converts the dict keys into keyword arguments for the function call.\n\n✅ this will work - functions accepts those keywords\n\n```py\ndef greet(name, age):\n    print(f"Hello {name}, you are {age}")\n\nmy_dict = {"name": "Konrad", "age": 38}\ngreet(**my_dict)  # Works: equivalent to greet(name="Konrad", age=38)\n```',
+        '❌ This will not work\nPrint does not have a name method\n\n```py\nmy_dict = {"name": "Konrad", "age": 38}\n\nprint(**my_dict)\n```\n\nDictionary unpacking with `**` converts the dict keys into keyword arguments for the function call.\n\n✅ this will work - functions accepts those keywords\n\n```py\ndef greet(name, age):\n    print(f"Hello {name}, you are {age}")\n\nmy_dict = {"name": "Konrad", "age": 38}\ngreet(**my_dict)  # Works: equivalent to greet(name="Konrad", age=38)\n```',
       position: 45,
     },
     {
@@ -377,7 +375,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'dict()',
       content:
-        "# dict()\n\nTransforms a key val pairs into dictionary\n\n```py\n# List of tuples\ndict([('a', 1), ('b', 2)])\n\n# List of lists\ndict([['a', 1], ['b', 2]])\n\n# Tuple of tuples\ndict((('a', 1), ('b', 2)))\n\n# Mixed sequences\ndict([['a', 1], ('b', 2)])\n```",
+        "Transforms a key val pairs into dictionary\n\n```py\n# List of tuples\ndict([('a', 1), ('b', 2)])\n\n# List of lists\ndict([['a', 1], ['b', 2]])\n\n# Tuple of tuples\ndict((('a', 1), ('b', 2)))\n\n# Mixed sequences\ndict([['a', 1], ('b', 2)])\n```",
       position: 46,
     },
     {
@@ -385,7 +383,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'lru_cache',
       content:
-        "# lru_cache\n\nlru_cache from the functools module is an example of a decorator and an example of memoization.\n\nlru_cache memoizes the inputs and outputs of the decorated function in a size-restricted dictionary. It speeds up repeated calls to a slow function with the same inputs. For instance, if the function reads from disk, makes network requests, or requires a lot of computation AND it is used repeatedly with the same inputs.\n\nSince the factorial function is recursive and the inputs are sequential numbers, it's called repeatedly with the same inputs. Without the cache, the function would be called 30 times. With lru_cache, the function is only called 13 times. While you don't often need to compute factorials, this example ties together how to use a decorator and memoization and recursion.\n\n```py\nfrom functools import lru_cache\n\n@lru_cache()\ndef factorial_r(x):\n    if x == 0:\n        return 1\n    else:\n        return x * factorial_r(x - 1)\n\nfactorial_r(10) # no previously cached result, makes 11 recursive calls\n# 3628800\nfactorial_r(5)  # just looks up cached value result\n# 120\nfactorial_r(12) # makes two new recursive calls, the other 11 are cached\n# 479001600\n```",
+        "lru_cache from the functools module is an example of a decorator and an example of memoization.\n\nlru_cache memoizes the inputs and outputs of the decorated function in a size-restricted dictionary. It speeds up repeated calls to a slow function with the same inputs. For instance, if the function reads from disk, makes network requests, or requires a lot of computation AND it is used repeatedly with the same inputs.\n\nSince the factorial function is recursive and the inputs are sequential numbers, it's called repeatedly with the same inputs. Without the cache, the function would be called 30 times. With lru_cache, the function is only called 13 times. While you don't often need to compute factorials, this example ties together how to use a decorator and memoization and recursion.\n\n```py\nfrom functools import lru_cache\n\n@lru_cache()\ndef factorial_r(x):\n    if x == 0:\n        return 1\n    else:\n        return x * factorial_r(x - 1)\n\nfactorial_r(10) # no previously cached result, makes 11 recursive calls\n# 3628800\nfactorial_r(5)  # just looks up cached value result\n# 120\nfactorial_r(12) # makes two new recursive calls, the other 11 are cached\n# 479001600\n```",
       position: 47,
     },
     {
@@ -393,7 +391,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'stacking decorators + currying',
       content:
-        '# stacking decorators + currying\n\n```py\ndef to_uppercase(func):\n    def wrapper(document):\n        return func(document.upper())\n\n    return wrapper\n\ndef get_truncate(length):\n    def truncate(func):\n        def wrapper(document):\n            return func(document[:length])525416\n\n        return wrapper\n\n    return truncate\n\n@to_uppercase\n@get_truncate(9) # currying\ndef print_input(input):\n    print(input)\n\nprint_input("Keep Calm and Carry On")\n# prints: "KEEP CALM"\n```\n\nObserve that to_uppercase wrapped get_truncate(9), and get_truncate(9) returned truncate which wrapped print_input, then print_input printed "KEEP CALM" from "Keep Calm and Carry On".',
+        '```py\ndef to_uppercase(func):\n    def wrapper(document):\n        return func(document.upper())\n\n    return wrapper\n\ndef get_truncate(length):\n    def truncate(func):\n        def wrapper(document):\n            return func(document[:length])525416\n\n        return wrapper\n\n    return truncate\n\n@to_uppercase\n@get_truncate(9) # currying\ndef print_input(input):\n    print(input)\n\nprint_input("Keep Calm and Carry On")\n# prints: "KEEP CALM"\n```\n\nObserve that to_uppercase wrapped get_truncate(9), and get_truncate(9) returned truncate which wrapped print_input, then print_input printed "KEEP CALM" from "Keep Calm and Carry On".',
       position: 48,
     },
     {
@@ -401,7 +399,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Sum types',
       content:
-        '# Sum types\n\nWe can reduce the number of cases our code needs to handle by using a (admittedly fake Pythonic) sum type with only 3 possible types.\n\nThen we can use the isinstance built-in function to check if a Person is an instance of one of the subclasses. It\'s a clunky way to represent sum types, but hey, it\'s Python.\n\n```py\nclass Person:\n    def __init__(self, name):\n        self.name = name\n\nclass Dateable(Person):\n    pass\n\nclass MaybeDateable(Person):\n    pass\n\nclass Undateable(Person):\n    pass\n\ndef respond_to_text(guy_at_bar):\n    if isinstance(guy_at_bar, Dateable):\n        return f"Hey {guy_at_bar.name}, I\'d love to go out with you!"\n    elif isinstance(guy_at_bar, MaybeDateable):\n        return f"Hey {guy_at_bar.name}, I\'m busy but let\'s hang out sometime later."\n    elif isinstance(guy_at_bar, Undateable):\n        return "Have you tried being rich?"\n    else:\n        raise ValueError("invalid person type")\n\n```\n\nThis works as a python way of type checking but better way is to use Enums',
+        'We can reduce the number of cases our code needs to handle by using a (admittedly fake Pythonic) sum type with only 3 possible types.\n\nThen we can use the isinstance built-in function to check if a Person is an instance of one of the subclasses. It\'s a clunky way to represent sum types, but hey, it\'s Python.\n\n```py\nclass Person:\n    def __init__(self, name):\n        self.name = name\n\nclass Dateable(Person):\n    pass\n\nclass MaybeDateable(Person):\n    pass\n\nclass Undateable(Person):\n    pass\n\ndef respond_to_text(guy_at_bar):\n    if isinstance(guy_at_bar, Dateable):\n        return f"Hey {guy_at_bar.name}, I\'d love to go out with you!"\n    elif isinstance(guy_at_bar, MaybeDateable):\n        return f"Hey {guy_at_bar.name}, I\'m busy but let\'s hang out sometime later."\n    elif isinstance(guy_at_bar, Undateable):\n        return "Have you tried being rich?"\n    else:\n        raise ValueError("invalid person type")\n\n```\n\nThis works as a python way of type checking but better way is to use Enums',
       position: 49,
     },
     {
@@ -409,7 +407,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Enums',
       content:
-        "# Enums\n\n```py\nfrom enum import Enum\n\nColor = Enum('Color', ['RED', 'GREEN', 'BLUE'])\nprint(Color.RED)  # this works, prints 'Color.RED'\nprint(Color.TEAL) # this raises an exception\n\n\nDoctype = Enum('Doctype', ['PDF', 'TXT', 'DOCX', 'MD', 'HTML'])\n\n```\n\n1. A \"Color\" can only be RED, GREEN, or BLUE. If you try to use Color.TEAL, Python raises an exception.\n2. There is a central place to see the \"valid\" values for a Color.\n3. Each \"Color\" has a \"name\" (e.g. Color.RED) and a \"value\" (e.g. 1). The value is an integer and is used under the hood instead of the name. Integers take up less memory than strings, which helps with performance.\n\nPython does not enforce your types before your code runs. That's why we need this line here to raise an Exception if a color is invalid:\n\n```python\ndef color_to_hex(color):\n    if color == Color.GREEN:\n        return '#00FF00'\n    elif color == Color.BLUE:\n        return '#0000FF'\n    elif color == Color.RED:\n        return '#FF0000'\n    # handle the case where the color is invalid\n    raise Exception('unknown color')\n```",
+        "```py\nfrom enum import Enum\n\nColor = Enum('Color', ['RED', 'GREEN', 'BLUE'])\nprint(Color.RED)  # this works, prints 'Color.RED'\nprint(Color.TEAL) # this raises an exception\n\n\nDoctype = Enum('Doctype', ['PDF', 'TXT', 'DOCX', 'MD', 'HTML'])\n\n```\n\n1. A \"Color\" can only be RED, GREEN, or BLUE. If you try to use Color.TEAL, Python raises an exception.\n2. There is a central place to see the \"valid\" values for a Color.\n3. Each \"Color\" has a \"name\" (e.g. Color.RED) and a \"value\" (e.g. 1). The value is an integer and is used under the hood instead of the name. Integers take up less memory than strings, which helps with performance.\n\nPython does not enforce your types before your code runs. That's why we need this line here to raise an Exception if a color is invalid:\n\n```python\ndef color_to_hex(color):\n    if color == Color.GREEN:\n        return '#00FF00'\n    elif color == Color.BLUE:\n        return '#0000FF'\n    elif color == Color.RED:\n        return '#FF0000'\n    # handle the case where the color is invalid\n    raise Exception('unknown color')\n```",
       position: 50,
     },
     {
@@ -417,7 +415,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'Match',
       content:
-        '# Match\n\n```py\nColor = Enum("Color", ["RED", "GREEN", "BLUE"])\n\ndef get_hex(color):\n    match color:\n        case Color.RED:\n            return "#FF0000"\n        case Color.GREEN:\n            return "#00FF00"\n        case Color.BLUE:\n            return "#0000FF"\n\n        # default case\n        # (invalid Color)\n        case _:\n            return "#FFFFFF"\n```\n\nMatching two values using a tuple\n\n```py\ndef get_hex(color, shade):\n    match (color, shade):\n        case (Color.RED, Shade.LIGHT):\n            return "#FFAAAA"\n        case (Color.RED, Shade.DARK):\n            return "#AA0000"\n        case (Color.GREEN, Shade.LIGHT):\n            return "#AAFFAA"\n        case (Color.GREEN, Shade.DARK):\n            return "#00AA00"\n        case (Color.BLUE, Shade.LIGHT):\n            return "#AAAAFF"\n        case (Color.BLUE, Shade.DARK):\n            return "#0000AA"\n\n        # default case\n        # (invalid combination)\n        case _:\n            return "#FFFFFF"\n```\n\nWitch class\n\n```py\nfrom enum import Enum\n\nclass DocFormat(Enum):\n    PDF = 1\n    TXT = 2\n    MD = 3\n    HTML = 4\n\ndef convert_format(content, from_format, to_format):\n    match (from_format, to_format):\n        case(DocFormat.MD, DocFormat.HTML):\n                return content.replace(\'# \',\'<h1>\') + \'</h1>\'\n        case(DocFormat.TXT, DocFormat.PDF):\n                return \'[PDF] \' + content  + \' [PDF]\'\n        case(DocFormat.HTML, DocFormat.MD):\n            return content.replace(\'<h1>\', \'# \').replace(\'</h1>\', \'\')\n        case _:\n            raise Exception(\'invalid type\')\n```\n\nEquivalent of switch in js',
+        '```py\nColor = Enum("Color", ["RED", "GREEN", "BLUE"])\n\ndef get_hex(color):\n    match color:\n        case Color.RED:\n            return "#FF0000"\n        case Color.GREEN:\n            return "#00FF00"\n        case Color.BLUE:\n            return "#0000FF"\n\n        # default case\n        # (invalid Color)\n        case _:\n            return "#FFFFFF"\n```\n\nMatching two values using a tuple\n\n```py\ndef get_hex(color, shade):\n    match (color, shade):\n        case (Color.RED, Shade.LIGHT):\n            return "#FFAAAA"\n        case (Color.RED, Shade.DARK):\n            return "#AA0000"\n        case (Color.GREEN, Shade.LIGHT):\n            return "#AAFFAA"\n        case (Color.GREEN, Shade.DARK):\n            return "#00AA00"\n        case (Color.BLUE, Shade.LIGHT):\n            return "#AAAAFF"\n        case (Color.BLUE, Shade.DARK):\n            return "#0000AA"\n\n        # default case\n        # (invalid combination)\n        case _:\n            return "#FFFFFF"\n```\n\nWitch class\n\n```py\nfrom enum import Enum\n\nclass DocFormat(Enum):\n    PDF = 1\n    TXT = 2\n    MD = 3\n    HTML = 4\n\ndef convert_format(content, from_format, to_format):\n    match (from_format, to_format):\n        case(DocFormat.MD, DocFormat.HTML):\n                return content.replace(\'# \',\'<h1>\') + \'</h1>\'\n        case(DocFormat.TXT, DocFormat.PDF):\n                return \'[PDF] \' + content  + \' [PDF]\'\n        case(DocFormat.HTML, DocFormat.MD):\n            return content.replace(\'<h1>\', \'# \').replace(\'</h1>\', \'\')\n        case _:\n            raise Exception(\'invalid type\')\n```\n\nEquivalent of switch in js',
       position: 51,
     },
     {
@@ -425,7 +423,7 @@ export const SAMPLE_DATA: SampleDataT = {
       subjectRef: '5b1ec700-0000-4000-8000-000000000001',
       title: 'list.extend()',
       content:
-        '# list.extend()\n\nAdd elements to the list\n\n```py\nlist1 = [1, 2]\nlist1.extend([3, 4])  # list1 is now [1, 2, 3, 4]\n```',
+        'Add elements to the list\n\n```py\nlist1 = [1, 2]\nlist1.extend([3, 4])  # list1 is now [1, 2, 3, 4]\n```',
       position: 52,
     },
   ],

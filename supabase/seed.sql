@@ -175,9 +175,7 @@ insert into subjects (id, user_id, title, description) values
 on conflict (id) do nothing;
 
 insert into notes (id, user_id, title, content, subject_id, position) values
-  ('0a7e0000-0000-4000-8000-000000000001', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Imperative (procedural) programming$seed$, $seed$# Imperative (procedural) programming
-
-We need to declare both what we want to happen and how we want it to happen.
+  ('0a7e0000-0000-4000-8000-000000000001', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Imperative (procedural) programming$seed$, $seed$We need to declare both what we want to happen and how we want it to happen.
 
 Imperative:
 
@@ -186,9 +184,7 @@ car = create_car()
 car.add_gas(10)
 car.clean_windows()
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 1),
-  ('0a7e0000-0000-4000-8000-000000000002', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Declarative programming$seed$, $seed$# Declarative programming
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000002', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Declarative programming$seed$, $seed$```py
 return clean_windows(add_gas(create_car()))
 ```
 
@@ -229,25 +225,19 @@ def get_average(nums):
 ```
 
 We do not keep track of the state (total), we only care about the result.$seed$, '5b1ec700-0000-4000-8000-000000000001', 2),
-  ('0a7e0000-0000-4000-8000-000000000003', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Functional programming basic concepts$seed$, $seed$# Functional programming basic concepts
-
-- higher order functions
+  ('0a7e0000-0000-4000-8000-000000000003', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Functional programming basic concepts$seed$, $seed$- higher order functions
 - first class functions
 - pure functions
 - recursion
 - closures
 - currying$seed$, '5b1ec700-0000-4000-8000-000000000001', 3),
-  ('0a7e0000-0000-4000-8000-000000000004', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Immutability$seed$, $seed$# Immutability
-
-Once the val is created it never changes.  
+  ('0a7e0000-0000-4000-8000-000000000004', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Immutability$seed$, $seed$Once the val is created it never changes.  
 Immutable data is easier to think about and work with. When 10 different functions have access to the same variable, and you're debugging a problem with that variable, you have to consider the possibility that any of those functions could have changed the value.
 
 When a variable is immutable, you can be sure that it hasn't changed since it was created. It's a helluva lot easier to work with.
 
 Generally speaking, `immutability means fewer bugs and more maintainable code.`$seed$, '5b1ec700-0000-4000-8000-000000000001', 4),
-  ('0a7e0000-0000-4000-8000-000000000005', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Tuples vs Lists$seed$, $seed$# Tuples vs Lists
-
-Both ordered sets of vals but
+  ('0a7e0000-0000-4000-8000-000000000005', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Tuples vs Lists$seed$, $seed$Both ordered sets of vals but
 `tuples are immutable` - you can not append to a tuple. You can create a new copy of a tuple with added value.
 
 ```py
@@ -262,9 +252,7 @@ all_ages = ages + more_ages
 ages = ages + more_ages
 # (16, 21, 30, 80)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 5),
-  ('0a7e0000-0000-4000-8000-000000000006', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorted()$seed$, $seed$# sorted()
-
-Sort items in the list
+  ('0a7e0000-0000-4000-8000-000000000006', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorted()$seed$, $seed$Sort items in the list
 
 ```py
 def get_median_font_size(font_sizes):
@@ -276,9 +264,7 @@ def get_median_font_size(font_sizes):
         return sorted_sizes[length // 2 - 1 ]
     return sorted_sizes[length // 2]
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 6),
-  ('0a7e0000-0000-4000-8000-000000000007', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Classes vs functions$seed$, $seed$# Classes vs functions
-
-Functional programming and object-oriented programming are `styles for writing code`.
+  ('0a7e0000-0000-4000-8000-000000000007', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Classes vs functions$seed$, $seed$Functional programming and object-oriented programming are `styles for writing code`.
 
 Of the `four pillars of OOP (inheritance, polymorphism, abstraction encapsulation)`, inheritance is the only one that doesn't fit with functional programming.
 
@@ -287,9 +273,7 @@ Default to functions. If we need something stateful and long-lived we might reac
 Classes encourage you to think about the `world as a hierarchical collection of objects`. Objects bundle behavior, data, and state together
 
 Functions encourage you to think about the world as a series of data transformations. Functions take data as input and return a transformed output.$seed$, '5b1ec700-0000-4000-8000-000000000001', 7),
-  ('0a7e0000-0000-4000-8000-000000000008', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$strip() #replace() #upper()$seed$, $seed$# strip() #replace() #upper()
-
-Equivalent of trim
+  ('0a7e0000-0000-4000-8000-000000000008', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$strip() #replace() #upper()$seed$, $seed$Equivalent of trim
 
 variations:
 
@@ -305,9 +289,7 @@ def format_line(line):
     return appended
     # return f"{line.rstrip().capitalize().replace(',', '')}...."
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 8),
-  ('0a7e0000-0000-4000-8000-000000000009', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Statements vs Expressions$seed$, $seed$# Statements vs Expressions
-
-`Statements - actions to be carried out.`  
+  ('0a7e0000-0000-4000-8000-000000000009', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Statements vs Expressions$seed$, $seed$`Statements - actions to be carried out.`  
 "Set n to 7"  
 "Define a function named greet"  
 "If x > 10, print a greeting to Alice"
@@ -353,9 +335,7 @@ for n in [1, 2, 3, 4]:
 ```
 
 `Expressions are reusable, declarative, do not mutate values and minize side effects`$seed$, '5b1ec700-0000-4000-8000-000000000001', 9),
-  ('0a7e0000-0000-4000-8000-000000000010', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Ternary expression$seed$, $seed$# Ternary expression
-
-We can change
+  ('0a7e0000-0000-4000-8000-000000000010', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Ternary expression$seed$, $seed$We can change
 
 ```py
 result = 0
@@ -372,9 +352,7 @@ result = number / 2 if number % 2 == 0 else (number * 3) + 1
 ```
 
 Like in js we should not overuse it as they tend to be hard to read$seed$, '5b1ec700-0000-4000-8000-000000000001', 10),
-  ('0a7e0000-0000-4000-8000-000000000011', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$First Class functions$seed$, $seed$# First Class functions
-
-`First class functions` means that a function in python can be treated like any other object
+  ('0a7e0000-0000-4000-8000-000000000011', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$First Class functions$seed$, $seed$`First class functions` means that a function in python can be treated like any other object
 
 - assigned to a value (functions as values)
 - passed as arguments to other functions
@@ -390,9 +368,7 @@ def foo(a, b:
 sum_foo = foo
 print(sum_foo(2, 2)) # 4
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 11),
-  ('0a7e0000-0000-4000-8000-000000000012', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Anonymous functions - lambda$seed$, $seed$# Anonymous functions - lambda
-
-In python unnamed functions are called `lambda `.  
+  ('0a7e0000-0000-4000-8000-000000000012', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Anonymous functions - lambda$seed$, $seed$In python unnamed functions are called `lambda `.  
 Example of a functions that takes `x` as an argument and returns `x + 1`
 
 ```py
@@ -436,9 +412,7 @@ def file_type_getter(file_extension_tuples):
     return lambda ext: file_extensions_dict.get(ext, "Unknown")
 
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 12),
-  ('0a7e0000-0000-4000-8000-000000000013', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Higher order function$seed$, $seed$# Higher order function
-
-`Function that takes another function as an argument`
+  ('0a7e0000-0000-4000-8000-000000000013', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Higher order function$seed$, $seed$`Function that takes another function as an argument`
 
 ```py
 def square(x):
@@ -452,9 +426,7 @@ def my_map(func, args):
 
 squares = my_map(square, [1, 2, 3, 4] )
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 13),
-  ('0a7e0000-0000-4000-8000-000000000014', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$map + list()$seed$, $seed$# map + list()
-
-`map, filter and reduce are higher order functions`
+  ('0a7e0000-0000-4000-8000-000000000014', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$map + list()$seed$, $seed$`map, filter and reduce are higher order functions`
 
 ```py
 def square(x):
@@ -482,9 +454,7 @@ def convert_line(line):
         return new_bullet + line[1:]
     return line
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 14),
-  ('0a7e0000-0000-4000-8000-000000000015', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$filter()$seed$, $seed$# filter()
-
-Similar syntax like in map, behaviour same like in js.
+  ('0a7e0000-0000-4000-8000-000000000015', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$filter()$seed$, $seed$Similar syntax like in map, behaviour same like in js.
 We can even use lambda inside like we would use a callback in js
 
 ```py
@@ -496,9 +466,7 @@ evens = list(filter(lambda x: x % 2 == 0, numbers))
 print(evens)
 # [2, 4, 6]
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 15),
-  ('0a7e0000-0000-4000-8000-000000000016', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$functools.reduce()$seed$, $seed$# functools.reduce()
-
-- it needs to be imported before use
+  ('0a7e0000-0000-4000-8000-000000000016', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$functools.reduce()$seed$, $seed$- it needs to be imported before use
 - takes two arguments
 - we can add an initial val for accumulator
 
@@ -522,9 +490,7 @@ It means that I can't for example print something and than return like I could i
 number = [1, 2, 3, 4 ]
 total = functools.reduce(lambda a, b: a + b, number)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 16),
-  ('0a7e0000-0000-4000-8000-000000000017', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$zip$seed$, $seed$# zip
-
-Take to iterables and combine them into a new iterable where each element is a tuple containig one element from each of the original iterables
+  ('0a7e0000-0000-4000-8000-000000000017', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$zip$seed$, $seed$Take to iterables and combine them into a new iterable where each element is a tuple containig one element from each of the original iterables
 
 ```py
     a = [1, 2, 3]
@@ -547,16 +513,10 @@ Take to iterables and combine them into a new iterable where each element is a t
     c = list(zip(a,b))
     # [(1, 1), (2, 2), (3, 3)]
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 17),
-  ('0a7e0000-0000-4000-8000-000000000018', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$type(variable)$seed$, $seed$# type(variable)
-
-Returns a type of a variable$seed$, '5b1ec700-0000-4000-8000-000000000001', 18),
-  ('0a7e0000-0000-4000-8000-000000000019', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sort() vs sorted()$seed$, $seed$# sort() vs sorted()
-
-arr.sort() - mutates original arr
+  ('0a7e0000-0000-4000-8000-000000000018', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$type(variable)$seed$, $seed$Returns a type of a variable$seed$, '5b1ec700-0000-4000-8000-000000000001', 18),
+  ('0a7e0000-0000-4000-8000-000000000019', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sort() vs sorted()$seed$, $seed$arr.sort() - mutates original arr
 arr.sorted() - returns sorted arr$seed$, '5b1ec700-0000-4000-8000-000000000001', 19),
-  ('0a7e0000-0000-4000-8000-000000000020', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$pure functions$seed$, $seed$# pure functions
-
-In majority of situations you want to use pure functions.
+  ('0a7e0000-0000-4000-8000-000000000020', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$pure functions$seed$, $seed$In majority of situations you want to use pure functions.
 
 - `Always return the same values given the same arguments`
 - `Cause no side effects`
@@ -591,9 +551,7 @@ print(dirty_add(10)) # 30
 
 So why we need to use unpure functions sometimes?  
 Because we need side effects every now and then.$seed$, '5b1ec700-0000-4000-8000-000000000001', 20),
-  ('0a7e0000-0000-4000-8000-000000000021', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Side Effects include:$seed$, $seed$# Side Effects include:
-
-`Anything that the function does, except returning a value`
+  ('0a7e0000-0000-4000-8000-000000000021', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Side Effects include:$seed$, $seed$`Anything that the function does, except returning a value`
 
 - printing to the console
 - updating db
@@ -604,9 +562,7 @@ Because we need side effects every now and then.$seed$, '5b1ec700-0000-4000-8000
 - I/O operations
 
 A program that has no side effects is effectively useless.$seed$, '5b1ec700-0000-4000-8000-000000000001', 21),
-  ('0a7e0000-0000-4000-8000-000000000022', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$References vs Copies$seed$, $seed$# References vs Copies
-
-Works almost like in js.
+  ('0a7e0000-0000-4000-8000-000000000022', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$References vs Copies$seed$, $seed$Works almost like in js.
 Collections are passed as references, `except tuples!`.
 
 When you pass a value into a function as an argument, one of two things can happen:
@@ -652,9 +608,7 @@ outer_num = 1
 attempt_to_modify(outer_num)
 # outer_num = 1
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 22),
-  ('0a7e0000-0000-4000-8000-000000000023', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$obj.copy()$seed$, $seed$# obj.copy()
-
-A way to avoid mutating original object.
+  ('0a7e0000-0000-4000-8000-000000000023', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$obj.copy()$seed$, $seed$A way to avoid mutating original object.
 
 ```py
 def add_format(default_formats, new_format):
@@ -662,9 +616,7 @@ def add_format(default_formats, new_format):
     updated[new_format] = True
     return updated
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 23),
-  ('0a7e0000-0000-4000-8000-000000000024', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Copying a list - copy$seed$, $seed$# Copying a list - copy
-
-To get a new copy of a list, use the copy() method. If you just do new_list = old_list, your new variable will just
+  ('0a7e0000-0000-4000-8000-000000000024', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Copying a list - copy$seed$, $seed$To get a new copy of a list, use the copy() method. If you just do new_list = old_list, your new variable will just
 be a reference to the original list.
 
 ```python
@@ -675,21 +627,15 @@ be a reference to the original list.
     # nums_copy is [4, 3, 2, 1]
 
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 24),
-  ('0a7e0000-0000-4000-8000-000000000025', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Delete from a list$seed$, $seed$# Delete from a list
-
-```python
+  ('0a7e0000-0000-4000-8000-000000000025', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Delete from a list$seed$, $seed$```python
     fruits = ["apple", "banana", "cherry", "kiwi"]
     del fruits[1]
     # fruits is ["apple", "cherry", "kiwi"]
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 25),
-  ('0a7e0000-0000-4000-8000-000000000026', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$I/O$seed$, $seed$# I/O
-
-The term "i/o" stands for `input/output.` In the context of writing programs, i/o refers to anything in our code that interacts with the "outside world". "Outside world" just means anything that's not stored in our application's memory (like variables).  
+  ('0a7e0000-0000-4000-8000-000000000026', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$I/O$seed$, $seed$The term "i/o" stands for `input/output.` In the context of writing programs, i/o refers to anything in our code that interacts with the "outside world". "Outside world" just means anything that's not stored in our application's memory (like variables).  
 All i/o is a form of "side effect". (including print)  
 In functional programming, i/o is viewed as dirty but necessary.$seed$, '5b1ec700-0000-4000-8000-000000000001', 26),
-  ('0a7e0000-0000-4000-8000-000000000027', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$No-Op$seed$, $seed$# No-Op
-
-`Operation that does nothing`
+  ('0a7e0000-0000-4000-8000-000000000027', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$No-Op$seed$, $seed$`Operation that does nothing`
 
 If a function doesn't return anything it is probably impure, and is performing some side effects.
 
@@ -711,9 +657,7 @@ def impure(x):
 ```
 
 The global keyword just tells Python to allow modification of the outer-scoped y variable.$seed$, '5b1ec700-0000-4000-8000-000000000001', 27),
-  ('0a7e0000-0000-4000-8000-000000000028', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Memoization$seed$, $seed$# Memoization
-
-In simple terms memoization is basically storing a copy (caching) of a result of a computation so that we don't have to calculate it again int the future.
+  ('0a7e0000-0000-4000-8000-000000000028', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Memoization$seed$, $seed$In simple terms memoization is basically storing a copy (caching) of a result of a computation so that we don't have to calculate it again int the future.
 
 ```py
 
@@ -737,9 +681,7 @@ def word_count(document):
 That is why we have dependency array to recalculate memoized val when using useMemo() in React.
 
 `Memoization is not free` - there is always a trade off between using RAM memory and speed. If function is fast enough it should'nt$seed$, '5b1ec700-0000-4000-8000-000000000001', 28),
-  ('0a7e0000-0000-4000-8000-000000000029', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Referential Transparency$seed$, $seed$# Referential Transparency
-
-`Pure functions are always referentialy transparent` meaning that pure functions can always be replaced by it's would be return value. Since this value is always the same every time.
+  ('0a7e0000-0000-4000-8000-000000000029', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Referential Transparency$seed$, $seed$`Pure functions are always referentialy transparent` meaning that pure functions can always be replaced by it's would be return value. Since this value is always the same every time.
 
 For example:
 
@@ -748,15 +690,11 @@ add(2, 3)
 ```
 
 Can simply be replaced with 5$seed$, '5b1ec700-0000-4000-8000-000000000001', 29),
-  ('0a7e0000-0000-4000-8000-000000000030', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$str to arr$seed$, $seed$# str to arr
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000030', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$str to arr$seed$, $seed$```py
 str = 'str'
 print(list(str))
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 30),
-  ('0a7e0000-0000-4000-8000-000000000031', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorted with a function$seed$, $seed$# sorted with a function
-
-This will be performed on each item
+  ('0a7e0000-0000-4000-8000-000000000031', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorted with a function$seed$, $seed$This will be performed on each item
 the transformation is only temporary for sorting. The key parameter in sorted() creates a "sort key" - it transforms each element just enough to make comparisons work, but returns the original elements in the sorted order.
 
 ```p6
@@ -774,9 +712,7 @@ def sort_dates(dates):
     # It sorts by these keys, then returns the ORIGINAL date strings
     return sorted(dates, key=transform_date)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 31),
-  ('0a7e0000-0000-4000-8000-000000000032', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$recursion$seed$, $seed$# recursion
-
-`Function that calls itself`
+  ('0a7e0000-0000-4000-8000-000000000032', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$recursion$seed$, $seed$`Function that calls itself`
 
 ```py
 def sum_nums(nums):
@@ -820,24 +756,18 @@ for item in tree:
             for nested_nested_nested_item in nested_nested_item:
                 # ... WHEN DOES IT END???
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 32),
-  ('0a7e0000-0000-4000-8000-000000000033', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Stack Overflow$seed$, $seed$# Stack Overflow
-
-Stack Overflow: Each function call requires a bit of memory. So, if you recurse too deeply, you can run out of "stack" memory which will crash your program. (This is what the famous website is named after)
+  ('0a7e0000-0000-4000-8000-000000000033', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Stack Overflow$seed$, $seed$Stack Overflow: Each function call requires a bit of memory. So, if you recurse too deeply, you can run out of "stack" memory which will crash your program. (This is what the famous website is named after)
 
 If you don't have a solid base case, you can end up in an infinite loop (which will likely lead to a stack overflow).
 
 Recursion (especially in a language like Python) is often slower than a for loop because each function call requires some memory.$seed$, '5b1ec700-0000-4000-8000-000000000001', 33),
-  ('0a7e0000-0000-4000-8000-000000000034', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$isinstance()$seed$, $seed$# isinstance()
-
-Returns true if an element is an instance of a certain type
+  ('0a7e0000-0000-4000-8000-000000000034', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$isinstance()$seed$, $seed$Returns true if an element is an instance of a certain type
 
 ```py
 isinstance(item, list):
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 34),
-  ('0a7e0000-0000-4000-8000-000000000035', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$.split(maxsplit=int)$seed$, $seed$# .split(maxsplit=int)$seed$, '5b1ec700-0000-4000-8000-000000000001', 35),
-  ('0a7e0000-0000-4000-8000-000000000036', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$function transformations$seed$, $seed$# function transformations
-
-A specific type of higher order function - `a function that takes another function as an argument nad returns a new function.`
+  ('0a7e0000-0000-4000-8000-000000000035', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$.split(maxsplit=int)$seed$, $seed$$seed$, '5b1ec700-0000-4000-8000-000000000001', 35),
+  ('0a7e0000-0000-4000-8000-000000000036', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$function transformations$seed$, $seed$A specific type of higher order function - `a function that takes another function as an argument nad returns a new function.`
 
 ```py
 def multiply(x, y):
@@ -906,9 +836,7 @@ print(bullet_point_formatter("Hello"))
 ```
 
 `90 % of times we want to use function transformations to create closures`.$seed$, '5b1ec700-0000-4000-8000-000000000001', 36),
-  ('0a7e0000-0000-4000-8000-000000000037', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$closures$seed$, $seed$# closures
-
-`Function that references variables from outside this function body.`
+  ('0a7e0000-0000-4000-8000-000000000037', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$closures$seed$, $seed$`Function that references variables from outside this function body.`
 Put simply, a closure is just a function that keeps track of some values from the place where it was defined, no matter where it is executed later on.
 
 `The whole point of a closure is that it's stateful`. It's a function that "remembers" the values from the enclosing scope even after the enclosing scope has finished executing.
@@ -962,16 +890,12 @@ def new_collection(initial_docs):
     return foo
 
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 37),
-  ('0a7e0000-0000-4000-8000-000000000038', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$copy.deepcopy()$seed$, $seed$# copy.deepcopy()
-
-.copy() method will produce a shallow copy - if we need we can use deepcopy() instead.
+  ('0a7e0000-0000-4000-8000-000000000038', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$copy.deepcopy()$seed$, $seed$.copy() method will produce a shallow copy - if we need we can use deepcopy() instead.
 
 ```py
     deep_copy = copy.deepcopy(initial_styles)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 38),
-  ('0a7e0000-0000-4000-8000-000000000039', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$currying$seed$, $seed$# currying
-
-`Function transformation where we transform a single function that accepts mutliple arguments into multiple functions that each accepts a single argument`
+  ('0a7e0000-0000-4000-8000-000000000039', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$currying$seed$, $seed$`Function transformation where we transform a single function that accepts mutliple arguments into multiple functions that each accepts a single argument`
 
 ```py
 def sum(a, b):
@@ -1050,9 +974,7 @@ print(final_volume)
 # 60
 
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 39),
-  ('0a7e0000-0000-4000-8000-000000000040', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$decorators$seed$, $seed$# decorators
-
-Basically a `syntactic sugar around function transformations` (returning a function by another function).  
+  ('0a7e0000-0000-4000-8000-000000000040', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$decorators$seed$, $seed$Basically a `syntactic sugar around function transformations` (returning a function by another function).  
 It is an often simpler way of writing higher order function.
 
 ```py
@@ -1087,9 +1009,7 @@ myFooIsNowDecorated('sialalala 🍆')
 # Vowel count: 5
 # sialalala 🍆
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 40),
-  ('0a7e0000-0000-4000-8000-000000000041', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$args and kwargs$seed$, $seed$# args and kwargs
-
-`*args` - collects positional arguments into a tuple (order matters)
+  ('0a7e0000-0000-4000-8000-000000000041', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$args and kwargs$seed$, $seed$`*args` - collects positional arguments into a tuple (order matters)
 `**kwargs` - collects keyword (named) arguments into a dictionary
 
 ```py
@@ -1132,9 +1052,7 @@ res = sub(a=3, b=2)
 # ❌ This will not work:
 res = sub(b=3, 2)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 41),
-  ('0a7e0000-0000-4000-8000-000000000042', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$enumerate$seed$, $seed$# enumerate
-
-If we are looping over an iterable and we need access to index we can use enumerate:
+  ('0a7e0000-0000-4000-8000-000000000042', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$enumerate$seed$, $seed$If we are looping over an iterable and we need access to index we can use enumerate:
 
 ```py
    for index, item in enumerate(args):
@@ -1153,22 +1071,16 @@ No manual indexing: Direct access to both index and item
 No length calculation: More efficient for large iterables
 Immutable pairs: Can't accidentally modify the wrong element
 Cleaner syntax: Expresses intent more clearly$seed$, '5b1ec700-0000-4000-8000-000000000001', 42),
-  ('0a7e0000-0000-4000-8000-000000000043', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorting by key$seed$, $seed$# sorting by key
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000043', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$sorting by key$seed$, $seed$```py
 dict = {"key": "val"}
 sorted_by_key = sorted(dict.keys())
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 43),
-  ('0a7e0000-0000-4000-8000-000000000044', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$tuple unpacking$seed$, $seed$# tuple unpacking
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000044', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$tuple unpacking$seed$, $seed$```py
 tuple = ("Konrad", "Antonik", "Scholar level 55")
 print(*tuple)
 # Konrad Antonik Scholar level 55
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 44),
-  ('0a7e0000-0000-4000-8000-000000000045', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$dict unpacking$seed$, $seed$# dict unpacking
-
-❌ This will not work
+  ('0a7e0000-0000-4000-8000-000000000045', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$dict unpacking$seed$, $seed$❌ This will not work
 Print does not have a name method
 
 ```py
@@ -1188,9 +1100,7 @@ def greet(name, age):
 my_dict = {"name": "Konrad", "age": 38}
 greet(**my_dict)  # Works: equivalent to greet(name="Konrad", age=38)
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 45),
-  ('0a7e0000-0000-4000-8000-000000000046', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$dict()$seed$, $seed$# dict()
-
-Transforms a key val pairs into dictionary
+  ('0a7e0000-0000-4000-8000-000000000046', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$dict()$seed$, $seed$Transforms a key val pairs into dictionary
 
 ```py
 # List of tuples
@@ -1205,9 +1115,7 @@ dict((('a', 1), ('b', 2)))
 # Mixed sequences
 dict([['a', 1], ('b', 2)])
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 46),
-  ('0a7e0000-0000-4000-8000-000000000047', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$lru_cache$seed$, $seed$# lru_cache
-
-lru_cache from the functools module is an example of a decorator and an example of memoization.
+  ('0a7e0000-0000-4000-8000-000000000047', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$lru_cache$seed$, $seed$lru_cache from the functools module is an example of a decorator and an example of memoization.
 
 lru_cache memoizes the inputs and outputs of the decorated function in a size-restricted dictionary. It speeds up repeated calls to a slow function with the same inputs. For instance, if the function reads from disk, makes network requests, or requires a lot of computation AND it is used repeatedly with the same inputs.
 
@@ -1230,9 +1138,7 @@ factorial_r(5)  # just looks up cached value result
 factorial_r(12) # makes two new recursive calls, the other 11 are cached
 # 479001600
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 47),
-  ('0a7e0000-0000-4000-8000-000000000048', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$stacking decorators + currying$seed$, $seed$# stacking decorators + currying
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000048', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$stacking decorators + currying$seed$, $seed$```py
 def to_uppercase(func):
     def wrapper(document):
         return func(document.upper())
@@ -1258,9 +1164,7 @@ print_input("Keep Calm and Carry On")
 ```
 
 Observe that to_uppercase wrapped get_truncate(9), and get_truncate(9) returned truncate which wrapped print_input, then print_input printed "KEEP CALM" from "Keep Calm and Carry On".$seed$, '5b1ec700-0000-4000-8000-000000000001', 48),
-  ('0a7e0000-0000-4000-8000-000000000049', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Sum types$seed$, $seed$# Sum types
-
-We can reduce the number of cases our code needs to handle by using a (admittedly fake Pythonic) sum type with only 3 possible types.
+  ('0a7e0000-0000-4000-8000-000000000049', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Sum types$seed$, $seed$We can reduce the number of cases our code needs to handle by using a (admittedly fake Pythonic) sum type with only 3 possible types.
 
 Then we can use the isinstance built-in function to check if a Person is an instance of one of the subclasses. It's a clunky way to represent sum types, but hey, it's Python.
 
@@ -1291,9 +1195,7 @@ def respond_to_text(guy_at_bar):
 ```
 
 This works as a python way of type checking but better way is to use Enums$seed$, '5b1ec700-0000-4000-8000-000000000001', 49),
-  ('0a7e0000-0000-4000-8000-000000000050', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Enums$seed$, $seed$# Enums
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000050', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Enums$seed$, $seed$```py
 from enum import Enum
 
 Color = Enum('Color', ['RED', 'GREEN', 'BLUE'])
@@ -1322,9 +1224,7 @@ def color_to_hex(color):
     # handle the case where the color is invalid
     raise Exception('unknown color')
 ```$seed$, '5b1ec700-0000-4000-8000-000000000001', 50),
-  ('0a7e0000-0000-4000-8000-000000000051', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Match$seed$, $seed$# Match
-
-```py
+  ('0a7e0000-0000-4000-8000-000000000051', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$Match$seed$, $seed$```py
 Color = Enum("Color", ["RED", "GREEN", "BLUE"])
 
 def get_hex(color):
@@ -1390,9 +1290,7 @@ def convert_format(content, from_format, to_format):
 ```
 
 Equivalent of switch in js$seed$, '5b1ec700-0000-4000-8000-000000000001', 51),
-  ('0a7e0000-0000-4000-8000-000000000052', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$list.extend()$seed$, $seed$# list.extend()
-
-Add elements to the list
+  ('0a7e0000-0000-4000-8000-000000000052', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', $seed$list.extend()$seed$, $seed$Add elements to the list
 
 ```py
 list1 = [1, 2]

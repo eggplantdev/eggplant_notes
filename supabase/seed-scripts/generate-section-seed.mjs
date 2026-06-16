@@ -57,7 +57,10 @@ function parseNoteSections(md) {
     const isH1 = !inFence && /^#\s+\S/.test(line);
     if (isH1) {
       if (current) sections.push(current);
-      current = { title: line.replace(/^#\s+/, '').trim(), body: [line] };
+      // Heading drives the note `title`, which the note view renders as a separate element — so it is
+      // NOT kept in `body` (matches splitMarkdown's import convention). Keeping it duplicated the title
+      // in the note view and in AI card-generation material (cardsMaterialFromNote prepends it again).
+      current = { title: line.replace(/^#\s+/, '').trim(), body: [] };
     } else if (current) {
       current.body.push(line);
     }
