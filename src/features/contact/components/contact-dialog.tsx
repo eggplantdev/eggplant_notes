@@ -41,7 +41,7 @@ export function ContactDialog() {
   return (
     <>
       <Button variant="ghost" size="sm" data-testid="contact-trigger" onClick={() => setOpen(true)}>
-        Contact
+        Contact me
       </Button>
       <Dialog
         open={open}

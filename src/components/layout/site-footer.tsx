@@ -6,11 +6,11 @@ import { ContactDialog } from '@/features/contact/components/contact-dialog'
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t">
-      <div className="container-shell flex flex-col items-center justify-between gap-3 py-6 text-sm sm:flex-row">
+      <div className="container-shell flex items-center justify-between gap-3 py-6 text-sm">
         <ContactDialog />
-        <div className="text-muted-foreground flex items-center gap-3">
+        <div className="text-muted-foreground flex items-center gap-2">
           <span>© 2026 eggplant_dev</span>
-          <BrandLogo className="size-5" />
+          <BrandLogo className="size-6" />
         </div>
       </div>
     </footer>
