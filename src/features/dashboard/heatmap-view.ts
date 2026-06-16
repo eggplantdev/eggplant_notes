@@ -5,6 +5,10 @@ import { formatFullDate } from '@/lib/utils/date'
 export const CELL = 11 // px square (legend swatch only)
 export const GAP = 2 // px between cells
 
+// Per-column floor on mobile: the grid claims max(100%, cols × this) so on a narrow phone it grows past
+// the viewport (→ horizontal scroll, touch-sized cells) while staying fluid full-width on larger screens.
+export const MIN_COL_WIDTH = 15 // px (cell + GAP)
+
 // e.g. "3 reviews · Wed, Jun 3, 2025" — UTC, matching the date keys.
 export function formatCellLabel(cell: HeatmapCellT): string {
   if (!cell.date) return ''

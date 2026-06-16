@@ -10,7 +10,7 @@ import {
 } from '@/features/dashboard/constants'
 import { HeatmapCell } from '@/features/dashboard/components/heatmap-cell'
 import { HeatmapTooltip } from '@/features/dashboard/components/heatmap-tooltip'
-import { CELL, formatCellLabel, GAP } from '@/features/dashboard/heatmap-view'
+import { CELL, formatCellLabel, GAP, MIN_COL_WIDTH } from '@/features/dashboard/heatmap-view'
 import type { HeatmapCellT, HeatmapColumnT } from '@/features/dashboard/types'
 import { cn } from '@/lib/utils'
 
@@ -35,45 +35,52 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
   }
 
   const cols = columns.length
+  // Floor the grid at cols × MIN_COL_WIDTH so it overflows (→ scroll) on narrow phones, stays fluid above.
+  const minWidth = `max(100%, ${cols * MIN_COL_WIDTH}px)`
 
   return (
     <div className="w-full pb-1">
-      {/* Month labels share the grid's column tracks so they stay aligned as cells grow; text overflows rightward. */}
-      <div
-        className="text-muted-foreground text-3xs mb-1.5 grid uppercase"
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: `${GAP}px` }}
-        aria-hidden
-      >
-        {columns.map((col, i) => (
-          <span key={i} className="relative block overflow-visible whitespace-nowrap">
-            {col.monthLabel}
-          </span>
-        ))}
-      </div>
+      {/* Touch-scrolls horizontally on mobile; fluid full-width on larger screens where 100% wins the max(). */}
+      <div className="-mx-1 overflow-x-auto px-1">
+        <div style={{ width: minWidth }}>
+          {/* Month labels share the grid's column tracks so they stay aligned as cells grow; text overflows rightward. */}
+          <div
+            className="text-muted-foreground text-3xs mb-1.5 grid uppercase"
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: `${GAP}px` }}
+            aria-hidden
+          >
+            {columns.map((col, i) => (
+              <span key={i} className="relative block overflow-visible whitespace-nowrap">
+                {col.monthLabel}
+              </span>
+            ))}
+          </div>
 
-      <div
-        role="img"
-        aria-label="Review activity heatmap for the last 12 months"
-        className="grid grid-flow-col"
-        style={{
-          // Fluid lattice: 7 fixed rows, N fluid columns; aspect-ratio (cols:7) keeps each cell square at any width.
-          gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
-          gridAutoColumns: 'minmax(0, 1fr)',
-          gap: `${GAP}px`,
-          aspectRatio: `${cols} / 7`,
-        }}
-      >
-        {columns.map((col, ci) =>
-          col.cells.map((cell, ri) => (
-            <HeatmapCell
-              key={`${ci}-${ri}`}
-              cell={cell}
-              ramp={ramp}
-              onEnter={showTip}
-              onLeave={hideTip}
-            />
-          )),
-        )}
+          <div
+            role="img"
+            aria-label="Review activity heatmap for the last 12 months"
+            className="grid grid-flow-col"
+            style={{
+              // Fluid lattice: 7 fixed rows, N fluid columns; aspect-ratio (cols:7) keeps each cell square at any width.
+              gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
+              gridAutoColumns: 'minmax(0, 1fr)',
+              gap: `${GAP}px`,
+              aspectRatio: `${cols} / 7`,
+            }}
+          >
+            {columns.map((col, ci) =>
+              col.cells.map((cell, ri) => (
+                <HeatmapCell
+                  key={`${ci}-${ri}`}
+                  cell={cell}
+                  ramp={ramp}
+                  onEnter={showTip}
+                  onLeave={hideTip}
+                />
+              )),
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="text-muted-foreground text-2xs mt-3 flex items-center gap-1">
