@@ -92,7 +92,7 @@ export default async function DashboardPage() {
       <TitledCard title="Review activity — last 12 months" className="w-full">
         <ActivityHeatmap columns={columns} variant="neon-cyan" />
       </TitledCard>
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
         <ReviewPanel card={card} goal={dailyGoal} />
         <div className="grid grid-cols-2 gap-4">
           {tiles.map((tile) => (
