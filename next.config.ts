@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
   // — without colliding on the Next build lock. Dev and Vercel leave NEXT_DIST_DIR unset, so
   // they use `.next` as before.
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // Allow cross-origin dev requests from this LAN IP (e.g. testing on a phone on the same network).
+  // Dev-only: Next validates this for the dev server's internal asset/HMR requests.
+  allowedDevOrigins: ['192.168.31.247'],
   experimental: {
     // The PDF import action (generateNotes file path) sends a base64 PDF in the Server Action body;
     // a 10 MB PDF is ~13.4 MB base64. The default Server Action body limit is 1 MB, which would
@@ -31,6 +34,7 @@ const nextConfig: NextConfig = {
     // busts become load-bearing. See context/changes/nav-cache-staletimes/.
     staleTimes: { dynamic: 300 },
   },
+
   async redirects() {
     return [
       {
