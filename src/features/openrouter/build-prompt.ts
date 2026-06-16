@@ -10,8 +10,28 @@ import {
 // the shown prompt can never drift from the sent one. Pure — the caller passes material it already
 // has (the grounded-cards caller passes the note it already loaded), so there's no DB fetch here.
 
+// A note's title is a separate field; `content` is not supposed to repeat it. But not every writer
+// can be trusted to honor that (a model that ignores the prompt, an API caller, a hand-edited row,
+// legacy seed data) — so we defensively drop a leading markdown heading whose text equals the title
+// before prepending our own `Note title:` line. Without this, such notes feed the title twice into the
+// card-generation context and every generated card echoes it.
+function stripDuplicateTitleHeading(title: string, content: string): string {
+  const lines = content.split('\n')
+  let i = 0
+  while (i < lines.length && lines[i].trim() === '') i++ // skip leading blank lines
+  const heading = lines[i]?.match(/^#{1,6}\s+(.*)$/)
+  if (heading && heading[1].trim() === title.trim()) {
+    return lines
+      .slice(i + 1)
+      .join('\n')
+      .trim()
+  }
+  return content
+}
+
 export function cardsMaterialFromNote(note: Pick<NoteT, 'title' | 'content'>): string {
-  return `Note title: ${note.title ?? 'Untitled'}\n\n${note.content}`
+  const title = note.title ?? 'Untitled'
+  return `Note title: ${title}\n\n${stripDuplicateTitleHeading(title, note.content)}`
 }
 
 export function cardsMaterialFromTopic(topic: string): string {

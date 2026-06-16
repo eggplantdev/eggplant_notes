@@ -15,6 +15,7 @@ export const CARDS_SYSTEM = [
 export const NOTES_DECOMPOSE_SYSTEM = [
   'You split source material into multiple focused study notes.',
   'Each note has a "title" and markdown "content".',
+  'The title is stored and shown separately — never repeat it as a heading inside "content".',
   'Identify the distinct topics and produce one note per topic — prefer several notes over one.',
   'Base every note ONLY on the provided text; do not invent material.',
 ].join(' ')
@@ -22,6 +23,7 @@ export const NOTES_DECOMPOSE_SYSTEM = [
 export const NOTES_TOPIC_SYSTEM = [
   'You write a single focused study note on the given topic.',
   'The note has a "title" and clear, well-structured markdown "content".',
+  'The title is stored and shown separately — never repeat it as a heading inside "content".',
 ].join(' ')
 
 // The built-in default per key — the fallback when a user has no override row (resolver returns

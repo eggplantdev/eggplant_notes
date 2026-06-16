@@ -23,7 +23,7 @@ function headingMatcher(level: SplitLevelT): RegExp {
 }
 
 // The matched heading text drives the note `title`, so it is NOT repeated in `content` (the note
-// renders its title separately) — unlike the seed script, which keeps the heading line in the body.
+// renders its title separately; the seed generator follows the same convention).
 // Deeper headings and all other lines stay in `content`.
 export function splitMarkdown(md: string, level: SplitLevelT): SplitSectionT[] {
   const isHeading = headingMatcher(level)
