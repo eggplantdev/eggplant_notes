@@ -27,15 +27,15 @@ export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
             size="sm"
             disabled={isPending}
             onClick={() =>
-              run(() => rateMemoryCard(memoryCardId, grade, goal, Boolean(advance)), {
-                successMessage: 'Review recorded',
-              }).then((result) => {
-                if (!result.success) return
-                // Celebrate AND advance: the dialog lives in the [id] layout's provider, so it
-                // survives the queue walk navigating to the next card behind it.
-                if (result.celebrate) celebrate(result.celebrate)
-                advance?.(result.nextDueId)
-              })
+              run(() => rateMemoryCard(memoryCardId, grade, goal, Boolean(advance))).then(
+                (result) => {
+                  if (!result.success) return
+                  // Celebrate AND advance: the dialog lives in the [id] layout's provider, so it
+                  // survives the queue walk navigating to the next card behind it.
+                  if (result.celebrate) celebrate(result.celebrate)
+                  advance?.(result.nextDueId)
+                },
+              )
             }
             className="h-auto flex-col gap-0.5 py-2"
           >
