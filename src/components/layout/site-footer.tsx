@@ -1,3 +1,4 @@
+import { BrandLogo } from '@/components/brand/brand-logo'
 import { ContactDialog } from '@/features/contact/components/contact-dialog'
 
 // Non-domain layout primitive. Uses the shared `container-shell` @utility so its edges line up with
@@ -8,7 +9,8 @@ export function SiteFooter() {
       <div className="container-shell flex flex-col items-center justify-between gap-3 py-6 text-sm sm:flex-row">
         <ContactDialog />
         <div className="text-muted-foreground flex items-center gap-3">
-          <span>© 2026 eggplant_dev.com 🍆</span>
+          <span>© 2026 eggplant_dev</span>
+          <BrandLogo className="size-5" />
         </div>
       </div>
     </footer>
