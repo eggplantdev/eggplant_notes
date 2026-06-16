@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { setOpenRouterModel } from '@/features/openrouter/actions/set-model'
 
-// Settings default-model picker. Persists on change (optimistic local value + toast); this is the
-// model used for all AI generation unless the generate dialog overrides it per-run.
+// Settings default-model picker. Persists on change (optimistic local value, reverts on failure);
+// this is the model used for all AI generation unless the generate dialog overrides it per-run.
 export function SettingsModelSelect({ defaultModel }: { defaultModel: string }) {
   const [model, setModel] = useState(defaultModel)
   const [isSaving, startSave] = useTransition()
@@ -18,7 +18,7 @@ export function SettingsModelSelect({ defaultModel }: { defaultModel: string }) 
     setModel(modelId)
     startSave(async () => {
       const result = await setOpenRouterModel({ modelId })
-      if (!toastActionResult(result, { successMessage: 'Default model saved' })) setModel(previous)
+      if (!toastActionResult(result)) setModel(previous)
     })
   }
 

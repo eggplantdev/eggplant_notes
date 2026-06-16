@@ -14,7 +14,8 @@ import { isNavActive } from './is-nav-active'
 import { ALL_NAV_ITEMS } from './nav-items'
 
 // Open and close controls share these exact classes so they sit in one spot and read as a single toggle.
-const TOGGLE_BUTTON_CLASS = 'fixed top-4 right-4 z-50 md:hidden'
+const TOGGLE_BUTTON_CLASS =
+  'fixed top-4 right-4 z-50 bg-black text-white hover:bg-black hover:text-white md:hidden'
 
 export function MobileNav({
   connected,
@@ -32,7 +33,7 @@ export function MobileNav({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="icon"
           aria-label="Open menu"
           className={TOGGLE_BUTTON_CLASS}
         >
@@ -45,7 +46,7 @@ export function MobileNav({
         <SheetClose asChild>
           <Button
             variant="outline"
-            size="icon-sm"
+            size="icon"
             aria-label="Close menu"
             className={TOGGLE_BUTTON_CLASS}
           >
