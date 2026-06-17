@@ -177,14 +177,16 @@ Approach selection is its own decision; do not implement Phase 2/3 from this sec
 - [x] 1.1 `next typegen` + `pnpm typecheck` passes — 313c96e
 - [x] 1.2 `pnpm lint` passes — 313c96e
 - [x] 1.3 `pnpm test` passes — 313c96e
-- [ ] 1.4 `pnpm test:e2e memory-card-review-page.spec.ts` passes — fix verified by reasoning + first-run partial pass (3/3 other specs green; only the caught-up assertion failed on the race now fixed). Green-confirmation deferred: a parallel `next dev` was continuously corrupting the shared `.next/dev/types/validator.ts` (in tsconfig include), breaking every prod-build type-check. Re-run when no `next dev` is active.
+- [ ] 1.4 `pnpm test:e2e memory-card-review-page.spec.ts` passes — the spec's BEHAVIOR is now confirmed via agent browser walk (see Manual 1.5/1.6: advance A→B then caught-up in place). The automated command itself stayed red-blocked by a parallel `next dev` continuously corrupting the shared `.next/dev/types/validator.ts` (in tsconfig include), which breaks every prod-build type-check. Re-run for the green checkmark when no `next dev` is active.
 
 #### Manual
 
-- [ ] 1.5 ≥3-card walk paints each next card instantly, no spinner
-- [ ] 1.6 Last card → caught-up notice, URL pinned
-- [ ] 1.7 Goal crossing still shows celebration dialog
-- [ ] 1.8 Failed rating → error toast, card still due on reload
+> Verified by agent via Playwright against the running dev server (fresh isolated account, 2 due cards) — mirrors the blocked E2E spec. Dev mode can't judge perceived "instant" speed; the user should confirm that feel on a prod build.
+
+- [x] 1.5 walk advances correctly, no spinner/overlay — agent browser: rated card A (Good) → URL advanced A→B, no loading overlay shown (perceived-speed on prod-build still user-to-confirm)
+- [x] 1.6 Last card → caught-up notice, URL pinned — agent browser: rated last card (Good) → "All caught up" in place, URL stayed on card B (the exact assertion the pre-fix run failed)
+- [ ] 1.7 Goal crossing still shows celebration dialog — not exercised (goal not crossed in the 2-card run); celebrate() mechanism unchanged, still routed through the `[id]` layout provider
+- [ ] 1.8 Failed rating → error toast, card still due on reload — not simulated (needs forced network failure); toast path is straightforward, user-to-confirm
 
 ### Phase 2 + 3: Heavy in-place surfaces — APPROACH UNDECIDED
 
