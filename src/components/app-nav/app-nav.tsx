@@ -45,6 +45,9 @@ export async function AppNav() {
         </div>
       </header>
 
+      {/* Mobile-only gradient backing the fixed brand/label/hamburger (which sit at z-50) — mirrors the desktop header fade. */}
+      <div className="from-background pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-40% to-transparent md:hidden" />
+
       {/* Mobile-only fixed brand, mirroring the floating hamburger on the right — the logo is the dashboard link. */}
       <BrandMark
         href="/dashboard"
