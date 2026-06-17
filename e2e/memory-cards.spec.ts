@@ -38,8 +38,12 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await expect(page.getByText(editedPrompt)).toBeVisible({ timeout: 15_000 })
 
   // Saving redirects to the /memory-cards listing; delete from there via the row's AlertDialog.
-  // Listing rows are card links (not <li>), with Edit/Delete buttons in the action slot.
-  const editedRow = page.getByRole('link').filter({ hasText: editedPrompt })
+  // Listing cards aren't links — locate the list card by its prompt + Review button (the review
+  // panel is also a card but has no Review button), then delete from its action slot.
+  const editedRow = page
+    .locator('[data-slot="card"]')
+    .filter({ hasText: editedPrompt })
+    .filter({ has: page.getByRole('button', { name: 'Review' }) })
   await editedRow.getByRole('button', { name: 'Delete' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })

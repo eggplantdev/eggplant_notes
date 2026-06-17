@@ -7,8 +7,11 @@ import { attachCheck, signUp, uniqueEmail } from './helpers'
 //     source-note title.
 //  2. The Subjects multiselect filters the list server-side (?subjects=<id> in the URL),
 //     committed on popover close (the debounce's flush-on-close) — joining through notes.
-//  3. Clicking a card opens its own review page, from which the source note stays reachable.
-// Shared auth/check helpers live in ./helpers.
+//  3. The per-card Review button selects it into the in-place review panel (?review=<id>, no
+//     navigation away), from which the source note stays reachable.
+// Shared auth/check helpers live in ./helpers. Cards are NOT links — they carry a Review button; the
+// list card is located by [data-slot=card] filtered to the prompt AND a Review button (the in-place
+// review PANEL is also a card but has no Review button, so this disambiguates panel from list).
 
 async function createSubject(page: Page, title: string): Promise<void> {
   await page.goto('/subjects/new')
@@ -47,13 +50,20 @@ test('memory-cards listing: lists checks, filters by subject, card opens its rev
   await createNoteInSubject(page, `Note B ${stamp}`, subjB)
   await attachCheck(page, promptB)
 
+  // A list card = a [data-slot=card] holding the prompt AND a Review button (the review panel is also
+  // a card but has no Review button — this picks the LIST card, not the panel).
+  const listCard = (prompt: string) =>
+    page
+      .locator('[data-slot="card"]')
+      .filter({ hasText: prompt })
+      .filter({ has: page.getByRole('button', { name: 'Review' }) })
+
   // (1) Both checks list, and card A carries its subject chip + source-note title.
   await page.goto('/memory-cards')
-  const cardA = page.getByRole('link').filter({ hasText: promptA })
-  await expect(cardA).toBeVisible()
-  await expect(page.getByRole('link').filter({ hasText: promptB })).toBeVisible()
-  await expect(cardA).toContainText(subjA)
-  await expect(cardA).toContainText(noteA)
+  await expect(listCard(promptA)).toBeVisible()
+  await expect(listCard(promptB)).toBeVisible()
+  await expect(listCard(promptA)).toContainText(subjA)
+  await expect(listCard(promptA)).toContainText(noteA)
 
   // (2) Filter by subject A: open the Subjects multiselect, check A, close to flush the commit.
   await page.getByRole('combobox', { name: /Subjects/ }).click()
@@ -61,11 +71,12 @@ test('memory-cards listing: lists checks, filters by subject, card opens its rev
   await page.keyboard.press('Escape')
 
   await expect(page).toHaveURL(/\?subjects=[0-9a-f-]+/, { timeout: 15_000 })
-  await expect(page.getByRole('link').filter({ hasText: promptA })).toBeVisible()
-  await expect(page.getByRole('link').filter({ hasText: promptB })).toHaveCount(0)
+  await expect(listCard(promptA)).toBeVisible()
+  await expect(listCard(promptB)).toHaveCount(0)
 
-  // (3) Click the card → its own review page; the source note stays reachable from there.
-  await page.getByRole('link').filter({ hasText: promptA }).click()
-  await expect(page).toHaveURL(/\/memory-cards\/[0-9a-f-]+$/, { timeout: 15_000 })
+  // (3) Click the card's Review button → it's selected into the in-place panel (?review=<id>, no
+  // navigation away); the source note stays reachable from the panel.
+  await listCard(promptA).getByRole('button', { name: 'Review' }).click()
+  await expect(page).toHaveURL(/[?&]review=[0-9a-f-]+/, { timeout: 15_000 })
   await expect(page.getByRole('link', { name: `From: ${noteA}` })).toBeVisible()
 })

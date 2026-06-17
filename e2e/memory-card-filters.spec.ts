@@ -34,7 +34,13 @@ test('memory-cards: State + Maturity filters narrow server-side and AND-compose'
   ])
   expect(error, 'seed insert failed').toBeNull()
 
-  const row = (text: string) => page.getByRole('link').filter({ hasText: text })
+  // Cards aren't links — a list row is the [data-slot=card] carrying the prompt AND a Review button
+  // (the in-place review panel is also a card but has no Review button, so this excludes it).
+  const row = (text: string) =>
+    page
+      .locator('[data-slot="card"]')
+      .filter({ hasText: text })
+      .filter({ has: page.getByRole('button', { name: 'Review' }) })
 
   // Baseline — all three list.
   await page.goto('/memory-cards')

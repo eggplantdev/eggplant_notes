@@ -4,9 +4,9 @@ import { clientFor, signUp, uniqueEmail } from './helpers'
 
 // Topic-scoped review on /memory-cards (test-plan §3 Phase-debt; change topic-scoped-review,
 // archived 2026-06-09). RISK: the Review PANEL on the listing page must scope its due queue to the
-// active filters — not the global queue the dashboard / [id] page walk. This crosses boundaries the
-// layers below can't prove together: the filter searchParams → getDueQueue(opts) → ReviewPanel →
-// rateMemoryCard → revalidatePath('/memory-cards') → the NEXT filtered-due card on SSR re-render.
+// active filters — not the global queue the dashboard uses. This crosses boundaries the layers
+// below can't prove together: the filter searchParams → getDueQueue(opts) → ReviewPanel →
+// rateMemoryCard → revalidatePath('/', 'layout') → the NEXT filtered-due card on SSR re-render.
 // The list filter is already covered (memory-card-filters.spec.ts); the panel's getDueQueue scoping
 // is NOT — and a regression there is invisible to unit/integration.
 //
@@ -88,10 +88,19 @@ test('topic-scoped review: panel scopes its due queue to the subject filter and 
   await expect(page.getByText(promptB1)).toHaveCount(0)
   await expect(page.getByRole('button', { name: /Good/ })).toBeVisible()
 
-  // Rate the last A card → A's filtered queue empties → caught-up shown IN PLACE. The list survives
-  // beneath it (gate total>0: A's cards still exist, just not due), and B1 is still nowhere.
+  // Rate the last A card → A's filtered due count hits 0 → the panel drops the count and shows the
+  // "All caught up — reviewing ahead" note IN PLACE (review-ahead keeps the user unblocked instead of
+  // dead-ending). The list survives beneath it (gate total>0: A's cards still exist, just not due),
+  // and B1 is still nowhere.
   await page.getByRole('button', { name: /Good/ }).click()
   await expect(page.getByText('All caught up', { exact: false })).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText(promptB1)).toHaveCount(0)
-  await expect(page.getByRole('link').filter({ hasText: promptA1 })).toBeVisible()
+  // The list survives beneath the panel. Cards aren't links now — the A1 list card is the
+  // [data-slot=card] carrying a Review button (the panel card has none), so this picks the list row.
+  await expect(
+    page
+      .locator('[data-slot="card"]')
+      .filter({ hasText: promptA1 })
+      .filter({ has: page.getByRole('button', { name: 'Review' }) }),
+  ).toBeVisible()
 })
