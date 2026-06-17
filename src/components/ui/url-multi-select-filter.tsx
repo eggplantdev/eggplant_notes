@@ -21,6 +21,8 @@ type UrlMultiSelectFilterPropsT = {
   searchable?: boolean
   searchPlaceholder?: string
   emptyMessage?: string
+  // Trigger width; defaults to the standalone filter width. A parent grid passes `w-full` to fill its cell.
+  triggerClassName?: string
 }
 
 // Generic URL-driven multiselect filter; selection lives in the URL so it's shareable and scales
@@ -36,6 +38,7 @@ export function UrlMultiSelectFilter({
   searchable,
   searchPlaceholder,
   emptyMessage,
+  triggerClassName = 'w-full sm:w-64',
 }: UrlMultiSelectFilterPropsT) {
   const router = useRouter()
   const pathname = usePathname()
@@ -116,7 +119,7 @@ export function UrlMultiSelectFilter({
         searchable={searchable}
         searchPlaceholder={searchPlaceholder}
         emptyMessage={emptyMessage}
-        className="w-full sm:w-64"
+        className={triggerClassName}
         data-testid={`filter-${paramKey}`}
       />
 

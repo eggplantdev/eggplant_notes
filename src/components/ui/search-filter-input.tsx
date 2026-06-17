@@ -67,11 +67,12 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
   useEffect(() => () => clearTimeout(timer.current ?? undefined), [])
 
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn('relative w-full sm:w-64', className)}>
+      {/* opacity-50 over foreground matches the select chevrons (ChevronsUpDown) sitting beside it. */}
       {isSearching ? (
-        <Loader2 className="text-muted-foreground absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin" />
+        <Loader2 className="absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin opacity-50" />
       ) : (
-        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2" />
+        <Search className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 opacity-50" />
       )}
       <Input
         type="search"
@@ -81,8 +82,9 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
         placeholder={placeholder}
         // Mirror the sm-size Button's touch-first sizing exactly (selects beside it use it): h-8/text-sm
         // on mobile, h-7/text-control from sm up. md:text-control defeats Input's base md:text-sm so the
-        // font stays matched to the button (which has no md override) on desktop.
-        className="sm:text-control md:text-control h-8 w-full pr-8 text-sm sm:h-7 sm:w-64"
+        // font stays matched to the button (which has no md override) on desktop. Width is the wrapper's
+        // job (so a parent grid can size it), input just fills it.
+        className="sm:text-control md:text-control h-8 w-full pr-8 text-sm sm:h-7"
       />
     </div>
   )

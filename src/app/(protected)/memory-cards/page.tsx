@@ -128,16 +128,24 @@ export default async function MemoryCardsPage({
         {/* The filters and the card list are one section ("Cards"), so they sit at the standard gap
             from each other — only the major sections above use the bigger gap-12. */}
         <div className="flex flex-col gap-6">
+          {/* Grid so the filters stay even columns that shrink with the viewport instead of
+              overflowing; each control fills its cell (w-full) rather than a hardcoded width. */}
           {(total > 0 || isFiltered) && (
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-              <SearchFilterInput placeholder="Search memory cards…" />
-              {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {subjects.length > 0 && (
+                <SubjectFilter
+                  options={options}
+                  selectedIds={selectedIds}
+                  triggerClassName="w-full"
+                />
+              )}
               <UrlMultiSelectFilter
                 paramKey="state"
                 options={FSRS_STATE_LABELS.map((label, i) => ({ value: String(i), label }))}
                 selectedValues={states.map(String)}
                 placeholder="State"
                 searchable={false}
+                triggerClassName="w-full"
               />
               <UrlMultiSelectFilter
                 paramKey="maturity"
@@ -145,7 +153,9 @@ export default async function MemoryCardsPage({
                 selectedValues={maturity}
                 placeholder="Maturity"
                 searchable={false}
+                triggerClassName="w-full"
               />
+              <SearchFilterInput placeholder="Search memory cards…" className="sm:w-full" />
             </div>
           )}
 
