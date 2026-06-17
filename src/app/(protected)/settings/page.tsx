@@ -30,7 +30,6 @@ export default async function SettingsPage() {
       <SettingsSection
         title="AI (OpenRouter)"
         description="Bring your own OpenRouter key to generate notes and cards with AI. The key is encrypted and used only on the server."
-        className="gradient-border"
       >
         <ConnectCard connected={openRouterConnected} defaultModel={openRouterModel} />
       </SettingsSection>
