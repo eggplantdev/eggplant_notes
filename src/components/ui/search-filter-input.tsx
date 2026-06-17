@@ -79,7 +79,7 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className="h-7 w-full pl-8 text-[0.8rem] sm:w-64"
+        className="text-control h-7 w-full pl-8 sm:w-64"
       />
     </div>
   )

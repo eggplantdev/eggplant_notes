@@ -25,7 +25,7 @@ type SegmentedTogglePropsT<V extends string> = {
 }
 
 const SIZE = {
-  sm: 'h-7 px-2.5 text-[0.8rem]',
+  sm: 'h-7 px-2.5 text-control',
   default: 'h-8 px-3 text-sm',
 } as const
 
