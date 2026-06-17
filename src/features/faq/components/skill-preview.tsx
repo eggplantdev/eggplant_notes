@@ -9,9 +9,7 @@ type PropsT = { skill: string }
 export function SkillPreview({ skill }: PropsT) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-3">
-        <CopySkillButton skill={skill} />
-      </div>
+      <CopySkillButton skill={skill} />
       <pre className="border-border bg-muted max-h-96 overflow-auto rounded-md border p-4 font-mono text-xs whitespace-pre">
         {skill}
       </pre>

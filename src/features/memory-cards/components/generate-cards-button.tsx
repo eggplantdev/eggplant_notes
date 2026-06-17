@@ -66,23 +66,21 @@ export function GenerateCardsButton({
   return (
     <div className="flex flex-col gap-3">
       {!candidates && (
-        <div>
-          <GenerateDialog<GeneratedCardT>
-            connected={connected}
-            defaultModel={defaultModel}
-            previewInput={{
-              task: 'cards',
-              material: cardsMaterialFromNote({ title: noteTitle, content: noteContent }),
-            }}
-            action={(modelId, promptOverride) => generateCards({ noteId, modelId, promptOverride })}
-            onResult={(data) => setCandidates(data)}
-            triggerLabel="Generate with AI"
-            triggerTestId="cards-generate-ai"
-            dialogTitle="Generate cards from this note"
-            resultNoun="card"
-            applyHint="Cards ready below — review, then Add to save."
-          />
-        </div>
+        <GenerateDialog<GeneratedCardT>
+          connected={connected}
+          defaultModel={defaultModel}
+          previewInput={{
+            task: 'cards',
+            material: cardsMaterialFromNote({ title: noteTitle, content: noteContent }),
+          }}
+          action={(modelId, promptOverride) => generateCards({ noteId, modelId, promptOverride })}
+          onResult={(data) => setCandidates(data)}
+          triggerLabel="Generate with AI"
+          triggerTestId="cards-generate-ai"
+          dialogTitle="Generate cards from this note"
+          resultNoun="card"
+          applyHint="Cards ready below — review, then Add to save."
+        />
       )}
 
       {candidates && (
