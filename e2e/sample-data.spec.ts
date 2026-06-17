@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test'
 import { signUp, uniqueEmail } from './helpers'
 
 // S-12: the Load / Clear sample-data demo flow on a fresh account. Sign up → /notes shows the
-// Load CTA in its empty state → Load → notes/subjects populate and the dashboard review panel has
+// Load CTA in its empty state → Load → notes/subjects populate and the dashboard review teaser has
 // a due card → Clear (from /settings) → account empty again, Load reappears. Targets the controls
 // by data-testid (lessons.md); asserts on COMMITTED fixture content ("Immutability" — a note we
-// own) and on the review buttons, not on UI copy. Self-seeds via fresh-per-test sign-up and
+// own) and on the review teaser's Review link, not on UI copy. Self-seeds via fresh-per-test sign-up and
 // asserts clean-slate state, so it must NOT share a session. Sign-up flake is environmental
 // (lessons.md) — retries: 2 reruns from a brand-new account.
 
@@ -27,9 +27,11 @@ test('load then clear sample data round-trips an empty account', async ({ page }
   await expect(page.getByText('No notes yet', { exact: false })).toHaveCount(0)
 
   // Cards loaded with default scheduling (state=0, due_at=now) → all due now, so the dashboard
-  // review panel shows a gradable card (rating buttons), not "All caught up".
+  // review teaser previews a due card with a "Review" link out (not the "All caught up" note).
   await page.goto('/dashboard')
-  await expect(page.getByRole('button', { name: /Good/ })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByRole('link', { name: 'Review', exact: true })).toBeVisible({
+    timeout: 15_000,
+  })
 
   // Clear from settings (both controls always render — gating is on-demand via the actions).
   await page.goto('/settings')

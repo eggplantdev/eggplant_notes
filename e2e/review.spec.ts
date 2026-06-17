@@ -3,7 +3,8 @@ import { test, expect } from '@playwright/test'
 import { attachCheck, clientFor, createNote, signUp, uniqueEmail } from './helpers'
 
 // S-03 north-star path: the recall loop end-to-end (FR-016–019). Sign up → create a note →
-// attach a memory card → open /dashboard (the review panel lives here now) → rate it → assert
+// attach a memory card → open /memory-cards (the review panel lives here; the dashboard only
+// previews + links out now) → rate it → assert
 // the check leaves the queue AND that the schedule/event actually changed in the DB
 // (review_events row written, due_at pushed to
 // the future). Plus cross-account RLS on the review read + rate paths. Shared helpers in
@@ -25,17 +26,21 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
   const prompt = `What is a closure? ${Date.now()}`
   await attachCheck(page, prompt)
 
-  // The dashboard's review panel shows the question + four rating buttons, each with an interval preview.
-  await page.goto('/dashboard')
-  await expect(page.getByText(prompt)).toBeVisible()
+  // The /memory-cards review panel shows the question + four rating buttons, each with an interval
+  // preview. Scope to the panel (#review-panel): the same prompt also renders in the list row below,
+  // so an unscoped getByText would match twice (strict-mode violation).
+  await page.goto('/memory-cards')
+  const panel = page.locator('#review-panel')
+  await expect(panel.getByText(prompt)).toBeVisible({ timeout: 15_000 })
   for (const label of ['Again', 'Hard', 'Good', 'Easy']) {
-    const button = page.getByRole('button', { name: new RegExp(label) })
+    const button = panel.getByRole('button', { name: new RegExp(label) })
     await expect(button).toBeVisible()
     await expect(button, `${label} should show an interval preview`).toContainText(/\d/)
   }
 
-  // Rate Good → the queue empties (only one check) → "All caught up".
-  await page.getByRole('button', { name: /Good/ }).click()
+  // Rate Good → the only due card leaves the queue → the panel shows the "All caught up — reviewing
+  // ahead" note (review-ahead keeps the user unblocked).
+  await panel.getByRole('button', { name: /Good/ }).click()
   await expect(page.getByText('All caught up', { exact: false })).toBeVisible({ timeout: 15_000 })
 
   // The schedule + event actually changed: one review_event (rating 3), due_at now in the future.
@@ -55,7 +60,7 @@ test('full loop: review a due check, rate Good, and the schedule + event change'
 })
 
 // RLS on the review path: account B can neither see nor rate account A's checks. B's dashboard
-// review panel is empty even though A has a due check, and calling record_review against A's id writes nothing
+// review teaser shows "All caught up" even though A has a due check, and calling record_review against A's id writes nothing
 // (the RPC's update-first ownership guard matches 0 rows under RLS → raises → no event).
 test('review path is isolated by account', async ({ browser }) => {
   const emailA = uniqueEmail('rev-iso-a')
@@ -86,7 +91,8 @@ test('review path is isolated by account', async ({ browser }) => {
   expect(tc.error, 'A memory_card insert failed').toBeNull()
   const aCheckId = tc.data!.id
 
-  // B opens /dashboard → "All caught up" (A's due check is hidden by RLS, not visible to B).
+  // B opens /dashboard → its review teaser reads "All caught up" (A's due check is hidden by RLS,
+  // so B has no soonest-due prompt).
   await pageB.goto('/dashboard')
   await expect(pageB.getByText('All caught up', { exact: false })).toBeVisible({ timeout: 15_000 })
   await ctxB.close()
