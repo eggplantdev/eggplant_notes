@@ -28,6 +28,9 @@ type MultiSelectPropsT = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   placeholder?: string
+  // Show the in-popover filter box. Off for short, self-explanatory option sets where typing to
+  // filter is more friction than help (e.g. a handful of state/maturity values).
+  searchable?: boolean
   searchPlaceholder?: string
   emptyMessage?: string
   className?: string
@@ -44,6 +47,7 @@ export function MultiSelect({
   open: openProp,
   onOpenChange,
   placeholder = 'Select…',
+  searchable = true,
   searchPlaceholder = 'Search…',
   emptyMessage = 'No results.',
   className,
@@ -79,9 +83,9 @@ export function MultiSelect({
       </PopoverTrigger>
       <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          {searchable && <CommandInput placeholder={searchPlaceholder} />}
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            {searchable && <CommandEmpty>{emptyMessage}</CommandEmpty>}
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

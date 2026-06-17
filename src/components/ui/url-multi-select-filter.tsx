@@ -18,6 +18,7 @@ type UrlMultiSelectFilterPropsT = {
   // Values currently in the URL (`?<paramKey>=a,b`) — server-derived, the source of truth.
   selectedValues: string[]
   placeholder?: string
+  searchable?: boolean
   searchPlaceholder?: string
   emptyMessage?: string
 }
@@ -32,6 +33,7 @@ export function UrlMultiSelectFilter({
   options,
   selectedValues,
   placeholder,
+  searchable,
   searchPlaceholder,
   emptyMessage,
 }: UrlMultiSelectFilterPropsT) {
@@ -111,6 +113,7 @@ export function UrlMultiSelectFilter({
         values={selected}
         onValuesChange={handleChange}
         placeholder={placeholder}
+        searchable={searchable}
         searchPlaceholder={searchPlaceholder}
         emptyMessage={emptyMessage}
         className="w-full sm:w-64"

@@ -1,8 +1,5 @@
-import type { ReactNode } from 'react'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CardActions } from '@/components/ui/card-actions'
-import { MutedText } from '@/components/ui/muted-text'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { AnswerDisclosure } from '@/features/review/components/answer-disclosure'
 import { buildPreviews } from '@/features/review/build-previews'
@@ -16,8 +13,6 @@ import type { DueCardT } from '@/features/memory-cards/types'
 
 // provideCelebration: both surfaces (dashboard, /memory-cards) advance in place, so they self-provide
 // the celebration dialog (default true).
-// subtitle: optional context line under the card title (the /memory-cards panel shows the active
-// filter + due count here); omitted on the dashboard.
 // showCardControls: render per-card Edit/Delete in the header — on for both in-place review panels.
 // advanceHref: passed through to RatingButtons; the /memory-cards panel uses it to clear its
 // `?review` selection after a rating so the next card surfaces (omitted on the dashboard).
@@ -25,7 +20,6 @@ type PropsT = {
   card: DueCardT | undefined
   goal: number
   provideCelebration?: boolean
-  subtitle?: ReactNode
   showCardControls?: boolean
   deleteRedirectTo?: string
   advanceHref?: string
@@ -38,7 +32,6 @@ export function ReviewPanel({
   card,
   goal,
   provideCelebration = true,
-  subtitle,
   showCardControls = false,
   deleteRedirectTo,
   advanceHref,
@@ -52,7 +45,6 @@ export function ReviewPanel({
   ) : (
     <Card className="gradient-border ring-0">
       <CardHeader>
-        {subtitle && <MutedText>{subtitle}</MutedText>}
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
           {showCardControls && (
@@ -73,6 +65,8 @@ export function ReviewPanel({
             noteId={card.note_id}
             subjectId={card.notes.subject_id}
             title={card.notes.title}
+            // Mobile buttons are taller (h-8 vs h-7), so add breathing room below them; desktop keeps the tight header gap.
+            className="mt-2 sm:mt-0"
           />
         )}
       </CardHeader>

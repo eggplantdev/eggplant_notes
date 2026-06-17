@@ -69,9 +69,9 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
   return (
     <div className={cn('relative', className)}>
       {isSearching ? (
-        <Loader2 className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2 animate-spin" />
+        <Loader2 className="text-muted-foreground absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin" />
       ) : (
-        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2" />
       )}
       <Input
         type="search"
@@ -79,7 +79,10 @@ export function SearchFilterInput({ placeholder = 'Search…', className }: Sear
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className="text-control h-7 w-full pl-8 sm:w-64"
+        // Mirror the sm-size Button's touch-first sizing exactly (selects beside it use it): h-8/text-sm
+        // on mobile, h-7/text-control from sm up. md:text-control defeats Input's base md:text-sm so the
+        // font stays matched to the button (which has no md override) on desktop.
+        className="sm:text-control md:text-control h-8 w-full pr-8 text-sm sm:h-7 sm:w-64"
       />
     </div>
   )

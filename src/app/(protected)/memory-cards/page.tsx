@@ -1,6 +1,7 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
+import { MutedText } from '@/components/ui/muted-text'
 import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -102,7 +103,7 @@ export default async function MemoryCardsPage({
       )}
 
       {(total > 0 || isFiltered) && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <SearchFilterInput placeholder="Search memory cards…" />
           {subjects.length > 0 && <SubjectFilter options={options} selectedIds={selectedIds} />}
           <UrlMultiSelectFilter
@@ -110,16 +111,14 @@ export default async function MemoryCardsPage({
             options={FSRS_STATE_LABELS.map((label, i) => ({ value: String(i), label }))}
             selectedValues={states.map(String)}
             placeholder="State"
-            searchPlaceholder="Search states…"
-            emptyMessage="No states found."
+            searchable={false}
           />
           <UrlMultiSelectFilter
             paramKey="maturity"
             options={MATURITY_OPTIONS}
             selectedValues={maturity}
             placeholder="Maturity"
-            searchPlaceholder="Search maturity…"
-            emptyMessage="No options found."
+            searchable={false}
           />
         </div>
       )}
@@ -133,17 +132,19 @@ export default async function MemoryCardsPage({
         // The page is width="full" for the card grid; cap the review panel so it stays a
         // comfortable reading width instead of stretching across the whole deck width. id anchors the
         // per-card Review button's smooth-scroll target.
-        <div id={REVIEW_PANEL_ID} className="mx-auto my-12 w-full max-w-3xl scroll-mt-24">
+        <div id={REVIEW_PANEL_ID} className="mx-auto w-full max-w-3xl scroll-mt-24 sm:my-12">
           {reviewingAhead && (
             <p className="text-muted-foreground mb-4 text-center text-sm">
               All caught up 🎉 — reviewing ahead.
             </p>
           )}
+          {reviewCard && (
+            <MutedText className="mb-4 block text-center">{reviewDescription}</MutedText>
+          )}
           <ReviewCardTransition cardKey={reviewCard?.id ?? 'caught-up'}>
             <ReviewPanel
               card={reviewCard}
               goal={dailyGoal}
-              subtitle={reviewDescription}
               showCardControls
               advanceHref={advanceHref}
             />
