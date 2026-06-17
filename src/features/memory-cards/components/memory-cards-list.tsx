@@ -2,17 +2,16 @@
 
 import { AnimatedCardList } from '@/components/motion/animated-card-list'
 import { CardActions } from '@/components/ui/card-actions'
-import { Pill } from '@/components/ui/pill'
-import { cn } from '@/lib/utils'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
+import {
+  renderCardEyebrow,
+  renderCardSubtitle,
+  renderCardTitle,
+} from '@/features/memory-cards/components/memory-card-cells'
 import { ReviewCardButton } from '@/features/memory-cards/components/review-card-button'
 import type { MemoryCardListItemT } from '@/features/memory-cards/types'
-import {
-  formatReviewStatus,
-  isCardOverdue,
-  memoryCardEditHref,
-} from '@/features/memory-cards/utils'
+import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import type { SubjectOptionT } from '@/features/subjects/types'
 
 // Thin client wrapper over the shared AnimatedCardList — client only so it can hand render
@@ -47,23 +46,9 @@ export function MemoryCardsList({
           deleteControl={<DeleteMemoryCardButton id={card.id} noteId={card.note_id ?? undefined} />}
         />
       )}
-      renderTitle={(card) => <span className="line-clamp-2">{card.prompt}</span>}
-      renderEyebrow={(card) => (
-        <span
-          className={cn(
-            'text-xs',
-            isCardOverdue(card) ? 'text-destructive' : 'text-muted-foreground',
-          )}
-        >
-          {formatReviewStatus(card)}
-        </span>
-      )}
-      renderSubtitle={(card) => (
-        <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-          {card.subjects?.title && <Pill>{card.subjects.title}</Pill>}
-          {card.notes?.title && <span className="line-clamp-1">{card.notes.title}</span>}
-        </div>
-      )}
+      renderTitle={renderCardTitle}
+      renderEyebrow={renderCardEyebrow}
+      renderSubtitle={renderCardSubtitle}
     />
   )
 }
