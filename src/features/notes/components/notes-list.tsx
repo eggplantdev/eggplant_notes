@@ -18,7 +18,6 @@ export function NotesList({ notes }: { notes: NoteListItemT[] }) {
     <>
       <AnimatedCardList
         gridLayout
-        collapseRowGap
         items={notes}
         getKey={(note) => note.id}
         getHref={(note) => `/notes/${note.id}`}
