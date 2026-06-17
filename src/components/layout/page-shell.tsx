@@ -51,44 +51,41 @@ export function PageShell({
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (
-    <main className="container-shell overflow-x-clip py-6 md:py-12">
-      <motion.div
-        {...useFadeSlideUp({ y: 20, transition: { duration: 0.4, ease: 'easeInOut' } })}
-        className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
-      >
-        {(backHref || backHistory) && (
-          <div>
-            {backHistory ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  window.history.length > 1 ? router.back() : router.push(backHref ?? '/')
-                }
-              >
-                ← {backLabel}
-              </Button>
-            ) : (
-              <Button asChild variant="ghost" size="sm">
-                <Link href={backHref!}>← {backLabel}</Link>
-              </Button>
-            )}
-          </div>
-        )}
+    // The page <main> (container width + top offset) lives in (protected)/layout.tsx; this is just the content.
+    <motion.div
+      {...useFadeSlideUp({ y: 20, transition: { duration: 0.4, ease: 'easeInOut' } })}
+      className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
+    >
+      {(backHref || backHistory) && (
+        <div>
+          {backHistory ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                window.history.length > 1 ? router.back() : router.push(backHref ?? '/')
+              }
+            >
+              ← {backLabel}
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm">
+              <Link href={backHref!}>← {backLabel}</Link>
+            </Button>
+          )}
+        </div>
+      )}
 
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            {eyebrow}
-            <h1 className={cn('text-2xl font-semibold', isNavRoot && 'hidden md:block')}>
-              {title}
-            </h1>
-            {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
-          </div>
-          {actions && <div className="flex items-center gap-2">{actions}</div>}
-        </header>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          {eyebrow}
+          <h1 className={cn('text-2xl font-semibold', isNavRoot && 'hidden md:block')}>{title}</h1>
+          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+        </div>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
+      </header>
 
-        {children}
-      </motion.div>
-    </main>
+      {children}
+    </motion.div>
   )
 }
