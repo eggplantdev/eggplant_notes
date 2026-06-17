@@ -23,8 +23,6 @@ type PropsT = {
   backHistory?: boolean
   // Inner width within the container-shell cap: 'full' fills it, 'prose' = max-w-2xl, 'wide' = max-w-4xl.
   width?: WidthT
-  // Desktop app-shell mode: bound <main> to the viewport so children scroll internally; consumer must give the fill child `md:min-h-0 md:flex-1`.
-  fill?: boolean
   children: ReactNode
 }
 
@@ -44,7 +42,6 @@ export function PageShell({
   backLabel,
   backHistory,
   width = 'full',
-  fill = false,
   children,
 }: PropsT) {
   const pathname = usePathname()
@@ -54,16 +51,10 @@ export function PageShell({
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
 
   return (
-    <main
-      className={cn(
-        'container-shell overflow-x-clip py-6 md:py-12',
-        // 4rem ≈ the desktop sticky app-nav bar height (AppNav: py-4 + a row of sm controls).
-        fill && 'md:flex md:h-[calc(100dvh-4rem)] md:flex-col md:overflow-hidden',
-      )}
-    >
+    <main className="container-shell overflow-x-clip py-6 md:py-12">
       <motion.div
         {...useFadeSlideUp({ y: 20, transition: { duration: 0.4, ease: 'easeInOut' } })}
-        className={cn('flex flex-col gap-6', fill && 'md:min-h-0 md:flex-1', WIDTH_CLASS[width])}
+        className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
       >
         {(backHref || backHistory) && (
           <div>

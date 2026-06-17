@@ -42,7 +42,6 @@ export default async function SubjectLayout({
         </>
       }
       width="full"
-      fill
     >
       {/* Full-width toolbar: select on the left, subject/note actions pushed to the right edge.
           Lives here (not PageShell's header) because that header column hugs its content, so
@@ -64,13 +63,15 @@ export default async function SubjectLayout({
       {/* Track priority: the content node is the capped minmax track, the sidebar is the fr track.
           Grid maximizes non-fr tracks (the node, up to 64rem) BEFORE expanding fr tracks (the
           sidebar), so the node grows first and never shrinks below 36rem; the sidebar only widens
-          past 15rem once the node has hit its ceiling. Each pane scrolls on its own
-          (md:overflow-y-auto below) while the page itself never scrolls. */}
-      <div className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[minmax(15rem,1fr)_minmax(36rem,64rem)] md:grid-rows-[minmax(0,1fr)]">
-        <div className="flex flex-col gap-2 md:min-h-0">
+          past 15rem once the node has hit its ceiling. The WHOLE PAGE scrolls (window) — the note
+          body scrolls with it, footer comes after. The topic list is sticky (self-start so it isn't
+          stretched), pinned just below the sticky AppNav (top-20 ≈ its 77px band); its own overflow
+          only kicks in for a list taller than the viewport. */}
+      <div className="grid gap-6 md:grid-cols-[minmax(15rem,1fr)_minmax(36rem,64rem)]">
+        <div className="flex flex-col gap-2 md:sticky md:top-20 md:max-h-[calc(100dvh-5rem)] md:self-start md:overflow-y-auto">
           <SubjectNoteSidebar subjectId={id} notes={summaries} />
         </div>
-        <div className="min-w-0 md:min-h-0 md:overflow-y-auto">{children}</div>
+        <div className="min-w-0">{children}</div>
       </div>
     </PageShell>
   )
