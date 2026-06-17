@@ -11,7 +11,6 @@ export type GoalCelebrationT = {
   weeklyGoal: number
 }
 
-// `celebrate` is present only when this rating crossed a goal. The next due card is no longer
-// returned here — the queue walk owns it client-side (computed at page render, prefetched), so the
-// action doesn't re-query it.
+// `celebrate` is present only when this rating crossed a goal. Rating advances by the action's
+// revalidatePath re-render (in-place), so there's no next-card id to thread back.
 export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT }

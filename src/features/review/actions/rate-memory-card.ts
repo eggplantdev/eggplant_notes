@@ -21,11 +21,6 @@ export async function rateMemoryCard(
   memoryCardId: string,
   rating: unknown,
   goal: unknown,
-  // The standalone card page advances by client navigation to a PREFETCHED next card, so it skips
-  // the broad revalidatePath below — that revalidate would invalidate the warmed prefetch and undo
-  // the whole speedup. The in-place panels (dashboard, /memory-cards) pass false and rely on the
-  // revalidate to swap to the next due card on SSR re-render.
-  skipRevalidate = false,
 ): Promise<RateResultT> {
   const parsedId = validateInput(memoryCardIdSchema, memoryCardId)
   if (!parsedId.success) return parsedId
@@ -70,9 +65,10 @@ export async function rateMemoryCard(
     dailyGoal,
   })
 
-  // In-place panels (dashboard, /memory-cards) advance by re-rendering the page; the queue walk
-  // advances by navigating to a prefetched card, so it skips this to keep the prefetch valid.
-  if (!skipRevalidate) revalidatePath('/', 'layout')
+  // Nuclear by design: every review surface (dashboard + /memory-cards list/panel) re-renders so
+  // the next card AND the list's due dates / overview chart reflect the write. Reviewing must never
+  // show stale due dates — correctness over the prefetch speed hack we removed (see lessons.md).
+  revalidatePath('/', 'layout')
 
   return { success: true, celebrate }
 }
