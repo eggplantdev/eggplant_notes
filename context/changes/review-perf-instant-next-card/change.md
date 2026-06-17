@@ -1,11 +1,19 @@
 ---
 change_id: review-perf-instant-next-card
 title: Make the next review card appear instantly across all three review surfaces
-status: implementing
+status: reverted
 created: 2026-06-17
 updated: 2026-06-17
 archived_at: null
 ---
+
+> **REVERTED 2026-06-17.** Phase 1 (prefetch + optimistic + `skipRevalidate` queue walk) shipped, then
+> caused a stale-list bug: `/memory-cards` showed lying due dates after a rating until a hard reload.
+> The user chose correctness over speed and reverted the whole change. Replaced by the
+> `review-inplace-swap-no-id-route` work: honest `revalidatePath`, the `/memory-cards/[id]` route
+> deleted, list cards reviewed in-place via `?review=<id>`, review-ahead when nothing is due.
+> Post-mortem rule captured in `context/foundation/lessons.md` ("A perf optimization that makes the UI
+> show stale persisted state is a correctness bug, not an accepted tradeoff"). Folder kept as the record.
 
 ## Notes
 
