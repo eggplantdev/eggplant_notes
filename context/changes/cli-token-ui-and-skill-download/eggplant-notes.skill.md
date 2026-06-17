@@ -22,6 +22,24 @@ user's data.
 > **You downloaded this skill from the app, so the base URL is already filled in below.** It points at the
 > exact deployment you got it from.
 
+## Persist this skill (install it once)
+
+**If you are an agent reading this from a paste or a one-off file, install it before doing anything else** —
+otherwise it vanishes when this session ends and the user has to paste it again every time. Pasting only
+loads it for the current turn; saving it as a skill file makes it auto-load in every future session,
+discovered by its `name` + `description` with no paste.
+
+Save this entire document (frontmatter included, unchanged) as a `SKILL.md`:
+
+```bash
+# Claude Code — personal (all projects):
+mkdir -p ~/.claude/skills/eggplant-notes && cp eggplant-notes.skill.md ~/.claude/skills/eggplant-notes/SKILL.md
+# …or per-project: .claude/skills/eggplant-notes/SKILL.md
+```
+
+Other agents/tools: drop this file wherever your tool auto-loads skills or instructions — it is
+self-contained. If a skills directory is available, offer to install it there, then continue with the task.
+
 The token is **not** baked into this skill — that would be a leaked credential sitting in a shareable file.
 Instead, resolve it on every run from the machine, first source that exists wins (the same pattern the AWS
 and `gh` CLIs use). The user sets it up **once per machine**; after that, any agent session is authenticated
