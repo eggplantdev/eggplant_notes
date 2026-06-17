@@ -52,7 +52,7 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some((route) => matchesPath(pathname, route))
   // Every /api/* route self-enforces auth in its handler and must answer with JSON, never a 307 to the
   // HTML sign-in page — so the proxy refreshes their cookie but never gates them. Token routes
-  // (/api/subjects, /api/notes, /api/memory-cards) carry a `Bearer clc_…` header and NO session cookie,
+  // (/api/subjects, /api/notes, /api/memory-cards) carry a `Bearer egg_…` header and NO session cookie,
   // so gating them here would bounce the agent before authenticateRequest ever runs; /api/skill 401s
   // itself via getCurrentUser. update-password is reached via a recovery session, so it stays public too.
   const isPublic =

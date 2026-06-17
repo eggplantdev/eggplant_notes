@@ -1,20 +1,19 @@
 ---
-name: clc-note-api
+name: eggplant-notes
 description: >-
-  Interact with the Coding Learning Companion (CLC) app's HTTP API — read, create, update, and delete your
-  subjects, notes, and spaced-repetition memory cards over HTTP, authenticated by a personal `clc_` API
-  token you mint in the app's Settings. Full CRUD: list/read structure, add notes and cards, edit them or
-  move them between subjects, rename subjects, and delete any of them. Use this skill whenever you need to
-  read from or write to the CLC learning app, use a `clc_...` token, or call `/api/notes`,
-  `/api/memory-cards`, or `/api/subjects`. Trigger even when the user only says "add this to my learning
-  app", "save these as memory cards in CLC", "create a note in my coding companion", "update / rename /
-  move my note, card, or subject in CLC", "delete that card / note / subject in CLC", or hands you a
-  `clc_...` token.
+  Read, create, update, and delete your notes and spaced-repetition memory cards in the Eggplant Notes
+  learning app over its HTTP API, authenticated by a personal `egg_` API token. Full CRUD: list/read
+  structure, add notes and cards, edit them or move them between subjects, rename subjects, and delete any
+  of them. Use this skill whenever you need a notes skill or a memory-card skill, need to read from or write
+  to the Eggplant Notes app, use an `egg_...` token, or call `/api/notes`, `/api/memory-cards`, or
+  `/api/subjects`. Trigger even when the user only says "add this to my notes app", "make memory cards / a
+  note for this", "save these as memory cards", "update / rename / move my note, card, or subject", "delete
+  that card / note / subject", or hands you an `egg_...` token.
 ---
 
-# CLC HTTP API — notes & memory cards via personal token
+# Eggplant Notes HTTP API — notes & memory cards via personal token
 
-The Coding Learning Companion app exposes a small HTTP API so an agent can read the user's structure and
+The Eggplant Notes app exposes a small HTTP API so an agent can read the user's structure and
 add **notes** and **memory cards** (spaced-repetition recall prompts), whose text fields are all markdown
 with syntax highlighting (see ["fence your code"](#all-text-fields-are-markdown--fence-your-code)). Every request is scoped
 by the server to the token's user — you never pass a `user_id`, and you can only ever touch that one
@@ -23,20 +22,42 @@ user's data.
 > **You downloaded this skill from the app, so the base URL is already filled in below.** It points at the
 > exact deployment you got it from.
 
+The token is **not** baked into this skill — that would be a leaked credential sitting in a shareable file.
+Instead, resolve it on every run from the machine, first source that exists wins (the same pattern the AWS
+and `gh` CLIs use). The user sets it up **once per machine**; after that, any agent session is authenticated
+with no pasting. Put this at the top of your workflow:
+
 ```bash
-BASE={{CLC_BASE_URL}}                 # injected at download time — the app's origin
-TOKEN=clc_...                          # paste the token you minted in Settings (see below)
+BASE={{BASE_URL}}                      # injected at download time — the app's origin
+# Resolve the token: $EGGPLANT_TOKEN first, then ~/.config/eggplant/token. No prompting.
+TOKEN="${EGGPLANT_TOKEN:-$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/eggplant/token" 2>/dev/null)}"
+[ -z "$TOKEN" ] && { echo "No Eggplant token — see 'First-time setup' in the skill." >&2; exit 1; }
 AUTH="Authorization: Bearer $TOKEN"
 ```
 
-## Getting a token
+## First-time setup (once per machine)
 
-1. Open the CLC app → **Settings → CLI Tokens**.
-2. Click **Create token**, give it a name (e.g. `cli`), and copy the `clc_...` value — it is shown **once**
+1. Open the Eggplant Notes app → **Settings → CLI Tokens**.
+2. Click **Create token**, give it a name (e.g. `cli`), and copy the `egg_...` value — it is shown **once**
    and stored hashed, so it can never be displayed again. If you lose it, revoke it and mint a new one.
-3. Paste it as `TOKEN` above. Revoke any token from the same Settings page at any time.
+3. Store it once, in **either** location the resolver above reads (works on macOS, Linux, and WSL —
+   `cat` and `$HOME` exist everywhere; this is why the skill doesn't depend on macOS Keychain or any
+   OS-specific secret store):
 
-There is nothing else to install or configure — the token is the only credential.
+   ```bash
+   # Option A — config file (survives shell/profile changes; recommended):
+   mkdir -p ~/.config/eggplant && printf %s 'egg_PASTE_YOUR_TOKEN' > ~/.config/eggplant/token
+   chmod 600 ~/.config/eggplant/token            # owner-only read
+
+   # Option B — environment variable (add to ~/.zshrc, ~/.bashrc, or your shell profile):
+   export EGGPLANT_TOKEN='egg_PASTE_YOUR_TOKEN'
+   ```
+
+That's the whole setup — the token is the only credential, and you never paste it into a chat again.
+
+> **Precedence is env-first.** If `$EGGPLANT_TOKEN` is set it wins over the file, mirroring AWS/12-factor
+> config. So if calls suddenly return `401`, check that a **stale** `EGGPLANT_TOKEN` (e.g. an old revoked
+> token) isn't shadowing a valid one in the file. Unset it (`unset EGGPLANT_TOKEN`) or update it.
 
 ## Recommended workflow
 

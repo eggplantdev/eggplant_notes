@@ -9,7 +9,7 @@ export type FaqItemT = {
   endpoints?: readonly FaqEndpointRowT[]
   // Names an interactive block the accordion injects below this item's prose — keys into its `slots`
   // map (e.g. 'skill' = the live agent-skill preview, 'contact' = the contact-dialog trigger). The
-  // node is server-supplied, so the skill preview stays single-sourced from CLC_SKILL_TEMPLATE.
+  // node is server-supplied, so the skill preview stays single-sourced from SKILL_TEMPLATE.
   slot?: string
 }
 
@@ -82,7 +82,7 @@ export const FAQ_SECTIONS: readonly FaqSectionT[] = [
       {
         question: 'How do I point an agent at the API?',
         answer:
-          'Easiest path: use "Download agent skill" in Settings to get a ready-made skill (your account\'s base URL is baked in). Then you just copy and paste the skill to your coding agent, give it one of your access tokens, and it works. Prefer to wire it yourself? Give the agent your token and the base URL, and have it call GET /api/subjects first to pick or confirm a subject, then POST /api/notes and POST /api/memory-cards to author content.',
+          'Easiest path: use "Download agent skill" in Settings to get a ready-made skill (your account\'s base URL is baked in). Store one of your access tokens once on your machine — either in an EGGPLANT_TOKEN environment variable or in a ~/.config/eggplant/token file — and the skill picks it up automatically on every run, so you never paste it into a chat again (the same approach the AWS and gh CLIs use; the token is deliberately not baked into the skill file). Prefer to wire it yourself? Point the agent at the base URL and that stored token, and have it call GET /api/subjects first to pick or confirm a subject, then POST /api/notes and POST /api/memory-cards to author content.',
       },
       {
         question: 'What API endpoints are exposed?',
@@ -155,7 +155,7 @@ export const FAQ_SECTIONS: readonly FaqSectionT[] = [
       {
         question: 'See the agent skill',
         answer:
-          'This is the exact skill the "Download agent skill" and "Copy skill" buttons in Settings give you — your account\'s base URL is already baked in, and authentication is covered inside it. Paste it into your coding agent along with one of your tokens. It is generated from the same source as the API, so what you see here never drifts from what actually works.',
+          'This is the exact skill the "Download agent skill" and "Copy skill" buttons in Settings give you — your account\'s base URL is already baked in, and authentication is covered inside it (store a token once on your machine, as described above, and the skill resolves it on every run). Paste it into your coding agent. It is generated from the same source as the API, so what you see here never drifts from what actually works.',
         slot: 'skill',
       },
     ],

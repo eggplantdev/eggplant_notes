@@ -18,7 +18,7 @@ const { authenticateRequest } = await import('@/features/api-tokens/authenticate
 
 function reqWithToken() {
   return new Request('http://localhost/api/subjects', {
-    headers: { authorization: 'Bearer clc_validlooking' },
+    headers: { authorization: 'Bearer egg_validlooking' },
   })
 }
 

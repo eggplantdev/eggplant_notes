@@ -26,7 +26,7 @@ export const clientSchema = z.object({
 
 export const serverSchema = z.object({
   EMAIL_HOST: z.string().min(1),
-  // Signs the short-lived user JWT the token API mints (mint-user-jwt.ts) so a `clc_` request runs
+  // Signs the short-lived user JWT the token API mints (mint-user-jwt.ts) so an `egg_` request runs
   // under RLS. next.config.ts runs serverSchema.parse at build/dev-start, so a missing secret fails
   // fast there instead of as an opaque runtime 500 from a token API call. HS256 secrets are ≥ 32 chars.
   SUPABASE_JWT_SECRET: z.string().min(32),

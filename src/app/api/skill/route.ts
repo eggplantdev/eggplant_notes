@@ -5,7 +5,7 @@ import { fillSkillTemplate } from '@/features/api-tokens/skill'
 import { originFromHeaders } from '@/lib/request-origin'
 import { getCurrentUser } from '@/lib/supabase/server'
 
-// GET /api/skill — serves the clc-note-api agent skill with the deployment origin injected as BASE.
+// GET /api/skill — serves the eggplant-notes agent skill with the deployment origin injected as BASE.
 // Session-gated: it's a Settings feature, and gating keeps it tidy (the body is non-secret either way).
 export async function GET(request: Request) {
   const user = await getCurrentUser()
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     status: 200,
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="clc-note-api.skill.md"',
+      'Content-Disposition': 'attachment; filename="eggplant-notes.skill.md"',
     },
   })
 }

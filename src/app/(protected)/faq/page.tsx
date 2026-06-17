@@ -10,7 +10,7 @@ import { originFromHeaders } from '@/lib/request-origin'
 
 export default async function FaqPage() {
   // Inject the origin server-side (same path as the Settings copy/download) so the FAQ skill preview is
-  // single-sourced from CLC_SKILL_TEMPLATE and can't drift from the downloaded skill.
+  // single-sourced from SKILL_TEMPLATE and can't drift from the downloaded skill.
   const skill = fillSkillTemplate(originFromHeaders(await headers()))
 
   return (

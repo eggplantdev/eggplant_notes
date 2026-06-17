@@ -136,7 +136,7 @@ describe.skipIf(!RUN)('api token pipeline (integration)', () => {
   it('rejects a missing/garbage Authorization header with 401', async () => {
     const noHeader = await authenticateRequest(new Request('http://localhost/api/notes'))
     expect('error' in noHeader && noHeader.error.status).toBe(401)
-    const garbage = await authenticateRequest(req('clc_not-a-real-token'))
+    const garbage = await authenticateRequest(req('egg_not-a-real-token'))
     expect('error' in garbage && garbage.error.status).toBe(401)
   })
 })
