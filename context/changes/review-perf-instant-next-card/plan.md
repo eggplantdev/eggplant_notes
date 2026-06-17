@@ -174,9 +174,9 @@ Approach selection is its own decision; do not implement Phase 2/3 from this sec
 
 #### Automated
 
-- [x] 1.1 `next typegen` + `pnpm typecheck` passes
-- [x] 1.2 `pnpm lint` passes
-- [x] 1.3 `pnpm test` passes
+- [x] 1.1 `next typegen` + `pnpm typecheck` passes — 313c96e
+- [x] 1.2 `pnpm lint` passes — 313c96e
+- [x] 1.3 `pnpm test` passes — 313c96e
 - [ ] 1.4 `pnpm test:e2e memory-card-review-page.spec.ts` passes — fix verified by reasoning + first-run partial pass (3/3 other specs green; only the caught-up assertion failed on the race now fixed). Green-confirmation deferred: a parallel `next dev` was continuously corrupting the shared `.next/dev/types/validator.ts` (in tsconfig include), breaking every prod-build type-check. Re-run when no `next dev` is active.
 
 #### Manual
