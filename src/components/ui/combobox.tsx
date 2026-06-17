@@ -63,13 +63,17 @@ export function Combobox({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={open}
-          className={cn('justify-between', !selectedLabel && 'text-muted-foreground', className)}
+          className={cn(
+            'min-w-0 justify-between',
+            !selectedLabel && 'text-muted-foreground',
+            className,
+          )}
         >
-          {selectedLabel ?? placeholder}
+          <span className="truncate">{selectedLabel ?? placeholder}</span>
           <ChevronsUpDown className="size-3.5 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+      <PopoverContent className="w-fit min-w-(--radix-popover-trigger-width) p-0" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>

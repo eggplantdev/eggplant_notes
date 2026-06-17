@@ -19,9 +19,9 @@ export default async function SubjectReadNote({
   return (
     // max-w-4xl mirrors PageShell's 'wide' width so a note reads at the same measure here as on /notes/[id].
     <article className="mx-auto flex w-full max-w-4xl flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold">{note.title ?? 'Untitled'}</h2>
-        <div className="flex items-center gap-2">
+      <header className="flex items-start justify-between gap-2">
+        <h2 className="min-w-0 text-xl font-semibold wrap-anywhere">{note.title ?? 'Untitled'}</h2>
+        <div className="flex shrink-0 items-center gap-2">
           <ButtonLink href={`/notes/${note.id}?edit=note`} variant="outline" size="sm">
             Edit
           </ButtonLink>
