@@ -9,7 +9,7 @@ import { StatCard } from '@/features/dashboard/components/stat-card'
 import { WelcomeDialog } from '@/features/dashboard/components/welcome-dialog'
 import { WELCOME_SEEN_COOKIE } from '@/features/dashboard/welcome-dialog-cookie'
 import { TitledCard } from '@/components/ui/titled-card'
-import { ReviewPanel } from '@/features/review/components/review-panel'
+import { ReviewPreviewCard } from '@/features/dashboard/components/review-preview-card'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 import { cookies } from 'next/headers'
 import { getDashboardPageData } from './loader'
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     reviewedToday,
     currentStreak,
     dailyGoal,
-    card,
+    dueCard,
     isEmpty,
   } = await getDashboardPageData()
 
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
         <ActivityHeatmap columns={columns} variant="neon-cyan" />
       </TitledCard>
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
-        <ReviewPanel card={card} goal={dailyGoal} showCardControls />
+        <ReviewPreviewCard card={dueCard} />
         <div className="grid grid-cols-2 gap-4">
           {tiles.map((tile) => (
             <StatCard key={tile.label} {...tile} compact />

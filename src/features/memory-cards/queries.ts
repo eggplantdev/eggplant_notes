@@ -87,6 +87,28 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
+// The soonest-due card in the LISTING projection (the columns the grid card renders — no answer
+// text, no FSRS internals), for the dashboard's read-only due-card preview. The dashboard no longer
+// reviews in place (it links to /memory-cards), so it reuses the listing card body but needs only
+// this one row, not the full DueCardT + due count getDueQueue returns. Same (user_id, due_at) index;
+// RLS scopes to the owner; undefined when nothing is due.
+export async function getSoonestDueCard(
+  client?: SupabaseClient<Database>,
+): Promise<MemoryCardListItemT | undefined> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from('memory_cards')
+    .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)')
+    .lte('due_at', new Date().toISOString())
+    .order('due_at', { ascending: true })
+    .limit(1)
+  if (error) {
+    console.error('[getSoonestDueCard] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return data?.[0]
+}
+
 // Soonest card by due_at WITHOUT the due gate — the "review ahead" fallback for /memory-cards when
 // nothing is due yet: the user asked to keep reviewing instead of hitting a caught-up dead end. Same
 // filters as the listing so it stays topic-scoped; page-independent (no pagination), so it's the
