@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ButtonLink } from '@/components/ui/button-link'
 import { CardActions } from '@/components/ui/card-actions'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { AnswerDisclosure } from '@/features/review/components/answer-disclosure'
@@ -16,6 +17,8 @@ import type { DueCardT } from '@/features/memory-cards/types'
 // showCardControls: render per-card Edit/Delete in the header — on for both in-place review panels.
 // advanceHref: passed through to RatingButtons; the /memory-cards panel uses it to clear its
 // `?review` selection after a rating so the next card surfaces (omitted on the dashboard).
+// reviewHref: when set, a "Review" link to the full review surface shows in the header — the dashboard
+// uses it to send the user to /memory-cards (it reviews in place but is not the dedicated surface).
 type PropsT = {
   card: DueCardT | undefined
   goal: number
@@ -23,6 +26,7 @@ type PropsT = {
   showCardControls?: boolean
   deleteRedirectTo?: string
   advanceHref?: string
+  reviewHref?: string
 }
 
 // Server Component: owns the interval previews (computed only when a card is due). The celebration
@@ -35,6 +39,7 @@ export function ReviewPanel({
   showCardControls = false,
   deleteRedirectTo,
   advanceHref,
+  reviewHref,
 }: PropsT) {
   const body = !card ? (
     <Card className="gradient-border ring-0">
@@ -47,18 +52,25 @@ export function ReviewPanel({
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
-          {showCardControls && (
-            <CardActions
-              editHref={memoryCardEditHref(card.id)}
-              deleteControl={
-                <DeleteMemoryCardButton
-                  id={card.id}
-                  noteId={card.note_id ?? undefined}
-                  redirectTo={deleteRedirectTo}
-                />
-              }
-            />
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {reviewHref && (
+              <ButtonLink href={reviewHref} variant="outline" size="sm">
+                Review
+              </ButtonLink>
+            )}
+            {showCardControls && (
+              <CardActions
+                editHref={memoryCardEditHref(card.id)}
+                deleteControl={
+                  <DeleteMemoryCardButton
+                    id={card.id}
+                    noteId={card.note_id ?? undefined}
+                    redirectTo={deleteRedirectTo}
+                  />
+                }
+              />
+            )}
+          </div>
         </div>
         {card.note_id && card.notes?.title && (
           <SourceNoteLink

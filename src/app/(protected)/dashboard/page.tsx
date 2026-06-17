@@ -1,5 +1,4 @@
 import { PageShell } from '@/components/layout/page-shell'
-import { ButtonLink } from '@/components/ui/button-link'
 import { ActivityHeatmap } from '@/features/dashboard/components/activity-heatmap'
 import { buildHeatmapMatrix } from '@/features/dashboard/build-heatmap-matrix'
 import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
@@ -9,7 +8,7 @@ import { StatCard } from '@/features/dashboard/components/stat-card'
 import { WelcomeDialog } from '@/features/dashboard/components/welcome-dialog'
 import { WELCOME_SEEN_COOKIE } from '@/features/dashboard/welcome-dialog-cookie'
 import { TitledCard } from '@/components/ui/titled-card'
-import { ReviewPreviewCard } from '@/features/dashboard/components/review-preview-card'
+import { ReviewPanel } from '@/features/review/components/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 import { cookies } from 'next/headers'
 import { getDashboardPageData } from './loader'
@@ -26,7 +25,8 @@ export default async function DashboardPage() {
     reviewedToday,
     currentStreak,
     dailyGoal,
-    dueCard,
+    card,
+    reviewingAhead,
     isEmpty,
   } = await getDashboardPageData()
 
@@ -47,64 +47,63 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <PageShell
-      title="Dashboard"
-      subtitle={`Signed in as ${user?.email}`}
-      actions={
-        <div className="flex items-center gap-2">
-          <ButtonLink href="/notes/new">New note</ButtonLink>
-          <ButtonLink href="/memory-cards/new" variant="outline">
-            New card
-          </ButtonLink>
-        </div>
-      }
-    >
+    <PageShell title="Dashboard" subtitle={`Signed in as ${user?.email}`}>
       {isEmpty && !welcomeSeen && <WelcomeDialog />}
-      {/* Card-less hero stat: StatCard's type scale without the chrome. */}
-      <div>
-        <SectionLabel>Current streak</SectionLabel>
-        <p className="text-foreground mt-1 flex items-baseline gap-2 text-4xl font-bold">
-          <span>🔥</span>
-          <span className="tabular-nums">{currentStreak}</span>
-          <span className="text-muted-foreground text-base font-medium">
-            {currentStreak === 1 ? 'day' : 'days'} hitting your daily goal
-          </span>
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GoalProgressBar
-          label="Today's progress"
-          reviewed={reviewedToday}
-          goal={dailyGoal}
-          variant="aurora"
-          goalHitText="Daily goal hit 🏄"
-        />
-        <GoalProgressBar
-          label="This week's progress"
-          reviewed={s.reviewsThisWeek}
-          goal={dailyGoal * 7}
-          variant="aurora"
-          goalHitText="Weekly goal hit 🚀"
-        />
-      </div>
-      <TitledCard title="Review activity — last 12 months" className="w-full">
-        <ActivityHeatmap columns={columns} variant="neon-cyan" />
-      </TitledCard>
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
-        <ReviewPreviewCard card={dueCard} />
-        <div className="grid grid-cols-2 gap-4">
-          {tiles.map((tile) => (
-            <StatCard key={tile.label} {...tile} compact />
-          ))}
+      {/* Match the memory-cards page's bigger, even section spacing (PageShell's own gap is the default). */}
+      <div className="flex flex-col gap-12">
+        {/* Card-less hero stat: StatCard's type scale without the chrome. */}
+        <div>
+          <SectionLabel>Current streak</SectionLabel>
+          <p className="text-foreground mt-1 flex items-baseline gap-2 text-4xl font-bold">
+            <span>🔥</span>
+            <span className="tabular-nums">{currentStreak}</span>
+            <span className="text-muted-foreground text-base font-medium">
+              {currentStreak === 1 ? 'day' : 'days'} hitting your daily goal
+            </span>
+          </p>
         </div>
-      </div>
-      {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
-      {s.hardestCards.length > 1 && (
-        <TitledCard title="Needs attention">
-          <HardestCards cards={s.hardestCards} />
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <GoalProgressBar
+            label="Today's progress"
+            reviewed={reviewedToday}
+            goal={dailyGoal}
+            variant="aurora"
+            goalHitText="Daily goal hit 🏄"
+          />
+          <GoalProgressBar
+            label="This week's progress"
+            reviewed={s.reviewsThisWeek}
+            goal={dailyGoal * 7}
+            variant="aurora"
+            goalHitText="Weekly goal hit 🚀"
+          />
+        </div>
+        <TitledCard title="Review activity — last 12 months" className="w-full">
+          <ActivityHeatmap columns={columns} variant="neon-cyan" />
         </TitledCard>
-      )}
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
+          <div>
+            {reviewingAhead && (
+              <p className="text-muted-foreground mb-4 text-center text-sm">
+                All caught up 🎉 — reviewing ahead.
+              </p>
+            )}
+            <ReviewPanel card={card} goal={dailyGoal} showCardControls reviewHref="/memory-cards" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {tiles.map((tile) => (
+              <StatCard key={tile.label} {...tile} compact />
+            ))}
+          </div>
+        </div>
+        {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
+        {s.hardestCards.length > 1 && (
+          <TitledCard title="Needs attention">
+            <HardestCards cards={s.hardestCards} />
+          </TitledCard>
+        )}
+      </div>
     </PageShell>
   )
 }
