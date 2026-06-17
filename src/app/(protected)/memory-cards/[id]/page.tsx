@@ -1,10 +1,7 @@
 import { PageShell } from '@/components/layout/page-shell'
-import { CardActions } from '@/components/ui/card-actions'
-import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
 import { getMemoryCardForReview } from '@/features/memory-cards/queries'
 import { assertFound } from '@/lib/assert-found'
-import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { CardReviewQueue } from '@/features/review/components/card-review-queue'
 import { ReviewPanel } from '@/features/review/components/review-panel'
 import { getDailyGoal } from '@/features/settings/queries'
@@ -32,27 +29,9 @@ export default async function MemoryCardReviewPage({
       backHref="/memory-cards"
       backLabel="Memory cards"
       actions={
-        <CardActions
-          editHref={memoryCardEditHref(card.id)}
-          linkControl={
-            card.note_id ? undefined : (
-              <LinkCardButton
-                cardId={card.id}
-                cardSubjectId={card.subject_id}
-                subjects={subjects}
-              />
-            )
-          }
-          // Deleting from the card's own page must navigate away — the route would otherwise 404 on
-          // the deleted row (list rows just vanish via revalidate, so they pass no redirect).
-          deleteControl={
-            <DeleteMemoryCardButton
-              id={card.id}
-              noteId={card.note_id ?? undefined}
-              redirectTo="/memory-cards"
-            />
-          }
-        />
+        card.note_id ? undefined : (
+          <LinkCardButton cardId={card.id} cardSubjectId={card.subject_id} subjects={subjects} />
+        )
       }
     >
       {/* Server-render ReviewPanel (keeps its async markdown an RSC) and hand it to the client queue
@@ -60,7 +39,13 @@ export default async function MemoryCardReviewPage({
           provider lives in this route's layout (survives navigating between cards), so ReviewPanel
           must not self-provide here. */}
       <CardReviewQueue>
-        <ReviewPanel card={card} goal={goal} provideCelebration={false} />
+        <ReviewPanel
+          card={card}
+          goal={goal}
+          provideCelebration={false}
+          showCardControls
+          deleteRedirectTo="/memory-cards"
+        />
       </CardReviewQueue>
     </PageShell>
   )

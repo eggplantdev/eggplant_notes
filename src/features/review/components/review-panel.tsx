@@ -20,15 +20,16 @@ import type { DueCardT } from '@/features/memory-cards/types'
 // subtitle: optional context line under the card title (the /memory-cards panel shows the active
 // filter + due count here); omitted on the dashboard.
 // showCardControls: render per-card Edit/Delete in the header. On for the in-place review panels
-// (dashboard, /memory-cards) where delete leans on the action's nuclear revalidate to advance to the
-// next due card; OFF for the /memory-cards/[id] page, which already carries those controls in its
-// PageShell header (and whose delete needs a redirectTo the in-place flow doesn't).
+// (dashboard, /memory-cards) AND the /memory-cards/[id] page (controls live inside the card, not
+// in PageShell). deleteRedirectTo: supplied by the [id] page so delete navigates away instead of
+// revalidating in place (the route would 404 on the deleted row without it).
 type PropsT = {
   card: DueCardT | undefined
   goal: number
   provideCelebration?: boolean
   subtitle?: ReactNode
   showCardControls?: boolean
+  deleteRedirectTo?: string
 }
 
 // Server Component: owns the interval previews (computed only when a card is due). The celebration
@@ -40,6 +41,7 @@ export function ReviewPanel({
   provideCelebration = true,
   subtitle,
   showCardControls = false,
+  deleteRedirectTo,
 }: PropsT) {
   const body = !card ? (
     <Card className="gradient-border ring-0">
@@ -57,7 +59,11 @@ export function ReviewPanel({
             <CardActions
               editHref={memoryCardEditHref(card.id)}
               deleteControl={
-                <DeleteMemoryCardButton id={card.id} noteId={card.note_id ?? undefined} />
+                <DeleteMemoryCardButton
+                  id={card.id}
+                  noteId={card.note_id ?? undefined}
+                  redirectTo={deleteRedirectTo}
+                />
               }
             />
           )}
