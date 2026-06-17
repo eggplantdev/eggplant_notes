@@ -93,7 +93,7 @@ export default async function DashboardPage() {
         <ActivityHeatmap columns={columns} variant="neon-cyan" />
       </TitledCard>
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
-        <ReviewPanel card={card} goal={dailyGoal} />
+        <ReviewPanel card={card} goal={dailyGoal} showCardControls />
         <div className="grid grid-cols-2 gap-4">
           {tiles.map((tile) => (
             <StatCard key={tile.label} {...tile} compact />

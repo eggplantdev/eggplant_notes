@@ -101,7 +101,12 @@ export default async function MemoryCardsPage({
         // The page is width="full" for the card grid; cap the review panel so it stays a
         // comfortable reading width instead of stretching across the whole deck width.
         <div className="mx-auto my-12 w-full max-w-3xl">
-          <ReviewPanel card={dueCard} goal={dailyGoal} subtitle={reviewDescription} />
+          <ReviewPanel
+            card={dueCard}
+            goal={dailyGoal}
+            subtitle={reviewDescription}
+            showCardControls
+          />
         </div>
       )}
 
