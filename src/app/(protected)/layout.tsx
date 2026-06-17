@@ -16,9 +16,12 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
     <>
       <AppNav />
       {/* Single page <main> for every protected route — owns the container width + the mobile top
-          offset (pt-18) that clears the floating hamburger; desktop's sticky bar reserves its own
-          space, so md:py-6. Lives here, not in PageShell, so it's present even on pages that skip it. */}
-      <main className="container-shell overflow-x-clip pt-18 pb-12 md:py-6">{children}</main>
+          offset (pt-18) that clears the floating hamburger. Desktop has no top padding: the sticky bar's
+          gradient tail (pb-* on the header) is the spacing, so content fades under it. Lives here, not in
+          PageShell, so it's present even on pages that skip it. */}
+      <main className="container-shell overflow-x-clip pt-18 pb-12 md:pt-0 md:pb-6">
+        {children}
+      </main>
       <SiteFooter />
     </>
   )
