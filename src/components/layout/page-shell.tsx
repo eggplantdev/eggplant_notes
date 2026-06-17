@@ -1,13 +1,12 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
 import { ALL_NAV_ITEMS } from '@/components/app-nav/nav-items'
+import { PageBackButton } from '@/components/layout/page-back-button'
 import { useFadeSlideUp } from '@/components/motion/fade-slide-up'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 type WidthT = 'full' | 'prose' | 'wide'
@@ -45,7 +44,6 @@ export function PageShell({
   children,
 }: PropsT) {
   const pathname = usePathname()
-  const router = useRouter()
   // Hides the mobile <h1> only on nav-root routes (CurrentPageLabel pins those). Exact match,
   // not isNavActive: detail/new/edit pages live under a nav route but their title is unique content.
   const isNavRoot = ALL_NAV_ITEMS.some((item) => item.href === pathname)
@@ -56,25 +54,7 @@ export function PageShell({
       {...useFadeSlideUp({ y: 20, transition: { duration: 0.4, ease: 'easeInOut' } })}
       className={cn('flex flex-col gap-6', WIDTH_CLASS[width])}
     >
-      {(backHref || backHistory) && (
-        <div>
-          {backHistory ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                window.history.length > 1 ? router.back() : router.push(backHref ?? '/')
-              }
-            >
-              ← {backLabel}
-            </Button>
-          ) : (
-            <Button asChild variant="ghost" size="sm">
-              <Link href={backHref!}>← {backLabel}</Link>
-            </Button>
-          )}
-        </div>
-      )}
+      <PageBackButton backHref={backHref} backLabel={backLabel} backHistory={backHistory} />
 
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
