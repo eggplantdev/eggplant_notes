@@ -14,15 +14,13 @@ import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { SourceNoteLink } from '@/features/notes/components/source-note-link'
 import type { DueCardT } from '@/features/memory-cards/types'
 
-// provideCelebration: the dashboard self-provides (default) since it advances in place; the card
-// page passes false and relies on the [id] layout's provider, which survives navigating to the next
-// card (a queue walk router.pushes between cards). See lessons.md:141-145.
+// provideCelebration: both surfaces (dashboard, /memory-cards) advance in place, so they self-provide
+// the celebration dialog (default true).
 // subtitle: optional context line under the card title (the /memory-cards panel shows the active
 // filter + due count here); omitted on the dashboard.
-// showCardControls: render per-card Edit/Delete in the header. On for the in-place review panels
-// (dashboard, /memory-cards) AND the /memory-cards/[id] page (controls live inside the card, not
-// in PageShell). deleteRedirectTo: supplied by the [id] page so delete navigates away instead of
-// revalidating in place (the route would 404 on the deleted row without it).
+// showCardControls: render per-card Edit/Delete in the header — on for both in-place review panels.
+// advanceHref: passed through to RatingButtons; the /memory-cards panel uses it to clear its
+// `?review` selection after a rating so the next card surfaces (omitted on the dashboard).
 type PropsT = {
   card: DueCardT | undefined
   goal: number
@@ -30,11 +28,12 @@ type PropsT = {
   subtitle?: ReactNode
   showCardControls?: boolean
   deleteRedirectTo?: string
+  advanceHref?: string
 }
 
 // Server Component: owns the interval previews (computed only when a card is due). The celebration
 // provider wraps BOTH branches so the dialog survives RatingButtons unmounting when the last card is
-// rated (lessons.md:141-145) — owned here for the dashboard, by the [id] layout for the card page.
+// rated (lessons.md:141-145).
 export function ReviewPanel({
   card,
   goal,
@@ -42,6 +41,7 @@ export function ReviewPanel({
   subtitle,
   showCardControls = false,
   deleteRedirectTo,
+  advanceHref,
 }: PropsT) {
   const body = !card ? (
     <Card className="gradient-border ring-0">
@@ -93,6 +93,7 @@ export function ReviewPanel({
           memoryCardId={card.id}
           previews={buildPreviews(card, new Date())}
           goal={goal}
+          advanceHref={advanceHref}
         />
       </CardContent>
     </Card>

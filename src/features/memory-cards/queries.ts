@@ -87,6 +87,28 @@ export async function getDueQueue(
   return { first: data?.[0], count: count ?? 0 }
 }
 
+// Soonest card by due_at WITHOUT the due gate — the "review ahead" fallback for /memory-cards when
+// nothing is due yet: the user asked to keep reviewing instead of hitting a caught-up dead end. Same
+// filters as the listing so it stays topic-scoped; page-independent (no pagination), so it's the
+// soonest match overall, not the soonest on the current page. `limit(1)` → one card or undefined.
+export async function getSoonestReviewCard(
+  opts?: CardFilterOptsT,
+  client?: SupabaseClient<Database>,
+): Promise<DueCardT | undefined> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await applyCardFilters(
+    supabase.from('memory_cards').select('*, notes(title, subject_id)'),
+    opts,
+  )
+    .order('due_at', { ascending: true })
+    .limit(1)
+  if (error) {
+    console.error('[getSoonestReviewCard] PostgREST error', error)
+    throw new Error(error.message, { cause: error })
+  }
+  return data?.[0]
+}
+
 // Whole-deck counts for the "Cards overview" chart (per FSRS state + mature split), aggregated in
 // the card_overview RPC instead of fetching every card and bucketing in TS. SECURITY INVOKER, so
 // RLS scopes the counts to the owner. Returns a jsonb whose shape the RPC guarantees (safe cast).
