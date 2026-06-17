@@ -73,7 +73,6 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Flip variant to switch palettes: 'aurora' | 'fuchsia' | 'mono' | 'white'. */}
         <GoalProgressBar
           label="Today's progress"
           reviewed={reviewedToday}
