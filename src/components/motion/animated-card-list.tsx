@@ -40,6 +40,8 @@ type PropsT<T> = {
   getItemClassName?: (item: T) => string | undefined
   // Default is a vertical stack; gridLayout switches to a responsive card grid (1/2/3 cols).
   gridLayout?: boolean
+  // Collapses the CardHeader row gap at sm+ (sm:gap-y-0). Notes need it; memory cards don't.
+  collapseRowGap?: boolean
 }
 
 // Client component because callers pass render functions, which can't cross the RSC boundary —
@@ -55,6 +57,7 @@ export function AnimatedCardList<T>({
   renderAction,
   getItemClassName,
   gridLayout = false,
+  collapseRowGap = false,
 }: PropsT<T>) {
   // Keying the outer fade on the query string cross-fades whole-page swaps; otherwise the inner
   // popLayout FLIP tries to reshuffle an entirely new key-set and looks janky. Stable within a page
@@ -86,9 +89,9 @@ export function AnimatedCardList<T>({
                   >
                     {/* Single layout at every width: row 1 is the eyebrow (left) + action slot (right),
                         row 2 is the full-width title. gap-y-4 matches the Card's gap-4 to the subtitle below,
-                        so title→buttons and title→tags spacing line up. row-span-1 keeps the action on row 1
+                        so title→buttons and title→Remove the collapse rope.tags spacing line up. row-span-1 keeps the action on row 1
                         only so the col-span-2 title can take the whole second row. */}
-                    <CardHeader className="gap-x-4 gap-y-2 sm:gap-y-0">
+                    <CardHeader className={cn('gap-x-4 gap-y-2', collapseRowGap && 'sm:gap-y-0')}>
                       {renderEyebrow?.(item)}
                       <CardTitle className="col-span-2">{renderTitle(item)}</CardTitle>
                       {renderDescription && (
