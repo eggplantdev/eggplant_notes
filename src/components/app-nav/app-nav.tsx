@@ -18,7 +18,7 @@ export async function AppNav() {
       {/* Gradient fades the page background to transparent so scrolled content slides under the bar with no
           border seam. The header is click-through (pointer-events-none) so its transparent tail doesn't eat
           clicks on the content beneath; the bar row re-enables pointer events for its own controls. */}
-      <header className="from-background pointer-events-none sticky top-0 z-40 hidden bg-gradient-to-b from-40% to-transparent pb-24 md:block">
+      <header className="from-background pointer-events-none sticky top-0 z-40 hidden bg-gradient-to-b from-40% to-transparent pb-12 md:block">
         <div className="container-shell pointer-events-auto flex items-center justify-between gap-2 py-4">
           <div className="flex items-center gap-1">
             <BrandMark
