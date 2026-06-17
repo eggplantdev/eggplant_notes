@@ -1,6 +1,6 @@
 import { PageShell } from '@/components/layout/page-shell'
 import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
-import { getMemoryCardForReview } from '@/features/memory-cards/queries'
+import { getDueQueue, getMemoryCardForReview } from '@/features/memory-cards/queries'
 import { assertFound } from '@/lib/assert-found'
 import { CardReviewQueue } from '@/features/review/components/card-review-queue'
 import { ReviewPanel } from '@/features/review/components/review-panel'
@@ -15,10 +15,13 @@ export default async function MemoryCardReviewPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [card, goal, subjects] = await Promise.all([
+  // The soonest-due remaining card (excluding this one) drives the queue walk: CardReviewQueue
+  // prefetches it on mount and advances to it after a rating, so the next card is already warm.
+  const [card, goal, subjects, { first: nextDue }] = await Promise.all([
     getMemoryCardForReview(id),
     getDailyGoal(),
     getSubjects(),
+    getDueQueue({ excludeId: id }),
   ])
   assertFound(card)
 
@@ -38,7 +41,7 @@ export default async function MemoryCardReviewPage({
           walker as children, so a rating advances to the next due card / caught-up. The celebration
           provider lives in this route's layout (survives navigating between cards), so ReviewPanel
           must not self-provide here. */}
-      <CardReviewQueue>
+      <CardReviewQueue nextDueId={nextDue?.id}>
         <ReviewPanel
           card={card}
           goal={goal}

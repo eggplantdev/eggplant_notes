@@ -8,7 +8,6 @@ import { applyRating, serializeCard } from '@/features/review/scheduling'
 import type { RateResultT } from '@/features/review/types'
 import { nextReviewCounts, reviewWindowKeys } from '@/features/review-events/derive-counts'
 import { getReviewCounts } from '@/features/review-events/queries'
-import { getDueQueue } from '@/features/memory-cards/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
 import { validateInput } from '@/lib/validate'
@@ -22,9 +21,11 @@ export async function rateMemoryCard(
   memoryCardId: string,
   rating: unknown,
   goal: unknown,
-  // The standalone card page advances through the due queue, so it asks for the next due card id;
-  // the dashboard re-renders via revalidate and doesn't need it (skips the extra query).
-  returnNextDue = false,
+  // The standalone card page advances by client navigation to a PREFETCHED next card, so it skips
+  // the broad revalidatePath below — that revalidate would invalidate the warmed prefetch and undo
+  // the whole speedup. The in-place panels (dashboard, /memory-cards) pass false and rely on the
+  // revalidate to swap to the next due card on SSR re-render.
+  skipRevalidate = false,
 ): Promise<RateResultT> {
   const parsedId = validateInput(memoryCardIdSchema, memoryCardId)
   if (!parsedId.success) return parsedId
@@ -69,11 +70,9 @@ export async function rateMemoryCard(
     dailyGoal,
   })
 
-  revalidatePath('/', 'layout')
+  // In-place panels (dashboard, /memory-cards) advance by re-rendering the page; the queue walk
+  // advances by navigating to a prefetched card, so it skips this to keep the prefetch valid.
+  if (!skipRevalidate) revalidatePath('/', 'layout')
 
-  // Soonest-due remaining card (excluding the one just rated) so the card page can advance the queue.
-  const nextDueId = returnNextDue
-    ? (await getDueQueue({ excludeId: parsedId.data }, supabase)).first?.id
-    : undefined
-  return { success: true, celebrate, nextDueId }
+  return { success: true, celebrate }
 }

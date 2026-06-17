@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { toastMessage } from '@/components/toasts'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { Button } from '@/components/ui/button'
 import { LoadingOverlay } from '@/components/ui/loading-overlay'
@@ -16,42 +17,54 @@ type PropsT = { memoryCardId: string; previews: Record<number, string>; goal: nu
 export function RatingButtons({ memoryCardId, previews, goal }: PropsT) {
   const { error, isPending, run } = useActionTransition()
   const { celebrate } = useReviewCelebration()
-  // Present only on the standalone card page (a queue walk); undefined on the dashboard.
+  // Present only on the standalone card page (a queue walk); undefined on the dashboard / memory-cards.
   const advance = useQueueAdvance()
-  // The card-page advance is a router.push that fires AFTER the transition resolves, so isPending no
-  // longer covers it — track that nav separately so the loader spans it too. Set true and never
-  // reset: the push unmounts this component, mounting a fresh one for the next card.
-  const [isAdvancing, setIsAdvancing] = useState(false)
-  const busy = isPending || isAdvancing
+  // Queue walk only: guards a double-click in the brief window before the optimistic navigation
+  // unmounts this component.
+  const [submitted, setSubmitted] = useState(false)
 
-  // Rating triggers a nuclear revalidatePath('/', 'layout') (dashboard re-renders in place) or a
-  // queue-walk router.push — both have real latency, so show the standard page-centered loader
-  // meanwhile (also covers the post-transition router.push the queue walk does, via isAdvancing).
+  function rate(grade: number) {
+    if (advance) {
+      // Queue walk: persist the rating, THEN advance to the (already-prefetched) next card. We can't
+      // advance before the write commits — the destination page recomputes the soonest-due card at
+      // render, and an in-flight write would let it still see THIS card as due (the last card would
+      // never reach "caught up", and mid-walk you'd briefly revisit a just-rated card). The next
+      // route is warm from the mount-time prefetch, so the only wait is the RPC itself; no overlay,
+      // just disabled buttons. The action skips revalidate so it can't invalidate the prefetch.
+      // celebrate() lands fine after the navigation because the dialog state lives in the [id] layout
+      // provider, not in this island.
+      setSubmitted(true)
+      void rateMemoryCard(memoryCardId, grade, goal, true).then((result) => {
+        if (!result.success) {
+          toastMessage(result.error, 'error')
+          setSubmitted(false)
+          return
+        }
+        if (result.celebrate) celebrate(result.celebrate)
+        advance()
+      })
+      return
+    }
+    // In-place (dashboard, /memory-cards): keep the awaited transition + loader; the action's
+    // revalidatePath re-renders the page to the next due card.
+    void run(() => rateMemoryCard(memoryCardId, grade, goal, false)).then((result) => {
+      if (result.success && result.celebrate) celebrate(result.celebrate)
+    })
+  }
+
   return (
     <div className="mt-6 flex flex-col gap-3">
       <FormError message={error} />
-      {busy && <LoadingOverlay />}
+      {/* Loader only on the in-place path; the queue walk is instant (prefetched), so no overlay. */}
+      {isPending && <LoadingOverlay />}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {GRADES.map(({ grade, label, variant }) => (
           <Button
             key={grade}
             variant={variant}
             size="lg"
-            disabled={busy}
-            onClick={() =>
-              run(() => rateMemoryCard(memoryCardId, grade, goal, Boolean(advance))).then(
-                (result) => {
-                  if (!result.success) return
-                  // Celebrate AND advance: the dialog lives in the [id] layout's provider, so it
-                  // survives the queue walk navigating to the next card behind it.
-                  if (result.celebrate) celebrate(result.celebrate)
-                  // A truthy nextDueId means advance() will router.push — keep the loader up across
-                  // it. An undefined id (caught up) swaps to CaughtUpNotice in place, no nav.
-                  if (advance && result.nextDueId) setIsAdvancing(true)
-                  advance?.(result.nextDueId)
-                },
-              )
-            }
+            disabled={isPending || submitted}
+            onClick={() => rate(grade)}
             className="h-auto flex-col gap-0.5 py-2"
           >
             <span className="font-semibold">{label}</span>

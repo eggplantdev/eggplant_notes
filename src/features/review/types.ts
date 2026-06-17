@@ -11,7 +11,7 @@ export type GoalCelebrationT = {
   weeklyGoal: number
 }
 
-// `celebrate` is present only when this rating crossed a goal. `nextDueId` is the soonest-due
-// remaining card (excluding the one just rated), populated only when the caller asks for it (the
-// standalone card page, which advances through the queue); undefined means none are due.
-export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT; nextDueId?: string }
+// `celebrate` is present only when this rating crossed a goal. The next due card is no longer
+// returned here — the queue walk owns it client-side (computed at page render, prefetched), so the
+// action doesn't re-query it.
+export type RateResultT = ActionResultT & { celebrate?: GoalCelebrationT }
