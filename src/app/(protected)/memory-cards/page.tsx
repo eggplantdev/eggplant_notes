@@ -110,7 +110,8 @@ export default async function MemoryCardsPage({
           // per-card Review button's smooth-scroll target.
           <div id={REVIEW_PANEL_ID} className="mx-auto w-full max-w-3xl scroll-mt-24">
             {reviewingAhead && (
-              <p className="text-muted-foreground mb-4 text-center text-sm">
+              // mb matches the section gap-12 so the notice sits centered between sections, not glued to the panel.
+              <p className="text-muted-foreground mb-12 text-center text-sm">
                 All caught up 🎉 — reviewing ahead.
               </p>
             )}

@@ -82,14 +82,15 @@ export default async function DashboardPage() {
         <TitledCard title="Review activity — last 12 months" className="w-full">
           <ActivityHeatmap columns={columns} variant="neon-cyan" />
         </TitledCard>
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-4">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-4">
           <div>
             {reviewingAhead && (
-              <p className="text-muted-foreground mb-4 text-center text-sm">
+              // mb matches the section gap-12 so the notice sits centered between sections, not glued to the panel.
+              <p className="text-muted-foreground mb-12 text-center text-sm">
                 All caught up 🎉 — reviewing ahead.
               </p>
             )}
-            <ReviewPanel card={card} goal={dailyGoal} showCardControls reviewHref="/memory-cards" />
+            <ReviewPanel card={card} goal={dailyGoal} reviewHref="/memory-cards" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             {tiles.map((tile) => (

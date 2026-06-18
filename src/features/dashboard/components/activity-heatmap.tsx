@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 import {
   DEFAULT_HEAT_VARIANT,
@@ -34,6 +34,11 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
     if (tipRef.current) tipRef.current.style.opacity = '0'
   }
 
+  // Newest week is the rightmost column; land scrolled to the end so the current days show without a swipe on mobile.
+  const scrollToEnd = useCallback((node: HTMLDivElement | null) => {
+    if (node) node.scrollLeft = node.scrollWidth
+  }, [])
+
   const cols = columns.length
   // Floor the grid at cols × MIN_COL_WIDTH so it overflows (→ scroll) on narrow phones, stays fluid above.
   const minWidth = `max(100%, ${cols * MIN_COL_WIDTH}px)`
@@ -41,7 +46,7 @@ export function ActivityHeatmap({ columns, variant = DEFAULT_HEAT_VARIANT }: Pro
   return (
     <div className="w-full pb-1">
       {/* Touch-scrolls horizontally on mobile; fluid full-width on larger screens where 100% wins the max(). */}
-      <div className="-mx-1 overflow-x-auto px-1">
+      <div ref={scrollToEnd} className="-mx-1 overflow-x-auto px-1">
         <div style={{ width: minWidth }}>
           {/* Month labels share the grid's column tracks so they stay aligned as cells grow; text overflows rightward. */}
           <div
