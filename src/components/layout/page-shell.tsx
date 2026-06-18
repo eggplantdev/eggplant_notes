@@ -59,7 +59,9 @@ export function PageShell({
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
           {eyebrow}
-          <h1 className={cn('text-2xl font-semibold', isNavRoot && 'hidden md:block')}>{title}</h1>
+          <h1 className={cn('text-2xl font-semibold break-words', isNavRoot && 'hidden md:block')}>
+            {title}
+          </h1>
           {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}

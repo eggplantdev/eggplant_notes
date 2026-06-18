@@ -14,9 +14,11 @@ type PropsT = {
 export function ContextLink({ href, children, className }: PropsT) {
   return (
     <MutedText asChild interactive className={className}>
-      <Link href={href} className="inline-flex items-center gap-1">
-        {children}
-        <ArrowUpRight className="size-3.5 shrink-0" aria-hidden />
+      {/* flex (not inline-flex) + py-1.5 widen the tap target for mobile; the label is clamped to
+          one line so a long note title can't wrap or push the arrow off-screen. */}
+      <Link href={href} className="flex max-w-full items-center gap-1 py-1.5">
+        <span className="line-clamp-1 min-w-0">{children}</span>
+        <ArrowUpRight className="size-4.5 shrink-0" aria-hidden />
       </Link>
     </MutedText>
   )
