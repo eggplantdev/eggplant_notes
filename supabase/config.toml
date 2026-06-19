@@ -228,7 +228,13 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
+# Use a production-ready SMTP server.
+# PROD NOTE: this whole file (SMTP creds, sender_name, subjects, the templates below) is LOCAL-DEV
+# ONLY — nothing here syncs to the hosted project. Prod auth email lives in the hosted Supabase
+# config (smtp_*, mailer_subjects_*, mailer_templates_*), edited via dashboard / Management API.
+# Keep the subjects + ./supabase/templates/*.html here matching hosted by hand, or they drift
+# silently (e.g. a project rename left the hosted sender_name as "Eggplant AI Notes"). See
+# context/foundation/lessons.md + the reference_supabase_management_api memory for the PATCH recipe.
 # [auth.email.smtp]
 # enabled = true
 # host = "smtp.sendgrid.net"
@@ -243,7 +249,7 @@ otp_expiry = 3600
 # are not user-reachable features today; wired defensively so they can't silently regress to the
 # old flow if ever enabled. The route allow-lists their `type` (see confirm/route.ts).
 [auth.email.template.invite]
-subject = "You have been invited"
+subject = "You've been invited"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.magic_link]
@@ -259,7 +265,7 @@ content_path = "./supabase/templates/email_change.html"
 # with no token_hash and GoTrue redirects to Site URL (localhost). The route reads ?type=email,
 # matching the emailRedirectTo set in sign-up.ts.
 [auth.email.template.confirmation]
-subject = "Confirm your email"
+subject = "Confirm your email address"
 content_path = "./supabase/templates/confirmation.html"
 
 # Recovery email must link to the /auth/confirm token-exchange route (server-side
