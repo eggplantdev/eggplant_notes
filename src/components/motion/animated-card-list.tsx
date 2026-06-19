@@ -78,6 +78,9 @@ export function AnimatedCardList<T>({
           {items.map((item) => {
             const key = getKey(item)
             const href = getHref?.(item)
+            // Resolve once so an empty answer (a card with no body in a list that DOES show bodies)
+            // skips the CardDescription entirely instead of rendering an empty box.
+            const description = renderDescription?.(item)
             const card = (
               <Card
                 className={cn(
@@ -88,15 +91,14 @@ export function AnimatedCardList<T>({
                 )}
               >
                 {/* Single layout at every width: row 1 is the eyebrow (left) + action slot (right),
-                    row 2 is the full-width title. gap-y-2 keeps the row spacing tight. row-span-1
-                    keeps the action on row 1 only so the col-span-2 title takes the whole second row. */}
-                <CardHeader className="gap-x-4 gap-y-2">
+                    row 2 is the full-width title. gap-y-3 sets the shared vertical rhythm between
+                    eyebrow, title and the answer body. row-span-1 keeps the action on row 1 only so
+                    the col-span-2 title takes the whole second row. */}
+                <CardHeader className="gap-x-4 gap-y-3">
                   {renderEyebrow?.(item)}
                   <CardTitle className="col-span-2">{renderTitle(item)}</CardTitle>
-                  {renderDescription && (
-                    <CardDescription className="col-span-2">
-                      {renderDescription(item)}
-                    </CardDescription>
+                  {description && (
+                    <CardDescription className="col-span-2">{description}</CardDescription>
                   )}
                   {renderAction && (
                     <CardAction onClick={blockCardNav} className="row-span-1">

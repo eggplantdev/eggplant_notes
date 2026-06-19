@@ -8,7 +8,10 @@ import type { MemoryCardListItemT } from '@/features/memory-cards/types'
 // preview render an IDENTICAL card body off one source (only their action + border differ); editing
 // the card's look stays a single edit.
 
-export function renderCardEyebrow(card: MemoryCardListItemT) {
+// Eyebrow + title take only the slim fields they consume (not the full MemoryCardListItemT), so the
+// in-note card section can feed them a raw MemoryCardT — which lacks the listing's note/subject
+// embeds. The subtitle still needs those embeds, so it keeps the richer type.
+export function renderCardEyebrow(card: { state: number; due_at: string }) {
   return (
     <span
       className={cn('text-xs', isCardOverdue(card) ? 'text-destructive' : 'text-muted-foreground')}
@@ -18,7 +21,7 @@ export function renderCardEyebrow(card: MemoryCardListItemT) {
   )
 }
 
-export function renderCardTitle(card: MemoryCardListItemT) {
+export function renderCardTitle(card: { prompt: string }) {
   return <span className="line-clamp-2">{card.prompt}</span>
 }
 

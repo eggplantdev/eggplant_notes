@@ -1,18 +1,11 @@
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
-import { ButtonLink } from '@/components/ui/button-link'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { AddMemoryCard } from '@/features/memory-cards/components/add-memory-card'
-import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
-import { UnlinkCardButton } from '@/features/memory-cards/components/unlink-card-button'
+import {
+  NoteMemoryCardsList,
+  type NoteCardRowT,
+} from '@/features/memory-cards/components/note-memory-cards-list'
 import type { MemoryCardT } from '@/features/memory-cards/types'
-import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { GenerateCardsButton } from '@/features/memory-cards/components/generate-cards-button'
 
 type MemoryCardsSectionPropsT = {
@@ -29,9 +22,12 @@ type MemoryCardsSectionPropsT = {
   defaultModel: string
 }
 
-// Server Component (renders the server-only Shiki RenderMarkdown). This section only ADDS cards —
-// editing lives at the /memory-cards/[id]/edit route.
-export async function MemoryCardsSection({
+// This section only ADDS cards — editing lives at the /memory-cards/[id]/edit route. The card list
+// renders through NoteMemoryCardsList (the shared listing shell), expanded with each card's answer
+// body. The body (example + code_context) is pre-rendered HERE via the server-only Shiki
+// RenderMarkdown and handed down as a ReactNode, because that component can't run inside the client
+// list. Pass `answer: undefined` instead to get the compact (listing-style) card.
+export function MemoryCardsSection({
   noteId,
   noteTitle,
   noteContent,
@@ -39,55 +35,40 @@ export async function MemoryCardsSection({
   aiEnabled,
   defaultModel,
 }: MemoryCardsSectionPropsT) {
+  const rows: NoteCardRowT[] = cards.map((card) => ({
+    card,
+    answer:
+      card.example || card.code_context ? (
+        // Separator divides the question from its answer; gap-4 keeps the body from crowding it.
+        <div className="flex flex-col gap-2">
+          <Separator />
+          {card.example && <RenderMarkdown content={card.example} />}
+          {card.code_context && <RenderMarkdown content={card.code_context} />}
+        </div>
+      ) : undefined,
+  }))
+
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
-      <AddMemoryCard noteId={noteId} />
-      <GenerateCardsButton
-        noteId={noteId}
-        noteTitle={noteTitle}
-        noteContent={noteContent}
-        connected={aiEnabled}
-        defaultModel={defaultModel}
-      />
+      <div className={`flex gap-2`}>
+        <AddMemoryCard noteId={noteId} />
+        <GenerateCardsButton
+          noteId={noteId}
+          noteTitle={noteTitle}
+          noteContent={noteContent}
+          connected={aiEnabled}
+          defaultModel={defaultModel}
+        />
+      </div>
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground text-sm">
           No memory cards yet. Add one above to start building your recall set.
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {cards.map((card) => (
-            // Scroll target for the `/notes/[id]#card-<id>` deep link; scroll-mt clears the sticky nav.
-            <li key={card.id} id={`card-${card.id}`} className="scroll-mt-24">
-              <Card>
-                {/* CardAction sits in col 2 / row-span-2 so the buttons flank both title and
-                    description; the code block stays full-width below in CardContent. */}
-                <CardHeader className="gap-x-4">
-                  <CardTitle>{card.prompt}</CardTitle>
-                  {card.example && (
-                    <CardDescription>
-                      <RenderMarkdown content={card.example} />
-                    </CardDescription>
-                  )}
-                  <CardAction className="flex items-center gap-2">
-                    <ButtonLink href={memoryCardEditHref(card.id)} variant="outline" size="sm">
-                      Edit
-                    </ButtonLink>
-                    <UnlinkCardButton id={card.id} noteId={noteId} />
-                    <DeleteMemoryCardButton noteId={noteId} id={card.id} />
-                  </CardAction>
-                </CardHeader>
-                {card.code_context && (
-                  <CardContent>
-                    <RenderMarkdown content={card.code_context} />
-                  </CardContent>
-                )}
-              </Card>
-            </li>
-          ))}
-        </ul>
+        <NoteMemoryCardsList rows={rows} noteId={noteId} />
       )}
     </section>
   )
