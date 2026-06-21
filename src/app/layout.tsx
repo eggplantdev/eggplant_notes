@@ -40,6 +40,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // Inline so the browser paints brand-dark from the FIRST frame, before globals.css loads. The
+      // `.dark { color-scheme; --background }` rules are render-blocking but still resolve a beat after
+      // the HTML — in that gap the UA paints its default WHITE canvas (the intro flash). Setting both
+      // here, in the initial markup, removes that pre-stylesheet white frame and inter-page blanks.
+      style={{ colorScheme: 'dark', backgroundColor: BRAND_DARK }}
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
