@@ -19,7 +19,6 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // Allow cross-origin dev requests from this LAN IP (e.g. testing on a phone on the same network).
   // Dev-only: Next validates this for the dev server's internal asset/HMR requests.
-  allowedDevOrigins: ['192.168.31.247'],
   experimental: {
     // The PDF import action (generateNotes file path) sends a base64 PDF in the Server Action body;
     // a 10 MB PDF is ~13.4 MB base64. The default Server Action body limit is 1 MB, which would
@@ -33,21 +32,6 @@ const nextConfig: NextConfig = {
     // the premise of lessons.md "revalidatePath on a dynamic page is a no-op": once dynamic != 0, those
     // busts become load-bearing. See context/changes/nav-cache-staletimes/.
     staleTimes: { dynamic: 300 },
-  },
-
-  async redirects() {
-    return [
-      // `/` is no longer redirected here: it now serves the public landing page. Config redirects run
-      // before the proxy, so a `/` → /dashboard rule here would shadow the landing for everyone. The
-      // authed-only "root → dashboard" bounce lives in proxy.ts instead, where it can check the session.
-      {
-        // /review was relocated onto /dashboard. 307 (not 308) — a relocation that could
-        // plausibly revert, and 308s get aggressively browser-cached.
-        source: '/review',
-        destination: '/dashboard',
-        permanent: false,
-      },
-    ]
   },
 }
 

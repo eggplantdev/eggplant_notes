@@ -31,6 +31,12 @@ vi.mock('next/headers', () => ({
 // sign-up-email-redirect.test.ts); SITE_URL is irrelevant to the enumeration assertions.
 vi.mock('@/lib/env', () => ({ SITE_URL: 'http://localhost:3000' }))
 
+// sign-up.ts imports notify-new-user.ts, which begins with `import 'server-only'` — a directive Next's
+// bundler resolves but vitest cannot, so loading the real module throws at import time. The operator
+// notification is irrelevant to the enumeration behavior under test; stub it out to keep the
+// server-only boundary off the test's import graph.
+vi.mock('@/features/auth/notify-new-user', () => ({ notifyNewUser: vi.fn() }))
+
 import { signUp } from '@/features/auth/actions/sign-up'
 
 const VALID = { email: 'user@example.com', password: 'secret88' }

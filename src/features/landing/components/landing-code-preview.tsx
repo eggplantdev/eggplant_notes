@@ -24,7 +24,9 @@ export function LandingCodePreview() {
             <span className="text-muted-foreground ml-2 font-mono text-xs">unique.ts</span>
           </div>
           <pre className="overflow-x-auto px-5 py-5 text-sm leading-relaxed sm:text-base">
-            <code className="text-foreground/90 font-mono">
+            {/* ligatures off: Geist Mono renders the spread `[...` as a mangled `.[.` via a contextual
+                alternate — disable them so code reads literally (correct for a code block regardless). */}
+            <code className="text-foreground/90 font-mono [font-variant-ligatures:none]">
               {CODE_LINES.map((line, i) => (
                 <span key={i} className="block">
                   {line.map(([text, kind], j) => (

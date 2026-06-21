@@ -70,8 +70,9 @@ export async function proxy(request: NextRequest) {
 
   // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)
-  // Signed-in visitors skip the marketing landing and the auth screens — straight to the app.
-  if (user && (isAuthRoute || pathname === '/')) return redirectTo('/dashboard', request, response)
+  // Signed-in visitors on the auth screens go straight to the app; the landing (`/`) stays viewable
+  // by everyone, signed-in or not.
+  if (user && isAuthRoute) return redirectTo('/dashboard', request, response)
 
   return response
 }
