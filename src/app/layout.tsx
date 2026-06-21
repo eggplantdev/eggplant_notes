@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Suspense } from 'react'
 import './globals.css'
 
+// Build-time env gate: importing these runs their Zod parse, failing the build on a missing/bad var.
+import '@/lib/env'
+import '@/lib/env.server'
 import { ActionToast } from '@/components/action-toast'
 import { ToastProvider } from '@/components/toast-provider'
 import { BRAND_DARK } from '@/components/brand/brand-mark-dots'

@@ -1,10 +1,8 @@
-// Relative (not `@/`) on purpose: this module is loaded by next.config.ts via jiti, which doesn't
-// resolve the tsconfig path alias. Sibling import keeps it portable with zero jiti alias config.
 import { clientSchema } from './env-schema'
 
 // Client/public env entry — safe to import from anywhere (browser bundle included). Validated
-// eagerly at module load; a missing/malformed var throws here. Imported by next.config.ts (via
-// jiti) so that throw happens at BUILD start, not just at runtime.
+// eagerly at module load; a missing/malformed var throws here. Imported by the root layout
+// (src/app/layout.tsx) so that throw happens at BUILD start, not just at runtime.
 //
 // Each NEXT_PUBLIC_* must be read by a STATIC `process.env.NEXT_PUBLIC_X` key — Next.js only inlines
 // statically-written references into the client bundle; a wholesale `process.env` spread leaves them
