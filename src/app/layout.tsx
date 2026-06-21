@@ -30,6 +30,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: BRAND_DARK,
+  // Emits <meta name="color-scheme" content="dark"> so the browser paints its WINDOW canvas dark for the
+  // navigation-commit frame — the one painted before the document's own styles (CSS, inline <html> bg,
+  // the veil) resolve. Without it that first frame is the UA default white: the intro flash.
+  colorScheme: 'dark',
 }
 
 export default function RootLayout({
