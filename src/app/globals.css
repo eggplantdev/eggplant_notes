@@ -197,15 +197,6 @@
   max-width: 120rem; /* 1920px */
 }
 
-/* The public landing page's outer-container geometry — matches the app shell's `container-shell`
-   max width (120rem) so the landing lines up with the protected pages, with its own wider marketing
-   gutters. Single source: every landing section lines up on the same edges. Flex/vertical-padding
-   stays per-section. */
-@utility landing-shell {
-  @apply mx-auto w-full px-5 sm:px-8;
-  max-width: 120rem; /* 1920px — same cap as container-shell */
-}
-
 /* The header fade backdrop: brand background at the top, transparent below, so page content scrolls
    under it instead of hitting a solid bar. Single source — shared by the app nav (desktop bar +
    mobile cap) and the public landing header. Positioning/height/`pb-*` stay per-consumer; only the

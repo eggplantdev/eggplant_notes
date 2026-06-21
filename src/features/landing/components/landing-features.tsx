@@ -1,8 +1,9 @@
+import { LandingShell } from '@/features/landing/components/landing-shell'
 import { FEATURES } from '@/features/landing/landing-features-data'
 
 export function LandingFeatures() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+    <LandingShell>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ icon: Icon, tint, title, body }) => (
           <div
@@ -15,6 +16,6 @@ export function LandingFeatures() {
           </div>
         ))}
       </div>
-    </section>
+    </LandingShell>
   )
 }

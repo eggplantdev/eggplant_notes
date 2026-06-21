@@ -1,10 +1,11 @@
 import { Code2 } from 'lucide-react'
 
+import { LandingShell } from '@/features/landing/components/landing-shell'
 import { CODE_LINES, TOKEN_COLOR } from '@/features/landing/landing-code-preview-data'
 
 export function LandingCodePreview() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+    <LandingShell>
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
         <div className="text-center">
           <p className="text-neon-cyan inline-flex items-center gap-1.5 font-mono text-xs">
@@ -40,6 +41,6 @@ export function LandingCodePreview() {
           </pre>
         </div>
       </div>
-    </section>
+    </LandingShell>
   )
 }
