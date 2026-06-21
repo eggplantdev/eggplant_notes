@@ -1,9 +1,13 @@
 'use client'
 
 // Animated variant of <BrandLogo> for the marketing hero: the same dot grid, but each dot flies in
-// from a scattered position and settles into place once on mount. Geometry/colours come from the
-// shared brand-mark-dots source — this file only owns the entrance animation.
+// from a scattered position and settles into place. Geometry/colours come from the shared
+// brand-mark-dots source — this file only owns the entrance animation.
+//
+// `entrance={false}` renders the mark already settled (no scatter, glow at rest). The landing intro
+// uses that for the hero copy it morphs the splash logo into, so the mark doesn't re-scatter on handoff.
 
+import { useId } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 import { buildBrandDots, DOT_R, VIEWBOX } from './brand-mark-dots'
@@ -27,8 +31,18 @@ function scatter(i: number, cx: number, cy: number) {
   return { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
 }
 
-export function AnimatedBrandLogo({ className }: { className?: string }) {
+type AnimatedBrandLogoPropsT = {
+  className?: string
+  // false → render settled, no entrance animation (the intro morphs into this state).
+  entrance?: boolean
+}
+
+export function AnimatedBrandLogo({ className, entrance = true }: AnimatedBrandLogoPropsT) {
   const reduced = useReducedMotion()
+  // Unique per instance — a fixed id collides with the nav's BrandLogo and with a second copy of this
+  // logo on screen (the intro renders splash + hero copies), and url(#id) resolves to the first match.
+  const filterId = useId()
+  const animate = entrance && !reduced
   const dots = buildBrandDots()
 
   // One layer of <motion.circle>s; rendered twice (blurred glow behind, sharp in front) with
@@ -37,25 +51,25 @@ export function AnimatedBrandLogo({ className }: { className?: string }) {
     dots.map((d, i) => {
       const from = scatter(i, d.cx, d.cy)
       // Stagger by a hashed delay + a gentle index ramp so dots don't all land at once. Larger
-      // spacing than before = a slower, more drawn-out assembly.
+      // spacing = a slower, more drawn-out assembly.
       const delay = i * 0.03 + rand(i * 3 + 7) * 0.35
       return (
         <motion.circle
           key={`${d.cx}-${d.cy}`}
           r={d.r}
           fill={d.fill}
-          initial={reduced ? false : { cx: from.x, cy: from.y, scale: 0.2, opacity: 0 }}
+          initial={animate ? { cx: from.x, cy: from.y, scale: 0.2, opacity: 0 } : false}
           animate={{ cx: d.cx, cy: d.cy, scale: 1, opacity: 1 }}
           transition={
-            reduced
-              ? { duration: 0 }
-              : {
+            animate
+              ? {
                   // Softer spring (lower stiffness, more mass) — dots drift in and settle slowly.
                   cx: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay },
                   cy: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay },
                   scale: { type: 'spring', stiffness: 70, damping: 13, mass: 1.2, delay },
                   opacity: { duration: 0.6, delay },
                 }
+              : { duration: 0 }
           }
         />
       )
@@ -68,15 +82,15 @@ export function AnimatedBrandLogo({ className }: { className?: string }) {
       aria-hidden
     >
       <defs>
-        <filter id="brand-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
           <motion.feGaussianBlur
-            initial={reduced ? false : { stdDeviation: FLIGHT_BLUR }}
+            initial={animate ? { stdDeviation: FLIGHT_BLUR } : false}
             animate={{ stdDeviation: REST_BLUR }}
-            transition={reduced ? { duration: 0 } : { duration: 2, ease: 'easeOut' }}
+            transition={animate ? { duration: 2, ease: 'easeOut' } : { duration: 0 }}
           />
         </filter>
       </defs>
-      <g filter="url(#brand-glow)" opacity={Math.min(1, 0.55 + GLOW * 0.45)}>
+      <g filter={`url(#${filterId})`} opacity={Math.min(1, 0.55 + GLOW * 0.45)}>
         {renderDots()}
       </g>
       <g>{renderDots()}</g>
