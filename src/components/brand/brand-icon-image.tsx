@@ -1,4 +1,5 @@
-import { BRAND_DARK, buildBrandDots, VIEWBOX } from '@/components/brand/brand-mark-dots'
+import { BRAND_DARK } from '@/components/brand/brand-colors'
+import { buildBrandDots, VIEWBOX } from '@/components/brand/brand-mark-dots'
 
 // Shared element for the installable home-screen icons (PWA manifest + apple-touch). Distinct from
 // app/icon.tsx (the favicon: transparent, edge-to-edge): these may be masked to a circle by the OS,

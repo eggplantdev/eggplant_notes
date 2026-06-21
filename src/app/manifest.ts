@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-import { BRAND_DARK } from '@/components/brand/brand-mark-dots'
+import { BRAND_DARK } from '@/components/brand/brand-colors'
 
 // Web App Manifest — makes the app installable and launches it standalone (no browser chrome).
 // Next auto-links this from <head> (rel="manifest"); no manual <link> needed. iOS ignores the icons
@@ -11,8 +11,10 @@ import { BRAND_DARK } from '@/components/brand/brand-mark-dots'
 // while a live session cookie lands straight in. The cookie-based @supabase/ssr session survives the
 // standalone launch, which is what makes "tap icon → already logged in" work.
 export default function manifest(): MetadataRoute.Manifest {
-  const icons = ['/app-icon-192.png', '/app-icon-512.png'] as const
-  const sizes = { '/app-icon-192.png': '192x192', '/app-icon-512.png': '512x512' } as const
+  const icons = [
+    { src: '/app-icon-192.png', sizes: '192x192' },
+    { src: '/app-icon-512.png', sizes: '512x512' },
+  ] as const
 
   return {
     name: 'Eggplant Notes',
@@ -22,12 +24,12 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: BRAND_DARK,
     theme_color: BRAND_DARK,
-    icons: icons.flatMap((src) =>
+    icons: icons.flatMap(({ src, sizes }) =>
       // Each size listed as both 'any' (generic) and 'maskable' (adaptive/circular masks); the icon
       // is rendered with safe-zone padding, so one image serves both purposes.
       (['any', 'maskable'] as const).map((purpose) => ({
         src,
-        sizes: sizes[src],
+        sizes,
         type: 'image/png',
         purpose,
       })),

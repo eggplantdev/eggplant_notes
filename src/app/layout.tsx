@@ -8,7 +8,7 @@ import '@/lib/env'
 import '@/lib/env.server'
 import { ActionToast } from '@/components/action-toast'
 import { ToastProvider } from '@/components/toast-provider'
-import { BRAND_DARK } from '@/components/brand/brand-mark-dots'
+import { BRAND_DARK } from '@/components/brand/brand-colors'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
