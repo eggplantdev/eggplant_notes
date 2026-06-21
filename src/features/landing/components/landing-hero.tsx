@@ -7,14 +7,14 @@ export function LandingHero() {
   // section's box) and would get clipped mid-morph — a visible "step" — until it shrinks into the hero.
   return (
     <section className="relative">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-5 text-center sm:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-5 text-center sm:px-8">
         <BrandIntroLockup />
-        <h1 className="font-heading max-w-3xl pt-8 text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl">
+        <h1 className="font-heading max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl">
           <span className="from-neon-green via-neon-cyan to-neon-fuchsia bg-linear-to-r bg-clip-text text-transparent">
             Wired for recall
           </span>
         </h1>
-        <p className="text-muted-foreground mt-6 max-w-xl text-base text-pretty sm:text-lg">
+        <p className="text-muted-foreground max-w-xl text-base text-pretty sm:text-lg">
           Keep your coding notes in one place, group them into subjects, and turn them into
           spaced-repetition cards that link straight back to the note they came from.
         </p>

@@ -16,7 +16,7 @@ export function LandingCodePreview() {
           </h2>
           <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-relaxed sm:text-base">
             Notes and cards render code with real syntax highlighting — so a snippet reads like
-            code, not a grey wall of text. Paste it, review it, recall it.
+            code, not a grey wall of text.
           </p>
         </div>
         <div className="border-border/60 bg-card overflow-hidden rounded-xl border shadow-lg">
