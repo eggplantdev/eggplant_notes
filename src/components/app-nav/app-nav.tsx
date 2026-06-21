@@ -15,7 +15,7 @@ export async function AppNav() {
   const connected = await isOpenRouterConnected()
   return (
     <>
-      <header className="from-background pointer-events-none sticky top-0 z-40 hidden bg-gradient-to-b from-40% to-transparent pb-12 md:block">
+      <header className="header-fade pointer-events-none sticky top-0 z-40 hidden pb-12 md:block">
         <div className="container-shell pointer-events-auto flex items-center justify-between gap-2 py-4">
           <div className="flex items-center gap-1">
             <BrandMark
@@ -46,7 +46,7 @@ export async function AppNav() {
       </header>
 
       {/* Mobile-only gradient backing the fixed brand/label/hamburger (which sit at z-50) — mirrors the desktop header fade. */}
-      <div className="from-background pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-40% to-transparent md:hidden" />
+      <div className="header-fade pointer-events-none fixed inset-x-0 top-0 z-40 h-24 md:hidden" />
 
       {/* Mobile-only fixed brand, mirroring the floating hamburger on the right — the logo is the dashboard link. */}
       <BrandMark

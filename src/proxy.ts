@@ -63,13 +63,15 @@ export async function proxy(request: NextRequest) {
   // itself via getCurrentUser. update-password is reached via a recovery session, so it stays public too.
   const isPublic =
     isAuthRoute ||
+    pathname === '/' || // the public landing page — viewable signed-out, never bounced to /sign-in
     pathname.startsWith('/api/') ||
     matchesPath(pathname, '/update-password') ||
     PUBLIC_ASSET_ROUTES.some((route) => matchesPath(pathname, route))
 
   // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)
-  if (user && isAuthRoute) return redirectTo('/dashboard', request, response)
+  // Signed-in visitors skip the marketing landing and the auth screens — straight to the app.
+  if (user && (isAuthRoute || pathname === '/')) return redirectTo('/dashboard', request, response)
 
   return response
 }

@@ -197,6 +197,14 @@
   max-width: 120rem; /* 1920px */
 }
 
+/* The header fade backdrop: brand background at the top, transparent below, so page content scrolls
+   under it instead of hitting a solid bar. Single source — shared by the app nav (desktop bar +
+   mobile cap) and the public landing header. Positioning/height/`pb-*` stay per-consumer; only the
+   gradient lives here, so all three headers fade identically. */
+@utility header-fade {
+  @apply from-background bg-linear-to-b from-40% to-transparent;
+}
+
 /* The one focus-visible ring shared by every interactive control (button, inputs, segmented-toggle).
    Single source: change the ring colour/width here and all of them move together. Form fields add
    `focus-visible:border-ring` + the `aria-invalid` ring on top — those are field-specific, not here. */

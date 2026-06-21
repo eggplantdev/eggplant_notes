@@ -37,13 +37,9 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      {
-        // 307 (not 308): keeps `/` reroutable. A 308 is browser-cached permanently, so a future
-        // landing page / unauthenticated root would be unreachable for returning users.
-        source: '/',
-        destination: '/dashboard',
-        permanent: false,
-      },
+      // `/` is no longer redirected here: it now serves the public landing page. Config redirects run
+      // before the proxy, so a `/` → /dashboard rule here would shadow the landing for everyone. The
+      // authed-only "root → dashboard" bounce lives in proxy.ts instead, where it can check the session.
       {
         // /review was relocated onto /dashboard. 307 (not 308) — a relocation that could
         // plausibly revert, and 308s get aggressively browser-cached.
