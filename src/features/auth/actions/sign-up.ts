@@ -3,8 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 
 import { SITE_URL } from '@/lib/env'
+import { notifyNewUser } from '@/features/auth/notify-new-user'
 import { runAuthAction } from '@/features/auth/run-auth-action'
 import { credentialsSchema } from '@/features/auth/schemas'
 import type { ActionResultT } from '@/types/action'
@@ -29,6 +31,12 @@ export async function signUp(input: unknown): Promise<ActionResultT> {
         options: { emailRedirectTo: `${origin}/api/auth/confirm?type=email` },
       })
       hasSession = Boolean(res.data.session)
+      // Notify the operator inbox on a genuinely new sign-up only. With confirmations on, a repeat
+      // sign-up for an existing email returns a sessionless success with an EMPTY `identities` array
+      // (Supabase's enumeration-safe obfuscation) — guard on it so repeats don't ping the inbox.
+      // `after()` runs post-response, so the email never blocks the redirect below.
+      const isNewUser = !res.error && (res.data.user?.identities?.length ?? 0) > 0
+      if (isNewUser) after(() => notifyNewUser(data.email))
       return res
     },
     // Don't reveal whether the email already has an account (user-enumeration). Supabase returns
