@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 
+import type { AnyFieldApi } from '@tanstack/react-form'
+import type { ZodType } from 'zod'
+
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { toastActionResult } from '@/components/forms/toast-result'
@@ -18,6 +21,18 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { sendContactMessage } from '@/features/contact/actions/send-contact-message'
 import { contactSchema } from '@/features/contact/schemas'
+
+// Stay silent until the user actually submits, then re-check on every keystroke so the message
+// clears the moment the field becomes valid. A bare `onBlur`/`onChange` validator fires on the
+// focus churn Radix triggers when the dialog opens, surfacing "Subject is required" before the
+// user has touched anything. `onSubmit` (below) catches the first attempt; this catches the rest.
+function showAfterSubmit(schema: ZodType<string>) {
+  return ({ value, fieldApi }: { value: string; fieldApi: AnyFieldApi }) => {
+    if (fieldApi.form.state.submissionAttempts === 0) return undefined
+    const result = schema.safeParse(value)
+    return result.success ? undefined : result.error.issues[0]?.message
+  }
+}
 
 // The sender's email is not a field — the action derives it from the session. Success closes +
 // resets; failure keeps the dialog open with an inline error so the user doesn't lose their message.
@@ -70,14 +85,20 @@ export function ContactDialog() {
             <form.AppField
               name="subject"
               validators={{
-                onBlur: contactSchema.shape.subject,
                 onSubmit: contactSchema.shape.subject,
+                onChange: showAfterSubmit(contactSchema.shape.subject),
               }}
             >
               {(field) => <field.Input label="Subject" placeholder="What's this about?" />}
             </form.AppField>
 
-            <form.Field name="message" validators={{ onSubmit: contactSchema.shape.message }}>
+            <form.Field
+              name="message"
+              validators={{
+                onSubmit: contactSchema.shape.message,
+                onChange: showAfterSubmit(contactSchema.shape.message),
+              }}
+            >
               {(field) => (
                 <div className="grid gap-2">
                   <Label htmlFor={field.name}>Message</Label>
