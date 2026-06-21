@@ -26,7 +26,7 @@ const letter: Variants = {
 }
 
 // `delay` (seconds) holds the whole cascade until the dots have finished assembling. `layoutId` lets
-// the hero copy morph from this one (the lockup travels down together with the logo).
+// the page copy morph from this one (the lockup travels down together with the logo).
 export function IntroWordmark({
   text,
   delay = 0,
