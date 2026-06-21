@@ -46,8 +46,9 @@ export function WelcomeDialog() {
             turn any note into <strong>memory cards</strong> and <strong>review</strong> a few each
             day — a <strong>daily goal</strong> keeps you on track. You can use LLM to generate it
             for you. Head to Settings to load sample data, connect an OpenRouter account, or
-            download a skill that lets an AI agent author notes and cards for you over CLI/HTTP.
-            Still in active development, so expect a few rough edges.
+            download a skill that lets an AI agent author notes and cards for you over CLI/HTTP. You
+            can also install it as an app from your browser. Still in active development, so expect
+            a few rough edges.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

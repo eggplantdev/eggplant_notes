@@ -40,6 +40,11 @@ export const FAQ_SECTIONS: readonly FaqSectionT[] = [
         answer:
           'This is an evolving MVP under active development, so a few things are intentionally missing for now: there is no data export or download, PDF / vision import is still coming, and AI features require you to connect your own OpenRouter key first. Expect this list to shrink as features land.',
       },
+      {
+        question: 'Can I install it as an app?',
+        answer:
+          'Yes — it is a PWA, so you can install it from your browser and launch it like a native app. On desktop Chrome, use the install icon in the address bar (or the menu → "Install page as app"); on iPhone, open it in Safari and tap Share → Add to Home Screen. It opens in its own window and you stay signed in. It does still need a connection — there is no offline mode.',
+      },
     ],
   },
   {
