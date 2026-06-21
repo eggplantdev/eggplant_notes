@@ -10,6 +10,8 @@
 import { useId } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
+import { cn } from '@/lib/utils'
+
 import { buildBrandDots, DOT_R, VIEWBOX } from './brand-mark-dots'
 
 const GLOW = 0.9 // 0..1 bloom intensity — matches the static BrandLogo
@@ -43,44 +45,48 @@ export function AnimatedBrandLogo({ className, entrance = true }: AnimatedBrandL
   // logo on screen (the intro renders splash + hero copies), and url(#id) resolves to the first match.
   const filterId = useId()
   const animate = entrance && !reduced
-  const dots = buildBrandDots()
+
+  // Precompute each dot's flight geometry once: scatter() and the stagger delay both hash through
+  // Math.sin, and the layers below render this same data twice (blurred glow + sharp), so deriving
+  // it per layer would double the work and risk the two layers drifting out of sync.
+  const dots = buildBrandDots().map((d, i) => ({
+    ...d,
+    from: scatter(i, d.cx, d.cy),
+    // Stagger by a hashed delay + a gentle index ramp so dots don't all land at once. Larger
+    // spacing = a slower, more drawn-out assembly.
+    delay: i * 0.03 + rand(i * 3 + 7) * 0.35,
+  }))
 
   // One layer of <motion.circle>s; rendered twice (blurred glow behind, sharp in front) with
   // identical motion props so both stay perfectly in sync through the flight.
   const renderDots = () =>
-    dots.map((d, i) => {
-      const from = scatter(i, d.cx, d.cy)
-      // Stagger by a hashed delay + a gentle index ramp so dots don't all land at once. Larger
-      // spacing = a slower, more drawn-out assembly.
-      const delay = i * 0.03 + rand(i * 3 + 7) * 0.35
-      return (
-        <motion.circle
-          key={`${d.cx}-${d.cy}`}
-          r={d.r}
-          fill={d.fill}
-          initial={animate ? { cx: from.x, cy: from.y, scale: 0.2, opacity: 0 } : false}
-          animate={{ cx: d.cx, cy: d.cy, scale: 1, opacity: 1 }}
-          transition={
-            animate
-              ? {
-                  // Softer spring (lower stiffness, more mass) — dots drift in and settle slowly.
-                  cx: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay },
-                  cy: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay },
-                  scale: { type: 'spring', stiffness: 70, damping: 13, mass: 1.2, delay },
-                  opacity: { duration: 0.6, delay },
-                }
-              : { duration: 0 }
-          }
-        />
-      )
-    })
+    dots.map((d) => (
+      <motion.circle
+        key={`${d.cx}-${d.cy}`}
+        r={d.r}
+        fill={d.fill}
+        initial={animate ? { cx: d.from.x, cy: d.from.y, scale: 0.2, opacity: 0 } : false}
+        animate={{ cx: d.cx, cy: d.cy, scale: 1, opacity: 1 }}
+        transition={
+          animate
+            ? {
+                // Softer spring (lower stiffness, more mass) — dots drift in and settle slowly.
+                cx: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay: d.delay },
+                cy: { type: 'spring', stiffness: 55, damping: 14, mass: 1.4, delay: d.delay },
+                scale: { type: 'spring', stiffness: 70, damping: 13, mass: 1.2, delay: d.delay },
+                opacity: { duration: 0.6, delay: d.delay },
+              }
+            : { duration: 0 }
+        }
+      />
+    ))
 
   return (
     <svg
       viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
       // overflow-visible: the glow blur (and the scatter cloud) bloom past the viewBox; the svg's
       // default overflow:hidden would clip them at the box edge — most visible as a cropped glow at full size.
-      className={`overflow-visible ${className ?? ''}`}
+      className={cn('overflow-visible', className)}
       aria-hidden
     >
       <defs>
