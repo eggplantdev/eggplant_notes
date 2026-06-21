@@ -1,10 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Suspense } from 'react'
 import './globals.css'
 
 import { ActionToast } from '@/components/action-toast'
 import { ToastProvider } from '@/components/toast-provider'
+import { BRAND_DARK } from '@/components/brand/brand-mark-dots'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,6 +20,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'eggplant_notes',
   description: 'AI powered notes with spaced-repetition recall cards.',
+  // Tells iOS Safari to launch "Add to Home Screen" standalone (no browser chrome) and emits the
+  // apple-mobile-web-app-* meta. The manifest covers this for Android/Chrome; iOS needs it here.
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Eggplant' },
+}
+
+export const viewport: Viewport = {
+  themeColor: BRAND_DARK,
 }
 
 export default function RootLayout({

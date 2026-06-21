@@ -7,6 +7,12 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env'
 // bouncing a signed-in user off it would trap them on the page they need.
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/reset-password']
 
+// Public, viewable signed-out: /logo is a brand-exploration gallery (no user data); the rest are
+// generated brand-asset metadata routes the browser fetches unauthenticated — the PWA manifest
+// (gating it breaks "Add to Home Screen"), the apple-touch icon, and the favicon. None end in a
+// static extension, so the matcher below can't exclude them; they're allowed through the gate here.
+const PUBLIC_ASSET_ROUTES = ['/logo', '/manifest.webmanifest', '/apple-icon', '/icon']
+
 // Exact match or true subpath — NOT a bare prefix, so `/sign-in-evil` can't slip through.
 function matchesPath(pathname: string, route: string) {
   return pathname === route || pathname.startsWith(route + '/')
@@ -59,8 +65,7 @@ export async function proxy(request: NextRequest) {
     isAuthRoute ||
     pathname.startsWith('/api/') ||
     matchesPath(pathname, '/update-password') ||
-    // /logo is a standalone brand-exploration gallery with no user data — viewable signed-out.
-    matchesPath(pathname, '/logo')
+    PUBLIC_ASSET_ROUTES.some((route) => matchesPath(pathname, route))
 
   // Optimistic gate; the (protected) layout is the authoritative backstop.
   if (!user && !isPublic) return redirectTo('/sign-in', request, response)

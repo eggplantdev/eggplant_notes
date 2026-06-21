@@ -35,3 +35,23 @@ describe('proxy /api gate', () => {
     expect(new URL(res.headers.get('location') ?? '').pathname).toBe('/sign-in')
   })
 })
+
+// The browser fetches these unauthenticated to decide PWA installability; gating them to /sign-in
+// silently breaks "Add to Home Screen". Guards against a future proxy edit re-gating them.
+describe('proxy public brand-asset routes', () => {
+  it('does NOT redirect the manifest / icon routes when signed out', async () => {
+    for (const path of ['/manifest.webmanifest', '/apple-icon', '/icon']) {
+      const res = await proxy(reqFor(path))
+      expect(res.headers.get('location'), `${path} must not redirect`).toBeNull()
+      expect(res.status, `${path} must not be a 307`).not.toBe(307)
+    }
+  })
+
+  // The allowlist must not over-expose: matchesPath is exact-or-subpath, so a protected route that
+  // merely shares a prefix region with '/icon' (e.g. /import) must still be gated.
+  it('does NOT widen the gate — a protected page sharing a prefix still redirects', async () => {
+    const res = await proxy(reqFor('/import'))
+    expect(res.status).toBe(307)
+    expect(new URL(res.headers.get('location') ?? '').pathname).toBe('/sign-in')
+  })
+})
