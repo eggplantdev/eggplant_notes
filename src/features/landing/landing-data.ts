@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Layers, RefreshCw, Smartphone, Sparkles, Terminal } from 'lucide-react'
+import { Layers, RefreshCw, Rocket, Smartphone, Sparkles, Terminal } from 'lucide-react'
 
 export type FeatureT = {
   icon: LucideIcon
@@ -30,7 +30,7 @@ export const FEATURES: readonly FeatureT[] = [
   },
   {
     icon: Terminal,
-    tint: 'text-neon-fuchsia',
+    tint: 'text-neon-green',
     title: 'CLI & agent API',
     body: 'Drive everything from your terminal or coding agent over a token-authenticated API. Download a ready-made agent skill and go.',
   },
@@ -39,6 +39,12 @@ export const FEATURES: readonly FeatureT[] = [
     tint: 'text-neon-cyan',
     title: 'Install as an app',
     body: 'Add it to your home screen and launch it like a native app, signed in and ready.',
+  },
+  {
+    icon: Rocket,
+    tint: 'text-neon-violet',
+    title: 'More coming soon',
+    body: "We're just getting started — more ways to capture, recall, and learn are on the way.",
   },
 ]
 
