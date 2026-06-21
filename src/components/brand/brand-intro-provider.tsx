@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import { AnimatedBrandLogo } from './animated-brand-logo'
 import { BrandIntroContext, WORDMARK, type BrandIntroPhaseT } from './brand-intro-context'
@@ -20,6 +20,13 @@ const VEIL_FADE_S = 0.9
 const VEIL_FADE_MS = VEIL_FADE_S * 1000
 // One key for the whole tab session — sessionStorage clears on tab close.
 const SEEN_KEY = 'eggplant-brand-intro-seen'
+
+// Synchronous pre-paint decision, mirroring the skip branch of the effect below. Runs from the SSR HTML
+// before the page content is parsed, so a returning-this-session / reduced-motion visitor never sees the
+// veil — it's `display:none`'d (globals.css) from the very first paint, instead of a blank brand screen
+// that lingers until the JS bundle hydrates. First-time visitors fall through to the default (veil up).
+// Wrapped in try/catch because sessionStorage throws in some privacy modes — failing open = intro plays.
+const NO_FLASH_SCRIPT = `(function(){try{var forced=new URLSearchParams(location.search).has('intro');var seen=sessionStorage.getItem('${SEEN_KEY}');var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduced||(seen&&!forced))document.documentElement.dataset.brandIntro='skip';}catch(e){}})()`
 
 // Wraps a page to play the brand intro once and morph the splash lockup into that page's <BrandIntroLockup>.
 // Children stay server-rendered (passed through), so a server-component page can use this client boundary.
@@ -45,6 +52,9 @@ export function BrandIntroProvider({ children }: { children: ReactNode }) {
     }
 
     sessionStorage.setItem(SEEN_KEY, '1')
+    // Clear any stale skip flag the inline script set on a prior load this session, so the no-flash CSS
+    // can't keep the veil hidden during a `?intro` replay reached via client-side navigation.
+    delete document.documentElement.dataset.brandIntro
     setPhase('splash')
     // splash → morph (veil still opaque) → reveal (veil dissolves) → done (cleanup).
     const toMorph = setTimeout(() => setPhase('morph'), INTRO_MS)
@@ -69,21 +79,26 @@ export function BrandIntroProvider({ children }: { children: ReactNode }) {
 
   return (
     <BrandIntroContext.Provider value={phase}>
+      {/* Must render before {children} so it executes before the page content is parsed/painted. */}
+      <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       {children}
 
-      {/* Plain veil over the whole page — stays opaque through splash AND morph (so content is hidden
-          until the lockup lands), then dissolves on reveal so the page fades up instead of popping.
-          The lockup sits above it (z-50) so it stays crisp. */}
-      <AnimatePresence>
-        {(phase === 'splash' || phase === 'morph') && (
-          <motion.div
-            key="veil"
-            className="bg-background fixed inset-0 z-40"
-            exit={{ opacity: 0 }}
-            transition={{ duration: VEIL_FADE_S, ease: 'easeOut' }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Opaque veil over the whole page. Rendered from the very first paint — the 'idle' SSR/hydration
+          state — so the page is hidden BEFORE the intro starts; without this the server HTML paints the
+          page, then the veil pops up a frame later (the flash). It stays opaque through idle → splash →
+          morph (content hidden until the lockup lands), fades out on 'reveal', and unmounts on 'done'.
+          On the skip path (returning visitor / reduced motion) it unmounts straight from 'idle' with no
+          fade — instant content, no waiting on a dissolve. The lockup sits above it (z-50) to stay crisp. */}
+      {phase !== 'skip' && phase !== 'done' && (
+        <motion.div
+          key="veil"
+          data-brand-veil
+          className="bg-background fixed inset-0 z-40"
+          initial={false}
+          animate={{ opacity: phase === 'reveal' ? 0 : 1 }}
+          transition={{ duration: VEIL_FADE_S, ease: 'easeOut' }}
+        />
+      )}
 
       {/* Splash lockup — logo + wordmark, both carrying layoutIds so they morph down to the page copies
           together (the wordmark stays under the logo). Above the veil (z-50) so it reads crisp through

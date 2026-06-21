@@ -362,3 +362,12 @@
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+
+/* Brand-intro no-flash gate. The inline script in BrandIntroProvider sets data-brand-intro="skip" on
+   <html> synchronously, before first paint, for returning-this-session / reduced-motion visitors. This
+   hides the veil from the server HTML itself so those visitors never see a blank brand screen while the
+   JS bundle loads. First-time visitors get the default (veil up) and the JS-driven intro. React unmounts
+   the veil moments later in its effect, so this only governs the pre-hydration window. */
+[data-brand-intro='skip'] [data-brand-veil] {
+  display: none;
+}
