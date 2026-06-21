@@ -78,7 +78,9 @@ export function AnimatedBrandLogo({ className, entrance = true }: AnimatedBrandL
   return (
     <svg
       viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
-      className={` ${className ?? ''}`}
+      // overflow-visible: the glow blur (and the scatter cloud) bloom past the viewBox; the svg's
+      // default overflow:hidden would clip them at the box edge — most visible as a cropped glow at full size.
+      className={`overflow-visible ${className ?? ''}`}
       aria-hidden
     >
       <defs>

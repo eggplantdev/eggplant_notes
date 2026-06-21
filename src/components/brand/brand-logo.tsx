@@ -14,7 +14,9 @@ export function BrandLogo({ className }: { className?: string }) {
   return (
     <svg
       viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
-      className={` ${className ?? ''}`}
+      // overflow-visible: the glow blur blooms past the viewBox; the svg's default overflow:hidden
+      // would clip it at the box edge.
+      className={`overflow-visible ${className ?? ''}`}
       aria-hidden
     >
       {/* Glow is one blur pass over a cloned dot layer behind the sharp dots — not a per-dot filter,
