@@ -1,6 +1,6 @@
 import { Code2 } from 'lucide-react'
 
-import { CODE_LINES, TOKEN_COLOR } from '@/features/landing/landing-data'
+import { CODE_LINES, TOKEN_COLOR } from '@/features/landing/landing-code-preview-data'
 
 export function LandingCodePreview() {
   return (

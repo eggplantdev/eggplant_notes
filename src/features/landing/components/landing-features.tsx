@@ -1,4 +1,4 @@
-import { FEATURES } from '@/features/landing/landing-data'
+import { FEATURES } from '@/features/landing/landing-features-data'
 
 export function LandingFeatures() {
   return (
