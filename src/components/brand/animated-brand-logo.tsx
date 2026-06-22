@@ -12,26 +12,11 @@ import { motion, useReducedMotion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
-import { buildBrandDots, DOT_R, VIEWBOX } from './brand-mark-dots'
+import { buildBrandDots, DOT_R, rand, scatter, VIEWBOX } from './brand-mark-dots'
 
 const GLOW = 0.9 // 0..1 bloom intensity — matches the static BrandLogo
 const REST_BLUR = GLOW * DOT_R * 1.8 // resting glow blur, matching the static BrandLogo
 const FLIGHT_BLUR = REST_BLUR * 3.2 // bigger bloom while the dots are still flying in
-
-// Deterministic [0,1) hash so server and client compute the SAME scatter — a Math.random() scatter
-// would differ between SSR and hydration and trip a mismatch on the initial transform.
-function rand(seed: number) {
-  const x = Math.sin(seed * 99.13) * 43758.5453
-  return x - Math.floor(x)
-}
-
-// Where dot `i` starts: pushed out from its final spot along a hashed angle by a large random
-// distance, so the grid begins as a loose cloud and converges inward.
-function scatter(i: number, cx: number, cy: number) {
-  const angle = rand(i + 1) * Math.PI * 2
-  const dist = (0.7 + rand(i * 2 + 5) * 0.9) * VIEWBOX.width
-  return { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
-}
 
 type AnimatedBrandLogoPropsT = {
   className?: string
