@@ -3,12 +3,15 @@ import type { ComponentProps } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { AnimatedBrandLogo } from './animated-brand-logo'
 import { BrandLogo } from './brand-logo'
 
 export type BrandMarkPropsT = ComponentProps<typeof Link> & {
   size?: 'sm' | 'lg'
   // Per-call wordmark tweaks — e.g. the desktop nav hides the text below `lg`.
   wordmarkClassName?: string
+  // Opt in to the scatter-entrance logo (the marketing variant) in place of the static mark.
+  animated?: boolean
 }
 
 // Literal lookups so Tailwind can scan the size classes (it can't read `size-${x}`).
@@ -23,8 +26,10 @@ export function BrandMark({
   size = 'sm',
   className,
   wordmarkClassName,
+  animated = false,
   ...props
 }: BrandMarkPropsT) {
+  const Logo = animated ? AnimatedBrandLogo : BrandLogo
   // The mark is always a link, so the hover affordance + transition are always on.
   return (
     <Link
@@ -32,7 +37,7 @@ export function BrandMark({
       className={cn('group flex shrink-0 items-center gap-1', className)}
       {...props}
     >
-      <BrandLogo className={cn(LOGO_SIZE[size], GLOW)} />
+      <Logo className={cn(LOGO_SIZE[size], GLOW)} />
       <span className={cn(GLOW, 'font-mono font-semibold', TEXT_SIZE[size], wordmarkClassName)}>
         eggplant_notes
       </span>

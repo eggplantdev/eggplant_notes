@@ -23,6 +23,7 @@ export async function AppNav() {
               aria-label="eggplant_notes — dashboard"
               className="focus-ring rounded-md"
               wordmarkClassName="hidden"
+              animated
             />
             <nav className="flex items-center gap-1">
               {NAV_ITEMS.map((item) => (
