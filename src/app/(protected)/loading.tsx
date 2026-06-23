@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 // real page. Renders inside the layout's <main>, so it inherits the container width + top offset.
 export default function ProtectedLoading() {
   return (
-    <div className="flex min-h-dvh items-center justify-center">
+    <div className="flex h-lvh items-center justify-center">
       <Spinner className="size-8" />
     </div>
   )
