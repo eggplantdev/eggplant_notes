@@ -10,9 +10,11 @@ export function LandingFeatures() {
             key={title}
             className="border-border/60 bg-card/50 hover:border-border rounded-xl border p-5 transition-colors"
           >
-            <Icon className={`size-5 ${tint}`} />
-            <h3 className="font-heading mt-4 text-base font-medium">{title}</h3>
-            <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">{body}</p>
+            <div className={`flex items-center gap-4`}>
+              <Icon className={`size-5 ${tint}`} />
+              <h3 className="font-heading text-base leading-none font-medium">{title}</h3>
+            </div>
+            <p className="text-muted-foreground mt-4 text-sm leading-relaxed">{body}</p>
           </div>
         ))}
       </div>
