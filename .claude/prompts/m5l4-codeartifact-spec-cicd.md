@@ -41,6 +41,8 @@ gh secret set AWS_ROLE_ARN --body "<role-arn>" --repo <owner>/<repo>
 
 ## Publish flow
 
+q
+
 1. Configure AWS credentials through OIDC.
 2. Run `aws codeartifact login`.
 3. Run validation.
