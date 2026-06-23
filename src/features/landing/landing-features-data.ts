@@ -20,7 +20,7 @@ export const FEATURES: readonly FeatureT[] = [
     icon: RefreshCw,
     tint: 'text-neon-cyan',
     title: 'Spaced-repetition recall',
-    body: 'Turn any note into memory cards that resurface right before you forget. Every card links back to the note it came from.',
+    body: 'Turn any note into memory cards that resurface right before you forget.',
   },
   {
     icon: Sparkles,
@@ -32,18 +32,18 @@ export const FEATURES: readonly FeatureT[] = [
     icon: Terminal,
     tint: 'text-neon-green',
     title: 'CLI & agent API',
-    body: 'Drive everything from your terminal or coding agent over a token-authenticated API. Download a ready-made agent skill and go.',
+    body: 'Drive everything from your terminal or coding agent over a token-authenticated API.',
   },
   {
     icon: Smartphone,
     tint: 'text-neon-cyan',
     title: 'Install as an app',
-    body: 'Add it to your home screen and launch it like a native app, signed in and ready.',
+    body: 'Add it to your home screen and launch it like a native app.',
   },
   {
     icon: Rocket,
     tint: 'text-neon-violet',
     title: 'More coming soon',
-    body: "We're just getting started — more ways to capture, recall, and learn are on the way.",
+    body: "We're just getting started — more features are on the way.",
   },
 ]
