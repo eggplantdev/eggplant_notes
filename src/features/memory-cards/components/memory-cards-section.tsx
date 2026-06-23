@@ -52,7 +52,13 @@ export function MemoryCardsSection({
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
-      <div className={`flex gap-2`}>
+      {/* Column, not a row: both controls expand in place (AddMemoryCard → the card form,
+          GenerateCardsButton → the AI review panel). As flex-row siblings those panels were
+          content-sized (`flex: 0 1 auto`) and collapsed to the width of their widest text line. The
+          column keeps the default `align-items: stretch` so the EXPANDED panels fill the width;
+          the collapsed triggers stay small via their own `self-start` / `justify-items-start`
+          (so DON'T add `items-start` here — it would shrink the panels back). */}
+      <div className="flex flex-col gap-2">
         <AddMemoryCard noteId={noteId} />
         <GenerateCardsButton
           noteId={noteId}

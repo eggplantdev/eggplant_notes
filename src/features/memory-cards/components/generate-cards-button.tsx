@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createCardsForNote } from '@/features/memory-cards/actions/create-cards-for-note'
+import { promptSchema } from '@/features/memory-cards/schemas'
+import { validateInput } from '@/lib/validate'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
@@ -49,11 +51,27 @@ export function GenerateCardsButton({
     setCandidates((prev) => prev?.filter((_, i) => i !== index) ?? null)
   }
 
+  // Validate each edited Question against the SAME schema the server enforces (promptSchema, ≥10), so
+  // the review panel reflects the rule in the UI instead of letting a too-short prompt 400 on save.
+  // One pass (one parse per card via the shared validateInput), reused for both the inline error and
+  // the save gate.
+  const promptErrors =
+    candidates?.map((c) => {
+      const result = validateInput(promptSchema, c.prompt)
+      return result.success ? undefined : result.error
+    }) ?? []
+  const hasInvalidPrompt = promptErrors.some(Boolean)
+
   function save() {
-    if (!candidates?.length) return
+    if (!candidates?.length || hasInvalidPrompt) return
     setError(undefined)
     startSave(async () => {
-      const result = await createCardsForNote(noteId, candidates)
+      // GeneratedCardT carries only { prompt, example }; the card insert schema requires a
+      // code_context key (a present value must be a string — null/omitted is a 400). Supply the
+      // missing field here at the boundary rather than loosening the shared schema (which feeds the
+      // token API too). Blank → the server coerces to SQL NULL.
+      const payload = candidates.map((c) => ({ ...c, code_context: '' }))
+      const result = await createCardsForNote(noteId, payload)
       if (toastActionResult(result)) {
         setCandidates(null)
         router.refresh()
@@ -98,7 +116,9 @@ export function GenerateCardsButton({
                     id={`ai-card-prompt-${index}`}
                     value={card.prompt}
                     onChange={(e) => patch(index, { prompt: e.target.value })}
+                    aria-invalid={Boolean(promptErrors[index])}
                   />
+                  <FormError message={promptErrors[index]} />
                 </div>
                 <div className="grid gap-1">
                   <Label htmlFor={`ai-card-example-${index}`}>Answer</Label>
@@ -122,7 +142,7 @@ export function GenerateCardsButton({
               type="button"
               size="sm"
               data-testid="ai-cards-save"
-              disabled={isSaving || candidates.length === 0}
+              disabled={isSaving || candidates.length === 0 || hasInvalidPrompt}
               onClick={save}
             >
               {isSaving
