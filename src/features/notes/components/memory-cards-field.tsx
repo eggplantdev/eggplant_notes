@@ -106,7 +106,6 @@ export const MemoryCardsField = withForm({
                       }),
                     )
                   }
-                  validate={() => (content.trim() ? undefined : 'Add note content first.')}
                   triggerLabel="Generate with AI"
                   triggerTestId="note-cards-generate-ai"
                   dialogTitle="Generate cards from this note"

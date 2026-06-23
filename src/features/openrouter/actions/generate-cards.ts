@@ -37,10 +37,13 @@ const sourceSchema = z.union([
   }),
   // Ungrounded on the note the user is CURRENTLY writing (create-note form) — no saved row to fetch,
   // so the material is built from the draft title+content the client sends (capped like notes text).
+  // Empty content is allowed: the user can supply the source by editing the prompt inside the dialog
+  // (sent as promptOverride). An empty-material build with no override just yields no usable cards,
+  // which the result guard below surfaces as a friendly error.
   z.object({
     draftNote: z.object({
       title: z.string().max(200),
-      content: z.string().trim().min(1, 'Add note content first').max(50_000),
+      content: z.string().trim().max(50_000),
     }),
     modelId: z.string().optional(),
     promptOverride: promptOverrideSchema.optional(),
