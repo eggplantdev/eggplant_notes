@@ -11,7 +11,7 @@ export function LandingNav() {
   return (
     <header className="header-fade pointer-events-none sticky top-0 z-40">
       <LandingShell as="nav" className="pointer-events-auto flex items-center justify-between py-4">
-        <BrandMark href="/" size="sm" wordmarkClassName="" />
+        <BrandMark href="/" size="sm" wordmarkClassName="hidden sm:flex" />
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link href="/sign-in">Sign in</Link>

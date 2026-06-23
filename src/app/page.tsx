@@ -16,7 +16,7 @@ export default function LandingPage() {
       <div className="flex min-h-svh flex-col">
         <LandingNav />
 
-        <main className="grid flex-1 content-start gap-32 py-32">
+        <main className="grid max-w-screen content-start gap-32 overflow-x-hidden py-32">
           <LandingHero />
           <LandingFeatures />
           <LandingCodePreview />
