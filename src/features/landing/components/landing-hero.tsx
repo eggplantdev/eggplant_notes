@@ -16,8 +16,8 @@ export function LandingHero() {
           </span>
         </h1>
         <p className="text-muted-foreground max-w-xl text-base text-pretty sm:text-lg">
-          Keep your coding notes in one place, group them into subjects, and turn them into
-          spaced-repetition cards that link straight back to the note they came from.
+          Keep your notes in one place, group them into subjects, and turn them into
+          spaced-repetition cards. Integrate seamlessly into your daily AI workflow.
         </p>
       </LandingShell>
     </section>
