@@ -4,6 +4,11 @@ import type { OpenRouterModelT } from '@/features/openrouter/types'
 // timeout message instead of spinning "Generating…" forever on a hung model.
 export const GENERATION_TIMEOUT_MS = 60_000
 
+// Floor for the effective prompt the dialog will send. The dialog OPENS freely (no source gate), but
+// the user can clear the Prompt textarea — this blocks Generate on an empty/trivial prompt so we
+// never fire a no-op generation.
+export const MIN_GENERATION_PROMPT_CHARS = 10
+
 // Curated short list. Not a UI group (the picker's top group is the user's per-user "Pinned" set);
 // it seeds two things: the offline catalog FALLBACK (RECOMMENDED_FALLBACK below) and a freshly
 // connected account's DB-default favorites (mirrored in migration 20260608100741 — keep aligned).

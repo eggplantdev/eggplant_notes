@@ -8,7 +8,7 @@ import { cardWithSubjectSchema } from '@/features/memory-cards/schemas'
 // fall-through silently re-routed a malformed note-attach body to the standalone branch (F1). These specs
 // lock each branch's rules; the route-level selection is proven in api-routes.integration.test.ts.
 const GUID = '00000000-0000-0000-0000-000000000001'
-const validCard = { prompt: 'Q?', example: '', code_context: '' }
+const validCard = { prompt: 'Borrow vs move?', example: '', code_context: '' }
 
 describe('memory-cards API body schemas', () => {
   describe('noteAttachCardsSchema', () => {
@@ -44,6 +44,15 @@ describe('memory-cards API body schemas', () => {
         noteAttachCardsSchema.safeParse({
           note_id: GUID,
           cards: [{ example: '', code_context: '' }],
+        }).success,
+      ).toBe(false)
+    })
+
+    it('rejects a card whose prompt is under the 10-char floor', () => {
+      expect(
+        noteAttachCardsSchema.safeParse({
+          note_id: GUID,
+          cards: [{ prompt: 'too short', example: '', code_context: '' }],
         }).success,
       ).toBe(false)
     })

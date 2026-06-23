@@ -300,7 +300,7 @@ Every card (in `checks` or `cards`) has exactly these fields:
 
 | field          | rule                                                                                                                                                                   |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prompt`       | **required** string, trimmed, ≤ 2000 chars. The question/recall cue. Rendered as markdown.                                                                             |
+| `prompt`       | **required** string, trimmed, **10–2000 chars** (a 1-word cue is rejected). The question/recall cue. Rendered as markdown.                                             |
 | `example`      | **required to be a string** — use `""` when none. **Markdown**: a short worked scenario (prose, or a fenced snippet). The server turns blank → null.                   |
 | `code_context` | same string rule as `example`, also **markdown**. Put the code here, **fenced** (` ```lang … ``` `) — bare code renders as a flattened paragraph with no highlighting. |
 
@@ -344,7 +344,7 @@ language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
 - **`308`** — a path built with an **empty `:id` segment** (e.g. `DELETE /api/subjects/`) is redirected by
   trailing-slash normalization to the collection route, not rejected — you get a silent redirect, never a
   `404`. Never construct a `:id` URL with a missing id; validate the id before the call.
-- **Caps:** ≤ 50 cards per note (`checks`), 1–20 cards per `note_id` attach (`cards`), `prompt` ≤ 2000 chars,
+- **Caps:** ≤ 50 cards per note (`checks`), 1–20 cards per `note_id` attach (`cards`), `prompt` 10–2000 chars,
   `title` ≤ 200 chars. Batch larger imports across multiple calls.
 
 ## Quick end-to-end smoke test

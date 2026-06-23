@@ -12,10 +12,17 @@ export const cardOverviewSchema = z.object({
   total: z.number(),
 }) satisfies z.ZodType<CardOverviewT>
 
-export const promptSchema = trimmedString('Question', 2000)
+// A recall cue under ~10 chars is never a real question — enforce a floor. Shared by every
+// card-create surface (forms + token API), so the manual forms reflect it in the UI automatically and
+// the API rejects a too-short prompt. NB: independent of the generation dialog's
+// MIN_GENERATION_PROMPT_CHARS — that floors the LLM *prompt textarea* (a different string); the
+// shared `10` is coincidence, so don't fold them into one constant.
+export const promptSchema = trimmedString('Question', 2000, 10)
 
 // Blank/whitespace-only → null (persist as SQL NULL, columns are nullable). Non-empty keeps its
-// ORIGINAL text (no trim) so code indentation / leading newlines in `code_context` survive.
+// ORIGINAL text (no trim) so code indentation / leading newlines in `code_context` survive. The KEY
+// is required (a present value must be a string; `null`/omitted → 400) — callers that don't carry the
+// field (e.g. AI gen-cards' GeneratedCardT = {prompt, example}) must supply `''` at the boundary.
 const optionalText = z.string().transform((v) => (v.trim().length > 0 ? v : null))
 
 export const memoryCardInputSchema = z.object({

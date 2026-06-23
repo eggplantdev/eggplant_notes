@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { ModelSelect } from '@/features/openrouter/components/model-select'
 import { useAiGate } from '@/features/openrouter/use-ai-gate'
+import { MIN_GENERATION_PROMPT_CHARS } from '@/features/openrouter/constants'
 import { useActionTransition } from '@/hooks/use-action-transition'
 import type { GenerateResultT } from '@/features/openrouter/types'
 import { resetUserPrompt } from '@/features/openrouter/actions/reset-user-prompt'
@@ -110,6 +111,10 @@ export function GenerateDialog<T>({
   // textarea seeds from — and the preview matches — what the action will actually send.
   const defaults = { ...previewPrompt(previewInput), system: savedSystem }
   const shown = override ?? defaults
+  // The dialog opens freely, but the Prompt textarea is editable — a user can clear it. Block Generate
+  // on an empty/trivial effective prompt so we never fire a no-op generation (validate at the submit
+  // step, not at open). Measured on the trimmed text the action will actually send.
+  const promptTooShort = shown.prompt.trim().length < MIN_GENERATION_PROMPT_CHARS
   const systemTrimmed = shown.system.trim()
   const mutating = saveTx.isPending || resetTx.isPending
   // Save is meaningful only when the system text is non-empty and differs from the saved baseline.
@@ -137,6 +142,7 @@ export function GenerateDialog<T>({
   }
 
   function generate() {
+    if (promptTooShort) return
     setError(undefined)
     startGenerate(async () => {
       // `override` is undefined unless the user edited; an unedited prompt lets the action build it
@@ -283,6 +289,14 @@ export function GenerateDialog<T>({
                 value={shown.prompt}
                 onChange={(e) => setOverride({ ...shown, prompt: e.target.value })}
                 className="max-h-72 min-h-40 font-mono text-xs"
+                aria-invalid={promptTooShort}
+              />
+              <FormError
+                message={
+                  promptTooShort
+                    ? `Prompt must be at least ${MIN_GENERATION_PROMPT_CHARS} characters.`
+                    : undefined
+                }
               />
             </div>
 
@@ -295,7 +309,7 @@ export function GenerateDialog<T>({
               variant="ai"
               size="sm"
               data-testid="generate-confirm"
-              disabled={isGenerating || !canGenerate}
+              disabled={isGenerating || !canGenerate || promptTooShort}
               onClick={generate}
             >
               <Sparkles />
