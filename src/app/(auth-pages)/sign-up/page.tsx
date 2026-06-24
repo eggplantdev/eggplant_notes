@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { TitledCard } from '@/components/ui/titled-card'
 import { signUp } from '@/features/auth/actions/sign-up'
 import { emailSchema, passwordSchema } from '@/features/auth/schemas'
@@ -54,7 +55,13 @@ export default function SignUpPage() {
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" size="default" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating account…' : 'Create account'}
+              {isSubmitting ? (
+                <>
+                  <Spinner /> Creating account…
+                </>
+              ) : (
+                'Create account'
+              )}
             </Button>
           )}
         </form.Subscribe>

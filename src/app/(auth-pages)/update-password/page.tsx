@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { TitledCard } from '@/components/ui/titled-card'
 import { updatePassword } from '@/features/auth/actions/update-password'
 import { passwordSchema } from '@/features/auth/schemas'
@@ -48,7 +49,13 @@ export default function UpdatePasswordPage() {
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" size="default" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : 'Save password'}
+              {isSubmitting ? (
+                <>
+                  <Spinner /> Saving…
+                </>
+              ) : (
+                'Save password'
+              )}
             </Button>
           )}
         </form.Subscribe>

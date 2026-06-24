@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { TitledCard } from '@/components/ui/titled-card'
 import { signIn } from '@/features/auth/actions/sign-in'
 import { emailSchema, passwordSchema } from '@/features/auth/schemas'
@@ -48,7 +49,13 @@ export default function SignInPage() {
         <form.Subscribe selector={(s) => s.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" size="default" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? (
+                <>
+                  <Spinner /> Signing in…
+                </>
+              ) : (
+                'Sign in'
+              )}
             </Button>
           )}
         </form.Subscribe>

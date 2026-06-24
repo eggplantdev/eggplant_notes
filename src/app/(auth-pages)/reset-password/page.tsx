@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { TitledCard } from '@/components/ui/titled-card'
 import { resetPassword } from '@/features/auth/actions/reset-password'
 import { emailSchema } from '@/features/auth/schemas'
@@ -54,7 +55,13 @@ export default function ResetPasswordPage() {
           <form.Subscribe selector={(s) => s.isSubmitting}>
             {(isSubmitting) => (
               <Button type="submit" size="default" disabled={isSubmitting}>
-                {isSubmitting ? 'Sending…' : 'Send reset link'}
+                {isSubmitting ? (
+                  <>
+                    <Spinner /> Sending…
+                  </>
+                ) : (
+                  'Send reset link'
+                )}
               </Button>
             )}
           </form.Subscribe>
