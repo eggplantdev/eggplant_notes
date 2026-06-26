@@ -10,11 +10,13 @@ import { IntroWordmark, wordmarkDurationMs } from './intro-wordmark'
 // The splash plays in sequence: dots scatter/assemble, THEN the wordmark types out, THEN a beat to
 // read it before the lockup morphs into the page. Each stage is its own number so the reveal can't drift.
 const SCATTER_MS = 3000 // dots fly in and settle (≈ slowest dot's staggered spring)
-const READ_MS = 700 // pause after the wordmark finishes, before revealing the page
-const INTRO_MS = SCATTER_MS + wordmarkDurationMs(WORDMARK) + READ_MS
+// The cascade overlaps the scatter tail instead of waiting for it to fully finish.
+const WORDMARK_DELAY_MS = SCATTER_MS * 0.6
+// The lockup morphs down the moment the wordmark cascade finishes.
+const INTRO_MS = WORDMARK_DELAY_MS + wordmarkDurationMs(WORDMARK)
 // The lockup glides to the page while the veil stays opaque — content is hidden until it lands. A hair
-// longer than the morph's own duration (1s) so it fully settles before the veil dissolves.
-const MORPH_MS = 1100
+// longer than the morph's own duration (0.7s) so it fully settles before the veil dissolves.
+const MORPH_MS = 800
 // Veil dissolve — only AFTER the morph, so the page reveals once the animation is done, not during it.
 const VEIL_FADE_S = 0.9
 const VEIL_FADE_MS = VEIL_FADE_S * 1000
@@ -108,8 +110,12 @@ export function BrandIntroProvider({ children }: { children: ReactNode }) {
           <motion.div layoutId="brand-logo" className="size-44 sm:size-60">
             <AnimatedBrandLogo className="size-full" />
           </motion.div>
-          {/* Hold the cascade until the dots have assembled. */}
-          <IntroWordmark text={WORDMARK} delay={SCATTER_MS / 1000} layoutId="brand-wordmark" />
+          {/* Start the cascade at 60% of the scatter — overlaps its tail, cuts the dead air. */}
+          <IntroWordmark
+            text={WORDMARK}
+            delay={WORDMARK_DELAY_MS / 1000}
+            layoutId="brand-wordmark"
+          />
         </div>
       )}
     </BrandIntroContext.Provider>

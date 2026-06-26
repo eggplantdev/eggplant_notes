@@ -10,7 +10,7 @@ import { useBrandIntro, WORDMARK } from './brand-intro-context'
 // per-page (the hero is bigger than the auth mark), so they're props rather than baked in.
 
 // Decelerating glide (easeOutExpo) shared by logo + wordmark so the lockup lands as one piece.
-const MORPH_TRANSITION = { layout: { duration: 1, ease: [0.22, 1, 0.36, 1] } } as const
+const MORPH_TRANSITION = { layout: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } } as const
 
 type BrandIntroLockupPropsT = {
   className?: string
