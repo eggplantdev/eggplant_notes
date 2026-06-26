@@ -57,6 +57,7 @@ export function TopicGenerator<T>({
       triggerLabel={label}
       triggerTestId={`${testIdPrefix}-generate`}
       canGenerate={topic.trim().length > 0}
+      gateHint="Enter a topic to generate."
       dialogTitle={label}
       resultNoun={resultNoun}
       applyHint={applyHint}

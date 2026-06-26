@@ -42,22 +42,15 @@ import type { PromptT } from '@/features/openrouter/types'
 // builds it server-side. The dialog does NOT preview the result — there's nothing to decide inside
 // it — so on success it hands the data straight to the caller's own preview/edit surface (form
 // fields / candidate list) and CLOSES; it stays open only on failure, for a retry.
-export function GenerateDialog<T>({
-  connected,
-  defaultModel,
-  previewInput,
-  action,
-  onResult,
-  triggerLabel,
-  triggerTestId,
-  validate,
-  dialogTitle,
-  children,
-  canGenerate = true,
-  modelFilter = 'text',
-  resultNoun = 'item',
-  applyHint,
-}: {
+// Couples the gate to its reason: either omit both (never gated) or pass both. You CANNOT disable
+// Generate without supplying the text that explains why — the silent greyed-out button is unbuildable.
+type GateT =
+  | { canGenerate?: undefined; gateHint?: undefined }
+  // Gates the Generate button; the topic flow sets canGenerate false while its in-dialog source is
+  // empty. gateHint is shown beside the disabled button (muted — a not-yet state, not an error).
+  | { canGenerate: boolean; gateHint: string }
+
+type GenerateDialogPropsT<T> = {
   connected: boolean
   defaultModel: string
   previewInput: PreviewInputT
@@ -72,9 +65,6 @@ export function GenerateDialog<T>({
   // Rendered at the top of the dialog body — used by the topic flow to put its source <textarea>
   // inside the dialog (the parent owns its state and feeds it back through previewInput/action).
   children?: ReactNode
-  // Gates the Generate button. The topic flow sets it false while its in-dialog source is empty;
-  // the import flow (source validated before open) leaves it at the default.
-  canGenerate?: boolean
   // Scopes the model picker: 'file' restricts to vision/file-capable models (PDF import, Phase 8).
   modelFilter?: 'text' | 'file'
   // Singular noun for the success toast fallback ("Generated 3 cards"). Caller-set so it's accurate.
@@ -84,7 +74,25 @@ export function GenerateDialog<T>({
   // that nothing is saved until the caller's own Save/Add/Create/Import. Falls back to a generic
   // "Generated N <noun>s" when unset.
   applyHint?: string
-}) {
+} & GateT
+
+export function GenerateDialog<T>({
+  connected,
+  defaultModel,
+  previewInput,
+  action,
+  onResult,
+  triggerLabel,
+  triggerTestId,
+  validate,
+  dialogTitle,
+  children,
+  canGenerate = true,
+  gateHint,
+  modelFilter = 'text',
+  resultNoun = 'item',
+  applyHint,
+}: GenerateDialogPropsT<T>) {
   const { guard, gateDialog } = useAiGate(connected)
   const [open, setOpen] = useState(false)
   const [model, setModel] = useState(defaultModel)
@@ -106,6 +114,7 @@ export function GenerateDialog<T>({
   const saveTx = useActionTransition()
   const resetTx = useActionTransition()
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
+  const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false)
 
   // previewPrompt is pure (no DB / no LLM); its system half is overlaid with the saved baseline so the
   // textarea seeds from — and the preview matches — what the action will actually send.
@@ -132,6 +141,25 @@ export function GenerateDialog<T>({
     setTriggerError(message)
     if (message) return
     guard(openConfig)()
+  }
+
+  // `override` is set only once the user edits the System/Prompt textareas — so it's our "unsaved
+  // work" signal. An accidental outside-click / Escape would discard it, so guard the close.
+  const isDirty = override !== undefined
+
+  function handleOpenChange(next: boolean) {
+    // Guard only user-driven closes that would throw away edits; let opens and clean closes through.
+    // The success path closes via setOpen(false) directly, so it never reaches here.
+    if (!next && isDirty && !isGenerating) {
+      setConfirmDiscardOpen(true)
+      return
+    }
+    setOpen(next)
+  }
+
+  function discardAndClose() {
+    setConfirmDiscardOpen(false)
+    setOpen(false)
   }
 
   function openConfig() {
@@ -211,7 +239,7 @@ export function GenerateDialog<T>({
         />
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           data-testid="generate-dialog"
           className="gradient-border ring-0 sm:max-w-3xl"
@@ -304,6 +332,9 @@ export function GenerateDialog<T>({
           </div>
 
           <DialogFooter>
+            {!canGenerate && gateHint && (
+              <MutedText className="mr-auto self-center">{gateHint}</MutedText>
+            )}
             <Button
               type="button"
               variant="ai"
@@ -332,6 +363,16 @@ export function GenerateDialog<T>({
         confirmLabel="Reset prompt"
         pendingLabel="Resetting…"
         onConfirm={handleResetPrompt}
+      />
+
+      <ConfirmDeleteDialog
+        open={confirmDiscardOpen}
+        onOpenChange={setConfirmDiscardOpen}
+        title="Discard your edited prompt?"
+        description="You've edited the prompt. Closing now discards those changes — nothing is generated or saved."
+        isPending={false}
+        confirmLabel="Discard"
+        onConfirm={discardAndClose}
       />
 
       {gateDialog}
