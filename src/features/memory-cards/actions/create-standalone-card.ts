@@ -5,12 +5,11 @@ import { revalidatePath } from 'next/cache'
 import { insertStandaloneCard } from '@/features/memory-cards/insert-standalone-card'
 import { cardWithSubjectSchema } from '@/features/memory-cards/schemas'
 import { createClient } from '@/lib/supabase/server'
-import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
 // Cookie-client entry point for the standalone-card form. The write core (insertStandaloneCard) is
-// shared with POST /api/memory-cards. Redirect throws, so the form only ever observes the failure branch.
+// shared with POST /api/memory-cards. Returns plain success; the form navigates to /memory-cards (known URL).
 export async function createStandaloneCard(input: unknown): Promise<ActionResultT> {
   const parsed = validateInput(cardWithSubjectSchema, input)
   if (!parsed.success) return parsed
@@ -27,5 +26,5 @@ export async function createStandaloneCard(input: unknown): Promise<ActionResult
   }
 
   revalidatePath('/', 'layout')
-  toastRedirect('/memory-cards', 'card-created')
+  return { success: true }
 }

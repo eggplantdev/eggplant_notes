@@ -5,13 +5,12 @@ import { revalidatePath } from 'next/cache'
 import { noteIdSchema, noteInputSchema } from '@/features/notes/schemas'
 import { updateNoteCore, type CardActionsT } from '@/features/notes/update-note-core'
 import { createClient } from '@/lib/supabase/server'
-import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
 // Cookie-client entry point for the note edit form. The patch/subject-change/card fan-out logic lives
-// in updateNoteCore (shared with PATCH /api/notes/:id); this wrapper validates, then revalidates +
-// redirects. redirect throws, so the form only ever observes the failure branch.
+// in updateNoteCore (shared with PATCH /api/notes/:id); this wrapper validates, then revalidates and
+// returns a redirect result so the form client-navigates (and the destination loader shows).
 export async function updateNote(
   id: string,
   input: unknown,
@@ -27,5 +26,5 @@ export async function updateNote(
   if ('error' in result) return { success: false, error: result.error }
 
   revalidatePath('/', 'layout')
-  toastRedirect(`/notes/${parsedId.data}`, 'note-saved')
+  return { success: true }
 }

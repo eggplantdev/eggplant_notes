@@ -5,7 +5,6 @@ import { revalidatePath } from 'next/cache'
 import { subjectIdSchema, subjectInputSchema } from '@/features/subjects/schemas'
 import { updateSubjectCore } from '@/features/subjects/update-subject-core'
 import { createClient } from '@/lib/supabase/server'
-import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 
@@ -25,5 +24,5 @@ export async function updateSubject(id: string, input: unknown): Promise<ActionR
   if ('error' in result) return { success: false, error: result.error }
 
   revalidatePath('/', 'layout')
-  toastRedirect(`/subjects/${parsedId.data}`, 'subject-saved')
+  return { success: true }
 }

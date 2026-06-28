@@ -7,8 +7,8 @@ import type { ActionResultT } from '@/types/action'
 
 // Owns the form-level error string + the toast-or-surface decision shared by every Server-Action form.
 // `reportResult` toasts on success / surfaces the error inline on failure, and returns the success
-// predicate so callers can branch further (reset, close — success itself usually redirects).
-// `clearError` runs before each submit so a stale error doesn't linger.
+// predicate so callers can branch further (navigate, reset, close). `clearError` runs before each
+// submit so a stale error doesn't linger.
 export function useFormError() {
   const [formError, setFormError] = useState<string | undefined>(undefined)
 

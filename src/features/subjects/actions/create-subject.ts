@@ -5,14 +5,13 @@ import { revalidatePath } from 'next/cache'
 import { createSubjectCore } from '@/features/subjects/create-subject-core'
 import { subjectInputSchema } from '@/features/subjects/schemas'
 import { createClient } from '@/lib/supabase/server'
-import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
-import type { ActionResultT } from '@/types/action'
+import type { RedirectResultT } from '@/types/action'
 
 // Cookie-client entry point for the create-subject form. The insert lives in createSubjectCore (shared
 // with POST /api/subjects). `user_id` is NOT sent — the DB defaults it to auth.uid() and RLS `with check`
-// guards it. redirect throws, so the form only ever observes the failure branch.
-export async function createSubject(input: unknown): Promise<ActionResultT> {
+// guards it. Returns the new subject's id (server-born) so the form client-navigates to it.
+export async function createSubject(input: unknown): Promise<RedirectResultT> {
   const parsed = validateInput(subjectInputSchema, input)
   if (!parsed.success) return parsed
 
@@ -21,5 +20,5 @@ export async function createSubject(input: unknown): Promise<ActionResultT> {
   if ('error' in result) return { success: false, error: result.error }
 
   revalidatePath('/', 'layout')
-  toastRedirect(`/subjects/${result.id}`, 'subject-saved')
+  return { success: true, redirectTo: `/subjects/${result.id}` }
 }

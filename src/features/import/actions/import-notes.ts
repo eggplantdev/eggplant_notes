@@ -4,14 +4,13 @@ import { revalidatePath } from 'next/cache'
 
 import { importNotesSchema } from '@/features/import/schemas'
 import { createClient } from '@/lib/supabase/server'
-import { toastRedirect } from '@/lib/toast-redirect'
 import { validateInput } from '@/lib/validate'
-import type { ActionResultT } from '@/types/action'
+import type { RedirectResultT } from '@/types/action'
 
 // Bulk-commit previewed notes under a subject (existing or new) in one transaction via the
 // import_notes RPC. Mirrors createNote: `user_id` is never sent (DB defaults it to auth.uid(), RLS
-// guards it); redirect throws, so the form only ever observes the failure branch.
-export async function importNotes(input: unknown): Promise<ActionResultT> {
+// guards it); returns the target subject's id (possibly server-born) so the panel client-navigates.
+export async function importNotes(input: unknown): Promise<RedirectResultT> {
   const parsed = validateInput(importNotesSchema, input)
   if (!parsed.success) return parsed
   const { subject, notes } = parsed.data
@@ -27,5 +26,5 @@ export async function importNotes(input: unknown): Promise<ActionResultT> {
   }
 
   revalidatePath('/', 'layout')
-  toastRedirect(`/subjects/${subjectId}`, 'notes-imported')
+  return { success: true, redirectTo: `/subjects/${subjectId}` }
 }

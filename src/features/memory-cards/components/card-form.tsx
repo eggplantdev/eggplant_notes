@@ -33,12 +33,13 @@ import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import { useActionTransition } from '@/hooks/use-action-transition'
+import { useActionNavigation } from '@/hooks/use-action-navigation'
 
 // Combobox needs a concrete option value; unfiled card ↔ this sentinel ↔ null on the way out.
 const NO_SUBJECT = 'none'
 
-// `card` present → edit (updateMemoryCard); absent → create (createStandaloneCard). Both actions
-// redirect on success (redirect throws), so the form only ever observes the failure branch.
+// `card` present → edit (updateMemoryCard); absent → create (createStandaloneCard). On success the
+// form client-navigates to /memory-cards (a known URL), toasting + showing that route's loader.
 // `sourceNote` (edit of a linked card) renders a source-note row + an Unlink action.
 type CardFormPropsT = {
   subjects: SubjectOptionT[]
@@ -62,6 +63,8 @@ type CardFormValuesT = {
 export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
   const router = useRouter()
   const { formError, clearError, reportResult } = useFormError()
+  // Both create and edit land on /memory-cards (a client-known URL); navigate there on success.
+  const { isNavigating, navigate } = useActionNavigation()
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
   // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
@@ -101,7 +104,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     const result = card
       ? await updateMemoryCard(card.id, values)
       : await createStandaloneCard(values)
-    reportResult(result)
+    if (reportResult(result)) navigate('/memory-cards', card ? 'card-saved' : 'card-created')
   }
 
   return (
@@ -231,11 +234,14 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
 
       <div className="flex items-center gap-2">
         <form.Subscribe selector={(s) => s.isSubmitting}>
-          {(isSubmitting) => (
-            <Button type="submit" data-testid="card-form-submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : card ? 'Save changes' : 'Create card'}
-            </Button>
-          )}
+          {(isSubmitting) => {
+            const pending = isSubmitting || isNavigating
+            return (
+              <Button type="submit" data-testid="card-form-submit" disabled={pending}>
+                {pending ? 'Saving…' : card ? 'Save changes' : 'Create card'}
+              </Button>
+            )
+          }}
         </form.Subscribe>
         <ButtonLink href="/memory-cards" variant="ghost">
           Cancel

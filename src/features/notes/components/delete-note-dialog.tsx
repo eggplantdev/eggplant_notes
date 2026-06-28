@@ -3,20 +3,26 @@
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { deleteNote } from '@/features/notes/actions/delete-note'
 import { useActionTransition } from '@/hooks/use-action-transition'
+import { useActionNavigation } from '@/hooks/use-action-navigation'
 
 // Controlled (`noteId` non-null → open) so a single instance can serve a whole list, not one
-// Radix tree per row. deleteNote redirects on success, so the action only ever returns on failure
-// (which keeps the dialog open + shows the error).
+// Radix tree per row. On success the dialog client-navigates to `redirectTo`; a failure keeps the
+// dialog open + shows the error.
 type DeleteNoteDialogPropsT = {
   noteId: string | null
   onOpenChange: (open: boolean) => void
-  // Where deleteNote redirects on success — the subject view passes /subjects/[id] so the docs
-  // context survives the delete.
+  // Post-delete destination (client-known) — the subject view passes /subjects/[id] so the docs
+  // context survives the delete; defaults to the notes list.
   redirectTo?: string
 }
 
-export function DeleteNoteDialog({ noteId, onOpenChange, redirectTo }: DeleteNoteDialogPropsT) {
+export function DeleteNoteDialog({
+  noteId,
+  onOpenChange,
+  redirectTo = '/notes',
+}: DeleteNoteDialogPropsT) {
   const { error, isPending, run } = useActionTransition()
+  const { isNavigating, navigate } = useActionNavigation()
 
   return (
     <ConfirmDeleteDialog
@@ -24,10 +30,13 @@ export function DeleteNoteDialog({ noteId, onOpenChange, redirectTo }: DeleteNot
       onOpenChange={onOpenChange}
       title="Delete this note?"
       description="This permanently deletes the note and its memory cards. This can’t be undone."
-      isPending={isPending}
+      isPending={isPending || isNavigating}
       error={error}
       onConfirm={() => {
-        if (noteId) run(() => deleteNote(noteId, redirectTo))
+        if (!noteId) return
+        run(() => deleteNote(noteId)).then((result) => {
+          if (result.success) navigate(redirectTo, 'note-deleted')
+        })
       }}
     />
   )

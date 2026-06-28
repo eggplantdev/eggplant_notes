@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 
 import { subjectIdSchema } from '@/features/subjects/schemas'
 import { runDeleteRow } from '@/lib/supabase/run-delete-row'
-import { toastRedirect } from '@/lib/toast-redirect'
 import type { ActionResultT } from '@/types/action'
 
 // Member notes are DETACHED, not deleted — the FK `on delete set null` nulls their `subject_id`
@@ -14,5 +13,5 @@ export async function deleteSubject(id: string): Promise<ActionResultT> {
   if (!result.success) return result
 
   revalidatePath('/', 'layout')
-  toastRedirect('/subjects', 'subject-deleted')
+  return { success: true }
 }

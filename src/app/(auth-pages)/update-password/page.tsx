@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
+import { useActionNavigation } from '@/hooks/use-action-navigation'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -12,14 +13,19 @@ import { passwordSchema } from '@/features/auth/schemas'
 
 export default function UpdatePasswordPage() {
   const [formError, setFormError] = useState<string | undefined>(undefined)
+  // /dashboard is a client-known URL; navigate there on success (loader shows, button stays pending).
+  const { isNavigating, navigate } = useActionNavigation()
 
   const form = useAppForm({
     defaultValues: { password: '' },
     onSubmit: async ({ value }) => {
       const result = await updatePassword(value)
-      // Success redirects (throws), so this branch only sees failure. The error shows inline via
-      // <FormError> below — no toast, which would just repeat the visible message.
-      if (!result.success) setFormError(result.error)
+      if (result.success) {
+        navigate('/dashboard', 'password-updated')
+        return
+      }
+      // The error shows inline via <FormError> below — no toast, which would repeat the visible message.
+      setFormError(result.error)
     },
   })
 
@@ -47,17 +53,20 @@ export default function UpdatePasswordPage() {
         </form.AppField>
         <FormError message={formError} />
         <form.Subscribe selector={(s) => s.isSubmitting}>
-          {(isSubmitting) => (
-            <Button type="submit" size="default" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Spinner /> Saving…
-                </>
-              ) : (
-                'Save password'
-              )}
-            </Button>
-          )}
+          {(isSubmitting) => {
+            const pending = isSubmitting || isNavigating
+            return (
+              <Button type="submit" size="default" disabled={pending}>
+                {pending ? (
+                  <>
+                    <Spinner /> Saving…
+                  </>
+                ) : (
+                  'Save password'
+                )}
+              </Button>
+            )
+          }}
         </form.Subscribe>
       </form>
     </TitledCard>

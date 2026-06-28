@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 
 import { FormError } from '@/components/forms/form-components/form-error'
-import { toastActionResult } from '@/components/forms/toast-result'
+import { useActionNavigation } from '@/hooks/use-action-navigation'
 import { AccordionArrow } from '@/components/ui/accordion-arrow'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
@@ -62,6 +62,7 @@ export function ImportPanel({
   // Separate fold for the whole preview list, so a long split result can be collapsed out of the way.
   const [isPreviewOpen, setIsPreviewOpen] = useState(true)
   const [isPending, startTransition] = useTransition()
+  const { isNavigating, navigate } = useActionNavigation()
 
   // #3: AI decomposes the source text into multiple notes, feeding the SAME preview/commit pipeline
   // as the deterministic split — the two read-strategies converge on `drafts`.
@@ -145,7 +146,12 @@ export function ImportPanel({
         : { title: subjectChoice.title.trim() }
     startTransition(async () => {
       const result = await importNotes({ subject, notes })
-      if (result && !toastActionResult(result)) setFormError(result.error)
+      if (!result.success) {
+        setFormError(result.error)
+        return
+      }
+      // Subject id is server-born (may be a brand-new subject); navigate to it so its loader shows.
+      navigate(result.redirectTo, 'notes-imported')
     })
   }
 
@@ -279,7 +285,7 @@ export function ImportPanel({
             <Button
               type="button"
               data-testid="import-commit"
-              disabled={isPending}
+              disabled={isPending || isNavigating}
               onClick={handleImport}
             >
               {isPending ? 'Importing…' : `Import ${keptCount} note${keptCount === 1 ? '' : 's'}`}
