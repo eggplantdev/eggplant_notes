@@ -101,7 +101,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     const res = await notesPOST(
       postReq(u.token, '/api/notes', {
         note: { title: 'Route note', content: '', subject_title: `route-${Date.now()}` },
-        checks: [],
+        cards: [],
       }),
     )
     expect(res.status).toBe(201)
@@ -117,7 +117,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
   it('POST /api/memory-cards attaches cards to a note (201)', async () => {
     const u = await userWithToken()
     const noteRes = await notesPOST(
-      postReq(u.token, '/api/notes', { note: { title: 'N', content: '' }, checks: [] }),
+      postReq(u.token, '/api/notes', { note: { title: 'N', content: '' }, cards: [] }),
     )
     const { id: noteId } = (await noteRes.json()) as { id: string }
 
@@ -150,7 +150,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
   it('POST /api/memory-cards 400s a note-attach body with a malformed cards array (no silent misroute)', async () => {
     const u = await userWithToken()
     const noteRes = await notesPOST(
-      postReq(u.token, '/api/notes', { note: { title: 'NM', content: '' }, checks: [] }),
+      postReq(u.token, '/api/notes', { note: { title: 'NM', content: '' }, cards: [] }),
     )
     const { id: noteId } = (await noteRes.json()) as { id: string }
 
@@ -169,7 +169,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     expect(res.status).toBe(400)
   })
 
-  it('POST /api/notes stamps the note subject onto its checks-cards (linked → same subject)', async () => {
+  it('POST /api/notes stamps the note subject onto its cards (linked → same subject)', async () => {
     const u = await userWithToken()
     const { id: subjectId } = (await (
       await subjectsPOST(postReq(u.token, '/api/subjects', { title: `chk-${Date.now()}` }))
@@ -179,7 +179,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'WithSubject', content: '', subject_id: subjectId },
-          checks: [{ prompt: 'inherits-subject', example: '', code_context: '' }],
+          cards: [{ prompt: 'inherits-subject', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -200,7 +200,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     await notesPOST(
       postReq(a.token, '/api/notes', {
         note: { title: 'AX', content: '', subject_title: marker },
-        checks: [],
+        cards: [],
       }),
     )
     const { subjects: aSubs } = (await (
@@ -227,7 +227,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       body: '{ not json',
     })
     expect((await notesPOST(malformed)).status).toBe(400)
-    expect((await notesPOST(postReq(u.token, '/api/notes', { note: {}, checks: [] }))).status).toBe(
+    expect((await notesPOST(postReq(u.token, '/api/notes', { note: {}, cards: [] }))).status).toBe(
       400,
     )
   })
@@ -238,7 +238,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'Readback', content: '# Hello' },
-          checks: [{ prompt: 'Q1?', example: '', code_context: '' }],
+          cards: [{ prompt: 'Q1?', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -320,7 +320,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'F', content: '' },
-          checks: [{ prompt: 'note-card', example: '', code_context: '' }],
+          cards: [{ prompt: 'note-card', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -355,7 +355,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'ToDelete', content: '' },
-          checks: [{ prompt: 'c?', example: '', code_context: '' }],
+          cards: [{ prompt: 'c?', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -383,7 +383,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'Filed', content: '', subject_title: subjTitle },
-          checks: [{ prompt: 'k?', example: '', code_context: '' }],
+          cards: [{ prompt: 'k?', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -444,11 +444,11 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'P2', content: 'body', subject_title: `from-${Date.now()}-${seq++}` },
-          checks: [{ prompt: 'linked?', example: '', code_context: '' }],
+          cards: [{ prompt: 'linked?', example: '', code_context: '' }],
         }),
       )
     ).json()) as { id: string }
-    // The checks-card inherits the note's subject (create_note_with_checks stamps it), so a linked card
+    // The card inherits the note's subject (create_note_with_cards stamps it), so a linked card
     // shares its note's subject. Capture that source subject for the unlink/edit assertions below.
     const { note, cards } = (await (
       await noteIdGET(getReq(u.token, `/api/notes/${noteId}`), idCtx(noteId))

@@ -342,8 +342,8 @@ export type Database = {
         Args: { p_time_zone: string; p_window_days: number }
         Returns: Json
       }
-      create_note_with_checks: {
-        Args: { p_checks: Json; p_note: Json }
+      create_note_with_cards: {
+        Args: { p_cards: Json; p_note: Json }
         Returns: string
       }
       delete_account: { Args: never; Returns: undefined }

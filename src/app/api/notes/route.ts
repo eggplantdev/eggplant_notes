@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import { authenticateRequest } from '@/features/api-tokens/authenticate-request'
 import { authError, errorJson, readJsonBody } from '@/features/api-tokens/route-helpers'
-import { insertNoteWithChecks } from '@/features/notes/insert-note-with-checks'
-import { createNoteWithChecksSchema } from '@/features/notes/schemas'
+import { insertNoteWithCards } from '@/features/notes/insert-note-with-cards'
+import { createNoteWithCardsSchema } from '@/features/notes/schemas'
 import { validateInput } from '@/lib/validate'
 
 // POST /api/notes — create a note (+ optional cards) for the token's user. Reuses the same write core
@@ -16,11 +16,11 @@ export async function POST(request: Request) {
   const parsedBody = await readJsonBody(request)
   if (!parsedBody.ok) return parsedBody.res
 
-  const parsed = validateInput(createNoteWithChecksSchema, parsedBody.body)
+  const parsed = validateInput(createNoteWithCardsSchema, parsedBody.body)
   if (!parsed.success) return errorJson(400, parsed.error)
 
   try {
-    const id = await insertNoteWithChecks(auth.supabase, parsed.data)
+    const id = await insertNoteWithCards(auth.supabase, parsed.data)
     return NextResponse.json({ id }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/notes] insert error', error)

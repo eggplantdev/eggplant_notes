@@ -30,14 +30,14 @@ export const createNoteInputSchema = noteInputSchema
     path: ['subject_title'],
   })
 
-// checks capped to bound the RPC's bulk insert.
-export const createNoteWithChecksSchema = z.object({
+// `cards` capped to bound the RPC's bulk insert.
+export const createNoteWithCardsSchema = z.object({
   note: createNoteInputSchema,
-  checks: z.array(memoryCardInputSchema).max(50, 'At most 50 memory cards per note'),
+  cards: z.array(memoryCardInputSchema).max(50, 'At most 50 memory cards per note'),
 })
 
 export type NoteInputT = z.infer<typeof noteInputSchema>
 export type CreateNoteInputT = z.infer<typeof createNoteInputSchema>
-export type CreateNoteWithChecksT = z.infer<typeof createNoteWithChecksSchema>
+export type CreateNoteWithCardsT = z.infer<typeof createNoteWithCardsSchema>
 // Form-side (pre-transform) shape — z.input keeps it in sync with memoryCardInputSchema without drift.
-export type StagedCheckInputT = z.input<typeof memoryCardInputSchema>
+export type StagedCardInputT = z.input<typeof memoryCardInputSchema>

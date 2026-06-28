@@ -69,9 +69,9 @@ describe.skipIf(!RUN)('api token pipeline (integration)', () => {
   }
 
   async function createNoteVia(supabase: SupabaseClient, title: string, extra: object = {}) {
-    const { data, error } = await supabase.rpc('create_note_with_checks', {
+    const { data, error } = await supabase.rpc('create_note_with_cards', {
       p_note: { title, content: '', subject_title: `subj-${title}`, ...extra },
-      p_checks: [],
+      p_cards: [],
     })
     if (error) throw error
     return data as string

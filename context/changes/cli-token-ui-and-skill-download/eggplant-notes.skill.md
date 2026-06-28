@@ -85,7 +85,7 @@ subject instead of creating duplicates:
 1. `GET /api/subjects` → see existing topics; grab a `subject_id` to reuse, or decide to make a new one
    (`POST /api/subjects`).
 2. `POST /api/notes` → create the note under an existing subject (`subject_id`) **or** a new one created
-   inline (`subject_title`). Include its recall cards in the same call via `checks`.
+   inline (`subject_title`). Include its recall cards in the same call via `cards`.
 3. `POST /api/memory-cards` → add more cards to a note later, or create standalone cards.
 4. `GET /api/notes/:id` · `GET /api/memory-cards` → read a note's content + cards back, or list/inspect
    cards (filter by note/subject/unfiled) before writing.
@@ -191,7 +191,7 @@ curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
     "subject_id": "<uuid>", // attach to an EXISTING subject — OR omit and use subject_title
     // "subject_title": "Rust"        // create a NEW subject inline. Mutually exclusive with subject_id.
   },
-  "checks": [
+  "cards": [
     // recall cards for this note; ≤ 50; may be [] for none.
     // example/code_context are MARKDOWN — fence code blocks or they render flat (see "fence your code" below).
     {
@@ -205,7 +205,7 @@ curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
 
 ```bash
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"note":{"title":"Ownership basics","content":"# Ownership","subject_title":"Rust"},"checks":[{"prompt":"What is ownership?","example":"","code_context":""}]}' \
+  -d '{"note":{"title":"Ownership basics","content":"# Ownership","subject_title":"Rust"},"cards":[{"prompt":"What is ownership?","example":"","code_context":""}]}' \
   "$BASE/api/notes"
 # → 201 { "id": "<note-uuid>" }
 ```
@@ -296,7 +296,7 @@ curl -s -X DELETE -H "$AUTH" "$BASE/api/subjects/<subject-uuid>"    # → 200 { 
 
 ## The card field shape — get this right or you get a 400
 
-Every card (in `checks` or `cards`) has exactly these fields:
+Every card (in a note's `cards` array or a `POST /api/memory-cards` `cards` array) has exactly these fields:
 
 | field          | rule                                                                                                                                                                   |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -344,7 +344,7 @@ language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
 - **`308`** — a path built with an **empty `:id` segment** (e.g. `DELETE /api/subjects/`) is redirected by
   trailing-slash normalization to the collection route, not rejected — you get a silent redirect, never a
   `404`. Never construct a `:id` URL with a missing id; validate the id before the call.
-- **Caps:** ≤ 50 cards per note (`checks`), 1–20 cards per `note_id` attach (`cards`), `prompt` 10–2000 chars,
+- **Caps:** ≤ 50 cards per note (`POST /api/notes` `cards`), 1–20 cards per `note_id` attach (`POST /api/memory-cards` `cards`), `prompt` 10–2000 chars,
   `title` ≤ 200 chars. Batch larger imports across multiple calls.
 
 ## Quick end-to-end smoke test
@@ -352,7 +352,7 @@ language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
 ```bash
 curl -s -H "$AUTH" "$BASE/api/subjects"                                              # 1. read structure
 NOTE=$(curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"note":{"title":"Smoke test","content":"# hi","subject_title":"Sandbox"},"checks":[{"prompt":"Does the API work?","example":"","code_context":""}]}' \
+  -d '{"note":{"title":"Smoke test","content":"# hi","subject_title":"Sandbox"},"cards":[{"prompt":"Does the API work?","example":"","code_context":""}]}' \
   "$BASE/api/notes")                                                                 # 2. create note + card
 echo "$NOTE"                                                                          # → {"id":"..."}
 ID=$(echo "$NOTE" | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')

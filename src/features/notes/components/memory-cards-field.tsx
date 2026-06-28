@@ -13,10 +13,10 @@ import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
 import { GenerateDialog } from '@/features/openrouter/components/generate-dialog'
 import { cardsMaterialFromNote } from '@/features/openrouter/build-prompt'
-import type { StagedCheckInputT } from '@/features/notes/schemas'
+import type { StagedCardInputT } from '@/features/notes/schemas'
 
 // Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.
-const EMPTY_CHECK: StagedCheckInputT = { prompt: '', example: '', code_context: '' }
+const EMPTY_CARD: StagedCardInputT = { prompt: '', example: '', code_context: '' }
 
 // Per-row code-context toggle, mirroring card-form.tsx: code context is optional, and its editor
 // pulls in the heavy CodeMirror chunk, so the editor mounts (and loads) only on opt-in. A row that
@@ -60,7 +60,7 @@ export const MemoryCardsField = withForm({
     title: '',
     content: '',
     subject_id: null as string | null,
-    checks: [] as StagedCheckInputT[],
+    cards: [] as StagedCardInputT[],
   },
   // OpenRouter connection + default model, forwarded so the inline AI generator can ground on the
   // note being written. Defaults keep the AI button gated-off when NoteForm doesn't pass them.
@@ -74,8 +74,8 @@ export const MemoryCardsField = withForm({
     const content = useStore(form.store, (s) => s.values.content)
 
     return (
-      <form.Field name="checks" mode="array">
-        {(checksField) => (
+      <form.Field name="cards" mode="array">
+        {(cardsField) => (
           <Box>
             {/* Stack on mobile: at ~390px the label column + the two buttons crowd on one row, so
                 the label sits above the buttons below `sm` and restores the side-by-side row at `sm`+. */}
@@ -99,7 +99,7 @@ export const MemoryCardsField = withForm({
                   }
                   onResult={(cards) =>
                     cards.forEach((c) =>
-                      checksField.pushValue({
+                      cardsField.pushValue({
                         prompt: c.prompt,
                         example: c.example,
                         code_context: '',
@@ -116,14 +116,14 @@ export const MemoryCardsField = withForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => checksField.pushValue(EMPTY_CHECK)}
+                  onClick={() => cardsField.pushValue(EMPTY_CARD)}
                 >
                   Add card
                 </Button>
               </div>
             </div>
 
-            {checksField.state.value.map((_, i) => (
+            {cardsField.state.value.map((_, i) => (
               <Box key={i} gap={3}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium">Card {i + 1}</span>
@@ -131,14 +131,14 @@ export const MemoryCardsField = withForm({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => checksField.removeValue(i)}
+                    onClick={() => cardsField.removeValue(i)}
                   >
                     Remove
                   </Button>
                 </div>
 
                 <form.AppField
-                  name={`checks[${i}].prompt`}
+                  name={`cards[${i}].prompt`}
                   validators={{ onBlur: promptSchema, onSubmit: promptSchema }}
                 >
                   {(field) => (
@@ -146,16 +146,17 @@ export const MemoryCardsField = withForm({
                   )}
                 </form.AppField>
 
-                <form.AppField name={`checks[${i}].example`}>
+                <form.AppField name={`cards[${i}].example`}>
                   {(field) => (
                     <field.Textarea
                       label="Example (optional)"
                       placeholder="A worked example or expected answer"
+                      className={`min-h-40`}
                     />
                   )}
                 </form.AppField>
 
-                <form.Field name={`checks[${i}].code_context`}>
+                <form.Field name={`cards[${i}].code_context`}>
                   {(field) => (
                     <CodeContextField value={field.state.value} onChange={field.handleChange} />
                   )}
