@@ -6,6 +6,7 @@ import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { useFormError } from '@/components/forms/hooks/use-form-error'
+import { useActionNavigation } from '@/hooks/use-action-navigation'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
@@ -17,7 +18,7 @@ import {
   type LinkedCardT,
 } from '@/features/notes/components/move-linked-cards-dialog'
 import { titleSchema } from '@/features/notes/schemas'
-import type { CreateNoteWithChecksT, NoteInputT, StagedCheckInputT } from '@/features/notes/schemas'
+import type { CreateNoteWithCardsT, NoteInputT, StagedCardInputT } from '@/features/notes/schemas'
 import {
   NO_SUBJECT,
   SubjectSelect,
@@ -25,11 +26,11 @@ import {
 } from '@/features/subjects/components/subject-select'
 import type { SubjectOptionT } from '@/features/subjects/types'
 import type { NoteT } from '@/types/note'
-import type { ActionResultT } from '@/types/action'
+import type { ActionResultT, RedirectResultT } from '@/types/action'
 
 type NoteFormPropsT =
   | {
-      action: (input: CreateNoteWithChecksT) => Promise<ActionResultT>
+      action: (input: CreateNoteWithCardsT) => Promise<RedirectResultT>
       subjects: SubjectOptionT[]
       defaultSubjectId?: string
       note?: undefined
@@ -52,6 +53,9 @@ type NoteFormPropsT =
 export function NoteForm(props: NoteFormPropsT) {
   const { note } = props
   const { formError, clearError, reportResult } = useFormError()
+  // Navigate on success: create → the new note's server-born id; edit → back to this note. isNavigating
+  // keeps the submit button pending through the destination render.
+  const { isNavigating, navigate } = useActionNavigation()
   // Holds the edit input while the move/unlink dialog is open; the dialog's choices resume submit.
   const [pendingInput, setPendingInput] = useState<NoteInputT | undefined>(undefined)
   // #5 ungrounded gen-notes: a topic → AI fills the title/content fields below for the user to edit
@@ -78,7 +82,7 @@ export function NoteForm(props: NoteFormPropsT) {
       title: note?.title ?? '',
       content: note?.content ?? '',
       subject_id: note?.subject_id ?? null,
-      checks: [] as StagedCheckInputT[],
+      cards: [] as StagedCardInputT[],
     },
     onSubmit: async ({ value }) => {
       if (!props.note) {
@@ -95,9 +99,13 @@ export function NoteForm(props: NoteFormPropsT) {
         }
         const result = await props.action({
           note: { title: value.title, content: value.content, ...subjectFields },
-          checks: value.checks,
+          cards: value.cards,
         })
-        reportResult(result)
+        if (!result.success) {
+          reportResult(result)
+          return
+        }
+        navigate(result.redirectTo, 'note-saved')
         return
       }
       const noteInput: NoteInputT = {
@@ -121,7 +129,7 @@ export function NoteForm(props: NoteFormPropsT) {
     if (!props.note) return
     setPendingInput(undefined)
     const result = await props.action(props.note.id, noteInput, cardActions)
-    reportResult(result)
+    if (reportResult(result)) navigate(`/notes/${props.note.id}`, 'note-saved')
   }
 
   return (
@@ -202,11 +210,14 @@ export function NoteForm(props: NoteFormPropsT) {
       <FormError message={formError} />
 
       <form.Subscribe selector={(s) => s.isSubmitting}>
-        {(isSubmitting) => (
-          <Button type="submit" disabled={isSubmitting} className="self-start">
-            {isSubmitting ? 'Saving…' : note ? 'Save changes' : 'Create note'}
-          </Button>
-        )}
+        {(isSubmitting) => {
+          const pending = isSubmitting || isNavigating
+          return (
+            <Button type="submit" disabled={pending} className="self-start">
+              {pending ? 'Saving…' : note ? 'Save changes' : 'Create note'}
+            </Button>
+          )
+        }}
       </form.Subscribe>
 
       {/* Mounted only while pending — unmount resets choices state so each subject-change starts fresh. */}
