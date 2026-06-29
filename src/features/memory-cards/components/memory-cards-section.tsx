@@ -58,7 +58,7 @@ export function MemoryCardsSection({
           column keeps the default `align-items: stretch` so the EXPANDED panels fill the width;
           the collapsed triggers stay small via their own `self-start` / `justify-items-start`
           (so DON'T add `items-start` here — it would shrink the panels back). */}
-      <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
         <AddMemoryCard noteId={noteId} />
         <GenerateCardsButton
           noteId={noteId}
