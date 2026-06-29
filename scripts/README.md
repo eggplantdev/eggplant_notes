@@ -42,7 +42,9 @@
 > `context/foundation/lessons.md`.
 >
 > `db-dump.sh` (`pnpm db:dump`) and `db-restore-local.sh` (`pnpm db:restore:local`)
-> implement this; restoring locally doubles as the recovery drill.
+> implement this; restoring locally doubles as the recovery drill. For **real disaster
+> recovery into a fresh hosted project**, use `db-restore-hosted.sh`
+> (`pnpm db:restore:hosted`) and follow the operator runbook in **`scripts/RECOVERY.md`**.
 
 These are the project's shell scripts. The scripts themselves stay lean (just the
 commands); this file carries the **explanation and the _why_** so the executables
@@ -162,6 +164,34 @@ sequences behind the loaded rows, so the _first_ `INSERT` (e.g. a login writing
 granting user." The loop walks every sequence in `auth`/`storage`/`public` and
 `setval`s it to its table's `max(id)`. **This is why row counts never prove a
 recovery — only a real login does.**
+
+---
+
+## `db-restore-hosted.sh` — restore a 3-file dump into a fresh HOSTED project (real DR)
+
+**What it's for:** the actual disaster-recovery restore — rebuild prod into a **fresh
+Supabase project** from a `db:dump`/server-made artifact. Run with
+`TARGET=<session-pooler-url> pnpm db:restore:hosted [backup-dir]`. The step-by-step
+operator runbook (create project, prove with a login, repoint the app) is in
+**`scripts/RECOVERY.md`** — this section is just the _why it differs from local_.
+
+A hosted project gives only the non-superuser `postgres` role (its `auth`/`storage`
+schemas are owned by `supabase_*_admin`), so the local script's approach fails. Four
+hosted-only adjustments, each a privilege wall found 2026-06-29:
+
+1. **Enable `moddatetime` first** — a `--schema=public` dump references the extension's
+   trigger function but doesn't carry the extension; a fresh project doesn't enable it.
+2. **Strip `ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin`** from `schema.sql` —
+   `postgres` can't change another role's default privileges (already present anyway).
+3. **Skip `auth.schema_migrations` + `storage.migrations` data** — framework bookkeeping
+   owned by `supabase_*_admin` that `postgres` can't write (and a fresh project has it).
+4. **No `roles.sql`, no manual resync** — managed roles pre-exist; the only sequence
+   (`auth.refresh_tokens_id_seq`, owned by `supabase_auth_admin`) can't be `setval`'d by
+   `postgres`, but `data.sql`'s own `setval` already synced it during the restore.
+
+The script also **refuses a non-empty target** (`to_regclass('public.notes')` guard), so it
+can never run over a live project. **Session pooler (5432) only** — the restore needs a
+stable session (`--single-transaction`, `SET session_replication_role`).
 
 ---
 

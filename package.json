@@ -21,6 +21,7 @@
     "db:push:safe": "bash scripts/db-push-safe.sh",
     "db:dump": "bash scripts/db-dump.sh",
     "db:restore:local": "bash scripts/db-restore-local.sh",
+    "db:restore:hosted": "bash scripts/db-restore-hosted.sh",
     "seed:dump-fixture": "node supabase/seed-scripts/dump-sample-fixture.mjs",
     "prepare": "husky"
   },
