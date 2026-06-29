@@ -82,7 +82,7 @@ export default async function DashboardPage() {
         <TitledCard title="Review activity — last 12 months" className="w-full">
           <ActivityHeatmap columns={columns} variant="neon-cyan" />
         </TitledCard>
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-4">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-4 [&>*]:min-w-0">
           <div>
             {reviewingAhead && (
               // mb matches the section gap-12 so the notice sits centered between sections, not glued to the panel.

@@ -151,7 +151,7 @@ export const MemoryCardsField = withForm({
                     <field.Textarea
                       label="Example (optional)"
                       placeholder="A worked example or expected answer"
-                      className={`min-h-40`}
+                      className="min-h-40"
                     />
                   )}
                 </form.AppField>
