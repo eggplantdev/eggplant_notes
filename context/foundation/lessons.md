@@ -251,3 +251,37 @@
 - **Problem**: The screen is the product; "the value is correct in the database" is worthless to the user — they clicked a button, the persisted state changed, and the UI kept showing the old value. A list that misreports due dates / counts / status after a write is a **bug**, even when the staleness is documented in a plan and the user "signed off" on eventual consistency. Sign-off on an abstract tradeoff ("list refreshes per batch") does not survive contact with the concrete symptom ("I rated it and the date didn't change") — the user reads it as broken, and they're right. It hides because typecheck/lint/build/DB-assertions all stay green (the write landed); only a human looking at the screen catches it, and only if they look at the list mid-session (the exact case the optimization bet they wouldn't).
 - **Rule**: Never trade truthful UI for perceived speed. After a mutation, the surfaces showing that data must re-render to the new persisted state — default to honest revalidation (`revalidatePath('/', 'layout')` for this all-dynamic app) and only optimize with a **targeted** `revalidatePath('/specific-route')` that keeps the view truthful, never by removing the bust. If a plan proposes skip-revalidate / optimistic / batched-refresh, treat "the list may show stale values between refreshes" as a **defect to design out**, not a footnote to accept — and don't let "documented + accepted" relabel a lying screen as a feature. When in doubt, correctness over speed; make it fast only after it's honest.
 - **Applies to**: /10x-plan, /10x-plan-review, /10x-implement, /10x-impl-review, /10x-e2e, /simplify, any review/list surface with a mutation in its hot path
+
+## A single `pg_dump` is NOT a Supabase recovery artifact — use the official roles + schema + data dump
+
+- **Context**: Any "dump prod" / "seed local from prod" / disaster-recovery task on this Supabase project. Surfaced while building `db:dump:prod` / `db:seed:local`: a one-file `pg_dump "$URL" --no-owner --no-privileges --clean | gzip` was used, then restored into the live local stack. Data counts matched prod, so it _looked_ fine — but login broke with **"Database error querying schema."**
+- **Problem**: Two compounding errors. (1) **Roles live at the cluster level, not inside a database** — a plain `pg_dump` of one DB contains zero roles, so it can never fully rebuild prod (`supabase_auth_admin`, `authenticated`, `anon`, … are missing). (2) Restoring a **full schema dump** (DDL) into a stack that **already has** the schema/roles, with `--no-owner --no-privileges`, recreates the `auth.*`/`public.*` tables owned by the restoring role (`supabase_admin`) and strips every GRANT. GoTrue connects as `supabase_auth_admin`, which then can't read the `auth` schema → the login error. The data load (COPY/INSERT) is independent and still succeeds, so counts match and it masquerades as a working restore. `--no-owner --no-privileges` is correct only when restoring to a _generic_ target; it is wrong for Supabase→Supabase, where both sides share the managed roles and ownership must be preserved.
+- **Rule**: For backup/recovery/local-seed, use the **official Supabase three-dump method** (verified at supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), which `scripts/db-push-safe.sh` already implements:
+  ```bash
+  supabase db dump --db-url "$URL" -f roles.sql  --role-only
+  supabase db dump --db-url "$URL" -f schema.sql
+  supabase db dump --db-url "$URL" -f data.sql   --use-copy --data-only \
+    -x storage.buckets_vectors -x storage.vector_indexes
+  ```
+  Restore all three, in order, triggers off during the data load:
+  ```bash
+  psql --single-transaction --variable ON_ERROR_STOP=1 \
+    --file roles.sql --file schema.sql \
+    --command 'SET session_replication_role = replica' \
+    --file data.sql --dbname "$TARGET_URL"
+  ```
+  **Then resync every sequence — the step the official docs omit (TESTED 2026-06-29).** A `--data-only` restore does not reliably advance sequences to match the loaded rows, so the restore succeeds and the data is all present, but the **first write fails**: login dies with `duplicate key value violates unique constraint "refresh_tokens_pkey"` → GoTrue returns _"Database error granting user"_. Run after the restore:
+  ```sql
+  DO $$ DECLARE r record; mx bigint; BEGIN
+    FOR r IN SELECT n.nspname sch, s.relname seq, t.relname tbl, a.attname col
+      FROM pg_class s JOIN pg_depend d ON d.objid=s.oid AND d.deptype='a'
+      JOIN pg_class t ON t.oid=d.refobjid
+      JOIN pg_attribute a ON a.attrelid=t.oid AND a.attnum=d.refobjsubid
+      JOIN pg_namespace n ON n.oid=s.relnamespace
+      WHERE s.relkind='S' AND n.nspname IN ('auth','storage','public') LOOP
+      EXECUTE format('SELECT coalesce(max(%I),0) FROM %I.%I', r.col, r.sch, r.tbl) INTO mx;
+      EXECUTE format('SELECT setval(%L, %s, true)', r.sch||'.'||r.seq, GREATEST(mx,1));
+    END LOOP; END $$;
+  ```
+  The **same** three-file artifact serves both jobs — full DR (restore into a fresh project) and local seed (restore into a blanked local) — so what you seed with is byte-identical to your recovery backup. Restore into an **empty** target (fresh project / reset-and-blanked local), never over a live stack. Never trust a single `pg_dump` (no roles) or `--no-owner --no-privileges` for Supabase recovery. **Never "validate" a recovery by row-count alone — only a real browser login proves it.** Verified end-to-end 2026-06-29: dump prod → blank local → restore → resync sequences → actual login renders the dashboard with recovered data. Row counts said "perfect" twice while auth was still broken (first by ownership, then by lagging sequences).
+- **Applies to**: /10x-implement, /10x-plan, any db dump/restore/seed/disaster-recovery task on Supabase
