@@ -1,42 +1,35 @@
 # ============================================================================
-# Daily Supabase Postgres → FTPS Backup (recovery-grade, 3-file method)
+# Daily Supabase Postgres → FTPS Backup (recovery-grade, READ-ONLY, token-free)
 # ============================================================================
-# Produces the OFFICIAL Supabase backup — roles + schema + data — bundled as one
-# tarball and shipped off-site via FTPS. A single pg_dump is NOT restorable
-# (no cluster-level roles, mangled ownership); see scripts/README.md and
-# context/foundation/lessons.md ("A single pg_dump is NOT a Supabase recovery
-# artifact"). Restore with the psql sequence documented there, into an EMPTY
-# target, then resync sequences.
+# Produces the official-equivalent recovery artifact — roles + schema + data —
+# as one tarball, shipped off-site via FTPS. A single whole-DB pg_dump is NOT a
+# clean restore target; this mirrors the proven scripts/db-dump.sh shape (public
+# DDL + auth/public/storage data + committed roles). Restore with
+# scripts/db-restore-local.sh, or the psql sequence in
+# context/foundation/lessons.md, into an EMPTY target, then resync sequences.
 #
-# What it does:
-#   1. Installs the Supabase CLI and links the project (via access token)
-#   2. Dumps roles.sql + schema.sql + data.sql with `supabase db dump --linked`
-#   3. Bundles them into one timestamped .tar.gz
-#   4. Validates each file actually has content (not just tarball size)
-#   5. Uploads via secure FTPS and prunes copies older than 7 days
+# READ-ONLY + TOKEN-FREE: dumps as the backup_ro role (pg_read_all_data, bypassrls,
+# no write) via raw pg_dump. No Supabase access token — `supabase db dump` can't run
+# as backup_ro (SET ROLE postgres denied), and a PAT can't be scoped read-only anyway.
 #
-# Secrets required (GitHub repo → Settings → Secrets and variables → Actions):
-#   - SUPABASE_ACCESS_TOKEN : a Supabase personal access token
-#       (supabase.com/dashboard/account/tokens). `--linked` uses it to provision
-#       a temporary privileged login role via the Management API, which is the
-#       ONLY way to dump roles — the prod *pooler* rejects the role dump with
-#       "permission denied to set role postgres". No DB password needed for dump.
+# Secrets required (repo → Settings → Secrets and variables → Actions):
+#   - SUPABASE_DB_URL : the backup_ro Session-pooler connection string (port 5432).
+#       Role setup (run once in the Supabase SQL editor):
+#         create role backup_ro login password '<strong>';
+#         grant pg_read_all_data to backup_ro;
+#         alter role backup_ro with bypassrls;     -- read auth.* etc.
+#       Username at the pooler is backup_ro.<project-ref>. Read-only: a leaked
+#       secret can only read, never mutate. GitHub runners are IPv4-only → use the
+#       pooler host, not db.<ref>.supabase.co. Session mode (5432), not txn (6543).
 #   - FTP_HOST / FTP_USER / FTP_PASS : the off-site FTPS server.
-# (The old SUPABASE_DB_URL / backup_ro pooler secret is no longer used here —
-#  --linked supersedes it.)
 # ============================================================================
 
 name: Backup Supabase DB
 
 on:
   schedule:
-    # Runs every day at 2:00 AM UTC
-    - cron: '0 2 * * *'
-  # Allows manual trigger from the GitHub Actions tab
+    - cron: '0 2 * * *'   # daily 02:00 UTC
   workflow_dispatch:
-
-env:
-  PROJECT_REF: xwivdlgkywhhonbsdzmm
 
 jobs:
   backup-and-upload:
@@ -44,50 +37,42 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
-
-      # Pinned to match the locally-verified CLI; bump deliberately.
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: 2.101.0
+      - uses: actions/checkout@v4   # for supabase/roles.sql
 
       - name: Install LFTP
         run: sudo apt-get update && sudo apt-get install -y lftp
 
-      - name: Dump (3-file recovery method)
+      - name: Dump (read-only, 3-file)
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
-          supabase link --project-ref "$PROJECT_REF"
-
           STAMP=$(date +%Y%m%d-%H%M%S)
           DIR="eggplant-backup-${STAMP}"
           mkdir -p "$DIR"
+          pgdump() { docker run --rm -e U="$SUPABASE_DB_URL" postgres:17-alpine sh -c "pg_dump \"\$U\" $*"; }
 
-          supabase db dump --linked -f "$DIR/roles.sql"  --role-only
-          supabase db dump --linked -f "$DIR/schema.sql"
-          supabase db dump --linked -f "$DIR/data.sql"   --use-copy --data-only \
-            -x storage.buckets_vectors -x storage.vector_indexes
+          cp supabase/roles.sql "$DIR/roles.sql"
+          pgdump --schema-only --schema=public | sed '/^CREATE SCHEMA public;$/d' > "$DIR/schema.sql"
+          pgdump --data-only --schema=auth --schema=public --schema=storage \
+            --exclude-table=storage.buckets_vectors --exclude-table=storage.vector_indexes > "$DIR/data.sql"
 
           tar -czf "${DIR}.tar.gz" "$DIR"
-          echo "BACKUP_DIR=$DIR"        >> "$GITHUB_ENV"
-          echo "BACKUP_FILE=${DIR}.tar.gz" >> "$GITHUB_ENV"
+          echo "BACKUP_DIR=$DIR"            >> "$GITHUB_ENV"
+          echo "BACKUP_FILE=${DIR}.tar.gz"  >> "$GITHUB_ENV"
           echo "✅ Backup created: ${DIR}.tar.gz"
 
-      # Content checks beat a size check: a single frozen/empty dump can stay
-      # "big enough" for weeks. Require real roles, tables, and COPY data blocks.
+      # Content checks beat size alone (a frozen/empty dump stays "big enough").
       - name: Validate Backup
         run: |
           set -euo pipefail
           D="${{ env.BACKUP_DIR }}"
-          grep -q 'ROLE'          "$D/roles.sql"  || { echo "❌ roles.sql has no ROLE statements";   exit 1; }
-          grep -q 'CREATE TABLE'  "$D/schema.sql" || { echo "❌ schema.sql has no CREATE TABLE";       exit 1; }
-          grep -q '^COPY '        "$D/data.sql"   || { echo "❌ data.sql has no COPY data blocks";      exit 1; }
+          grep -q 'ROLE'         "$D/roles.sql"  || { echo "❌ roles.sql empty";  exit 1; }
+          grep -q 'CREATE TABLE' "$D/schema.sql" || { echo "❌ schema.sql empty"; exit 1; }
+          grep -q '^COPY '       "$D/data.sql"   || { echo "❌ data.sql empty";   exit 1; }
           SIZE=$(stat --format=%s "${{ env.BACKUP_FILE }}")
           [ "$SIZE" -ge 1024 ] || { echo "❌ tarball too small ($SIZE bytes)"; exit 1; }
-          echo "📦 Validated — tarball $SIZE bytes (roles + schema + data all non-empty)"
+          echo "📦 Validated — $SIZE bytes (roles + schema + data all non-empty)"
 
       - name: Upload via FTPS and Clean Old Backups
         env:
@@ -96,8 +81,6 @@ jobs:
           FTP_PASS: ${{ secrets.FTP_PASS }}
           REMOTE_DIR: /db_backup_eggplant_ai_notes/
         run: |
-          # ssl:verify-certificate no — shared hosts often have mismatched certs;
-          # the connection is still TLS-encrypted, we just can't verify identity.
           lftp -c "
             set ftp:ssl-auth TLS
             set ftp:ssl-force true
@@ -124,7 +107,6 @@ jobs:
           DELETE_CMDS=""
           while read -r FILE; do
             [ -z "$FILE" ] && continue
-            # eggplant-backup-YYYYMMDD-HHMMSS.tar.gz
             FILE_DATE=$(echo "$FILE" | grep -oP '\d{8}' | head -1)
             if [ -n "$FILE_DATE" ] && [ "$FILE_DATE" -lt "$CUTOFF" ]; then
               echo "🗑️ Will delete: $FILE"

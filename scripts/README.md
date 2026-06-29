@@ -1,19 +1,19 @@
 # `scripts/` — what each script does, line by line
 
-> **⚠ Recovery note (read first).** A single `pg_dump` is **not** a complete Supabase
-> recovery artifact — database roles live at the _cluster_ level and aren't in a DB
-> dump. The **official Supabase way** to back up and restore for full recovery is
-> **three** dumps (roles + schema + data), restored together. It's documented at
-> [supabase.com/docs/.../backup-restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore)
-> and already implemented in `db-push-safe.sh`:
+> **⚠ Recovery note (read first).** A single whole-DB `pg_dump` is **not** a clean
+> recovery artifact (roles live at the _cluster_ level; restoring managed-schema DDL
+> over a live stack breaks ownership). The recovery artifact here is **three files**
+> — roles + schema + data — produced **read-only** and **token-free**:
 >
 > ```bash
-> # Backup (official three-dump method). Use --linked, NOT --db-url: the prod
-> # pooler rejects the role dump ("permission denied to set role postgres").
-> supabase db dump --linked -f roles.sql  --role-only
-> supabase db dump --linked -f schema.sql
-> supabase db dump --linked -f data.sql   --use-copy --data-only \
->   -x storage.buckets_vectors -x storage.vector_indexes
+> # Backup — read-only via the backup_ro role (pg_read_all_data, bypassrls, no write).
+> # Raw pg_dump, NOT `supabase db dump` (which issues SET ROLE postgres → denied for
+> # backup_ro). A Supabase access token (PAT) can't be scoped read-only, so we avoid it.
+> cp supabase/roles.sql roles.sql                          # backup_ro can't dump roles
+> pg_dump "$BACKUP_RO_URL" --schema-only --schema=public \
+>   | sed '/^CREATE SCHEMA public;$/d' > schema.sql         # public DDL only
+> pg_dump "$BACKUP_RO_URL" --data-only --schema=auth --schema=public --schema=storage \
+>   --exclude-table=storage.buckets_vectors --exclude-table=storage.vector_indexes > data.sql
 >
 > # Restore (into an EMPTY target — fresh project / blanked local), triggers off for data
 > psql --single-transaction --variable ON_ERROR_STOP=1 \
@@ -21,25 +21,28 @@
 >   --command 'SET session_replication_role = replica' \
 >   --file data.sql --dbname "$TARGET_URL"
 >
-> # ⚠ THEN resync sequences — the official docs OMIT this. A --data-only restore
-> #   leaves sequences behind the loaded rows, so the FIRST login write dies with
-> #   duplicate-key on auth.refresh_tokens → "Database error granting user".
-> #   Run the setval loop from context/foundation/lessons.md after every restore.
+> # ⚠ THEN resync sequences — a --data-only restore leaves sequences behind the loaded
+> #   rows, so the FIRST login write dies with duplicate-key on auth.refresh_tokens →
+> #   "Database error granting user". Run the setval loop from lessons.md after restore.
 > ```
 >
-> The same three-file artifact serves **both** disaster recovery (restore into a fresh
-> project) **and** local seeding (restore into a blanked local) — so what you seed with
-> is byte-identical to your recovery backup. **A recovery is only proven by a real
-> login, never by row counts** — verified end-to-end 2026-06-29 (dump prod → blank local
-> → restore → resync sequences → dashboard renders under a real session). Full rationale
+> Why read-only/token-free: the clean `supabase db dump --linked` path needs a
+> full-access account PAT (PATs can't be scoped read-only), which is too much privilege
+> for an unattended backup. `backup_ro` is genuinely read-only, so the scheduled
+> off-site backup (`.github/workflows/db-backup.yml`) and `pnpm db:dump` both use it.
+> `roles.sql` is committed (`supabase/roles.sql`) because backup_ro can't dump roles;
+> `db-push-safe.sh` still captures a fresh roles snapshot before each prod migration.
 >
-> - the two traps this surfaced (login broke first on ownership, then on lagging
->   sequences, while row-counts looked perfect both times) is in
->   `context/foundation/lessons.md`.
+> The same three-file artifact serves **both** disaster recovery (restore into a fresh
+> project) **and** local seeding (restore into a blanked local) — what you seed with is
+> the recovery backup. **A recovery is only proven by a real login, never by row
+> counts** — verified end-to-end 2026-06-29 (dump prod → blank local → restore → resync
+> → real dashboard login). The two traps it surfaced (login broke first on ownership,
+> then on lagging sequences, while row-counts looked perfect both times) are in
+> `context/foundation/lessons.md`.
 >
 > `db-dump.sh` (`pnpm db:dump`) and `db-restore-local.sh` (`pnpm db:restore:local`)
-> below implement exactly this method — they ARE recovery-grade. Restoring locally
-> doubles as the recovery drill.
+> implement this; restoring locally doubles as the recovery drill.
 
 These are the project's shell scripts. The scripts themselves stay lean (just the
 commands); this file carries the **explanation and the _why_** so the executables
@@ -55,43 +58,58 @@ Mental model for all of them:
 
 ---
 
-## `db-dump.sh` — recovery-grade 3-file dump of prod
+## `db-dump.sh` — recovery-grade 3-file dump of prod (read-only, token-free)
 
-**What it's for:** produce the official Supabase backup (`roles.sql` + `schema.sql`
-
-- `data.sql`) in `backups/<timestamp>/`. Run with `pnpm db:dump`. This is a
-  **restorable** artifact, unlike a single `pg_dump`.
-
-```bash
-set -euo pipefail
-cd "$(dirname "$0")/.."
-```
-
-Safety switches (`-e` exit on error, `-u` unset-var guard, `-o pipefail` fail a pipe
-if any stage fails) + `cd` to repo root so it runs from anywhere.
+**What it's for:** produce the recovery backup (`roles.sql` + `schema.sql` +
+`data.sql`) in `backups/<timestamp>/`. Run with `pnpm db:dump`. Restorable, unlike a
+single whole-DB `pg_dump`.
 
 ```bash
-ts=$(date +%Y%m%d-%H%M%S); dir="backups/$ts"; mkdir -p "$dir"
+url=$(grep -E '^SUPABASE_DB_URL=' .env.local | cut -d= -f2- | tr -d \"\' | xargs)
 ```
 
-A timestamped folder per dump (the three files live together).
+Reads the **backup_ro** pooler URL — a read-only role (`pg_read_all_data`,
+`bypassrls`, no write grants) — from `.env.local`. `xargs` trims stray whitespace.
 
 ```bash
-supabase db dump --linked -f "$dir/roles.sql"  --role-only
-supabase db dump --linked -f "$dir/schema.sql"
-supabase db dump --linked -f "$dir/data.sql"   --use-copy --data-only \
-  -x storage.buckets_vectors -x storage.vector_indexes
+pgdump() { docker run --rm -e U="$url" postgres:17-alpine sh -c "pg_dump \"\$U\" $*"; }
 ```
 
-The three official dumps:
+A helper that runs raw `pg_dump` in a throwaway Postgres-17 container, passing the URL
+as an env var (not a CLI arg → not visible in `ps`). We use **raw `pg_dump`, not
+`supabase db dump`**, because the latter issues `SET ROLE postgres`, which `backup_ro`
+is denied.
 
-- **`--role-only`** → cluster-level roles (the layer a single `pg_dump` is missing).
-- **schema** → table definitions, ownership, RLS policies, functions, grants, indexes.
-- **`--data-only --use-copy`** → the rows, as fast `COPY` blocks. `-x storage.…`
-  excludes two internal vector tables Supabase recommends skipping.
-- **`--linked`, not `--db-url`** → the prod _pooler_ rejects the role dump
-  (`permission denied to set role postgres`); `--linked` provisions a privileged
-  login role via the Supabase API, which can dump roles.
+```bash
+cp supabase/roles.sql "$dir/roles.sql"
+```
+
+`roles.sql` is the **committed baseline** — `backup_ro` can't dump roles (`pg_dumpall`
+also needs `SET ROLE postgres`). Regenerate it only when cluster roles change (see its
+header); `db-push-safe.sh` captures a fresh one before each prod migration anyway.
+
+```bash
+pgdump --schema-only --schema=public | sed '/^CREATE SCHEMA public;$/d' > schema.sql
+```
+
+Public DDL only (tables, RLS policies, functions, grants, indexes). `--schema-only` =
+no data; `--schema=public` = just that schema. The `sed` drops the lone
+`CREATE SCHEMA public;` line — the restore's blank step already recreates `public`, so
+re-creating it would abort the strict (`ON_ERROR_STOP`) restore.
+
+```bash
+pgdump --data-only --schema=auth --schema=public --schema=storage \
+  --exclude-table=storage.buckets_vectors --exclude-table=storage.vector_indexes > data.sql
+```
+
+The rows — from the three schemas a fresh Supabase project provides (`auth`, `public`,
+`storage`), matching what the restore target expects. Raw `pg_dump` uses `COPY` by
+default. `--exclude-table` (note: raw `pg_dump`'s `-x` means `--no-privileges`, so the
+long form is required) skips two internal vector tables.
+
+> Earlier this script used `supabase db dump --linked`, which is cleaner but needs a
+> full-access account token (PATs can't be scoped read-only). The read-only `backup_ro`
+> path above avoids that — see the recovery note at the top.
 
 ---
 
