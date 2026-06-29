@@ -2,8 +2,9 @@
 
 **When prod is gone or corrupted, this is the minutes-not-hours path.** It restores the
 daily 3-file backup into a fresh hosted Supabase project, proves it with a real login,
-then repoints the app. Proven end-to-end 2026-06-29 (direct restore **and** a live Vercel
-preview against the recovered DB).
+then repoints the app. Proven end-to-end 2026-06-29 by a direct restore + real login to the
+recovered project (a Vercel deploy-level test was attempted but couldn't be isolated from
+prod — see the Custom Environment note below).
 
 > The full _why_ behind every step (the four hosted-only fixes, why row counts lie, why
 > session pooler) is in `context/foundation/lessons.md`. This file is the **operator
