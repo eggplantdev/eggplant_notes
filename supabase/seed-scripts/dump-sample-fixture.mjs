@@ -63,7 +63,7 @@ async function main() {
       .order('position'),
     supabase
       .from('memory_cards')
-      .select('id, note_id, prompt, example, code_context')
+      .select('id, note_id, prompt, example')
       .eq('user_id', TEMPLATE_USER_ID)
       .order('note_id')
       .order('id'),
@@ -98,7 +98,6 @@ async function main() {
       noteRef: c.note_id,
       prompt: c.prompt,
       example: c.example,
-      codeContext: c.code_context,
     })),
   }
 

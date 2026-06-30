@@ -40,7 +40,6 @@ export function remapSampleData(
     note_id: idFor(c.noteRef),
     prompt: c.prompt,
     example: c.example,
-    code_context: c.codeContext,
     is_seeded: true,
   }))
 

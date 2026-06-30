@@ -433,14 +433,12 @@ export const SAMPLE_DATA: SampleDataT = {
       prompt: 'Czym różni się programowanie imperatywne od deklaratywnego?',
       example:
         'Imperatywne definiuje **co** i **jak** ma się wydarzyć (krok po kroku). Deklaratywne skupia się tylko na **co** chcemy osiągnąć, ukrywając implementację.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000001',
       prompt: 'Na czym polega programowanie funkcyjne?',
       example:
         'Na tworzeniu funkcji zamiast mutowania stanu. Głównym celem jest uczynienie kodu bardziej deklaratywnym - przekształcamy dane zamiast zmieniać zmienne.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000001',
@@ -448,194 +446,166 @@ export const SAMPLE_DATA: SampleDataT = {
         'Podaj przykład imperatywnego i deklaratywnego podejścia do sumowania listy w Pythonie.',
       example:
         'Imperatywne: pętla `for` z akumulatorem `total += num`. Deklaratywne: `return sum(nums) / len(nums)` - nie śledzimy stanu, interesuje nas tylko wynik.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000001',
       prompt: 'Dlaczego CSS jest dobrym przykładem programowania deklaratywnego?',
       example:
         'Bo opisujemy **co** chcemy osiągnąć (np. `button { color: red; }`), a nie **jak** przeglądarka ma to zrealizować krok po kroku.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000002',
       prompt: 'Do czego służy `Enum` w Pythonie?',
       example:
         'Definiuje zamknięty zbiór dopuszczalnych wartości. Zapewnia centralne miejsce z listą prawidłowych wartości i rzuca wyjątek przy próbie użycia nieprawidłowej.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000002',
       prompt: 'Pokaż dwa sposoby tworzenia Enum w Pythonie.',
       example:
         "```py\n# Sposób 1 - funkcja:\nColor = Enum('Color', ['RED', 'GREEN', 'BLUE'])\n\n# Sposób 2 - klasa:\nclass DocFormat(Enum):\n    PDF = 1\n    TXT = 2\n    MD = 3\n```",
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000004',
       prompt: 'Dlaczego niemutowalność oznacza mniej bugów?',
       example:
         'Gdy zmienna jest niemutowalna, mamy pewność, że nie zmieniła się od momentu utworzenia. Nie musimy sprawdzać, która z 10 funkcji mogła ją zmodyfikować.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000004',
       prompt: 'Czym różnią się `tuple` od `list` w kontekście mutowalności?',
       example:
         '`tuple` jest niemutowalna - nie można do niej dodać elementu. `list` jest mutowalna. Aby "dodać" element do tuple, trzeba stworzyć nową kopię z dodaną wartością.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000004',
       prompt: 'Jak utworzyć jednoelementową tuple w Pythonie?',
       example:
         'Trzeba dodać przecinek po elemencie: `more_ages = (80,)`. Bez przecinka Python potraktuje to jako zwykłą wartość w nawiasach.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000004',
       prompt: 'Jak "dodać" element do tuple, skoro jest niemutowalna?',
       example:
         'Tworząc nową tuple przez konkatenację:\n```py\nages = (16, 21, 30)\nall_ages = ages + (80,)\n# (16, 21, 30, 80)\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000009',
       prompt: 'Czym różnią się statements od expressions?',
       example:
         'Statements to akcje do wykonania (np. `n = 7`, `if x > 10`). Expressions to podzbiór statements, który **produkuje wartości** (np. `2 + 2`, `len("hello")`).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000009',
       prompt: 'Dlaczego w programowaniu funkcyjnym preferujemy expressions?',
       example:
         'Bo expressions produkują wartości, są reusable, deklaratywne, nie mutują stanu i minimalizują side effects.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000009',
       prompt: 'Pokaż ternary expression w Pythonie i wyjaśnij, dlaczego jest lepszy od if/else.',
       example:
         '```py\n# Statement (mutuje result):\nresult = 0\nif number % 2 == 0:\n    result = number / 2\nelse:\n    result = (number * 3) + 1\n\n# Expression (brak mutacji):\nresult = number / 2 if number % 2 == 0 else (number * 3) + 1\n```\nExpression unika mutowania zmiennej `result`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000011',
       prompt: 'Co oznacza, że Python ma first-class functions?',
       example:
         'Że funkcje mogą być traktowane jak każdy inny obiekt - przypisane do zmiennej, przekazane jako argument, zwrócone z funkcji i przechowywane w strukturach danych.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000011',
       prompt: 'Pokaż jak przypisać funkcję do zmiennej w Pythonie.',
       example:
         '```py\ndef foo(a, b):\n    return a + b\n\nsum_foo = foo\nprint(sum_foo(2, 2))  # 4\n```\nPrzypisujemy referencję do funkcji (bez nawiasów) do nowej zmiennej.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000012',
       prompt: 'Co to jest lambda w Pythonie i czym odpowiada w JavaScript?',
       example:
         'Lambda to anonimowa (nienazwana) funkcja. Odpowiada arrow function w JS: `lambda x: x + 1` to ekwiwalent `(x) => x + 1`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000012',
       prompt: 'Jakie jest kluczowe ograniczenie lambda w Pythonie?',
       example:
         'Lambda może zawierać tylko jedno wyrażenie (single expression). Nie można w niej np. najpierw wywołać `print()`, a potem zwrócić wartość - w przeciwieństwie do callbacka w JS.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000012',
       prompt: 'Jaka jest składnia lambda w Pythonie?',
       example:
         '```py\nlambda argumenty: wyrażenie\n# np.\nlambda x, y: x + y\n```\nWynik wyrażenia jest zwracany automatycznie.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Co to jest higher-order function?',
       example: 'Funkcja, która przyjmuje inną funkcję jako argument lub zwraca funkcję.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Jakie trzy wbudowane higher-order functions w Pythonie są najczęściej używane?',
       example: '`map()`, `filter()` i `functools.reduce()`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Dlaczego `print(map(square, [1, 2, 3]))` nie wypisuje listy wyników?',
       example:
         'Bo `map()` zwraca obiekt typu `map`, a nie listę. Trzeba go przekonwertować: `list(map(square, [1, 2, 3]))`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Jaka jest składnia `filter()` i co zwraca?',
       example:
         '```py\nevens = list(filter(lambda x: x % 2 == 0, numbers))\n```\nPrzyjmuje funkcję zwracającą `bool` i iterable. Zwraca obiekt filter (trzeba owinąć w `list()`).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Czym `functools.reduce()` różni się od `map()` i `filter()`?',
       example:
         '`reduce()` trzeba zaimportować z modułu `functools`. Przyjmuje funkcję z dwoma argumentami (akumulator i bieżący element) i redukuje iterable do jednej wartości.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Pokaż użycie `reduce()` z lambdą.',
       example:
         '```py\nimport functools\ntotal = functools.reduce(lambda a, b: a + b, [1, 2, 3, 4])\n# 10\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Co robi funkcja `zip()` i co zwraca?',
       example:
         'Łączy dwa iterables w nowy iterable, gdzie każdy element to tuple z jednym elementem z każdego źródła. Zwraca obiekt `zip` (trzeba owinąć w `list()`).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000013',
       prompt: 'Co się stanie, gdy przekażemy do `zip()` iterables o różnej długości?',
       example:
         'Zwróci tylko tyle par, ile pozwala krótszy iterable. Nadmiarowe elementy z dłuższego są ignorowane.\n```py\nlist(zip([1, 2, 3, 4, 5], [1, 2, 3]))\n# [(1, 1), (2, 2), (3, 3)]\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000019',
       prompt: 'Jak działa parametr `key` w `sorted()`?',
       example:
         'Przyjmuje funkcję, która jest wywoływana na każdym elemencie, tworząc tymczasowy "klucz sortowania". Elementy są sortowane wg kluczy, ale zwracane są oryginalne wartości.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000019',
       prompt: 'Pokaż sortowanie dat za pomocą `sorted()` z `key`.',
       example:
         '```py\ndef transform_date(date_str):\n    month, day, year = date_str.split("-")\n    return year + month + day\n\nsorted(dates, key=transform_date)\n```\nDaty w formacie "MM-DD-YYYY" są sortowane chronologicznie.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000019',
       prompt: 'Czym różni się `sort()` od `sorted()`?',
       example:
         '`list.sort()` mutuje oryginalną listę (in-place). `sorted()` zwraca nową posortowaną listę, nie zmieniając oryginału.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Jakie dwa warunki musi spełnić pure function?',
       example:
         '1) Zawsze zwraca ten sam wynik dla tych samych argumentów. 2) Nie powoduje żadnych side effects.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
@@ -643,90 +613,77 @@ export const SAMPLE_DATA: SampleDataT = {
         'Dlaczego poniższa funkcja jest impure?\n```py\ntotal = 0\ndef dirty_add(x):\n    global total\n    total = total + x\n    return total\n```',
       example:
         'Bo modyfikuje zmienną globalną `total` (side effect) i zwraca różne wyniki dla tego samego argumentu - `dirty_add(10)` da kolejno 10, 20, 30.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Co to jest referential transparency?',
       example:
         'Właściwość pure functions - można je zastąpić ich wartością zwracaną bez zmiany zachowania programu. Np. `add(2, 3)` zawsze można zastąpić liczbą `5`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Dlaczego mimo zalet pure functions czasem potrzebujemy impure functions?',
       example:
         'Bo potrzebujemy side effects - program bez nich byłby bezużyteczny. Zapis do bazy, wyświetlenie wyniku, request HTTP - to wszystko wymaga side effects.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Co to jest memoization?',
       example:
         'Cachowanie (przechowywanie) wyników obliczeń, aby nie trzeba było ich powtarzać dla tych samych danych wejściowych.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Dlaczego pure functions mogą być bezpiecznie memoizowane, a impure nie?',
       example:
         'Bo pure functions zawsze zwracają ten sam wynik dla tych samych argumentów. Impure functions mogą zwracać różne wyniki - cache dawałby błędne odpowiedzi.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000020',
       prompt: 'Jaki jest trade-off przy memoization?',
       example:
         'Szybkość vs pamięć RAM. Memoization przyspiesza obliczenia kosztem zużycia pamięci na cache. Jeśli funkcja jest wystarczająco szybka, memoization może nie być opłacalna.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000021',
       prompt: 'Co to jest side effect w kontekście funkcji?',
       example: 'Wszystko, co funkcja robi oprócz zwracania wartości.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000021',
       prompt: 'Wymień co najmniej 5 przykładów side effects.',
       example:
         'Wypisywanie do konsoli, zapis/odczyt z bazy danych, dostęp do internetu, modyfikacja zmiennych globalnych, modyfikacja argumentów wejściowych, zapis do pliku, operacje I/O.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000021',
       prompt: 'Co oznacza I/O w programowaniu i jaki ma związek z side effects?',
       example:
         'I/O to input/output - wszystko co wchodzi w interakcję ze "światem zewnętrznym" (poza pamięcią aplikacji). Każda operacja I/O jest formą side effect, łącznie z `print()`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000021',
       prompt: 'Co to jest No-Op i co sugeruje o funkcji?',
       example:
         'No-Op to operacja, która nic nie robi. Jeśli funkcja nic nie zwraca, prawdopodobnie jest impure i wykonuje side effects.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000022',
       prompt: 'Które typy w Pythonie są przekazywane przez referencję, a które przez wartość?',
       example:
         'Przez referencję: `list`, `dict`, `set` (mutowalne). Przez wartość: `int`, `float`, `str`, `bool`, `tuple` (niemutowalne).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000022',
       prompt: 'Co się stanie, gdy zmodyfikujemy listę przekazaną do funkcji?',
       example:
         '```py\ndef modify_list(inner_lst):\n    inner_lst.append(4)\n\nouter_lst = [1, 2, 3]\nmodify_list(outer_lst)\n# outer_lst = [1, 2, 3, 4] - oryginał zmieniony!\n```\nLista jest przekazywana przez referencję - modyfikacja wewnątrz funkcji zmienia oryginał.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000024',
       prompt: 'Czym różni się `copy()` od `copy.deepcopy()`?',
       example:
         '`.copy()` tworzy płytką kopię (shallow copy) - zagnieżdżone obiekty nadal są referencjami. `copy.deepcopy()` tworzy głęboką kopię - kopiuje rekurencyjnie wszystkie zagnieżdżone obiekty.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000024',
@@ -734,187 +691,160 @@ export const SAMPLE_DATA: SampleDataT = {
         'Co się stanie, jeśli zrobimy `new_list = old_list` zamiast `new_list = old_list.copy()`?',
       example:
         '`new_list` będzie referencją do tego samego obiektu - zmiany w jednej zmiennej będą widoczne w drugiej.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000032',
       prompt: 'Co to jest rekurencja i dlaczego jest ważna w programowaniu funkcyjnym?',
       example:
         'Funkcja wywołująca samą siebie. W FP jest ważna, bo pozwala uniknąć pętli ze stanowymi zmiennymi (akumulatorami).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000032',
       prompt: 'Co to jest base case i co się stanie bez niego?',
       example:
         'Base case to warunek kończący rekurencję. Bez niego funkcja będzie się wywoływać w nieskończoność, co doprowadzi do stack overflow.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000032',
       prompt: 'Kiedy rekurencja jest lepsza od pętli?',
       example:
         'Przy strukturach "drzewiastych" o nieznanej głębokości - zagnieżdżone słowniki, systemy plików, HTML, JSON. Dla jednowymiarowych list prosta pętla jest zazwyczaj lepsza.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000036',
       prompt: 'Co to jest function transformation?',
       example:
         'Specyficzny typ higher-order function - funkcja, która przyjmuje inną funkcję jako argument **i zwraca nową funkcję**.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000036',
       prompt: 'Dlaczego function transformations są przydatne?',
       example:
         'Pozwalają współdzielić funkcjonalność. Zamiast tworzyć wiele oddzielnych funkcji, tworzymy jedną transformację, która generuje wyspecjalizowane warianty.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000036',
       prompt: 'Pokaż przykład function transformation tworzącego wyspecjalizowane funkcje.',
       example:
         '```py\ndef self_math(math_func):\n    def inner_func(x):\n        return math_func(x, x)\n    return inner_func\n\nsquare_func = self_math(multiply)  # 5 -> 25\ndouble_func = self_math(add)       # 5 -> 10\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000037',
       prompt: 'Co to jest closure?',
       example:
         'Funkcja, która "pamięta" zmienne z otaczającego zakresu (enclosing scope), nawet po zakończeniu wykonania tego zakresu. Closure jest z natury stanowa (stateful).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000037',
       prompt: 'Kiedy potrzebujemy słowa kluczowego `nonlocal` w closure?',
       example:
         'Gdy chcemy **reasignować** (ponownie przypisać) zmienną niemutowalną z otaczającego zakresu (np. string, int). Przy modyfikacji mutowalnego obiektu (np. `list.append()`) `nonlocal` nie jest potrzebny.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000037',
       prompt: 'Pokaż przykład closure, który nie wymaga `nonlocal`.',
       example:
         '```py\ndef new_collection(initial_docs):\n    init_copy = initial_docs.copy()\n    def foo(str):\n        init_copy.append(str)  # modyfikujemy mutowalny obiekt\n        return init_copy\n    return foo\n```\nLista jest mutowalna, więc `.append()` działa bez `nonlocal`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000037',
       prompt: 'Pokaż przykład closure, który wymaga `nonlocal`.',
       example:
         '```py\ndef concatter():\n    doc = ""\n    def doc_builder(word):\n        nonlocal doc  # wymagane - reasignujemy string\n        doc += word + " "\n        return doc\n    return doc_builder\n```\nString jest niemutowalny, więc `doc += ...` to reasignacja.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000039',
       prompt: 'Co to jest currying?',
       example:
         'Transformacja funkcji wieloargumentowej w łańcuch funkcji jednoargumentowych. `sum(a, b)` staje się `sum(a)(b)`.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000039',
       prompt: 'Pokaż currying w Pythonie.',
       example:
         '```py\ndef sum(a):\n    def inner_sum(b):\n        return a + b\n    return inner_sum\n\nprint(sum(1)(2))  # 3\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000039',
       prompt: 'Kiedy currying jest przydatny?',
       example:
         'Gdy trzeba dostosować sygnaturę funkcji do wymagań zewnętrznego narzędzia. Np. gdy API oczekuje funkcji jednoargumentowej, a nasza ma dwa argumenty - currying pozwala "wpiąć" pierwszy argument i zwrócić jednoargumentową wersję.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000041',
       prompt: 'Co robią `*args` i `**kwargs`?',
       example:
         '`*args` zbiera argumenty pozycyjne do tuple (kolejność ma znaczenie). `**kwargs` zbiera argumenty nazwane (keyword) do słownika.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000041',
       prompt: 'Pokaż różnicę między argumentami pozycyjnymi a keyword.',
       example:
         '```py\ndef sub(a, b):\n    return a - b\n\nsub(3, 2)       # pozycyjne: a=3, b=2, wynik=1\nsub(b=3, a=2)   # keyword: a=2, b=3, wynik=-1\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000041',
       prompt: 'Jaka jest zasada kolejności argumentów pozycyjnych i keyword?',
       example: 'Argumenty pozycyjne muszą być **przed** keyword. `sub(b=3, 2)` spowoduje błąd.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000041',
       prompt: 'Co robi `**` przy rozpakowaniu słownika?',
       example:
         'Konwertuje klucze słownika na keyword arguments:\n```py\nmy_dict = {"name": "Konrad", "age": 38}\ngreet(**my_dict)  # = greet(name="Konrad", age=38)\n```\nFunkcja musi przyjmować parametry o takich samych nazwach jak klucze.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000042',
       prompt: 'Do czego służy `enumerate()` i dlaczego jest lepszy od `range(len())`?',
       example:
         'Daje dostęp do indeksu i elementu jednocześnie podczas iteracji. Jest lepszy od `range(len())`, bo nie wymaga ręcznego indeksowania, jest czytelniejszy i bezpieczniejszy.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000042',
       prompt: 'Pokaż składnię `enumerate()`.',
       example: '```py\nfor index, item in enumerate(args):\n    print(f"{index + 1}. {item}")\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000044',
       prompt: 'Czym jest `match` w Pythonie i co odpowiada mu w JavaScript?',
       example:
         '`match` to odpowiednik `switch` z JS. Porównuje wartość z wieloma wzorcami i wykonuje kod dla pierwszego dopasowania. `case _:` to domyślny przypadek (jak `default`).',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000044',
       prompt: 'Pokaż `match` z dopasowywaniem tuple.',
       example:
         '```py\nmatch (color, shade):\n    case (Color.RED, Shade.LIGHT):\n        return "#FFAAAA"\n    case (Color.RED, Shade.DARK):\n        return "#AA0000"\n    case _:\n        return "#FFFFFF"\n```\nPozwala dopasowywać kombinacje wielu wartości jednocześnie.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000047',
       prompt: 'Co to jest decorator w Pythonie?',
       example:
         'Syntactic sugar wokół function transformations. Upraszcza zapis wyższego rzędu funkcji, która przyjmuje funkcję i zwraca nową funkcję.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000047',
       prompt: 'Pokaż równoważne zapisy z i bez decoratora.',
       example:
         '```py\n# Bez decoratora:\ndef myFoo(val):\n    print(val)\ntt = vowel_counter(myFoo)\n\n# Z decoratorem (równoważne):\n@vowel_counter\ndef myFoo(val):\n    print(val)\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000047',
       prompt: 'W jakiej kolejności wykonują się stacked decorators?',
       example:
         'Od dołu do góry. Najpierw stosowany jest dekorator najbliżej funkcji, potem kolejne w górę.\n```py\n@to_uppercase       # 2. owijamy wynik get_truncate\n@get_truncate(9)    # 1. najpierw owijamy print_input\ndef print_input(input):\n    print(input)\n```',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000047',
       prompt: 'Co to jest `lru_cache` i do czego służy?',
       example:
         'Dekorator z `functools`, który memoizuje wyniki funkcji. Cachuje pary input-output w słowniku o ograniczonym rozmiarze - przyspiesza powtarzające się wywołania z tymi samymi argumentami.',
-      codeContext: null,
     },
     {
       noteRef: '0a7e0000-0000-4000-8000-000000000047',
       prompt: 'Pokaż użycie `lru_cache`.',
       example:
         '```py\nfrom functools import lru_cache\n\n@lru_cache()\ndef factorial_r(x):\n    if x == 0:\n        return 1\n    return x * factorial_r(x - 1)\n```\nKolejne wywołania z tymi samymi argumentami korzystają z cache.',
-      codeContext: null,
     },
   ],
 }
