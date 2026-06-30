@@ -30,6 +30,13 @@ export async function expectDashboard(page: Page) {
 
 // Sign up through the real UI and land on the dashboard.
 export async function signUp(page: Page, email: string) {
+  // Pre-set the dashboard "welcome seen" cookie so the one-time onboarding dialog never opens after
+  // sign-up. The dialog marks the page background aria-hidden, which hides nav controls (Sign out)
+  // and the heatmap from getByRole. No spec tests onboarding, so suppress it suite-wide. Literal
+  // mirrors WELCOME_SEEN_COOKIE in src/features/dashboard/welcome-dialog-cookie.ts.
+  await page
+    .context()
+    .addCookies([{ name: 'eggplant_welcome_seen', value: '1', domain: '127.0.0.1', path: '/' }])
   await page.goto('/sign-up')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(PASSWORD)

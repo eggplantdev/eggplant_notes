@@ -10,6 +10,8 @@ import { signUp, uniqueEmail } from './helpers'
 const authFile = 'e2e/.auth/dashboard.json'
 
 setup('authenticate the shared dashboard user', async ({ page }) => {
+  // signUp pre-sets the welcome-seen cookie, so the captured storageState already suppresses the
+  // dashboard onboarding dialog for the shared read-only specs.
   await signUp(page, uniqueEmail('dash-shared'))
   await page.context().storageState({ path: authFile })
 })
