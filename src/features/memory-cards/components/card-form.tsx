@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { useFormError } from '@/components/forms/hooks/use-form-error'
-import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,10 +19,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Combobox } from '@/components/ui/combobox'
-import { Reveal } from '@/components/ui/reveal'
 import { Label } from '@/components/ui/label'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
+import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
 import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
@@ -57,7 +56,6 @@ type CardFormValuesT = {
   subject_id: string | null
   prompt: string
   example: string
-  code_context: string
 }
 
 export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
@@ -68,9 +66,6 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
   // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
   // subject changed); undefined when no confirm is pending.
   const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
-  // Code context pulls in the heavy CodeMirror chunk, so its editor mounts (and loads) only on
-  // opt-in; already-present content (edit mode) starts expanded.
-  const [showCode, setShowCode] = useState(Boolean(card?.code_context))
   const { isPending: isUnlinking, run: runUnlink } = useActionTransition()
 
   const subjectOptions = useMemo(
@@ -86,7 +81,6 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
       subject_id: card?.subject_id ?? null,
       prompt: card?.prompt ?? '',
       example: card?.example ?? '',
-      code_context: card?.code_context ?? '',
     },
     onSubmit: async ({ value }) => {
       // A linked card shares its note's subject, so changing its subject must unlink it — confirm
@@ -158,37 +152,13 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
         {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
       </form.AppField>
 
-      <form.AppField name="example">
+      <form.Field name="example">
         {(field) => (
-          <field.Textarea
-            label="Example (optional)"
-            placeholder="A worked example or expected answer"
+          <CardExampleField
+            value={field.state.value}
+            onChange={field.handleChange}
             testId="card-form-example"
           />
-        )}
-      </form.AppField>
-
-      <form.Field name="code_context">
-        {(field) => (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Label>Code context (optional)</Label>
-              {!showCode && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  data-testid="card-form-add-code"
-                  onClick={() => setShowCode(true)}
-                >
-                  Add code context
-                </Button>
-              )}
-            </div>
-            <Reveal open={showCode}>
-              <EditorWithPreview value={field.state.value} onChange={field.handleChange} />
-            </Reveal>
-          </div>
         )}
       </form.Field>
 

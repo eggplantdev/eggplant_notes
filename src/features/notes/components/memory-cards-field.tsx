@@ -1,13 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-
-import { EditorWithPreview } from '@/components/markdown/editor-with-preview'
 import { useStore, withForm } from '@/components/forms/hooks/form-hooks'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Reveal } from '@/components/ui/reveal'
+import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
@@ -16,38 +13,7 @@ import { cardsMaterialFromNote } from '@/features/openrouter/build-prompt'
 import type { StagedCardInputT } from '@/features/notes/schemas'
 
 // Blank optional fields are coerced to null server-side by the schema's `optionalText` transform.
-const EMPTY_CARD: StagedCardInputT = { prompt: '', example: '', code_context: '' }
-
-// Per-row code-context toggle, mirroring card-form.tsx: code context is optional, and its editor
-// pulls in the heavy CodeMirror chunk, so the editor mounts (and loads) only on opt-in. A row that
-// already carries content (e.g. a re-rendered draft) starts expanded. Own state per row — array
-// fields can't hoist a single toggle, and the editor can't be conditionalized inside the field
-// render-prop without breaking the rules of hooks.
-function CodeContextField({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (value: string) => void
-}) {
-  const [showCode, setShowCode] = useState(Boolean(value))
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Label>Code context (optional)</Label>
-        {!showCode && (
-          <Button type="button" variant="outline" size="sm" onClick={() => setShowCode(true)}>
-            Add code context
-          </Button>
-        )}
-      </div>
-      <Reveal open={showCode}>
-        <EditorWithPreview value={value} onChange={onChange} />
-      </Reveal>
-    </div>
-  )
-}
+const EMPTY_CARD: StagedCardInputT = { prompt: '', example: '' }
 
 // Inline memory-card staging for the create-note form: an array field where each row collects a
 // recall question + optional example/code-context, saved atomically with the note. Edit mode
@@ -99,11 +65,7 @@ export const MemoryCardsField = withForm({
                   }
                   onResult={(cards) =>
                     cards.forEach((c) =>
-                      cardsField.pushValue({
-                        prompt: c.prompt,
-                        example: c.example,
-                        code_context: '',
-                      }),
+                      cardsField.pushValue({ prompt: c.prompt, example: c.example }),
                     )
                   }
                   triggerLabel="Generate with AI"
@@ -146,19 +108,9 @@ export const MemoryCardsField = withForm({
                   )}
                 </form.AppField>
 
-                <form.AppField name={`cards[${i}].example`}>
+                <form.Field name={`cards[${i}].example`}>
                   {(field) => (
-                    <field.Textarea
-                      label="Example (optional)"
-                      placeholder="A worked example or expected answer"
-                      className="min-h-40"
-                    />
-                  )}
-                </form.AppField>
-
-                <form.Field name={`cards[${i}].code_context`}>
-                  {(field) => (
-                    <CodeContextField value={field.state.value} onChange={field.handleChange} />
+                    <CardExampleField value={field.state.value} onChange={field.handleChange} />
                   )}
                 </form.Field>
               </Box>

@@ -1,15 +1,12 @@
 'use client'
 
-import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { useFormError } from '@/components/forms/hooks/use-form-error'
-import { MarkdownEditor } from '@/components/markdown/markdown-editor'
-import { MarkdownPreview } from '@/components/markdown/markdown-preview'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { createMemoryCard } from '@/features/memory-cards/actions/create-memory-card'
+import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
 import { promptSchema } from '@/features/memory-cards/schemas'
 
 // In-note inline ADD form (create-only). No subject picker: the card is seeded with the note's
@@ -27,7 +24,6 @@ export function MemoryCardForm({ noteId, onClose }: MemoryCardFormPropsT) {
     defaultValues: {
       prompt: '',
       example: '',
-      code_context: '',
     },
     onSubmit: async ({ value }) => {
       const result = await createMemoryCard(noteId, value)
@@ -60,30 +56,8 @@ export function MemoryCardForm({ noteId, onClose }: MemoryCardFormPropsT) {
         {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
       </form.AppField>
 
-      <form.AppField name="example">
-        {(field) => (
-          <field.Textarea
-            label="Example (optional)"
-            placeholder="A worked example or expected answer"
-          />
-        )}
-      </form.AppField>
-
-      <form.Field name="code_context">
-        {(field) => (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label>Code context (optional)</Label>
-              <CodeBlockInserter value={field.state.value} onChange={field.handleChange} />
-            </div>
-            <MarkdownEditor value={field.state.value} onChange={field.handleChange} />
-            {field.state.value.trim().length > 0 && (
-              <div className="prose dark:prose-invert max-w-none rounded-lg border p-4">
-                <MarkdownPreview content={field.state.value} />
-              </div>
-            )}
-          </div>
-        )}
+      <form.Field name="example">
+        {(field) => <CardExampleField value={field.state.value} onChange={field.handleChange} />}
       </form.Field>
 
       <FormError message={formError} />
