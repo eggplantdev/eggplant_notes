@@ -121,7 +121,7 @@ describe('updateNoteCore', () => {
 })
 
 describe('updateMemoryCardCore', () => {
-  const cardInput = { prompt: 'Q?', example: null, code_context: null, subject_id: 'B' }
+  const cardInput = { prompt: 'Q?', example: null, subject_id: 'B' }
 
   it('self-detects the forced unlink (linked card, subject changed) and reports the previous note', async () => {
     // current row: linked to n1, on subject A; input moves it to B → must unlink.

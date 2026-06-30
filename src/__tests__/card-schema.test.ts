@@ -6,16 +6,15 @@ import { validateInput } from '@/lib/validate'
 // The standalone-create + unified-edit payload (standalone-memory-cards): card fields plus the
 // card's own optional subject. Mirrors notes-schema.test.ts.
 describe('cardWithSubjectSchema', () => {
-  it('accepts a prompt with a null subject and coerces blank optionals to null', () => {
+  it('accepts a prompt with a null subject and coerces a blank example to null', () => {
     const result = validateInput(cardWithSubjectSchema, {
       prompt: '  What is a closure?  ',
       example: '   ',
-      code_context: '',
       subject_id: null,
     })
     expect(result).toEqual({
       success: true,
-      data: { prompt: 'What is a closure?', example: null, code_context: null, subject_id: null },
+      data: { prompt: 'What is a closure?', example: null, subject_id: null },
     })
   })
 
@@ -23,7 +22,6 @@ describe('cardWithSubjectSchema', () => {
     const result = validateInput(cardWithSubjectSchema, {
       prompt: '   ',
       example: '',
-      code_context: '',
       subject_id: null,
     })
     expect(result).toEqual({ success: false, error: 'Question must be at least 10 characters' })
@@ -33,7 +31,6 @@ describe('cardWithSubjectSchema', () => {
     const result = validateInput(cardWithSubjectSchema, {
       prompt: 'short',
       example: '',
-      code_context: '',
       subject_id: null,
     })
     expect(result).toEqual({ success: false, error: 'Question must be at least 10 characters' })
@@ -47,7 +44,6 @@ describe('cardWithSubjectSchema', () => {
     const result = validateInput(cardWithSubjectSchema, {
       prompt: 'What is a closure?',
       example: '',
-      code_context: '',
       subject_id: '5b1ec700-0000-0000-8000-000000000001',
     })
     expect(result.success).toBe(true)
@@ -57,42 +53,23 @@ describe('cardWithSubjectSchema', () => {
     const result = validateInput(cardWithSubjectSchema, {
       prompt: 'What is a closure?',
       example: '',
-      code_context: '',
       subject_id: 'not-a-uuid',
     })
     expect(result).toEqual({ success: false, error: 'Invalid subject id' })
   })
 })
 
-// Regression: AI gen-cards (createCardsForNote) sends GeneratedCardT = { prompt, example } with NO
-// code_context key. The card insert schema requires that key (a present value must be a string;
-// null/omitted → 400) — so the SAVE BOUNDARY must supply `code_context: ''`, not the schema relax it.
-// These specs lock that contract so a future "simplify the schema" can't silently break the AI save.
-describe('cardsArraySchema — code_context key is required', () => {
-  it('rejects a card missing its code_context key (the AI candidate shape pre-mapping)', () => {
+// After merge-card-example-and-code-context the card is a single answer field. GeneratedCardT
+// ({ prompt, example }) now matches the insert schema exactly, so AI gen-cards saves with no
+// boundary remap. This spec locks that the candidate shape validates directly (blank example → null).
+describe('cardsArraySchema — the AI candidate shape ({ prompt, example }) validates directly', () => {
+  it('accepts a card with just prompt + example (blank example → null)', () => {
     const result = validateInput(cardsArraySchema, [
       { prompt: 'What is a closure?', example: 'A function plus its captured scope.' },
     ])
-    expect(result.success).toBe(false)
-  })
-
-  it('accepts the mapped payload (code_context: "" → null)', () => {
-    const result = validateInput(cardsArraySchema, [
-      {
-        prompt: 'What is a closure?',
-        example: 'A function plus its captured scope.',
-        code_context: '',
-      },
-    ])
     expect(result).toEqual({
       success: true,
-      data: [
-        {
-          prompt: 'What is a closure?',
-          example: 'A function plus its captured scope.',
-          code_context: null,
-        },
-      ],
+      data: [{ prompt: 'What is a closure?', example: 'A function plus its captured scope.' }],
     })
   })
 })

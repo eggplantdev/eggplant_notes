@@ -124,7 +124,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
     const res = await cardsPOST(
       postReq(u.token, '/api/memory-cards', {
         note_id: noteId,
-        cards: [{ prompt: 'Q?', example: '', code_context: '' }],
+        cards: [{ prompt: 'Q?', example: '' }],
       }),
     )
     expect(res.status).toBe(201)
@@ -138,7 +138,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       postReq(u.token, '/api/memory-cards', {
         prompt: 'Standalone?',
         example: '',
-        code_context: '',
         subject_id: null,
       }),
     )
@@ -162,7 +161,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         cards: 'garbage',
         prompt: 'sneaky standalone',
         example: '',
-        code_context: '',
         subject_id: null,
       }),
     )
@@ -179,7 +177,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'WithSubject', content: '', subject_id: subjectId },
-          cards: [{ prompt: 'inherits-subject', example: '', code_context: '' }],
+          cards: [{ prompt: 'inherits-subject', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -238,7 +236,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'Readback', content: '# Hello' },
-          cards: [{ prompt: 'Q1?', example: '', code_context: '' }],
+          cards: [{ prompt: 'Q1?', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -304,7 +302,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       postReq(u.token, '/api/memory-cards', {
         prompt: 'filed-card',
         example: '',
-        code_context: '',
         subject_id: subjectId,
       }),
     )
@@ -312,7 +309,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       postReq(u.token, '/api/memory-cards', {
         prompt: 'unfiled-card',
         example: '',
-        code_context: '',
         subject_id: null,
       }),
     )
@@ -320,7 +316,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'F', content: '' },
-          cards: [{ prompt: 'note-card', example: '', code_context: '' }],
+          cards: [{ prompt: 'note-card', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -355,7 +351,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'ToDelete', content: '' },
-          cards: [{ prompt: 'c?', example: '', code_context: '' }],
+          cards: [{ prompt: 'c?', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -383,7 +379,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'Filed', content: '', subject_title: subjTitle },
-          cards: [{ prompt: 'k?', example: '', code_context: '' }],
+          cards: [{ prompt: 'k?', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -410,7 +406,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
         postReq(u.token, '/api/memory-cards', {
           prompt: 'standalone',
           example: '',
-          code_context: '',
           subject_id: null,
         }),
       )
@@ -444,7 +439,7 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       await notesPOST(
         postReq(u.token, '/api/notes', {
           note: { title: 'P2', content: 'body', subject_title: `from-${Date.now()}-${seq++}` },
-          cards: [{ prompt: 'linked?', example: '', code_context: '' }],
+          cards: [{ prompt: 'linked?', example: '' }],
         }),
       )
     ).json()) as { id: string }
@@ -524,7 +519,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       patchReq(u.token, `/api/memory-cards/${cardId}`, {
         prompt: 'edited prompt',
         example: '',
-        code_context: '',
         subject_id: sourceSubjectId,
       }),
       idCtx(cardId),
@@ -541,7 +535,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
       patchReq(u.token, `/api/memory-cards/${cardId}`, {
         prompt: 'edited prompt',
         example: '',
-        code_context: '',
         subject_id: targetSubjectId,
       }),
       idCtx(cardId),
@@ -577,7 +570,6 @@ describe.skipIf(!RUN)('token API routes (integration)', () => {
           patchReq(other.token, `/api/memory-cards/${cardId}`, {
             prompt: 'x',
             example: '',
-            code_context: '',
             subject_id: null,
           }),
           idCtx(cardId),

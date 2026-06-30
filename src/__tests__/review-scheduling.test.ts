@@ -16,7 +16,6 @@ function freshRow(now: Date): MemoryCardT {
     subject_id: null,
     prompt: 'What is a closure?',
     example: null,
-    code_context: null,
     stability: 0,
     difficulty: 0,
     elapsed_days: 0,

@@ -14,8 +14,8 @@ const fixture: SampleDataT = {
     { ref: 'n2', subjectRef: null, title: 'N2', content: '# n2', position: 2 },
   ],
   cards: [
-    { noteRef: 'n1', prompt: 'p1', example: 'e1', codeContext: null },
-    { noteRef: 'n2', prompt: 'p2', example: null, codeContext: 'cc' },
+    { noteRef: 'n1', prompt: 'p1', example: 'e1' },
+    { noteRef: 'n2', prompt: 'p2', example: null },
   ],
 }
 
@@ -44,8 +44,7 @@ describe('remapSampleData', () => {
     const { notes, cards } = remapSampleData(fixture, USER, idFor)
     expect(notes[0].content).toBe('# n1')
     expect(cards[0].example).toBe('e1')
-    expect(cards[0].code_context).toBeNull()
-    expect(cards[1].code_context).toBe('cc')
+    expect(cards[1].example).toBeNull()
   })
 
   it('handles an empty fixture', () => {
