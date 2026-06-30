@@ -19,16 +19,16 @@ export const cardOverviewSchema = z.object({
 // shared `10` is coincidence, so don't fold them into one constant.
 export const promptSchema = trimmedString('Question', 2000, 10)
 
-// Blank/whitespace-only → null (persist as SQL NULL, columns are nullable). Non-empty keeps its
-// ORIGINAL text (no trim) so code indentation / leading newlines in `code_context` survive. The KEY
-// is required (a present value must be a string; `null`/omitted → 400) — callers that don't carry the
-// field (e.g. AI gen-cards' GeneratedCardT = {prompt, example}) must supply `''` at the boundary.
+// Blank/whitespace-only → null (persist as SQL NULL, the column is nullable). Non-empty keeps its
+// ORIGINAL text (no trim) so code indentation / leading newlines in a fenced block survive. The KEY
+// is required (a present value must be a string; `null`/omitted → 400) — callers carry it as `''`
+// when absent. Matches GeneratedCardT ({prompt, example}) exactly, so AI gen-cards saves with no
+// boundary remap.
 const optionalText = z.string().transform((v) => (v.trim().length > 0 ? v : null))
 
 export const memoryCardInputSchema = z.object({
   prompt: promptSchema,
   example: optionalText,
-  code_context: optionalText,
 })
 
 // Bulk card payload, capped to bound the insert. Shared by createCardsForNote (form action) and the

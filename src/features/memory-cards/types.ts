@@ -16,9 +16,9 @@ export type DueCardT = MemoryCardT & {
   notes: { title: string | null; subject_id: string | null } | null
 }
 
-// A card as shown on the /memory-cards listing: slim columns only (never the `example`/
-// `code_context` answer text). Subject hangs off the card itself (`memory_cards→subjects` FK), so a
-// note-less card still carries a subject; both embeds are `| null` (outer joins).
+// A card as shown on the /memory-cards listing: slim columns only (never the `example` answer text).
+// Subject hangs off the card itself (`memory_cards→subjects` FK), so a note-less card still carries a
+// subject; both embeds are `| null` (outer joins).
 export type MemoryCardListItemT = Pick<
   MemoryCardT,
   'id' | 'prompt' | 'note_id' | 'due_at' | 'state' | 'subject_id'

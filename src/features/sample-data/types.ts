@@ -20,7 +20,6 @@ export type SampleCardT = {
   noteRef: string
   prompt: string
   example: string | null
-  codeContext: string | null
 }
 
 export type SampleDataT = {
