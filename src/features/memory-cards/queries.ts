@@ -50,7 +50,7 @@ function applyCardFilters<T extends PostgrestFilterBuilder<any, any, any, any>>(
         ? query.gte('stability', MATURE_STABILITY_DAYS)
         : query.lt('stability', MATURE_STABILITY_DAYS)
   }
-  const orFilter = opts?.q ? searchOr(['prompt', 'example', 'code_context'], opts.q) : null
+  const orFilter = opts?.q ? searchOr(['prompt', 'example'], opts.q) : null
   if (orFilter) query = query.or(orFilter)
   return query
 }
@@ -121,7 +121,7 @@ export async function getCardOverview(client?: SupabaseClient<Database>): Promis
 }
 
 // Backs the /memory-cards listing, ordered soonest-due first. Selects only the columns the card
-// renders (never the `example`/`code_context` answer text). Subject is the card's OWN `subject_id`
+// renders (never the `example` answer text). Subject is the card's OWN `subject_id`
 // (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
 // `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(

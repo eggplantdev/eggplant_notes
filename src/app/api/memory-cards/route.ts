@@ -58,9 +58,7 @@ export async function GET(request: Request) {
     return errorJson(400, 'Invalid subject id')
   }
 
-  let query = auth.supabase
-    .from('memory_cards')
-    .select('id,prompt,example,code_context,note_id,subject_id')
+  let query = auth.supabase.from('memory_cards').select('id,prompt,example,note_id,subject_id')
   if (note !== null) query = query.eq('note_id', note)
   if (subject !== null) query = query.eq('subject_id', subject)
   if (unfiled) query = query.is('subject_id', null)

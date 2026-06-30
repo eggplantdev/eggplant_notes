@@ -35,7 +35,7 @@ export async function GET(request: Request, ctx: RouteContext<'/api/notes/[id]'>
 
   const { data: cards, error: cardsError } = await auth.supabase
     .from('memory_cards')
-    .select('id,prompt,example,code_context,subject_id,note_id')
+    .select('id,prompt,example,subject_id,note_id')
     .eq('note_id', parsedId.data)
   if (cardsError) {
     console.error('[GET /api/notes/:id] cards read error', cardsError)
