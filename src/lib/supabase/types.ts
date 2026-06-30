@@ -66,7 +66,6 @@ export type Database = {
       }
       memory_cards: {
         Row: {
-          code_context: string | null
           created_at: string
           difficulty: number
           due_at: string
@@ -88,7 +87,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          code_context?: string | null
           created_at?: string
           difficulty?: number
           due_at?: string
@@ -110,7 +108,6 @@ export type Database = {
           user_id?: string
         }
         Update: {
-          code_context?: string | null
           created_at?: string
           difficulty?: number
           due_at?: string
