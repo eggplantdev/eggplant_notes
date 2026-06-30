@@ -144,7 +144,7 @@ curl -s -H "$AUTH" "$BASE/api/notes/<note-uuid>"
 # → {
 #     "note":  { "id": "<uuid>", "title": "...", "content": "# ...", "subject_id": "<uuid>|null" },
 #     "cards": [ { "id": "<uuid>", "prompt": "...", "example": "...|null",
-#                  "code_context": "...|null", "subject_id": "<uuid>|null", "note_id": "<uuid>" }, ... ]
+#                  "subject_id": "<uuid>|null", "note_id": "<uuid>" }, ... ]
 #   }
 ```
 
@@ -193,11 +193,10 @@ curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
   },
   "cards": [
     // recall cards for this note; ≤ 50; may be [] for none.
-    // example/code_context are MARKDOWN — fence code blocks or they render flat (see "fence your code" below).
+    // example is MARKDOWN — fence code blocks or they render flat (see "fence your code" below).
     {
       "prompt": "What does a `move` do to ownership in Rust?",
-      "example": "Passing a String into a function transfers ownership; the caller can't use it afterwards.",
-      "code_context": "```rust\nlet s = String::from(\"hi\");\ntakes(s);          // s is moved\n// println!(\"{s}\"); // ❌ borrow of moved value\n```",
+      "example": "Passing a String into a function transfers ownership; the caller can't use it afterwards.\n\n```rust\nlet s = String::from(\"hi\");\ntakes(s);          // s is moved\n// println!(\"{s}\"); // ❌ borrow of moved value\n```",
     },
   ],
 }
@@ -205,7 +204,7 @@ curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
 
 ```bash
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"note":{"title":"Ownership basics","content":"# Ownership","subject_title":"Rust"},"cards":[{"prompt":"What is ownership?","example":"","code_context":""}]}' \
+  -d '{"note":{"title":"Ownership basics","content":"# Ownership","subject_title":"Rust"},"cards":[{"prompt":"What is ownership?","example":""}]}' \
   "$BASE/api/notes"
 # → 201 { "id": "<note-uuid>" }
 ```
@@ -219,7 +218,7 @@ don't mix them.
 
 ```bash
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"note_id":"<note-uuid>","cards":[{"prompt":"Borrow vs move?","example":"","code_context":""}]}' \
+  -d '{"note_id":"<note-uuid>","cards":[{"prompt":"Borrow vs move?","example":""}]}' \
   "$BASE/api/memory-cards"
 # → 201 { "ids": ["<card-uuid>"] }
 ```
@@ -228,7 +227,7 @@ curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
 
 ```bash
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"prompt":"What is a lifetime?","example":"","code_context":"","subject_id":null}' \
+  -d '{"prompt":"What is a lifetime?","example":"","subject_id":null}' \
   "$BASE/api/memory-cards"
 # → 201 { "ids": ["<card-uuid>"] }
 ```
@@ -247,12 +246,12 @@ curl -s -H "$AUTH" "$BASE/api/memory-cards?subject=<subject-uuid>"
 curl -s -H "$AUTH" "$BASE/api/memory-cards?note=<note-uuid>"
 curl -s -H "$AUTH" "$BASE/api/memory-cards?unfiled=true"
 # → { "cards": [ { "id": "<uuid>", "prompt": "...", "example": "...|null",
-#                 "code_context": "...|null", "note_id": "<uuid>|null", "subject_id": "<uuid>|null" }, ... ] }
+#                 "note_id": "<uuid>|null", "subject_id": "<uuid>|null" }, ... ] }
 ```
 
 ### `PATCH /api/memory-cards/:id` — edit a card / change its subject
 
-Send the full card field set (`prompt`, `example`, `code_context` — same string rules as on create) plus
+Send the full card field set (`prompt`, `example` — same string rules as on create) plus
 `subject_id` (a uuid or `null`). Editing only the text fields leaves any note link intact. **Changing the
 subject of a card that is attached to a note UNLINKS it** (`note_id` → `null`) — see
 ["Linked vs standalone cards"](#linked-vs-standalone-cards). If that unlink happens, **tell the user** the
@@ -260,7 +259,7 @@ card was detached from its note. A non-existent or not-yours id returns `404`.
 
 ```bash
 curl -s -X PATCH -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"prompt":"Borrow vs move?","example":"","code_context":"","subject_id":"<subject-uuid>"}' \
+  -d '{"prompt":"Borrow vs move?","example":"","subject_id":"<subject-uuid>"}' \
   "$BASE/api/memory-cards/<card-uuid>"
 # → 200 { "id": "<card-uuid>" }
 ```
@@ -298,37 +297,34 @@ curl -s -X DELETE -H "$AUTH" "$BASE/api/subjects/<subject-uuid>"    # → 200 { 
 
 Every card (in a note's `cards` array or a `POST /api/memory-cards` `cards` array) has exactly these fields:
 
-| field          | rule                                                                                                                                                                   |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prompt`       | **required** string, trimmed, **10–2000 chars** (a 1-word cue is rejected). The question/recall cue. Rendered as markdown.                                             |
-| `example`      | **required to be a string** — use `""` when none. **Markdown**: a short worked scenario (prose, or a fenced snippet). The server turns blank → null.                   |
-| `code_context` | same string rule as `example`, also **markdown**. Put the code here, **fenced** (` ```lang … ``` `) — bare code renders as a flattened paragraph with no highlighting. |
+| field     | rule                                                                                                                                                                                    |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`  | **required** string, trimmed, **10–2000 chars** (a 1-word cue is rejected). The question/recall cue. Rendered as markdown.                                                              |
+| `example` | **required to be a string** — use `""` when none. **Markdown**: the answer revealed on review — prose, a fenced code snippet, or both. **Fence code** or it renders flat. Blank → null. |
 
-**Do not send `null` for `example`/`code_context`** — they are validated as strings, so `null` is a `400`,
-not "no value". Send `""`. Omitting `prompt`, or sending `cards` as anything but a non-empty array, is also
-a `400`.
+**Do not send `null` for `example`** — it is validated as a string, so `null` is a `400`, not "no value".
+Send `""`. Omitting `prompt`, or sending `cards` as anything but a non-empty array, is also a `400`.
 
 ## All text fields are markdown — fence your code
 
-`content` (notes) and `example` / `code_context` (cards) are rendered with react-markdown + Shiki syntax
-highlighting. **Code only highlights inside a fenced block** — ` ```lang … ``` `. Sending raw code with
-bare newlines renders as one flattened paragraph: whitespace collapses, nothing is highlighted.
+`content` (notes) and `example` (cards) are rendered with react-markdown + Shiki syntax highlighting.
+**Code only highlights inside a fenced block** — ` ```lang … ``` `. Sending raw code with bare newlines
+renders as one flattened paragraph: whitespace collapses, nothing is highlighted.
 
 ````jsonc
 // ❌ flattens to a single grey line, no highlighting
-{ "prompt": "Write a debounce wrapper.", "example": "", "code_context": "function debounce(fn, d){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),d) } }" }
+{ "prompt": "Write a debounce wrapper.", "example": "function debounce(fn, d){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),d) } }" }
 
-// ✅ renders as a highlighted JS block
+// ✅ prose scenario + a highlighted JS block, in the one example field
 {
   "prompt": "Write a debounce wrapper and explain why the timer lives in the closure.",
-  "example": "A search box collapsing rapid keystrokes into a single fetch.",
-  "code_context": "```js\nfunction debounce(fn, delay) {\n  let timer; // captured by the closure; survives across calls\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n```"
+  "example": "A search box collapsing rapid keystrokes into a single fetch.\n\n```js\nfunction debounce(fn, delay) {\n  let timer; // captured by the closure; survives across calls\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n```"
 }
 ````
 
-Convention: put the code snippet in `code_context` (fenced) and a short prose scenario in `example`. Both
-are free markdown, so either may hold prose or fenced code — just **always fence code**, and tag the
-language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
+`example` is free markdown, so put the prose scenario and any fenced code snippet in the one field
+(separate them with a blank line) — just **always fence code**, and tag the language (`js`, `ts`, `rust`,
+`python`, …) so the right grammar highlights.
 
 ## Responses & limits
 
@@ -352,12 +348,12 @@ language (`js`, `ts`, `rust`, `python`, …) so the right grammar highlights.
 ```bash
 curl -s -H "$AUTH" "$BASE/api/subjects"                                              # 1. read structure
 NOTE=$(curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d '{"note":{"title":"Smoke test","content":"# hi","subject_title":"Sandbox"},"cards":[{"prompt":"Does the API work?","example":"","code_context":""}]}' \
+  -d '{"note":{"title":"Smoke test","content":"# hi","subject_title":"Sandbox"},"cards":[{"prompt":"Does the API work?","example":""}]}' \
   "$BASE/api/notes")                                                                 # 2. create note + card
 echo "$NOTE"                                                                          # → {"id":"..."}
 ID=$(echo "$NOTE" | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')
 curl -s -X POST -H "$AUTH" -H 'content-type: application/json' \
-  -d "{\"note_id\":\"$ID\",\"cards\":[{\"prompt\":\"A second card?\",\"example\":\"\",\"code_context\":\"\"}]}" \
+  -d "{\"note_id\":\"$ID\",\"cards\":[{\"prompt\":\"A second card?\",\"example\":\"\"}]}" \
   "$BASE/api/memory-cards"                                                            # 3. attach another card
 curl -s -H "$AUTH" "$BASE/api/notes"                                                  # 4. confirm it's listed
 ```
