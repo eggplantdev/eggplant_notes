@@ -66,7 +66,9 @@ export default defineConfig({
   // coexists with the dev server instead of colliding on the port or the `.next` build lock.
   webServer: {
     command: 'pnpm build && pnpm start',
-    env: { PORT, NEXT_DIST_DIR: E2E_DIST_DIR },
+    // E2E=1 makes the server skip real outbound side-effects (operator email on sign-up) — every
+    // spec signs up real accounts, which would otherwise spam EMAIL_TO via the real SMTP in .env.local.
+    env: { PORT, NEXT_DIST_DIR: E2E_DIST_DIR, E2E: '1' },
     url: BASE_URL,
     reuseExistingServer: false,
     timeout: 180_000,

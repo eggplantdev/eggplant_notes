@@ -36,4 +36,8 @@ export const serverSchema = z.object({
   // presence here so a missing key fails `next build` instead of throwing only when a user first
   // connects/uses a key; the 32-byte base64 decode is still checked at call time in getKey().
   OPENROUTER_ENC_KEY: z.string().min(1),
+  // Set to '1' ONLY by the Playwright webServer (playwright.config.ts) so server code can skip real
+  // outbound side-effects (the new-user operator email) during E2E, which signs up many real
+  // accounts. Optional — absent everywhere except the E2E server process.
+  E2E: z.string().optional(),
 })

@@ -8,6 +8,8 @@ import { mailTransport } from '@/lib/mailer'
 // the user's sign-up. Call inside next/server `after()` so it runs post-response (non-blocking) and
 // survives the redirect under Fluid Compute (waitUntil-backed on Vercel).
 export async function notifyNewUser(email: string): Promise<void> {
+  // E2E signs up many real accounts per run; skip the real outbound email there (set by playwright.config).
+  if (serverEnv.E2E === '1') return
   try {
     await mailTransport.sendMail({
       from: EMAIL_USER,
