@@ -27,10 +27,15 @@ test('memory-cards: State + Maturity filters narrow server-side and AND-compose'
 
   // Seed three standalone cards (note_id null; user_id defaults to auth.uid(), RLS-scoped).
   const supabase = await clientFor(email)
+  // Review-state cards need a valid FSRS difficulty (>0): the listing's ReviewPanel previews the due
+  // card's next intervals, and FSRS rejects a Review state with difficulty 0 — crashing the page. 5
+  // is the canonical mid-range value real cards carry (see review.spec.ts). difficulty must be set on
+  // EVERY row: a batch insert with the key on only some rows sends NULL for the rest (the column
+  // DEFAULT doesn't apply to an explicit NULL), violating its not-null constraint.
   const { error } = await supabase.from('memory_cards').insert([
-    { prompt: newYoung, state: 0, stability: 0 },
-    { prompt: reviewMature, state: 2, stability: 30 },
-    { prompt: reviewYoung, state: 2, stability: 5 },
+    { prompt: newYoung, state: 0, stability: 0, difficulty: 0 },
+    { prompt: reviewMature, state: 2, stability: 30, difficulty: 5 },
+    { prompt: reviewYoung, state: 2, stability: 5, difficulty: 5 },
   ])
   expect(error, 'seed insert failed').toBeNull()
 
