@@ -49,12 +49,13 @@ export async function createNote(page: Page, title: string) {
 // Attach a question-only memory card on the current note detail page and wait for it to list.
 // The add form is deferred behind an "Add card" toggle (S-17), so reveal it first; it
 // collapses again after a successful add, so each call re-reveals. (Specs exercising the
-// optional example/code_context fields add their checks inline instead.)
+// optional example field add their checks inline instead.)
 export async function attachCheck(page: Page, prompt: string) {
   await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByLabel('Question').fill(prompt)
   await page.getByRole('button', { name: 'Add memory card' }).click()
-  await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
+  // The card lists as its prompt text (AnimatedCardList renders shadcn Cards, not <li> rows).
+  await expect(page.getByText(prompt)).toBeVisible({ timeout: 15_000 })
 }
 
 // Insert text into the CodeMirror contenteditable without firing key handlers — closeBrackets

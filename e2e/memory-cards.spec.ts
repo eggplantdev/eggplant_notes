@@ -2,10 +2,12 @@ import { test, expect } from '@playwright/test'
 
 import { clientFor, createNote, fillEditor, signUp, uniqueEmail } from './helpers'
 
-// S-02 acceptance path: on a note, add a memory card (question + example + highlighted code
-// context) → see it listed → edit → delete (FR-012–015). Plus a two-account isolation check on
-// the new write/read path. Shared auth/editor/client helpers live in ./helpers.
-const CODE_CONTEXT = ['```ts', 'const sum = (a: number, b: number) => a + b', '```'].join('\n')
+// S-02 acceptance path: on a note, add a memory card (question + a single markdown `example` field
+// holding a fenced code block) → see it listed with highlighted code → edit → delete (FR-012–015).
+// Plus a two-account isolation check on the write/read path. Shared auth/editor/client helpers live
+// in ./helpers. The example field starts as a textarea and upgrades to the markdown editor on
+// "Add formatting" (merge-card-example-and-code-context).
+const CODE_EXAMPLE = ['```ts', 'const sum = (a: number, b: number) => a + b', '```'].join('\n')
 
 test('full CRUD: add a memory card with highlighted code, list, edit, delete', async ({ page }) => {
   await signUp(page, uniqueEmail('tc-crud'))
@@ -19,41 +21,45 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await page.getByRole('button', { name: 'Add card' }).click()
   const prompt = `What does sum do? ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)
-  await page.getByLabel('Example (optional)').fill('sum(2, 3) === 5')
-  await fillEditor(page, CODE_CONTEXT)
+  // Upgrade the example field to the markdown editor, then enter a fenced code block.
+  await page.getByTestId('card-example-rich').click()
+  await fillEditor(page, CODE_EXAMPLE)
   await page.getByRole('button', { name: 'Add memory card' }).click()
 
-  // It lists, and its code context renders Shiki-highlighted (per-token CSS vars), not flat text.
-  const row = page.locator('li', { hasText: prompt })
+  // It lists (AnimatedCardList renders shadcn Cards, not <li> rows), and its example's fenced code
+  // renders Shiki-highlighted (per-token CSS vars), not flat text.
+  const row = page.locator('[data-slot="card"]', { hasText: prompt })
   await expect(row).toBeVisible({ timeout: 15_000 })
   await expect(page.locator('pre.shiki')).toBeVisible()
   expect(await page.locator('pre.shiki span[style*="--shiki"]').count()).toBeGreaterThan(3)
 
   // Edit via the dedicated /memory-cards/<id>/edit route → form seeds → change the question → save.
-  await row.getByRole('link', { name: 'Edit' }).click()
+  await row.getByRole('button', { name: 'Edit' }).click()
   await expect(page).toHaveURL(/\/memory-cards\/[0-9a-f-]+\/edit$/)
   const editedPrompt = `${prompt} (edited)`
   await page.getByLabel('Question').fill(editedPrompt)
   await page.getByRole('button', { name: 'Save changes' }).click()
-  await expect(page.getByText(editedPrompt)).toBeVisible({ timeout: 15_000 })
 
-  // Saving redirects to the /memory-cards listing; delete from there via the row's AlertDialog.
-  // Listing cards aren't links — locate the list card by its prompt + Review button (the review
-  // panel is also a card but has no Review button), then delete from its action slot.
+  // Saving redirects to the /memory-cards listing. Locate the list card by its prompt + Review
+  // button — the due card also shows in the in-place review panel (also a [data-slot=card] but with
+  // NO Review button), so this filter disambiguates the listing row from the panel. Reused for the
+  // visibility assertion and the delete below.
   const editedRow = page
     .locator('[data-slot="card"]')
     .filter({ hasText: editedPrompt })
     .filter({ has: page.getByRole('button', { name: 'Review' }) })
+  await expect(editedRow).toBeVisible({ timeout: 15_000 })
   await editedRow.getByRole('button', { name: 'Delete' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })
 })
 
-// S-17: the add-check form (and its CodeMirror island) is deferred behind an "Add card" toggle,
-// so a read view mounts no editor. Reveal on click, collapse on "Hide", collapse after a
-// successful add. `.cm-content` count is the observable proxy for the editor being mounted (the
-// CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 1 while the form is open.
-test('add-check form is deferred: no editor on read, reveals, hides, collapses after add', async ({
+// S-17 + merge-card-example-and-code-context: the CodeMirror island is now DOUBLY deferred — behind
+// the "Add card" toggle AND the example field's "Add formatting" upgrade (the field starts as a
+// plain textarea). `.cm-content` count is the observable proxy for the editor being mounted (the
+// CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 0 with the form open but the field
+// still a textarea, 1 only after "Add formatting".
+test('add-check form is deferred: no editor on read, reveals, upgrades, hides, collapses after add', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('tc-defer'))
@@ -65,9 +71,13 @@ test('add-check form is deferred: no editor on read, reveals, hides, collapses a
   const addCheck = page.getByRole('button', { name: 'Add card' })
   await expect(addCheck).toBeVisible()
 
-  // Reveal → form + exactly one CodeMirror island mounts.
+  // Reveal the form → its example field is a textarea, so STILL no CodeMirror island.
   await addCheck.click()
   await expect(page.getByLabel('Question')).toBeVisible()
+  await expect(page.locator('.cm-content')).toHaveCount(0)
+
+  // Upgrade the example field → exactly one CodeMirror island mounts.
+  await page.getByTestId('card-example-rich').click()
   await expect(page.locator('.cm-content')).toHaveCount(1)
 
   // Hide → form collapses, editor unmounts.
@@ -75,12 +85,12 @@ test('add-check form is deferred: no editor on read, reveals, hides, collapses a
   await expect(page.getByLabel('Question')).toBeHidden()
   await expect(page.locator('.cm-content')).toHaveCount(0)
 
-  // Re-open, add a check → it lists and the form collapses again (editor unmounts).
+  // Re-open, add a check (textarea-only, no upgrade) → it lists and the form collapses again.
   await addCheck.click()
   const prompt = `Deferred add ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)
   await page.getByRole('button', { name: 'Add memory card' }).click()
-  await expect(page.locator('li', { hasText: prompt })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(prompt)).toBeVisible({ timeout: 15_000 })
   await expect(page.getByLabel('Question')).toBeHidden()
   await expect(page.locator('.cm-content')).toHaveCount(0)
 })
@@ -88,8 +98,8 @@ test('add-check form is deferred: no editor on read, reveals, hides, collapses a
 // RLS on the new write/read path: account B cannot see account A's memory cards even when
 // querying by A's note_id directly — the same `.eq('note_id', …)` shape getMemoryCardsForNote
 // uses (the helper itself can't be imported into a raw spec: its @/ alias + server-only
-// next/headers deps don't resolve outside the Next runtime — see lessons.md). The new
-// example/code_context columns round-trip for the owner.
+// next/headers deps don't resolve outside the Next runtime — see lessons.md). The single
+// markdown `example` column round-trips for the owner.
 test('memory cards are isolated by account on the per-note read path', async ({ browser }) => {
   const emailA = uniqueEmail('tc-iso-a')
   const emailB = uniqueEmail('tc-iso-b')
@@ -118,10 +128,9 @@ test('memory cards are isolated by account on the per-note read path', async ({ 
     .insert({
       note_id: aNoteId,
       prompt: 'A prompt',
-      example: 'A example',
-      code_context: '```ts\nconst x = 1\n```',
+      example: 'A example\n\n```ts\nconst x = 1\n```',
     })
-    .select('id, example, code_context')
+    .select('id, example')
     .single()
   expect(tc.error, 'A memory_card insert failed').toBeNull()
 
@@ -129,8 +138,8 @@ test('memory cards are isolated by account on the per-note read path', async ({ 
   const ownRead = await supaA.from('memory_cards').select('*').eq('note_id', aNoteId)
   expect(ownRead.error).toBeNull()
   expect(ownRead.data?.length, 'A should see its own check').toBe(1)
-  expect(ownRead.data?.[0].example).toBe('A example')
-  expect(ownRead.data?.[0].code_context).toContain('const')
+  expect(ownRead.data?.[0].example).toContain('A example')
+  expect(ownRead.data?.[0].example).toContain('const')
 
   // Negative control assurance: querying by A's note_id as B returns nothing — RLS, not a typo.
   const foreignRead = await supaB.from('memory_cards').select('*').eq('note_id', aNoteId)

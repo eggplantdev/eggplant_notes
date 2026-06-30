@@ -3,10 +3,11 @@ import { test, expect } from '@playwright/test'
 import { clientFor, signUp, uniqueEmail } from './helpers'
 
 // S-07 acceptance path: stage 0..N memory cards inline on /notes/new and save them atomically
-// with the note (one create_note_with_checks RPC transaction). Rows use the prompt AppField +
-// the optional example Textarea; code_context (a CodeMirror island) is intentionally not driven
-// here — the create page mounts one .cm-content for the note body plus one per row, which would
-// break fillEditor's single-locator. Atomicity/highlight of code is covered by notes.spec.ts.
+// with the note (one create_note_with_cards RPC transaction). Rows use the prompt AppField +
+// the optional example field, which starts as a plain textarea; its "Add formatting" markdown
+// editor (a CodeMirror island) is intentionally not driven here — the create page mounts one
+// .cm-content for the note body, and upgrading a row would add more, breaking fillEditor's
+// single-locator. Atomicity/highlight of code is covered by notes.spec.ts.
 
 const noteIdFromUrl = (url: string) => url.match(/\/notes\/([0-9a-f-]+)$/)?.[1]
 
@@ -39,9 +40,10 @@ test('create a note with two memory cards inline, saved together', async ({ page
   const noteId = noteIdFromUrl(page.url())
   expect(noteId).toBeTruthy()
 
-  // Both checks are attached and listed on the detail page.
-  await expect(page.locator('li', { hasText: q1 })).toBeVisible()
-  await expect(page.locator('li', { hasText: q2 })).toBeVisible()
+  // Both checks are attached and listed on the detail page (cards render as their prompt text via
+  // AnimatedCardList's shadcn Cards, not <li> rows).
+  await expect(page.getByText(q1)).toBeVisible()
+  await expect(page.getByText(q2)).toBeVisible()
 
   // And both rows actually landed in the DB, scoped to this user (the atomic write committed both).
   const supabase = await clientFor(email)
