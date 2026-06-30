@@ -36,8 +36,10 @@ export const getSubject = cache(
 )
 
 // Lightweight list for the docs-style sidebar nav: id/title/position only, never `content`.
-// Ordered by `position` (nulls last, created_at tie-break; members always have a position, so
-// nulls-last is defensive).
+// Ordered by `position` DESC so newest notes (position = Date.now() at insert) surface first;
+// created_at DESC tie-break. Drag-to-reorder writes a fractional `position` (midpoint between the
+// displayed neighbors), which is direction-agnostic, so DESC keeps manual ordering intact. `position`
+// is non-null for every subject member, so nulls-last is defensive.
 export const getSubjectNoteSummaries = cache(
   async (subjectId: string, client?: SupabaseClient<Database>): Promise<SubjectNoteSummaryT[]> => {
     const supabase = client ?? (await createClient())
@@ -46,8 +48,8 @@ export const getSubjectNoteSummaries = cache(
         .from('notes')
         .select('id, title, position')
         .eq('subject_id', subjectId)
-        .order('position', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: true }),
+        .order('position', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false }),
     )
   },
 )

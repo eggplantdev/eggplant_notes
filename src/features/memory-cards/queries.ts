@@ -120,8 +120,10 @@ export async function getCardOverview(client?: SupabaseClient<Database>): Promis
   return cardOverviewSchema.parse(data)
 }
 
-// Backs the /memory-cards listing, ordered soonest-due first. Selects only the columns the card
-// renders (never the `example` answer text). Subject is the card's OWN `subject_id`
+// Backs the /memory-cards listing, ordered newest-created first (the review panel — getDueQueue —
+// owns due-order; this is the browse view). Selects only the columns the card renders (never the
+// `example` answer text); `created_at` is projected solely to drive the ordering. Subject is the
+// card's OWN `subject_id`
 // (embedded + filtered via the memory_cards→subjects FK), so a note-less card filters correctly;
 // `notes(title)` is an outer join (a standalone card has no note). RLS scopes rows to the owner.
 export async function getMemoryCardsList(
@@ -137,17 +139,20 @@ export async function getMemoryCardsList(
     applyCardFilters(
       supabase
         .from('memory_cards')
-        .select('id, prompt, note_id, due_at, state, subject_id, notes(title), subjects(title)', {
-          count: 'exact',
-          head,
-        }),
+        .select(
+          'id, prompt, note_id, due_at, state, subject_id, created_at, notes(title), subjects(title)',
+          {
+            count: 'exact',
+            head,
+          },
+        ),
       opts,
     )
 
   return runPaginatedQuery(
     'getMemoryCardsList',
     filtered(false)
-      .order('due_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1),
     () => filtered(true),
   )
@@ -181,7 +186,7 @@ export async function getMemoryCardForReview(
   )
 }
 
-// All memory cards attached to one note, oldest first. RLS scopes rows to the owner, so a note the
+// All memory cards attached to one note, newest first. RLS scopes rows to the owner, so a note the
 // caller doesn't own yields []. Injectable client so Playwright can pass a signInWithPassword
 // client for the isolation test.
 export async function getMemoryCardsForNote(
@@ -194,6 +199,6 @@ export async function getMemoryCardsForNote(
       .from('memory_cards')
       .select('*')
       .eq('note_id', noteId)
-      .order('created_at', { ascending: true }),
+      .order('created_at', { ascending: false }),
   )
 }
