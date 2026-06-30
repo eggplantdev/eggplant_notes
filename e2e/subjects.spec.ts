@@ -100,13 +100,10 @@ test('docs view: open → first note, sidebar nav, handle reorder, delete-detach
   await expect(reordered.nth(0)).toHaveText(titleB, { timeout: 15_000 })
   await expect(reordered.nth(1)).toHaveText(titleA)
 
-  // Delete the subject (header action) → redirects to /subjects; member notes survive, unassigned.
-  // Scope to the subject header — the open note's pane (article) also renders a Delete.
-  await page
-    .locator('header')
-    .filter({ hasText: `Subject ${stamp}` })
-    .getByRole('button', { name: 'Delete' })
-    .click()
+  // Delete the subject → redirects to /subjects; member notes survive, unassigned. The subject's
+  // delete control is the uniquely-named "Delete subject" button (the open note's pane renders a
+  // bare "Delete"), so target it directly — it no longer lives inside a <header> element.
+  await page.getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
 
@@ -193,12 +190,12 @@ test('subject switcher + /subjects redirect: navigate, delete-to-next, empty sta
 
   // Delete the current subject (Alpha) → delete redirects to /subjects, which redirects on to the
   // one remaining subject (Beta).
-  await page.locator('header').getByRole('button', { name: 'Delete subject' }).click()
+  await page.getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL(betaUrl, { timeout: 15_000 })
 
   // Delete the last subject (Beta) → /subjects has nothing to redirect to → empty state.
-  await page.locator('header').getByRole('button', { name: 'Delete subject' }).click()
+  await page.getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
   await expect(page.getByText('No subjects yet.')).toBeVisible()

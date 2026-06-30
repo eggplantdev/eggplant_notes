@@ -66,7 +66,9 @@ test('a staged check with an empty question blocks the save', async ({ page }) =
   await page.getByRole('button', { name: 'Create note' }).click()
 
   // Save is blocked: inline error shows and we stay on /notes/new (no redirect, no row written).
-  await expect(page.getByText('Question is required')).toBeVisible()
+  // The prompt schema floors at 10 chars (trimmedString min=10), so an empty question reports the
+  // min-length message, not "required" — the block (URL unchanged) is the behavior under test.
+  await expect(page.getByText('Question must be at least 10 characters')).toBeVisible()
   await expect(page).toHaveURL(/\/notes\/new$/)
 })
 

@@ -34,9 +34,9 @@ test('create note tied to a subject + filter the notes list by subject', async (
 
   // (1) Create note A from subject A's detail page → pre-tied to A (no manual picker step).
   await page.goto(subjAUrl)
-  // The detail view's notes column carries "Add note to this subject" → /notes/new?subject=<id>
+  // The detail view's notes column carries an "Add note" link → /notes/new?subject=<id>
   // (an empty subject also shows a "New note" empty-state CTA to the same place; either works).
-  await page.getByRole('link', { name: 'Add note to this subject' }).click()
+  await page.getByRole('link', { name: 'Add note', exact: true }).click()
   await expect(page).toHaveURL(/\/notes\/new\?subject=[0-9a-f-]+$/)
   await page.getByLabel('Title').fill(noteA)
   await page.getByRole('button', { name: 'Create note' }).click()
