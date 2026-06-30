@@ -28,7 +28,14 @@ test('create a standalone card with no subject — lands on /memory-cards, no ph
   await page.getByTestId('card-form-submit').click()
 
   await expect(page).toHaveURL(/\/memory-cards(\?|$)/, { timeout: 15_000 })
-  await expect(page.getByText(prompt)).toBeVisible()
+  // Scope to the listing card — the due card also renders in the in-place review panel, so a bare
+  // getByText is ambiguous. The list card carries a Review button; the panel card does not.
+  await expect(
+    page
+      .locator('[data-slot="card"]')
+      .filter({ hasText: prompt })
+      .filter({ has: page.getByRole('button', { name: 'Review' }) }),
+  ).toBeVisible()
 
   // The card exists with no note, and /notes was never polluted with a phantom note.
   const db = await clientFor(email)
@@ -76,14 +83,21 @@ test("changing a note's subject moves a linked card to the new subject (per-card
   // Note under the SOURCE subject, with one linked card (seeded with the note's subject).
   await page.goto('/notes/new')
   await page.getByLabel('Title').fill(`Note ${Date.now()}`)
-  await page.getByRole('combobox', { name: 'Subject' }).click()
+  // SubjectSelect's Combobox is unlabeled (name derives from the selected value); scope via the
+  // sibling "Subject mode" radiogroup, matching the link test + createAssignedNote in subjects.spec.
+  await page
+    .getByRole('radiogroup', { name: 'Subject mode' })
+    .locator('..')
+    .getByRole('combobox')
+    .click()
   await page.getByRole('option', { name: srcTitle, exact: true }).click()
   await page.getByRole('button', { name: 'Create note' }).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/, { timeout: 15_000 })
   const noteUrl = page.url()
   await attachCheck(page, `Linked Q ${Date.now()}`)
 
-  // Re-file the note to the destination subject → per-card dialog → Save (default Move).
+  // Re-file the note to the destination subject → per-card dialog → Save (default Move). The Edit-note
+  // form (unlike /notes/new) renders a labeled "Subject" combobox, so target it by name directly.
   await page.goto(`${noteUrl}?edit=note`)
   await page.getByRole('combobox', { name: 'Subject' }).click()
   await page.getByRole('option', { name: destTitle, exact: true }).click()
