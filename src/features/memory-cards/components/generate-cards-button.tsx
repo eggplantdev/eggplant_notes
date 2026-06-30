@@ -66,12 +66,9 @@ export function GenerateCardsButton({
     if (!candidates?.length || hasInvalidPrompt) return
     setError(undefined)
     startSave(async () => {
-      // GeneratedCardT carries only { prompt, example }; the card insert schema requires a
-      // code_context key (a present value must be a string — null/omitted is a 400). Supply the
-      // missing field here at the boundary rather than loosening the shared schema (which feeds the
-      // token API too). Blank → the server coerces to SQL NULL.
-      const payload = candidates.map((c) => ({ ...c, code_context: '' }))
-      const result = await createCardsForNote(noteId, payload)
+      // GeneratedCardT ({ prompt, example }) now matches the card insert schema exactly, so the
+      // candidates save with no boundary remap.
+      const result = await createCardsForNote(noteId, candidates)
       if (toastActionResult(result)) {
         setCandidates(null)
         router.refresh()

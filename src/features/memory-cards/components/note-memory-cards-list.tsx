@@ -14,7 +14,7 @@ import type { MemoryCardT } from '@/features/memory-cards/types'
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 
 // One row of the note's card list: the card plus its OPTIONAL pre-rendered answer body
-// (example + code_context). The body must be pre-rendered by the server section because it goes
+// (example). The body must be pre-rendered by the server section because it goes
 // through the server-only Shiki RenderMarkdown, which can't run inside this client component —
 // it arrives as a ReactNode. `answer` present → expanded card (body under the prompt); absent →
 // compact card (due-status + prompt only, matching the /memory-cards listing). This is how one

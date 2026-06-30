@@ -24,9 +24,9 @@ type MemoryCardsSectionPropsT = {
 
 // This section only ADDS cards — editing lives at the /memory-cards/[id]/edit route. The card list
 // renders through NoteMemoryCardsList (the shared listing shell), expanded with each card's answer
-// body. The body (example + code_context) is pre-rendered HERE via the server-only Shiki
-// RenderMarkdown and handed down as a ReactNode, because that component can't run inside the client
-// list. Pass `answer: undefined` instead to get the compact (listing-style) card.
+// body. The body (example) is pre-rendered HERE via the server-only Shiki RenderMarkdown and handed
+// down as a ReactNode, because that component can't run inside the client list. Pass
+// `answer: undefined` instead to get the compact (listing-style) card.
 export function MemoryCardsSection({
   noteId,
   noteTitle,
@@ -37,15 +37,13 @@ export function MemoryCardsSection({
 }: MemoryCardsSectionPropsT) {
   const rows: NoteCardRowT[] = cards.map((card) => ({
     card,
-    answer:
-      card.example || card.code_context ? (
-        // Separator divides the question from its answer; gap-4 keeps the body from crowding it.
-        <div className="flex flex-col gap-2">
-          <Separator />
-          {card.example && <RenderMarkdown content={card.example} />}
-          {card.code_context && <RenderMarkdown content={card.code_context} />}
-        </div>
-      ) : undefined,
+    answer: card.example ? (
+      // Separator divides the question from its answer; gap-4 keeps the body from crowding it.
+      <div className="flex flex-col gap-2">
+        <Separator />
+        <RenderMarkdown content={card.example} />
+      </div>
+    ) : undefined,
   }))
 
   return (

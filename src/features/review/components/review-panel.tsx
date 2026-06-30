@@ -84,14 +84,13 @@ export function ReviewPanel({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <RenderMarkdown content={card.prompt} />
-        {(card.example || card.code_context) && (
+        {card.example && (
           // key={card.id}: the panel advances in place, so without a per-card key React reuses the
           // same Collapsible instance and its uncontrolled open state leaks — the next card would
           // load with the answer already revealed, defeating recall.
           <AnswerDisclosure key={card.id}>
             <div className="mt-3 flex flex-col gap-3">
-              {card.example && <RenderMarkdown content={card.example} />}
-              {card.code_context && <RenderMarkdown content={card.code_context} />}
+              <RenderMarkdown content={card.example} />
             </div>
           </AnswerDisclosure>
         )}
