@@ -11,6 +11,7 @@ import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delet
 import { memoryCardEditHref } from '@/features/memory-cards/utils'
 import { SourceNoteLink } from '@/features/notes/components/source-note-link'
 import type { DueCardT } from '@/features/memory-cards/types'
+import { cn } from '@/lib/utils'
 
 // provideCelebration: both surfaces (dashboard, /memory-cards) advance in place, so they self-provide
 // the celebration dialog (default true).
@@ -19,6 +20,8 @@ import type { DueCardT } from '@/features/memory-cards/types'
 // `?review` selection after a rating so the next card surfaces (omitted on the dashboard).
 // reviewHref: when set, a "Review" link to the full review surface shows in the header — the dashboard
 // uses it to send the user to /memory-cards (it reviews in place but is not the dedicated surface).
+// reviewingAhead: nothing is due but a not-yet-due card is shown so the user can keep reviewing;
+// renders the "caught up, reviewing ahead" notice above the card. Set by both in-place panels.
 type PropsT = {
   card: DueCardT | undefined
   goal: number
@@ -27,6 +30,8 @@ type PropsT = {
   deleteRedirectTo?: string
   advanceHref?: string
   reviewHref?: string
+  reviewingAhead?: boolean
+  className?: string
 }
 
 // Server Component: owns the interval previews (computed only when a card is due). The celebration
@@ -40,9 +45,11 @@ export function ReviewPanel({
   deleteRedirectTo,
   advanceHref,
   reviewHref,
+  reviewingAhead = false,
+  className,
 }: PropsT) {
   const body = !card ? (
-    <Card className="gradient-border ring-0">
+    <Card className={cn('gradient-border ring-0', className)}>
       <CardContent>
         <CaughtUpNotice />
       </CardContent>
@@ -104,5 +111,22 @@ export function ReviewPanel({
     </Card>
   )
 
-  return provideCelebration ? <ReviewCelebrationProvider>{body}</ReviewCelebrationProvider> : body
+  const content = (
+    <>
+      {reviewingAhead && (
+        // mb matches the section gap-12 so the notice sits centered between the section above and the
+        // panel, not glued to the card.
+        <p className="text-muted-foreground mb-12 text-center text-sm">
+          All caught up 🎉 — reviewing ahead.
+        </p>
+      )}
+      {body}
+    </>
+  )
+
+  return provideCelebration ? (
+    <ReviewCelebrationProvider>{content}</ReviewCelebrationProvider>
+  ) : (
+    content
+  )
 }

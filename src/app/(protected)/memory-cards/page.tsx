@@ -3,7 +3,6 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
-import { TitledCard } from '@/components/ui/titled-card'
 import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
 import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
@@ -87,17 +86,10 @@ export default async function MemoryCardsPage({
     <PageShell
       title="Memory cards"
       subtitle={pluralize(total, 'memory card')}
-      width="full"
       actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >
-      {/* Bigger, even spacing between the page's major sections (PageShell's own gap is the page
-          default); the list + its pagination stay tight as one section in their own group below. */}
       <div className="flex flex-col gap-12">
-        {overview.total > 0 && (
-          <TitledCard title="Cards overview">
-            <CardsOverview overview={overview} />
-          </TitledCard>
-        )}
+        <CardsOverview overview={overview} />
 
         {/* Topic-scoped review: only when cards match the filters — a zero-match search shows the
           list's own empty state below. Clicking a list card sets `?review=<id>` and swaps it into
@@ -105,60 +97,46 @@ export default async function MemoryCardsPage({
           a caught-up note, so the user is never blocked from reviewing. The filter/due-count context
           rides in as the panel's subtitle. */}
         {total > 0 && (
-          // The page is width="full" for the card grid; cap the review panel so it stays a
-          // comfortable reading width instead of stretching across the whole deck width. id anchors the
-          // per-card Review button's smooth-scroll target.
           <div id={REVIEW_PANEL_ID} className="mx-auto w-full max-w-3xl scroll-mt-24">
-            {reviewingAhead && (
-              // mb matches the section gap-12 so the notice sits centered between sections, not glued to the panel.
-              <p className="text-muted-foreground mb-12 text-center text-sm">
-                All caught up 🎉 — reviewing ahead.
-              </p>
-            )}
             <ReviewCardTransition cardKey={reviewCard?.id ?? 'caught-up'}>
               <ReviewPanel
                 card={reviewCard}
                 goal={dailyGoal}
                 showCardControls
                 advanceHref={advanceHref}
+                reviewingAhead={reviewingAhead}
               />
             </ReviewCardTransition>
           </div>
         )}
 
-        {/* The filters and the card list are one section ("Cards"), so they sit at the standard gap
-            from each other — only the major sections above use the bigger gap-12. */}
         <div className="flex flex-col gap-6">
-          {/* Grid so the filters stay even columns that shrink with the viewport instead of
-              overflowing; each control fills its cell (w-full) rather than a hardcoded width. */}
-          {(total > 0 || isFiltered) && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {subjects.length > 0 && (
-                <SubjectFilter
-                  options={options}
-                  selectedIds={selectedIds}
-                  triggerClassName="w-full"
-                />
-              )}
-              <UrlMultiSelectFilter
-                paramKey="state"
-                options={FSRS_STATE_LABELS.map((label, i) => ({ value: String(i), label }))}
-                selectedValues={states.map(String)}
-                placeholder="State"
-                searchable={false}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {subjects.length > 0 && (
+              <SubjectFilter
+                options={options}
+                selectedIds={selectedIds}
                 triggerClassName="w-full"
               />
-              <UrlMultiSelectFilter
-                paramKey="maturity"
-                options={MATURITY_OPTIONS}
-                selectedValues={maturity}
-                placeholder="Maturity"
-                searchable={false}
-                triggerClassName="w-full"
-              />
-              <SearchFilterInput placeholder="Search memory cards…" className="sm:w-full" />
-            </div>
-          )}
+            )}
+            <UrlMultiSelectFilter
+              paramKey="state"
+              options={FSRS_STATE_LABELS.map((label, i) => ({ value: String(i), label }))}
+              selectedValues={states.map(String)}
+              placeholder="State"
+              searchable={false}
+              triggerClassName="w-full"
+            />
+            <UrlMultiSelectFilter
+              paramKey="maturity"
+              options={MATURITY_OPTIONS}
+              selectedValues={maturity}
+              placeholder="Maturity"
+              searchable={false}
+              triggerClassName="w-full"
+            />
+            <SearchFilterInput placeholder="Search memory cards…" className="sm:w-full" />
+          </div>
 
           {total === 0 ? (
             <EmptyState
