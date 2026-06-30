@@ -84,13 +84,12 @@ export default async function DashboardPage() {
         </TitledCard>
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-4 [&>*]:min-w-0">
           <div>
-            {reviewingAhead && (
-              // mb matches the section gap-12 so the notice sits centered between sections, not glued to the panel.
-              <p className="text-muted-foreground mb-12 text-center text-sm">
-                All caught up 🎉 — reviewing ahead.
-              </p>
-            )}
-            <ReviewPanel card={card} goal={dailyGoal} reviewHref="/memory-cards" />
+            <ReviewPanel
+              card={card}
+              goal={dailyGoal}
+              reviewHref="/memory-cards"
+              reviewingAhead={reviewingAhead}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             {tiles.map((tile) => (
