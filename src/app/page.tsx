@@ -6,10 +6,6 @@ import { LandingFeatures } from '@/features/landing/components/landing-features'
 import { LandingHero } from '@/features/landing/components/landing-hero'
 import { LandingNav } from '@/features/landing/components/landing-nav'
 
-// Standalone public marketing page at `/` — outside the auth flow and the (protected) app shell, wrapped
-// only by the root layout. The proxy lets `/` through unauthenticated. Sections are server components;
-// BrandIntroProvider is a client boundary that wraps them (children stay server-rendered) to drive the
-// first-visit splash → hero handoff.
 export default function LandingPage() {
   return (
     <BrandIntroProvider>
