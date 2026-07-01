@@ -94,6 +94,8 @@ These rules govern every note and card you create or edit:
    when it makes sense, against these questions:
    - **Card:** is the question genuinely meaningful — does it test something worth memorising,
      not a trivial or throwaway fact?
+   - **Card (code):** when the material is about code, does the `example` include a concrete,
+     fenced code snippet that illustrates the answer? Prefer showing code over describing it.
    - **Note (comprehensible):** would a cold reader fully understand it? Is anything missing that
      should be added?
    - **Note (signal):** is everything in it important enough to keep — no filler or noise that
