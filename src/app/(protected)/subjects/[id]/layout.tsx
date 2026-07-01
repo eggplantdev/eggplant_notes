@@ -69,10 +69,10 @@ export default async function SubjectLayout({
           only kicks in for a list taller than the viewport. */}
       <div className="grid gap-6 md:grid-cols-[minmax(15rem,1fr)_minmax(36rem,64rem)]">
         {/* `relative` + inner-nav scroll (not wrapper scroll) so the bottom fade pins to the
-            viewport edge instead of scrolling away — same trick as the AppNav top fade, mirrored. */}
+            viewport edge instead of scrolling away — same trick as the AppNav top fade, mirrored.
+            The fade itself is rendered by SubjectNoteSidebar, gated on actual overflow. */}
         <div className="relative flex flex-col gap-2 md:sticky md:top-20 md:max-h-[calc(100dvh-5rem)] md:self-start">
           <SubjectNoteSidebar subjectId={id} notes={summaries} />
-          <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 hidden h-4 bg-gradient-to-t from-40% to-transparent md:block" />
         </div>
         <div className="min-w-0">{children}</div>
       </div>
