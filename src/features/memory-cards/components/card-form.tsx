@@ -132,6 +132,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
       {!card && (
         <TopicGenerator
           label="Generate with AI"
+          sourceLabel="Question topic"
           placeholder="e.g. JavaScript closures"
           testIdPrefix="card-ai"
           task="cards"

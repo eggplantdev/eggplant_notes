@@ -16,6 +16,7 @@ import type { GenerateResultT } from '@/features/openrouter/types'
 // generated item into its own form fields (the only real variation between card and note).
 export function TopicGenerator<T>({
   label,
+  sourceLabel,
   placeholder,
   testIdPrefix,
   task,
@@ -27,6 +28,9 @@ export function TopicGenerator<T>({
   applyHint,
 }: {
   label: string
+  // Label for the in-dialog source textarea — worded per caller to match the field it fills
+  // (e.g. "Question topic" for cards, "Topic" for notes), so the flow into that field isn't jarring.
+  sourceLabel: string
   placeholder: string
   testIdPrefix: string
   task: 'cards' | 'notes'
@@ -63,7 +67,7 @@ export function TopicGenerator<T>({
       applyHint={applyHint}
     >
       <div className="grid gap-2">
-        <Label htmlFor={`${testIdPrefix}-topic`}>Topic</Label>
+        <Label htmlFor={`${testIdPrefix}-topic`}>{sourceLabel}</Label>
         <Textarea
           id={`${testIdPrefix}-topic`}
           data-testid={`${testIdPrefix}-topic`}
