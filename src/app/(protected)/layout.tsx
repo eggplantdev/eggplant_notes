@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import { AppNav } from '@/components/app-nav/app-nav'
 import { SiteFooter } from '@/components/layout/site-footer'
-import { getCurrentUser } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 
 // Authoritative server-side gate — the proxy is only optimistic (matcher can miss), so this
 // re-checks on every protected render.

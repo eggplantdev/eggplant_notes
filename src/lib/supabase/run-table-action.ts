@@ -1,7 +1,7 @@
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
 import type { ZodType } from 'zod'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 
 type SupabaseServerT = Awaited<ReturnType<typeof createClient>>

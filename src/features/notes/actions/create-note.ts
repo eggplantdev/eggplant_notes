@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { insertNoteWithCards } from '@/features/notes/insert-note-with-cards'
 import { createNoteWithCardsSchema } from '@/features/notes/schemas'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 import type { RedirectResultT } from '@/types/action'
 

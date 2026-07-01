@@ -12,7 +12,7 @@ const { authErrorRef } = vi.hoisted(() => ({
   authErrorRef: { current: null as { message: string } | null },
 }))
 
-vi.mock('@/lib/supabase/server', () => ({
+vi.mock('@/lib/supabase/create-server-client', () => ({
   createClient: vi.fn(async () => ({
     // Mirror GoTrue's real shape: `data` is always present (null session on error), so signUp's
     // session check doesn't throw on the error paths under test.

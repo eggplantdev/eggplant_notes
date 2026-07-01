@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { noteIdSchema, noteInputSchema } from '@/features/notes/schemas'
 import { updateNoteCore, type CardActionsT } from '@/features/notes/update-note-core'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

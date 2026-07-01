@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { dailyGoalSchema } from '@/features/settings/schemas'
 import type { DailyGoalInputT } from '@/features/settings/schemas'
-import { getCurrentUser } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { runTableAction } from '@/lib/supabase/run-table-action'
 import type { ActionResultT } from '@/types/action'
 

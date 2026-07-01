@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

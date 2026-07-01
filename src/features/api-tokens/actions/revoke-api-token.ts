@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import type { ActionResultT } from '@/types/action'
 
 // Soft revoke (mirrors openrouter/disconnect): there is deliberately no delete policy on api_tokens,

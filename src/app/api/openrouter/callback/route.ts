@@ -4,7 +4,8 @@ import { type NextRequest } from 'next/server'
 
 import { VERIFIER_COOKIE } from '@/features/openrouter/pkce'
 import { encryptSecret } from '@/lib/crypto/aes-gcm'
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { toastRedirect } from '@/lib/toast-redirect'
 
 // OpenRouter OAuth PKCE callback: exchange the returned `code` (+ the verifier we stashed) for the

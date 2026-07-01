@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 
 import { isBuiltinSystem } from '@/features/openrouter/system-prompts'
 import { userPromptSchema } from '@/features/openrouter/prompt-schemas'
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { importNotesSchema } from '@/features/import/schemas'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 import type { RedirectResultT } from '@/types/action'
 

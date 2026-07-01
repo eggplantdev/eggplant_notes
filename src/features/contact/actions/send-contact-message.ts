@@ -4,7 +4,7 @@ import { contactSchema, type ContactInputT } from '@/features/contact/schemas'
 import { EMAIL_USER } from '@/lib/env'
 import { serverEnv } from '@/lib/env.server'
 import { mailTransport } from '@/lib/mailer'
-import { getCurrentUser } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

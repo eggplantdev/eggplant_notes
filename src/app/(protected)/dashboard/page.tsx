@@ -8,7 +8,7 @@ import { StatCard } from '@/features/dashboard/components/stat-card'
 import { TitledCard } from '@/components/ui/titled-card'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
 import { getDashboardData } from '@/features/dashboard/data'
-import { getCurrentUser } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { Suspense } from 'react'
 import { WelcomeDialogServer } from '@/features/dashboard/components/welcome-dialog-server'
 

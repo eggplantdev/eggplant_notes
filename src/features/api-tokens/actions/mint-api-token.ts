@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { mintTokenSchema } from '@/features/api-tokens/schemas'
 import type { MintTokenInputT } from '@/features/api-tokens/schemas'
 import { generateToken } from '@/features/api-tokens/token'
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { validateInput } from '@/lib/validate'
 
 // Mint is the one action that can't use runTableAction: it returns a SECRET, not a DB row. The raw

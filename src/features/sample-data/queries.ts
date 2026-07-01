@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 
 // Empty = zero notes AND zero subjects. `head: true` + `count: 'exact'` returns a count with no

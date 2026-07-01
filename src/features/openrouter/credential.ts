@@ -3,7 +3,7 @@ import 'server-only'
 import { cache } from 'react'
 
 import { decryptSecret } from '@/lib/crypto/aes-gcm'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 
 type OpenRouterCredentialT = {
   apiKey: string

@@ -1,7 +1,7 @@
 import type { ZodType } from 'zod'
 
 import { validateInput } from '@/lib/validate'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { ActionResultT } from '@/types/action'
 
 type SupabaseServerT = Awaited<ReturnType<typeof createClient>>

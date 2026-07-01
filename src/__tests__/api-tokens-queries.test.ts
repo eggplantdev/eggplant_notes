@@ -4,10 +4,10 @@ import { describe, expect, it, vi } from 'vitest'
 // branches are testable in isolation. The fake client returns whatever {data,error} the test supplies
 // at the end of the .from().select().is().order() chain (supabase query builders are thenable).
 vi.mock('server-only', () => ({}))
-vi.mock('@/lib/supabase/server', () => ({ createClient: vi.fn() }))
+vi.mock('@/lib/supabase/create-server-client', () => ({ createClient: vi.fn() }))
 
 import { getApiTokens } from '@/features/api-tokens/queries'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 
 type QueryResult = { data: unknown; error: unknown }
 

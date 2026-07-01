@@ -9,7 +9,7 @@ import { runTableAction } from '@/lib/supabase/run-table-action'
 // reach the client — while the real error is still logged server-side for debugging. `createClient`
 // is stubbed (the real one is server-only + cookie-bound); the PostgREST `call` is supplied directly,
 // so this exercises the real normalize-and-mask logic without a live DB.
-vi.mock('@/lib/supabase/server', () => ({ createClient: vi.fn(async () => ({})) }))
+vi.mock('@/lib/supabase/create-server-client', () => ({ createClient: vi.fn(async () => ({})) }))
 
 const schema = z.object({ name: z.string() })
 const GENERIC_ERROR = 'Something went wrong. Please try again.'

@@ -3,7 +3,7 @@ import { cache } from 'react'
 
 import { runMaybeSingle } from '@/lib/supabase/run-maybe-single'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 import type { SubjectNoteSummaryT, SubjectOptionT } from '@/features/subjects/types'
 import type { SubjectT } from '@/types/subject'

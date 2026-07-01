@@ -5,7 +5,7 @@ import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { resolveSystemPrompts } from '@/features/openrouter/system-prompts'
 import type { PromptKeyT } from '@/features/openrouter/constants'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 
 // Backed by the request-cached credential row — shares one read with the page status + credits badge

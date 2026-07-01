@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { subjectIdSchema, subjectInputSchema } from '@/features/subjects/schemas'
 import { updateSubjectCore } from '@/features/subjects/update-subject-core'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

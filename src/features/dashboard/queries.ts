@@ -4,7 +4,7 @@ import { STATS_WINDOW_DAYS } from '@/features/dashboard/constants'
 import { cardStatsSchema } from '@/features/dashboard/schemas'
 import type { CardStatsT } from '@/features/dashboard/types'
 import { runRpc } from '@/lib/supabase/run-rpc'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 import { APP_TIME_ZONE } from '@/lib/utils'
 

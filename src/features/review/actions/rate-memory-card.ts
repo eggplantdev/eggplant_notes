@@ -9,7 +9,7 @@ import type { RateResultT } from '@/features/review/types'
 import { nextReviewCounts, reviewWindowKeys } from '@/features/review-events/derive-counts'
 import { getReviewCounts } from '@/features/review-events/queries'
 import { memoryCardIdSchema } from '@/features/memory-cards/schemas'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import { validateInput } from '@/lib/validate'
 
 // Server-trusted: the client sends only { memoryCardId, rating }; we compute the next FSRS state

@@ -1,7 +1,8 @@
 'use server'
 
 import { deleteSeededRows, revalidateSeedPaths } from '@/features/sample-data/seed-rows'
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import type { ActionResultT } from '@/types/action'
 
 // Delegates to deleteSeededRows — the same path the loader's rollback uses.

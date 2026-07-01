@@ -8,7 +8,7 @@ import {
 import type { ReviewDayCountT, ReviewEventT } from '@/features/review-events/types'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 import { APP_TIME_ZONE, MS_PER_DAY } from '@/lib/utils'
 

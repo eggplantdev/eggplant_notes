@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { isAllowedModel } from '@/features/openrouter/catalog'
-import { createClient, getCurrentUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
+import { getCurrentUser } from '@/lib/supabase/get-current-user'
 import { validateInput } from '@/lib/validate'
 import type { ActionResultT } from '@/types/action'
 

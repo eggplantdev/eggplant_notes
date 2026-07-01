@@ -14,7 +14,7 @@ import { runPaginatedQuery } from '@/lib/supabase/run-paginated-query'
 import { runRpc } from '@/lib/supabase/run-rpc'
 import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
 import { pageRange } from '@/lib/utils/pagination'
 
