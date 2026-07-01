@@ -16,8 +16,9 @@ export const MIN_GENERATION_PROMPT_CHARS = 10
 export const RECOMMENDED_MODELS: { id: string; label: string }[] = [
   { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini — cheap, fast' },
   { id: 'openai/gpt-4o', label: 'GPT-4o — stronger' },
-  { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku — cheap' },
-  { id: 'anthropic/claude-sonnet-4.5', label: 'Claude Sonnet 4.5 — stronger' },
+  { id: 'anthropic/claude-haiku-4.5', label: 'Claude Haiku 4.5 — cheap' },
+  { id: 'anthropic/claude-sonnet-5', label: 'Claude Sonnet 5 — stronger' },
+  { id: 'z-ai/glm-5.2', label: 'GLM 5.2' },
   { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash — cheap' },
   { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
 ]
