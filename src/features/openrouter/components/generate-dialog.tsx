@@ -351,7 +351,7 @@ export function GenerateDialog<T>({
       </Dialog>
 
       {/* Screen-centred while generating — see LoadingOverlay (portalled, above the dialog). */}
-      {isGenerating && <LoadingOverlay />}
+      {isGenerating && <LoadingOverlay wand />}
 
       <ConfirmDeleteDialog
         open={confirmResetOpen}
