@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 // starts as a cheap textarea and upgrades to the full markdown editor (EditorWithPreview, which pulls
 // the heavy CodeMirror + Shiki chunks) only on opt-in — so the common "plain prose answer" case never
 // pays for the editor bundle. Plain value/onChange so it drops into any TanStack `form.Field`.
-// `richByDefault` opens straight into the editor (the in-note add form, which is markdown-first).
+// `richByDefault` opens straight into the editor, skipping the toggle (the standalone card form,
+// which is markdown-first). The in-note forms keep the toggle so their many cards stay cheap textareas.
 export function CardExampleField({
   value,
   onChange,
