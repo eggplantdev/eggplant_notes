@@ -98,7 +98,10 @@ export default async function MemoryCardsPage({
           rides in as the panel's subtitle. */}
         {total > 0 && (
           <div id={REVIEW_PANEL_ID} className="mx-auto w-full max-w-3xl scroll-mt-24">
-            <ReviewCardTransition cardKey={reviewCard?.id ?? 'caught-up'}>
+            <ReviewCardTransition
+              cardKey={reviewCard?.id ?? 'caught-up'}
+              scrollOnMount={Boolean(sp.review)}
+            >
               <ReviewPanel
                 card={reviewCard}
                 goal={dailyGoal}
