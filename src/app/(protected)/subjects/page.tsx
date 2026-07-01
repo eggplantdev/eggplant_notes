@@ -1,22 +1,32 @@
-import { redirect } from 'next/navigation'
-
 import { PageShell } from '@/components/layout/page-shell'
+import { ButtonLink } from '@/components/ui/button-link'
 import { EmptyState } from '@/components/ui/empty-state'
-import { getSubjects } from '@/features/subjects/queries'
+import { getSubjectsWithFirstNote } from '@/features/subjects/queries'
+import { SubjectPicker } from '@/features/subjects/components/subject-picker'
 
-// No longer a list — the in-detail subject switcher replaced it. Redirect into the first subject's
-// detail; with zero subjects, offer to create one. `delete-subject` redirects here, so deleting the
-// current subject lands on the next remaining one (or this empty state when none are left).
+// Landing page for the Subjects nav tab: a picker, not a redirect. It used to bounce into the first
+// subject (which itself redirected to its first note) — two chained server redirects that flashed
+// three loading fallbacks. Now it renders a select and lets the user choose; the options carry each
+// subject's first note id so a pick lands straight on the note (one hop, not two). `delete-subject`
+// also lands here, so deleting the current subject drops you on the picker rather than auto-advancing.
 export default async function SubjectsPage() {
-  const subjects = await getSubjects()
-  if (subjects.length > 0) redirect(`/subjects/${subjects[0].id}`)
+  const subjects = await getSubjectsWithFirstNote()
 
   return (
     <PageShell title="Subjects" width="prose">
-      <EmptyState
-        message="No subjects yet. Group your notes under one."
-        action={{ label: 'Create your first subject', href: '/subjects/new' }}
-      />
+      {subjects.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <SubjectPicker subjects={subjects} />
+          <ButtonLink href="/subjects/new" variant="outline">
+            New subject
+          </ButtonLink>
+        </div>
+      ) : (
+        <EmptyState
+          message="No subjects yet. Group your notes under one."
+          action={{ label: 'Create your first subject', href: '/subjects/new' }}
+        />
+      )}
     </PageShell>
   )
 }

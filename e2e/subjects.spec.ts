@@ -147,24 +147,24 @@ test('subject in-place edit: rename + description via ?edit, lands back on the s
   await expect(page).not.toHaveURL(/\?edit$/)
 })
 
-// subjects-switcher-detail-view: the standalone /subjects card list is gone. /subjects now
-// redirects into a subject detail (the newest, via getSubjects' created_at-desc order) or shows an
-// empty state when there are none. Within the detail view, a switcher Combobox in the eyebrow
-// navigates between subjects, and "Delete subject" lands on the next remaining subject (or the
-// empty state). Covers the routing risk: redirect, switch, delete-to-next, delete-to-empty,
-// create-from-empty.
-test('subject switcher + /subjects redirect: navigate, delete-to-next, empty state, create-first', async ({
+// subjects-picker-detail-view: the standalone /subjects card list is gone. /subjects no longer
+// redirects — it shows a picker (or the empty state when there are none) and only navigates on an
+// explicit pick, avoiding the chained-redirect spinner flash. Within the detail view, a switcher
+// Combobox in the eyebrow navigates between subjects, and "Delete subject" lands back on the
+// /subjects picker (not the next subject). Covers the routing risk: pick-to-navigate, switch,
+// delete-to-picker, delete-to-empty, create-from-empty.
+test('subjects picker + detail switcher: pick, switch, delete-to-picker, empty state, create-first', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('subj-switch'))
   const stamp = Date.now()
 
-  // Empty account: /subjects is no longer a list — it shows the "no subjects" empty state.
+  // Empty account: /subjects is not a list — it shows the "no subjects" empty state.
   await page.goto('/subjects')
   await expect(page).toHaveURL('/subjects')
   await expect(page.getByText('No subjects yet.')).toBeVisible()
 
-  // Two subjects; Beta is created last, so it is newest and the redirect target.
+  // Two subjects.
   await page.goto('/subjects/new')
   await page.getByLabel('Title').fill(`Alpha ${stamp}`)
   await page.getByRole('button', { name: 'Create subject' }).click()
@@ -177,8 +177,12 @@ test('subject switcher + /subjects redirect: navigate, delete-to-next, empty sta
   await expect(page).toHaveURL(/\/subjects\/[0-9a-f-]+$/, { timeout: 15_000 })
   const betaUrl = page.url()
 
-  // /subjects redirects into the newest subject's detail (Beta).
+  // /subjects stays put and shows the picker (the only combobox on the landing). Picking Beta
+  // navigates into its detail.
   await page.goto('/subjects')
+  await expect(page).toHaveURL('/subjects')
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: `Beta ${stamp}`, exact: true }).click()
   await expect(page).toHaveURL(betaUrl, { timeout: 15_000 })
 
   // The switcher (the only combobox in the detail eyebrow) reads the current subject and navigates
@@ -188,13 +192,16 @@ test('subject switcher + /subjects redirect: navigate, delete-to-next, empty sta
   await expect(page).toHaveURL(alphaUrl, { timeout: 15_000 })
   await expect(page.getByRole('heading', { name: `Alpha ${stamp}` })).toBeVisible()
 
-  // Delete the current subject (Alpha) → delete redirects to /subjects, which redirects on to the
-  // one remaining subject (Beta).
+  // Delete the current subject (Alpha) → delete lands on the /subjects picker (no auto-advance).
+  // Beta remains; pick it from the picker to continue.
   await page.getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+  await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: `Beta ${stamp}`, exact: true }).click()
   await expect(page).toHaveURL(betaUrl, { timeout: 15_000 })
 
-  // Delete the last subject (Beta) → /subjects has nothing to redirect to → empty state.
+  // Delete the last subject (Beta) → /subjects picker has nothing to offer → empty state.
   await page.getByRole('button', { name: 'Delete subject' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL('/subjects', { timeout: 15_000 })
