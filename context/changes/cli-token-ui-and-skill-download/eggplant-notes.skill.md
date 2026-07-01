@@ -22,6 +22,83 @@ user's data.
 > **You downloaded this skill from the app, so the base URL is already filled in below.** It points at the
 > exact deployment you got it from.
 
+## Posting conventions (always follow)
+
+These rules govern every note and card you create or edit:
+
+1. **Draft before posting — open a temp markdown file, don't dump in the terminal.**
+   Write the full draft to a temporary `.md` file and open it so the user can read it rendered,
+   then wait for explicit approval before calling any write endpoint.
+
+   ```bash
+   DRAFT="${TMPDIR:-/tmp}/eggplant-draft-$$.md"   # $$ = PID, unique per run; .md suffix preserved
+   # write the note title, content, and every card (prompt / example) into $DRAFT
+   # Prefer the user's current editor (VS Code / Cursor) so the draft lands in their workspace.
+   # `code`/`cursor` open the file as RAW markdown — there is no CLI flag to open the rendered
+   # preview directly, so on macOS we then send Cmd+Shift+V to trigger the editor's preview.
+   # That keystroke step is best-effort: it needs Accessibility permission for the terminal and
+   # the editor window to take focus. If it doesn't fire, the user can hit Cmd+Shift+V manually.
+   EDITOR_APP=""
+   if command -v code &>/dev/null; then code "$DRAFT"; EDITOR_APP="Code"
+   elif command -v cursor &>/dev/null; then cursor "$DRAFT"; EDITOR_APP="Cursor"
+   elif [ -n "$EDITOR" ]; then "$EDITOR" "$DRAFT"
+   elif command -v open &>/dev/null; then open "$DRAFT"        # macOS fallback
+   elif command -v xdg-open &>/dev/null; then xdg-open "$DRAFT" # Linux fallback
+   elif command -v start &>/dev/null; then start "$DRAFT"      # Windows (Git Bash / WSL)
+   fi
+   # Auto-open the rendered preview (macOS + VS Code/Cursor only).
+   if [ -n "$EDITOR_APP" ] && command -v osascript &>/dev/null; then
+     sleep 1  # give the editor a moment to focus the newly opened file
+     osascript -e "tell application \"System Events\" to keystroke \"v\" using {command down, shift down}" 2>/dev/null || true
+   fi
+   ```
+
+   Structure the file so it's readable at a glance. A card has exactly two fields — `prompt` and the
+   single `example` answer, which holds the prose scenario **and** any fenced code in the one block:
+
+   ````markdown
+   # <note title>
+
+   <note content verbatim>
+
+   ---
+
+   ## Memory cards
+
+   ### Card 1
+
+   **Prompt:** the recall cue
+   **Example:** short prose scenario, then any code fenced in the same field:
+
+   ```lang
+   …
+   ```
+   ````
+
+   After opening, tell the user the file path and ask for approval. Don't post until they confirm.
+
+2. **No title inside the note `content`.** The note already stores its `title` separately and
+   the app renders it, so the body must NOT open with a `# Title` heading that repeats it.
+   Start `content` with the actual material.
+
+3. **The note must be fully self-contained; the card need not be.** Write the note for a reader
+   who is NOT the user, has zero memory of the conversation, and cannot see the code on screen
+   or the surrounding context window. Inline everything: the code being discussed, the scenario,
+   definitions of any referenced function/pattern/file, and the "why." Never reference "the code
+   above," "this file," or "what we discussed."
+   Cards are linked to a note the reader can open instantly, so a card may lean on its note for
+   context and just be a sharp recall prompt. The strict self-containment bar is on the **note**,
+   not the card.
+
+4. **Self-review before showing the draft.** Critique your own note and card first, and revise
+   when it makes sense, against these questions:
+   - **Card:** is the question genuinely meaningful — does it test something worth memorising,
+     not a trivial or throwaway fact?
+   - **Note (comprehensible):** would a cold reader fully understand it? Is anything missing that
+     should be added?
+   - **Note (signal):** is everything in it important enough to keep — no filler or noise that
+     adds length without real value? Cut what doesn't earn its place.
+
 ## Persist this skill (install it once)
 
 **If you are an agent reading this from a paste or a one-off file, install it before doing anything else** —
