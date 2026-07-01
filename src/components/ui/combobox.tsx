@@ -12,7 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ResponsivePopover } from '@/components/ui/responsive-popover'
 import { cn } from '@/lib/utils'
 
 // Local to this primitive — no external consumer; callers pass plain `{value,label}` literals.
@@ -52,8 +52,13 @@ export function Combobox({
   const selectedLabel = options.find((option) => option.value === value)?.label
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={modal}>
-      <PopoverTrigger asChild>
+    <ResponsivePopover
+      open={open}
+      onOpenChange={setOpen}
+      modal={modal}
+      title={placeholder}
+      contentClassName="w-fit min-w-(--radix-popover-trigger-width)"
+      trigger={
         <Button
           type="button"
           id={id}
@@ -72,32 +77,31 @@ export function Combobox({
           <span className="truncate">{selectedLabel ?? placeholder}</span>
           <ChevronsUpDown className="size-3.5 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-fit min-w-(--radix-popover-trigger-width) p-0" align="start">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                // `value` is the unique option id so cmdk doesn't collide on duplicate labels; `keywords` keeps search matching the label.
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  keywords={[option.label]}
-                  data-checked={value === option.value}
-                  onSelect={() => {
-                    onChange(option.value)
-                    setOpen(false)
-                  }}
-                >
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+      }
+    >
+      <Command>
+        <CommandInput placeholder={searchPlaceholder} />
+        <CommandList>
+          <CommandEmpty>{emptyMessage}</CommandEmpty>
+          <CommandGroup>
+            {options.map((option) => (
+              // `value` is the unique option id so cmdk doesn't collide on duplicate labels; `keywords` keeps search matching the label.
+              <CommandItem
+                key={option.value}
+                value={option.value}
+                keywords={[option.label]}
+                data-checked={value === option.value}
+                onSelect={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+              >
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsivePopover>
   )
 }

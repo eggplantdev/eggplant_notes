@@ -39,6 +39,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: BRAND_DARK,
+  // Shrink the LAYOUT viewport when the soft keyboard opens (instead of the default overlay). Keeps
+  // `position: fixed` bottom-anchored UI — the mobile combobox/multi-select Sheet — above the keyboard
+  // so its search input stays visible; also stops focused inputs anywhere from being hidden behind it.
+  interactiveWidget: 'resizes-content',
   // Emits <meta name="color-scheme" content="dark"> so the browser paints its WINDOW canvas dark for the
   // navigation-commit frame — the one painted before the document's own styles (CSS, inline <html> bg,
   // the veil) resolve. Without it that first frame is the UA default white: the intro flash.

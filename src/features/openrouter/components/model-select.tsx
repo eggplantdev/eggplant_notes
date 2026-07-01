@@ -14,7 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ResponsivePopover } from '@/components/ui/responsive-popover'
 import { listFavoriteModels } from '@/features/openrouter/actions/list-favorite-models'
 import { listOpenRouterModels } from '@/features/openrouter/actions/list-models'
 import { toggleFavoriteModel } from '@/features/openrouter/actions/toggle-favorite-model'
@@ -154,8 +154,13 @@ export function ModelSelect({
   }
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange} modal={modal}>
-      <PopoverTrigger asChild>
+    <ResponsivePopover
+      open={open}
+      onOpenChange={handleOpenChange}
+      modal={modal}
+      title="Select model"
+      contentClassName={cn('w-(--radix-popover-trigger-width)', 'min-w-72')}
+      trigger={
         <Button
           type="button"
           variant="outline"
@@ -170,60 +175,56 @@ export function ModelSelect({
           {selectedLabel}
           <ChevronsUpDown className="size-3.5 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className={cn('w-(--radix-popover-trigger-width) p-0', 'min-w-72')}
-        align="start"
-      >
-        <Command>
-          <div className="flex items-start gap-2 border-b px-3 py-4 text-xs text-white">
-            <Lightbulb className="text-neon-cyan mt-0.5 size-4 shrink-0" />
-            <p>
-              Generating notes and cards is a simple task — the cheap default models handle it well,
-              so there&apos;s no need to reach for a pricier one. Feel free to experiment with
-              stronger models, but they cost more tokens.
-            </p>
+      }
+    >
+      <Command>
+        <div className="flex items-start gap-2 border-b px-3 py-4 text-xs text-white">
+          <Lightbulb className="text-neon-cyan mt-0.5 size-4 shrink-0" />
+          <p>
+            Generating notes and cards is a simple task — the cheap default models handle it well,
+            so there&apos;s no need to reach for a pricier one. Feel free to experiment with
+            stronger models, but they cost more tokens.
+          </p>
+        </div>
+        <CommandInput placeholder="Search models…" />
+        <div className="flex flex-col gap-1.5 border-b px-2 py-2">
+          <span className="text-muted-foreground text-xs font-medium">Sort by</span>
+          <div className="flex items-center gap-1.5">
+            <SegmentedToggle
+              value={sort}
+              onChange={setSort}
+              options={SORT_OPTIONS}
+              size="sm"
+              ariaLabel="Sort field"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              data-testid={testId ? `${testId}-sort-dir` : undefined}
+              aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
+              className="h-7 gap-1 text-xs"
+            >
+              {sortDir === 'asc' ? (
+                <ArrowUp className="size-3.5" />
+              ) : (
+                <ArrowDown className="size-3.5" />
+              )}
+              {sortDir === 'asc' ? 'Asc' : 'Desc'}
+            </Button>
           </div>
-          <CommandInput placeholder="Search models…" />
-          <div className="flex flex-col gap-1.5 border-b px-2 py-2">
-            <span className="text-muted-foreground text-xs font-medium">Sort by</span>
-            <div className="flex items-center gap-1.5">
-              <SegmentedToggle
-                value={sort}
-                onChange={setSort}
-                options={SORT_OPTIONS}
-                size="sm"
-                ariaLabel="Sort field"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-                data-testid={testId ? `${testId}-sort-dir` : undefined}
-                aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
-                className="h-7 gap-1 text-xs"
-              >
-                {sortDir === 'asc' ? (
-                  <ArrowUp className="size-3.5" />
-                ) : (
-                  <ArrowDown className="size-3.5" />
-                )}
-                {sortDir === 'asc' ? 'Asc' : 'Desc'}
-              </Button>
-            </div>
-          </div>
-          <CommandList>
-            <CommandEmpty>{isLoading ? 'Loading models…' : 'No models found.'}</CommandEmpty>
-            {pinned.length > 0 && (
-              <CommandGroup heading="Pinned">{pinned.map(renderItem)}</CommandGroup>
-            )}
-            {rest.length > 0 && (
-              <CommandGroup heading="All models">{rest.map(renderItem)}</CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </div>
+        <CommandList>
+          <CommandEmpty>{isLoading ? 'Loading models…' : 'No models found.'}</CommandEmpty>
+          {pinned.length > 0 && (
+            <CommandGroup heading="Pinned">{pinned.map(renderItem)}</CommandGroup>
+          )}
+          {rest.length > 0 && (
+            <CommandGroup heading="All models">{rest.map(renderItem)}</CommandGroup>
+          )}
+        </CommandList>
+      </Command>
+    </ResponsivePopover>
   )
 }

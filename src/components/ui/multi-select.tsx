@@ -12,7 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ResponsivePopover } from '@/components/ui/responsive-popover'
 import { cn } from '@/lib/utils'
 
 export type MultiSelectOptionT = { value: string; label: string }
@@ -63,8 +63,12 @@ export function MultiSelect({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <ResponsivePopover
+      open={open}
+      onOpenChange={setOpen}
+      title={placeholder}
+      contentClassName="w-(--radix-popover-trigger-width)"
+      trigger={
         <Button
           type="button"
           id={id}
@@ -80,31 +84,30 @@ export function MultiSelect({
           {count === 0 ? placeholder : `${placeholder} (${count})`}
           <ChevronsUpDown className="size-3.5 opacity-50" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
-        <Command>
-          {searchable && <CommandInput placeholder={searchPlaceholder} />}
-          <CommandList>
-            {searchable && <CommandEmpty>{emptyMessage}</CommandEmpty>}
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  keywords={[option.label]}
-                  // Per-option E2E hook, derived from the trigger testid so the primitive stays
-                  // generic and option targeting doesn't couple to visible copy.
-                  data-testid={dataTestId ? `${dataTestId}-option-${option.value}` : undefined}
-                  data-checked={values.includes(option.value)}
-                  onSelect={() => toggle(option.value)}
-                >
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+      }
+    >
+      <Command>
+        {searchable && <CommandInput placeholder={searchPlaceholder} />}
+        <CommandList>
+          {searchable && <CommandEmpty>{emptyMessage}</CommandEmpty>}
+          <CommandGroup>
+            {options.map((option) => (
+              <CommandItem
+                key={option.value}
+                value={option.value}
+                keywords={[option.label]}
+                // Per-option E2E hook, derived from the trigger testid so the primitive stays
+                // generic and option targeting doesn't couple to visible copy.
+                data-testid={dataTestId ? `${dataTestId}-option-${option.value}` : undefined}
+                data-checked={values.includes(option.value)}
+                onSelect={() => toggle(option.value)}
+              >
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsivePopover>
   )
 }
