@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label'
 import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
 import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
 import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
+import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
 import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
 import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
 import { promptSchema } from '@/features/memory-cards/schemas'
@@ -216,6 +217,15 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
         <ButtonLink href="/memory-cards" variant="ghost">
           Cancel
         </ButtonLink>
+        {card && (
+          <div className="ml-auto">
+            <DeleteMemoryCardButton
+              id={card.id}
+              noteId={card.note_id ?? undefined}
+              redirectTo="/memory-cards"
+            />
+          </div>
+        )}
       </div>
 
       {card && pendingValues && (
