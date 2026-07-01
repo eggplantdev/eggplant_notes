@@ -15,6 +15,7 @@ import {
   getSoonestReviewCard,
 } from '@/features/memory-cards/queries'
 import { parseCardFilters } from '@/features/memory-cards/utils'
+import { getReviewCounts } from '@/features/review-events/queries'
 import { REVIEW_PANEL_ID } from '@/features/review/constants'
 import { ReviewCardTransition } from '@/features/review/components/review-card-transition'
 import { ReviewPanel } from '@/features/review/components/review-panel'
@@ -50,8 +51,9 @@ export default async function MemoryCardsPage({
     subjects,
     { rows: cards, total },
     overview,
-    { first: dueCard, count: dueCount },
+    { first: dueCard },
     dailyGoal,
+    { today: reviewedToday },
   ] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ ...filters, page, limit }),
@@ -59,6 +61,9 @@ export default async function MemoryCardsPage({
     // Same filters as the listing → the review panel is scoped to the active topic.
     getDueQueue(filters),
     getDailyGoal(),
+    // Global (not filter-scoped) — the daily goal counts distinct cards reviewed today across the
+    // whole deck, same as the dashboard.
+    getReviewCounts(),
   ])
 
   // The card to review, in priority: an explicitly clicked card (due or not) → the soonest-due card
@@ -66,8 +71,10 @@ export default async function MemoryCardsPage({
   const selectedCard = sp.review ? await getMemoryCardForReview(sp.review) : undefined
   let reviewCard = selectedCard ?? dueCard
   if (!reviewCard) reviewCard = await getSoonestReviewCard(filters)
-  // Showing a not-due card because nothing is due (vs. nothing due AND no cards at all).
-  const reviewingAhead = dueCount === 0 && Boolean(reviewCard)
+  // "Reviewing ahead" = today's goal is met (the persistent counterpart to the one-shot goal-crossing
+  // celebration), so any card still shown is a bonus review beyond the goal. Guarded on a card
+  // existing so the notice never stacks above the empty caught-up state.
+  const reviewingAhead = dailyGoal > 0 && reviewedToday >= dailyGoal && Boolean(reviewCard)
 
   // After a rating, RatingButtons replaces to this (filters minus `review`) so the selection clears
   // and the next card surfaces.

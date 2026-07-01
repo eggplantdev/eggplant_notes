@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ButtonLink } from '@/components/ui/button-link'
 import { CardActions } from '@/components/ui/card-actions'
 import { RenderMarkdown } from '@/components/markdown/render-markdown'
 import { AnswerDisclosure } from '@/features/review/components/answer-disclosure'
@@ -13,38 +12,30 @@ import { SourceNoteLink } from '@/features/notes/components/source-note-link'
 import type { DueCardT } from '@/features/memory-cards/types'
 import { cn } from '@/lib/utils'
 
-// provideCelebration: both surfaces (dashboard, /memory-cards) advance in place, so they self-provide
-// the celebration dialog (default true).
-// showCardControls: render per-card Edit/Delete in the header — on for both in-place review panels.
-// advanceHref: passed through to RatingButtons; the /memory-cards panel uses it to clear its
-// `?review` selection after a rating so the next card surfaces (omitted on the dashboard).
-// reviewHref: when set, a "Review" link to the full review surface shows in the header — the dashboard
-// uses it to send the user to /memory-cards (it reviews in place but is not the dedicated surface).
-// reviewingAhead: nothing is due but a not-yet-due card is shown so the user can keep reviewing;
-// renders the "caught up, reviewing ahead" notice above the card. Set by both in-place panels.
+// showCardControls: render per-card Edit/Delete in the header.
+// advanceHref: passed through to RatingButtons; the panel uses it to clear its `?review` selection
+// after a rating so the next card surfaces.
+// reviewingAhead: today's daily goal is met, so the card shown is a bonus review beyond the goal;
+// renders the "daily goal hit" notice above the card.
 type PropsT = {
   card: DueCardT | undefined
   goal: number
-  provideCelebration?: boolean
   showCardControls?: boolean
   deleteRedirectTo?: string
   advanceHref?: string
-  reviewHref?: string
   reviewingAhead?: boolean
   className?: string
 }
 
-// Server Component: owns the interval previews (computed only when a card is due). The celebration
-// provider wraps BOTH branches so the dialog survives RatingButtons unmounting when the last card is
-// rated (lessons.md:141-145).
+// Server Component: owns the interval previews (computed only when a card is due). Wrapped in the
+// celebration provider so the goal-crossing dialog survives RatingButtons unmounting when the last
+// card is rated (lessons.md:141-145).
 export function ReviewPanel({
   card,
   goal,
-  provideCelebration = true,
   showCardControls = false,
   deleteRedirectTo,
   advanceHref,
-  reviewHref,
   reviewingAhead = false,
   className,
 }: PropsT) {
@@ -60,11 +51,6 @@ export function ReviewPanel({
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">Memory Card Review</CardTitle>
           <div className="flex shrink-0 items-center gap-2">
-            {reviewHref && (
-              <ButtonLink href={reviewHref} variant="outline" size="sm">
-                Review
-              </ButtonLink>
-            )}
             {showCardControls && (
               <CardActions
                 editHref={memoryCardEditHref(card.id)}
@@ -117,16 +103,12 @@ export function ReviewPanel({
         // mb matches the section gap-12 so the notice sits centered between the section above and the
         // panel, not glued to the card.
         <p className="text-muted-foreground mb-12 text-center text-sm">
-          All caught up 🎉 — reviewing ahead.
+          Daily goal hit 🎉 — bonus reviews.
         </p>
       )}
       {body}
     </>
   )
 
-  return provideCelebration ? (
-    <ReviewCelebrationProvider>{content}</ReviewCelebrationProvider>
-  ) : (
-    content
-  )
+  return <ReviewCelebrationProvider>{content}</ReviewCelebrationProvider>
 }
