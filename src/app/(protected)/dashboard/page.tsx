@@ -13,11 +13,12 @@ import { Suspense } from 'react'
 import { WelcomeDialogServer } from '@/features/dashboard/components/welcome-dialog-server'
 
 // em-dash when there's no data yet (null fraction).
-const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%`)
+const percentage = (fraction: number | null) =>
+  fraction === null ? '—' : `${Math.round(fraction * 100)}%`
 
 export default async function DashboardPage() {
   const [user, data] = await Promise.all([getCurrentUser(), getDashboardData()])
-  const { stats: s, activity, dueToday, reviewedToday, currentStreak, dailyGoal } = data
+  const { stats, activity, dueToday, reviewedToday, currentStreak, dailyGoal } = data
 
   const columns = buildHeatmapMatrix(activity, {
     today: todayInZone(APP_TIME_ZONE),
@@ -27,9 +28,13 @@ export default async function DashboardPage() {
   // Rendered as a 2×2 grid; cull a line to drop a tile.
   const tiles = [
     { label: 'Due today', value: dueToday, sub: 'memory cards ready to review' },
-    { label: 'Overdue', value: s.overdue, sub: 'cards past their due date' },
-    { label: 'Reviews (30d)', value: s.reviewsInWindow, sub: 'reviews in the last 30 days' },
-    { label: 'Retention (30d)', value: pct(s.retention), sub: 'reviews rated Good or better' },
+    { label: 'Overdue', value: stats.overdue, sub: 'cards past their due date' },
+    { label: 'Reviews (30d)', value: stats.reviewsInWindow, sub: 'reviews in the last 30 days' },
+    {
+      label: 'Retention (30d)',
+      value: percentage(stats.retention),
+      sub: 'reviews rated Good or better',
+    },
   ]
 
   return (
@@ -59,7 +64,7 @@ export default async function DashboardPage() {
           />
           <GoalProgressBar
             label="This week's progress"
-            reviewed={s.reviewsThisWeek}
+            reviewed={stats.reviewsThisWeek}
             goal={dailyGoal * 7}
             variant="aurora"
             goalHitText="Weekly goal hit 🚀"
@@ -74,12 +79,7 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
-      {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
-      {s.hardestCards.length > 1 && (
-        <TitledCard title="Needs attention">
-          <HardestCards cards={s.hardestCards} />
-        </TitledCard>
-      )}
+      <HardestCards cards={stats.hardestCards} />
     </PageShell>
   )
 }
