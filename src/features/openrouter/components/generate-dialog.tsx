@@ -305,7 +305,7 @@ export function GenerateDialog<T>({
                 data-testid="generate-system"
                 value={shown.system}
                 onChange={(e) => setOverride({ ...shown, system: e.target.value })}
-                className="max-h-32 font-mono text-xs"
+                className="font-mono text-xs"
               />
             </div>
 
@@ -316,7 +316,7 @@ export function GenerateDialog<T>({
                 data-testid="generate-prompt"
                 value={shown.prompt}
                 onChange={(e) => setOverride({ ...shown, prompt: e.target.value })}
-                className="max-h-72 min-h-40 font-mono text-xs"
+                className="min-h-40 font-mono text-xs"
                 aria-invalid={promptTooShort}
               />
               <FormError
