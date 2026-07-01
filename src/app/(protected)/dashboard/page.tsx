@@ -13,8 +13,9 @@ import { Suspense } from 'react'
 import { WelcomeDialogServer } from '@/features/dashboard/components/welcome-dialog-server'
 
 // em-dash when there's no data yet (null fraction).
-const percentage = (fraction: number | null) =>
-  fraction === null ? '—' : `${Math.round(fraction * 100)}%`
+function percentage(fraction: number | null) {
+  return fraction === null ? '—' : `${Math.round(fraction * 100)}%`
+}
 
 export default async function DashboardPage() {
   const [user, data] = await Promise.all([getCurrentUser(), getDashboardData()])
