@@ -40,15 +40,11 @@ export function WelcomeDialog() {
         <DialogHeader>
           <DialogTitle>Welcome 👋</DialogTitle>
           <DialogDescription>
-            A place to organize what you&apos;re learning — built mainly for{' '}
-            <strong>code related notes</strong>, with <strong>syntax highlighting</strong> across
-            many languages. Group your <strong>notes</strong> into <strong>subjects</strong>, then
-            turn any note into <strong>memory cards</strong> and <strong>review</strong> a few each
-            day — a <strong>daily goal</strong> keeps you on track. You can use LLM to generate it
-            for you. Head to Settings to load sample data, connect an OpenRouter account, or
-            download a skill that lets an AI agent author notes and cards for you over CLI/HTTP. You
-            can also install it as an app from your browser. Still in active development, so expect
-            a few rough edges.
+            Organize what you&apos;re learning. Write <strong>code notes</strong> with{' '}
+            <strong>syntax highlighting</strong>, group them into <strong>subjects</strong>, then
+            turn any note into <strong>memory cards</strong> you <strong>review</strong> daily. Head
+            to <strong>Settings</strong> to load sample data or connect an LLM to generate cards for
+            you.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
