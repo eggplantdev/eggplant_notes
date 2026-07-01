@@ -5,33 +5,19 @@ import { GoalProgressBar } from '@/components/ui/goal-progress-bar'
 import { SectionLabel } from '@/components/ui/section-label'
 import { HardestCards } from '@/features/dashboard/components/hardest-cards'
 import { StatCard } from '@/features/dashboard/components/stat-card'
-import { WelcomeDialog } from '@/features/dashboard/components/welcome-dialog'
-import { WELCOME_SEEN_COOKIE } from '@/features/dashboard/welcome-dialog-cookie'
 import { TitledCard } from '@/components/ui/titled-card'
-import { ReviewPanel } from '@/features/review/components/review-panel'
 import { APP_TIME_ZONE, todayInZone } from '@/lib/utils'
-import { cookies } from 'next/headers'
-import { getDashboardPageData } from './loader'
+import { getDashboardData } from '@/features/dashboard/data'
+import { getCurrentUser } from '@/lib/supabase/server'
+import { Suspense } from 'react'
+import { WelcomeDialogServer } from '@/features/dashboard/components/welcome-dialog-server'
 
 // em-dash when there's no data yet (null fraction).
 const pct = (f: number | null) => (f === null ? '—' : `${Math.round(f * 100)}%`)
 
 export default async function DashboardPage() {
-  const {
-    user,
-    stats: s,
-    activity,
-    dueToday,
-    reviewedToday,
-    currentStreak,
-    dailyGoal,
-    card,
-    reviewingAhead,
-    isEmpty,
-  } = await getDashboardPageData()
-
-  // One-time onboarding: show only while empty AND not yet dismissed (cookie set by the dialog).
-  const welcomeSeen = (await cookies()).get(WELCOME_SEEN_COOKIE)?.value === '1'
+  const [user, data] = await Promise.all([getCurrentUser(), getDashboardData()])
+  const { stats: s, activity, dueToday, reviewedToday, currentStreak, dailyGoal } = data
 
   const columns = buildHeatmapMatrix(activity, {
     today: todayInZone(APP_TIME_ZONE),
@@ -48,7 +34,7 @@ export default async function DashboardPage() {
 
   return (
     <PageShell title="Dashboard" subtitle={`Signed in as ${user?.email}`}>
-      {isEmpty && !welcomeSeen && <WelcomeDialog />}
+      <Suspense>{<WelcomeDialogServer />}</Suspense>
       {/* Match the memory-cards page's bigger, even section spacing (PageShell's own gap is the default). */}
       <div className="flex flex-col gap-12">
         {/* Card-less hero stat: StatCard's type scale without the chrome. */}
@@ -82,28 +68,18 @@ export default async function DashboardPage() {
         <TitledCard title="Review activity — last 12 months" className="w-full">
           <ActivityHeatmap columns={columns} variant="neon-cyan" />
         </TitledCard>
-        <div className="&>*:min-w-0 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-4">
-          <div>
-            <ReviewPanel
-              card={card}
-              goal={dailyGoal}
-              reviewHref="/memory-cards"
-              reviewingAhead={reviewingAhead}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {tiles.map((tile) => (
-              <StatCard key={tile.label} {...tile} compact />
-            ))}
-          </div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {tiles.map((tile) => (
+            <StatCard key={tile.label} {...tile} compact />
+          ))}
         </div>
-        {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
-        {s.hardestCards.length > 1 && (
-          <TitledCard title="Needs attention">
-            <HardestCards cards={s.hardestCards} />
-          </TitledCard>
-        )}
       </div>
+      {/* Surfaced only with a backlog of lapsing cards — a single struggler isn't worth a callout. */}
+      {s.hardestCards.length > 1 && (
+        <TitledCard title="Needs attention">
+          <HardestCards cards={s.hardestCards} />
+        </TitledCard>
+      )}
     </PageShell>
   )
 }
