@@ -2,12 +2,13 @@
 
 import { type ReactNode } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { MenuIcon, XIcon } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { ArrowLeftIcon, MenuIcon, XIcon } from 'lucide-react'
 
 import { BrandMark } from '@/components/brand/brand-mark'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { useIsStandalone } from '@/hooks/use-is-standalone'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
 import { NavConnectButton } from '@/features/openrouter/components/nav-connect-button'
 import { isNavActive } from './is-nav-active'
@@ -27,6 +28,9 @@ export function MobileNav({
   credits?: ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  // In a browser the chrome already offers a back button; only the installed PWA (no chrome) needs one.
+  const isStandalone = useIsStandalone()
 
   return (
     <Sheet>
@@ -58,6 +62,14 @@ export function MobileNav({
           <BrandMark href="/dashboard" className="absolute top-4 left-4 h-7" />
         </SheetClose>
         <nav className="flex h-full flex-col gap-1 p-4 pt-16">
+          {isStandalone && (
+            <SheetClose asChild>
+              <Button variant="ghost" className="justify-start" onClick={() => router.back()}>
+                <ArrowLeftIcon />
+                Go back
+              </Button>
+            </SheetClose>
+          )}
           {ALL_NAV_ITEMS.map((item) => {
             const isActive = isNavActive(pathname, item.href)
             return (
