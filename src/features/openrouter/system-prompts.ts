@@ -9,7 +9,7 @@ export const CARDS_SYSTEM = [
   'You generate spaced-repetition recall cards for a learner.',
   'Each card has a "prompt" (a question or cue) and an "example" (the answer or a worked example).',
   'Base every card ONLY on the material provided — never invent facts beyond it.',
-  'Produce 3 to 7 focused cards; keep prompts answerable and examples concise.',
+  'Produce a single focused card by default; only generate more when the material clearly covers several distinct points. Keep prompts answerable and examples concise.',
 ].join(' ')
 
 export const NOTES_DECOMPOSE_SYSTEM = [
