@@ -96,10 +96,14 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
 
   async function submitCard(values: CardFormValuesT) {
     setPendingValues(undefined)
-    const result = card
-      ? await updateMemoryCard(card.id, values)
-      : await createStandaloneCard(values)
-    if (reportResult(result)) navigate('/memory-cards', card ? 'card-saved' : 'card-created')
+    if (card) {
+      const result = await updateMemoryCard(card.id, values)
+      // Stay on this edit page — just confirm via toast.
+      reportResult(result, { successMessage: 'Card saved' })
+      return
+    }
+    const result = await createStandaloneCard(values)
+    if (reportResult(result)) navigate('/memory-cards', 'card-created')
   }
 
   return (
@@ -144,6 +148,10 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
           onResult={(genCard) => {
             form.setFieldValue('prompt', genCard.prompt)
             form.setFieldValue('example', genCard.example)
+            // setFieldValue only re-runs the "change" validation cause; a stale error from an
+            // earlier blur on the empty field (e.g. tabbing through before generating) sticks
+            // around in errorMap.onBlur otherwise, showing under the now-valid AI-filled value.
+            form.validateField('prompt', 'blur')
           }}
           resultNoun="card"
           applyHint="Card filled in below — edit if needed, then Create card to save."
@@ -159,6 +167,7 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
           <CardExampleField
             value={field.state.value}
             onChange={field.handleChange}
+            richByDefault
             testId="card-form-example"
           />
         )}

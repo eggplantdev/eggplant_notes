@@ -129,7 +129,7 @@ export function NoteForm(props: NoteFormPropsT) {
     if (!props.note) return
     setPendingInput(undefined)
     const result = await props.action(props.note.id, noteInput, cardActions)
-    if (reportResult(result)) navigate(`/notes/${props.note.id}`, 'note-saved')
+    reportResult(result, { successMessage: 'Note saved' })
   }
 
   return (

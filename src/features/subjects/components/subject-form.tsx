@@ -27,7 +27,7 @@ export function SubjectForm(props: SubjectFormPropsT) {
     onSubmit: async ({ value }) => {
       if (props.subject) {
         const result = await props.action(props.subject.id, value)
-        if (reportResult(result)) navigate(`/subjects/${props.subject.id}`, 'subject-saved')
+        reportResult(result, { successMessage: 'Subject saved' })
         return
       }
       const result = await props.action(value)
