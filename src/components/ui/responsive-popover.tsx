@@ -43,7 +43,7 @@ export function ResponsivePopover({
         <SheetContent
           side="bottom"
           showCloseButton={false}
-          className="max-h-[85svh] gap-0 rounded-t-xl p-1"
+          className="max-h-[85dvh] gap-0 rounded-t-xl p-1"
         >
           <SheetTitle className="sr-only">{title}</SheetTitle>
           {children}
