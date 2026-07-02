@@ -66,7 +66,6 @@ export function MobileNav({
             <SheetClose asChild>
               <Button variant="ghost" className="justify-start" onClick={() => router.back()}>
                 <ArrowLeftIcon />
-                Go back
               </Button>
             </SheetClose>
           )}
