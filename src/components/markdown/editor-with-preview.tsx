@@ -82,7 +82,7 @@ export function EditorWithPreview({
         <MarkdownEditor value={value} onChange={onChange} />
       </div>
       {pane === 'preview' && (
-        <div className="prose dark:prose-invert min-h-80 max-w-none min-w-0 rounded-lg border p-4 break-all [&_pre]:overflow-x-auto">
+        <div className="prose dark:prose-invert min-h-80 max-w-none min-w-0 rounded-lg border p-4 [&_pre]:overflow-x-auto">
           <MarkdownPreview content={value} />
         </div>
       )}
