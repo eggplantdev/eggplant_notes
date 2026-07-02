@@ -1,34 +1,23 @@
 'use client'
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import confetti from 'canvas-confetti'
 
-import { GoalCelebrationDialog } from '@/features/review/components/goal-celebration-dialog'
-import type { GoalCelebrationT } from '@/features/review/types'
-
-type CelebrationContextT = { celebrate: (payload: GoalCelebrationT) => void }
+type CelebrationContextT = { celebrate: () => void }
 
 const ReviewCelebrationContext = createContext<CelebrationContextT | undefined>(undefined)
 
-// Holds celebration state ABOVE the panel's `card ? ... : empty` branch so the dialog survives
-// RatingButtons unmounting when the last due card is rated — exactly when the goal is most often crossed.
+// Lives ABOVE the panel's `card ? ... : empty` branch so a goal crossed on the last due card
+// still fires confetti after RatingButtons unmounts.
 export function ReviewCelebrationProvider({ children }: { children: ReactNode }) {
-  const [celebration, setCelebration] = useState<GoalCelebrationT | undefined>(undefined)
-
-  const celebrate = useCallback((payload: GoalCelebrationT) => {
+  const celebrate = useCallback(() => {
     void confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
-    setCelebration(payload)
   }, [])
 
   const value = useMemo(() => ({ celebrate }), [celebrate])
 
-  return (
-    <ReviewCelebrationContext value={value}>
-      {children}
-      <GoalCelebrationDialog celebration={celebration} onClose={() => setCelebration(undefined)} />
-    </ReviewCelebrationContext>
-  )
+  return <ReviewCelebrationContext value={value}>{children}</ReviewCelebrationContext>
 }
 
 export function useReviewCelebration(): CelebrationContextT {
