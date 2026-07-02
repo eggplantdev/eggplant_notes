@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ArrowLeftIcon, MenuIcon, XIcon } from 'lucide-react'
+import { ArrowLeftIcon, MenuIcon, RefreshCwIcon, XIcon } from 'lucide-react'
 
 import { BrandMark } from '@/components/brand/brand-mark'
 import { Button } from '@/components/ui/button'
@@ -88,6 +88,16 @@ export function MobileNav({
           })}
           {/* Balance/connect + sign-out pinned to the bottom of the sheet. */}
           <div className="mt-auto flex flex-col gap-2">
+            {/* Installed PWA has no browser reload; router.refresh() re-fetches server data (fresh
+                notes/cards) without a full app-shell reload. Browser chrome already offers reload. */}
+            {isStandalone && (
+              <SheetClose asChild>
+                <Button variant="ghost" className="justify-start" onClick={() => router.refresh()}>
+                  <RefreshCwIcon />
+                  Refresh
+                </Button>
+              </SheetClose>
+            )}
             {connected ? credits : <NavConnectButton className="w-full justify-start" />}
             <SignOutButton className="w-full justify-start" />
           </div>
