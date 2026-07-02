@@ -6,7 +6,7 @@ import { parseCardFilters } from '@/features/memory-cards/utils'
 // The oracle is the validation contract (drop junk, keep only legal states/buckets), not the impl.
 describe('parseCardFilters', () => {
   it('returns empty arrays when nothing is in the URL', () => {
-    expect(parseCardFilters({})).toEqual({ states: [], maturity: [] })
+    expect(parseCardFilters({})).toEqual({ states: [], maturity: [], due: [] })
   })
 
   it('does not coerce an empty string to state 0', () => {
@@ -33,6 +33,7 @@ describe('parseCardFilters', () => {
     expect(parseCardFilters({ state: '2', maturity: 'mature' })).toEqual({
       states: [2],
       maturity: ['mature'],
+      due: [],
     })
   })
 })
