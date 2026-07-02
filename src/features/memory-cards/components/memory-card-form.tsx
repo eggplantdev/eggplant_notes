@@ -37,6 +37,7 @@ export function MemoryCardForm({ noteId, onClose }: MemoryCardFormPropsT) {
     <Box
       as="form"
       id="memory-card-form"
+      className="w-full"
       onSubmit={(e) => {
         e.preventDefault()
         clearError()

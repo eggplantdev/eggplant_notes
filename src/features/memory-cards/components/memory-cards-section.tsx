@@ -6,7 +6,6 @@ import {
   type NoteCardRowT,
 } from '@/features/memory-cards/components/note-memory-cards-list'
 import type { MemoryCardT } from '@/features/memory-cards/types'
-import { GenerateCardsButton } from '@/features/memory-cards/components/generate-cards-button'
 
 type MemoryCardsSectionPropsT = {
   noteId: string
@@ -50,15 +49,8 @@ export function MemoryCardsSection({
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl font-semibold">Memory cards</h2>
 
-      {/* Column, not a row: both controls expand in place (AddMemoryCard → the card form,
-          GenerateCardsButton → the AI review panel). As flex-row siblings those panels were
-          content-sized (`flex: 0 1 auto`) and collapsed to the width of their widest text line. The
-          column keeps the default `align-items: stretch` so the EXPANDED panels fill the width;
-          the collapsed triggers stay small via their own `self-start` / `justify-items-start`
-          (so DON'T add `items-start` here — it would shrink the panels back). */}
       <div className="flex items-center gap-2">
-        <AddMemoryCard noteId={noteId} />
-        <GenerateCardsButton
+        <AddMemoryCard
           noteId={noteId}
           noteTitle={noteTitle}
           noteContent={noteContent}
@@ -72,7 +64,9 @@ export function MemoryCardsSection({
           No memory cards yet. Add one above to start building your recall set.
         </p>
       ) : (
-        <NoteMemoryCardsList rows={rows} noteId={noteId} />
+        <div className="mb-4">
+          <NoteMemoryCardsList rows={rows} noteId={noteId} />
+        </div>
       )}
     </section>
   )
