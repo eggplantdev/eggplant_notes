@@ -13,6 +13,7 @@ type GeneratedCardsReviewPropsT = {
   isSaving: boolean
   onPatch: (index: number, patch: Partial<GeneratedCardT>) => void
   onRemove: (index: number) => void
+  onAdd: (index: number) => void
   onSave: () => void
   onDiscard: () => void
 }
@@ -26,6 +27,7 @@ export function GeneratedCardsReview({
   isSaving,
   onPatch,
   onRemove,
+  onAdd,
   onSave,
   onDiscard,
 }: GeneratedCardsReviewPropsT) {
@@ -48,8 +50,10 @@ export function GeneratedCardsReview({
             key={index}
             card={card}
             promptError={promptErrors[index]}
+            isSaving={isSaving}
             onPatch={(patch) => onPatch(index, patch)}
             onRemove={() => onRemove(index)}
+            onAdd={() => onAdd(index)}
           />
         ))}
       </ul>
@@ -65,8 +69,8 @@ export function GeneratedCardsReview({
         >
           {isSaving ? 'Adding…' : `Add ${count} card${count === 1 ? '' : 's'}`}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onDiscard}>
-          Discard
+        <Button type="button" variant="ghost" size="sm" disabled={isSaving} onClick={onDiscard}>
+          Discard {count}
         </Button>
       </div>
     </div>

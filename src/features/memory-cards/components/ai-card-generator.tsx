@@ -74,6 +74,24 @@ export function AiCardGenerator({
     })
   }
 
+  // Persist one candidate on its own, then drop it from the review list — closing the panel once the
+  // last one is added (updateCandidates(null) also fires the reviewing signal).
+  function saveOne(index: number) {
+    const card = candidates?.[index]
+    if (!card) return
+    setError(undefined)
+    startSave(async () => {
+      const result = await createCardsForNote(noteId, [card])
+      if (toastActionResult(result)) {
+        const rest = candidates.filter((_, i) => i !== index)
+        updateCandidates(rest.length > 0 ? rest : null)
+        router.refresh()
+      } else if (!result.success) {
+        setError(result.error)
+      }
+    })
+  }
+
   if (candidates) {
     return (
       <GeneratedCardsReview
@@ -82,6 +100,7 @@ export function AiCardGenerator({
         isSaving={isSaving}
         onPatch={patch}
         onRemove={remove}
+        onAdd={saveOne}
         onSave={save}
         onDiscard={() => updateCandidates(null)}
       />
