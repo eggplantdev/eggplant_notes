@@ -14,10 +14,14 @@
 - [ ] **Performance / route caching (S-11)** — client Router Cache shipped (`nav-cache-staletimes` Phase 1, `staleTimes.dynamic=300` + nuclear bust); Phase 2 (granular busting) deferred — see Performance detail below.
 - [ ] **Mobile pass** — check + fix layouts on small screens.
 - [ ] **AI: stream generation (perf-audit H3)** — partial notes/cards in ~1–3s instead of a 30–60s opaque spinner.
+- [ ] sort in selects especially topics sort
+- [ ] sorting notes by date / time / alphabetically
+- [ ] wygląd kart pod notatką - większy padding etc
+- [ ] do not close editor after note saved only show toast
+- [ ] do not redirect after edit, just edit in place
+- [ ] go back works like shit
 
 _Code-health debt ✅ cleared — `systemDefaults` prop-drill fixed (`5e175cc`), `revalidate-prompt-surfaces.ts` deleted, topic-scoped-review E2E done._
-
-eggplant logo
 
 supabase connection
 
@@ -47,7 +51,7 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 
 ### Branding / identity
 
-- [ ] Eggplant logo — brand mark for nav/landing. Favicon ✅ shipped via `src/app/icon.tsx` (generated from `public/logos/eggplant-logo.png`, mirrors the portfolio repo). Nav/landing wordmark still open.
+- [x] Eggplant logo — brand mark for nav/landing. Favicon ✅ shipped via `src/app/icon.tsx` (generated from `public/logos/eggplant-logo.png`, mirrors the portfolio repo). Nav/landing wordmark still open.
 
 ### Performance (= roadmap S-11)
 
@@ -68,6 +72,28 @@ This app is a simple loop: write a note, turn it into memory cards, then review 
 - [x] **`revalidate-prompt-surfaces.ts` — DELETED (2026-06-10, `13db3a6`).** Verified a no-op: the four paths are dynamic (Supabase `cookies()`), supabase-js reads aren't Data-Cached, and Next 16 `staleTimes.dynamic=0` (no override) means dynamic pages refetch on soft-nav — nothing for `revalidatePath` to bust. Confirmed by a Playwright probe (out-of-band `user_prompts` change reflected after soft-nav, no revalidate). `revalidateTag` would also be a no-op (no tagged Data-Cache entry). Full record: `context/changes/revalidate-prompt-surfaces/handoff.md`.
 - [x] **`systemDefaults` prop-drill — FIXED (`5e175cc`).** Replaced the drill with `PromptDefaultsProvider` context (`prompt-defaults-context.tsx`): the page sets it once, `GenerateDialog` reads its one key via `usePromptDefault` — intermediate wrappers no longer carry it. (Siblings `aiEnabled`/`defaultModel` still pass through `MemoryCardsSection`→`GenerateCardsButton`, but that's a thin, stable chain — left as-is.)
 - [x] **E2E for `topic-scoped-review`** — shipped `e2e/topic-scoped-review.spec.ts` (2026-06-10): two subjects, an "intruder" global-soonest card in B; filter to A and assert B never surfaces + the panel's due-count subtitle tracks the filtered queue (3→2→1→caught-up) with the list surviving. Deliberate-break verified. Archived plan: `context/archive/2026-06-08-topic-scoped-review/plan.md`; test-plan §8 + §6.3.
+
+### Code-quality / refactor debt (open)
+
+> Surfaced while building the post-action loader work (`908ec33`). All three are about how the app
+> represents **mutation state + feedback** — currently three overlapping ad-hoc mechanisms. Worth a
+> single review pass that picks one pattern per concern, not piecemeal fixes.
+
+- [ ] **Form error handling — TanStack vs `useState`.** Two competing patterns: most forms route errors
+      through `useFormError`/`reportResult` (toast on success, inline on failure), but some hand-roll a bare
+      `useState<string>()` (`src/app/(auth-pages)/update-password/page.tsx`, `import-panel.tsx`). Pick one —
+      ideally a single form-result seam every Server-Action form uses — so error display is uniform and the
+      TanStack form owns its own error state instead of a parallel `useState`.
+- [ ] **`useActionTransition` Promise-bridge is unreadable.** `src/hooks/use-action-transition.ts` wraps a
+      manual `new Promise` + `resolve(result)` inside `startTransition` only to (a) keep `isPending` true
+      through the action/navigation while (b) returning the result to the caller. In-code `TODO` already
+      marks it. Replace with a clearer primitive (`Promise.withResolvers` or a small `Deferred`).
+- [ ] **Pending buttons scattered instead of a loading convention.** Nearly every mutation surface
+      hand-rolls its own `disabled={isSubmitting || isNavigating}` + "Saving…" label (`note-form`,
+      `subject-form`, `card-form`, the delete dialogs, `import-panel`, `update-password`). No shared
+      pending-button primitive and no clear rule for when to use a button-pending state vs the route's
+      `loading.tsx`. Consolidate: one pending-button component + a documented "inline-pending vs route-loader"
+      boundary.
 
 ### Loose ideas (unsorted)
 
