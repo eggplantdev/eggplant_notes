@@ -31,7 +31,7 @@ import { pageRange } from '@/lib/utils/pagination'
 // the caller keeps its projection→row typing. Column names aren't checked inside (Row is `any`
 // here); the call sites' result types are. Maturity is derived from `stability`, not a column of
 // its own — both buckets (or neither) selected = no constraint; exactly one bucket narrows.
-type CardFilterOptsT = {
+export type CardFilterOptsT = {
   subjectIds?: string[]
   q?: string
   states?: number[]
