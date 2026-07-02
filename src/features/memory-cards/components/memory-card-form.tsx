@@ -3,10 +3,12 @@
 import { FormError } from '@/components/forms/form-components/form-error'
 import { useAppForm } from '@/components/forms/hooks/form-hooks'
 import { useFormError } from '@/components/forms/hooks/use-form-error'
+import { getFieldErrorText } from '@/components/forms/utils'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { createMemoryCard } from '@/features/memory-cards/actions/create-memory-card'
 import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
+import { CardPromptField } from '@/features/memory-cards/components/card-prompt-field'
 import { promptSchema } from '@/features/memory-cards/schemas'
 
 // In-note inline ADD form (create-only). No subject picker: the card is seeded with the note's
@@ -53,9 +55,17 @@ export function MemoryCardForm({ noteId, onClose }: MemoryCardFormPropsT) {
         )}
       </div>
 
-      <form.AppField name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
-        {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
-      </form.AppField>
+      <form.Field name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
+        {(field) => (
+          <CardPromptField
+            value={field.state.value}
+            onChange={field.handleChange}
+            onBlur={field.handleBlur}
+            error={getFieldErrorText(field.state.meta.errors)}
+            placeholder="What should you recall?"
+          />
+        )}
+      </form.Field>
 
       <form.Field name="example">
         {(field) => <CardExampleField value={field.state.value} onChange={field.handleChange} />}

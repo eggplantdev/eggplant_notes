@@ -9,8 +9,12 @@ import { Textarea } from '@/components/ui/textarea'
 type CardPromptFieldPropsT = {
   value: string
   onChange: (value: string) => void
+  // Wire a TanStack field's handleBlur so onBlur validators fire on touch; omitted in the plain
+  // (AI-review) case where there's no blur validation.
+  onBlur?: () => void
   error?: string
   label?: string
+  placeholder?: string
 }
 
 // The Question field for a memory card: label + an autosizing Textarea (not an Input, so long AI
@@ -20,8 +24,10 @@ type CardPromptFieldPropsT = {
 export function CardPromptField({
   value,
   onChange,
+  onBlur,
   error,
   label = 'Question',
+  placeholder,
 }: CardPromptFieldPropsT) {
   const id = useId()
   return (
@@ -32,6 +38,8 @@ export function CardPromptField({
         rows={1}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        placeholder={placeholder}
         aria-invalid={Boolean(error)}
         className="min-h-0"
       />

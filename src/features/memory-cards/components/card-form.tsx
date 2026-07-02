@@ -1,46 +1,26 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
-
 import { FormError } from '@/components/forms/form-components/form-error'
-import { useAppForm } from '@/components/forms/hooks/form-hooks'
-import { useFormError } from '@/components/forms/hooks/use-form-error'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { getFieldErrorText } from '@/components/forms/utils'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Combobox } from '@/components/ui/combobox'
-import { Label } from '@/components/ui/label'
-import { createStandaloneCard } from '@/features/memory-cards/actions/create-standalone-card'
-import { unlinkCardFromNote } from '@/features/memory-cards/actions/unlink-card-from-note'
 import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
+import { CardNoteLinkRow } from '@/features/memory-cards/components/card-note-link-row'
+import { CardPromptField } from '@/features/memory-cards/components/card-prompt-field'
+import { CardSubjectField } from '@/features/memory-cards/components/card-subject-field'
 import { DeleteMemoryCardButton } from '@/features/memory-cards/components/delete-memory-card-button'
-import { LinkCardButton } from '@/features/memory-cards/components/link-card-button'
-import { updateMemoryCard } from '@/features/memory-cards/actions/update-memory-card'
+import { UnlinkOnSubjectChangeDialog } from '@/features/memory-cards/components/unlink-on-subject-change-dialog'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import type { MemoryCardT } from '@/features/memory-cards/types'
+import { useCardForm } from '@/features/memory-cards/use-card-form'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import { DEFAULT_OPENROUTER_MODEL } from '@/features/openrouter/constants'
 import { TopicGenerator } from '@/features/openrouter/components/topic-generator'
 import type { SubjectOptionT } from '@/features/subjects/types'
-import { useActionTransition } from '@/hooks/use-action-transition'
-import { useActionNavigation } from '@/hooks/use-action-navigation'
 
-// Combobox needs a concrete option value; unfiled card ↔ this sentinel ↔ null on the way out.
-const NO_SUBJECT = 'none'
-
-// `card` present → edit (updateMemoryCard); absent → create (createStandaloneCard). On success the
-// form client-navigates to /memory-cards (a known URL), toasting + showing that route's loader.
-// `sourceNote` (edit of a linked card) renders a source-note row + an Unlink action.
+// `card` present → edit (updateMemoryCard); absent → create (createStandaloneCard). The create/edit
+// lifecycle + the unlink-on-subject-change confirm gate live in useCardForm; this component only
+// renders. `sourceNote` (edit of a linked card) drives the source-note row.
 type CardFormPropsT = {
   subjects: SubjectOptionT[]
   card?: MemoryCardT
@@ -53,58 +33,9 @@ type CardFormPropsT = {
   defaultModel?: string
 }
 
-type CardFormValuesT = {
-  subject_id: string | null
-  prompt: string
-  example: string
-}
-
 export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }: CardFormPropsT) {
-  const router = useRouter()
-  const { formError, clearError, reportResult } = useFormError()
-  // Both create and edit land on /memory-cards (a client-known URL); navigate there on success.
-  const { isNavigating, navigate } = useActionNavigation()
-  // Holds the submitted values while the "this will unlink" dialog is open (a linked card whose
-  // subject changed); undefined when no confirm is pending.
-  const [pendingValues, setPendingValues] = useState<CardFormValuesT | undefined>(undefined)
-  const { isPending: isUnlinking, run: runUnlink } = useActionTransition()
-
-  const subjectOptions = useMemo(
-    () => [
-      { value: NO_SUBJECT, label: 'None' },
-      ...subjects.map((subject) => ({ value: subject.id, label: subject.title })),
-    ],
-    [subjects],
-  )
-
-  const form = useAppForm({
-    defaultValues: {
-      subject_id: card?.subject_id ?? null,
-      prompt: card?.prompt ?? '',
-      example: card?.example ?? '',
-    },
-    onSubmit: async ({ value }) => {
-      // A linked card shares its note's subject, so changing its subject must unlink it — confirm
-      // before saving. (The core re-derives the unlink server-side; this gate is purely the UX warning.)
-      if (card?.note_id && value.subject_id !== card.subject_id) {
-        setPendingValues(value)
-        return
-      }
-      await submitCard(value)
-    },
-  })
-
-  async function submitCard(values: CardFormValuesT) {
-    setPendingValues(undefined)
-    if (card) {
-      const result = await updateMemoryCard(card.id, values)
-      // Stay on this edit page — just confirm via toast.
-      reportResult(result, { successMessage: 'Card saved' })
-      return
-    }
-    const result = await createStandaloneCard(values)
-    if (reportResult(result)) navigate('/memory-cards', 'card-created')
-  }
+  const { form, formError, clearError, isNavigating, pendingValues, confirmSubmit, cancelConfirm } =
+    useCardForm(card)
 
   return (
     <form
@@ -118,18 +49,12 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
     >
       <form.Field name="subject_id">
         {(field) => (
-          <div className="grid gap-2">
-            <Label htmlFor={field.name}>Subject (optional)</Label>
-            <Combobox
-              id={field.name}
-              value={field.state.value ?? NO_SUBJECT}
-              onChange={(v) => field.handleChange(v === NO_SUBJECT ? null : v)}
-              options={subjectOptions}
-              searchPlaceholder="Search subject…"
-              emptyMessage="No subject found."
-              className="w-full sm:w-72"
-            />
-          </div>
+          <CardSubjectField
+            id={field.name}
+            value={field.state.value}
+            onChange={field.handleChange}
+            subjects={subjects}
+          />
         )}
       </form.Field>
 
@@ -158,58 +83,23 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
         />
       )}
 
-      <form.AppField name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
-        {(field) => <field.Input label="Question" placeholder="What should you recall?" />}
-      </form.AppField>
-
-      <form.Field name="example">
+      <form.Field name="prompt" validators={{ onBlur: promptSchema, onSubmit: promptSchema }}>
         {(field) => (
-          <CardExampleField
+          <CardPromptField
             value={field.state.value}
             onChange={field.handleChange}
-            richByDefault
-            testId="card-form-example"
+            onBlur={field.handleBlur}
+            error={getFieldErrorText(field.state.meta.errors)}
+            placeholder="What should you recall?"
           />
         )}
       </form.Field>
 
-      {sourceNote && card && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
-          <span className="text-muted-foreground">
-            Source note:{' '}
-            <ButtonLink href={`/notes/${sourceNote.id}`} variant="link" className="h-auto p-0">
-              {sourceNote.title ?? 'Untitled'}
-            </ButtonLink>
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            data-testid="card-unlink"
-            disabled={isUnlinking}
-            onClick={() =>
-              runUnlink(() => unlinkCardFromNote(card.id, sourceNote.id), {
-                successMessage: 'Card unlinked',
-                toastError: true, // bare button — no inline error surface
-              }).then((result) => {
-                if (result.success) router.refresh()
-              })
-            }
-          >
-            {isUnlinking ? 'Unlinking…' : 'Unlink'}
-          </Button>
-        </div>
-      )}
+      <form.Field name="example">
+        {(field) => <CardExampleField value={field.state.value} onChange={field.handleChange} />}
+      </form.Field>
 
-      {/* Mirror of the source-note row for an UNLINKED card. `sourceNote` is present iff note_id is
-          set, so the two rows are mutually exclusive. Linking refreshes the page (in the dialog), so
-          this row is then replaced by the Unlink row above. */}
-      {card && !card.note_id && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
-          <span className="text-muted-foreground">No source note</span>
-          <LinkCardButton cardId={card.id} cardSubjectId={card.subject_id} subjects={subjects} />
-        </div>
-      )}
+      {card && <CardNoteLinkRow card={card} sourceNote={sourceNote} subjects={subjects} />}
 
       <FormError message={formError} />
 
@@ -239,31 +129,11 @@ export function CardForm({ subjects, card, sourceNote, aiEnabled, defaultModel }
       </div>
 
       {card && pendingValues && (
-        <AlertDialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setPendingValues(undefined)
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unlink from note?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Changing the subject will unlink this card from “{sourceNote?.title ?? 'its note'}”.
-                The card keeps the new subject and becomes standalone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                data-testid="card-unlink-confirm"
-                onClick={() => submitCard(pendingValues)}
-              >
-                Unlink &amp; save
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <UnlinkOnSubjectChangeDialog
+          noteTitle={sourceNote?.title}
+          onConfirm={confirmSubmit}
+          onCancel={cancelConfirm}
+        />
       )}
     </form>
   )

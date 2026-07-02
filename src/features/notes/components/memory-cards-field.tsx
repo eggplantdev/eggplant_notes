@@ -1,10 +1,12 @@
 'use client'
 
 import { useStore, withForm } from '@/components/forms/hooks/form-hooks'
+import { getFieldErrorText } from '@/components/forms/utils'
 import { Box } from '@/components/ui/box'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { CardExampleField } from '@/features/memory-cards/components/card-example-field'
+import { CardPromptField } from '@/features/memory-cards/components/card-prompt-field'
 import { promptSchema } from '@/features/memory-cards/schemas'
 import { generateCards } from '@/features/openrouter/actions/generate-cards'
 import type { GeneratedCardT } from '@/features/openrouter/ai-schemas'
@@ -99,14 +101,20 @@ export const MemoryCardsField = withForm({
                   </Button>
                 </div>
 
-                <form.AppField
+                <form.Field
                   name={`cards[${i}].prompt`}
                   validators={{ onBlur: promptSchema, onSubmit: promptSchema }}
                 >
                   {(field) => (
-                    <field.Input label="Question" placeholder="What should you recall?" />
+                    <CardPromptField
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                      onBlur={field.handleBlur}
+                      error={getFieldErrorText(field.state.meta.errors)}
+                      placeholder="What should you recall?"
+                    />
                   )}
-                </form.AppField>
+                </form.Field>
 
                 <form.Field name={`cards[${i}].example`}>
                   {(field) => (
