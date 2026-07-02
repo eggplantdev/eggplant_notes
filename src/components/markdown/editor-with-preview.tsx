@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { Eye, Pencil } from 'lucide-react'
 import { useState } from 'react'
 
 import { CodeBlockInserter } from '@/components/markdown/code-block-inserter'
@@ -35,8 +36,18 @@ export function EditorWithPreview({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        {pane === 'write' && <CodeBlockInserter value={value} onChange={onChange} />}
-        {/* Preview segment prefetches the lazy Shiki chunk on hover/focus so the toggle rarely shows a loader. */}
+        {/* min-w-0 + flex-1 lets the inserter shrink on a narrow mobile card instead of overflowing;
+            it snaps back to its fixed width from sm up. */}
+        {pane === 'write' && (
+          <CodeBlockInserter
+            value={value}
+            onChange={onChange}
+            className="min-w-0 flex-1 sm:w-48 sm:flex-none"
+          />
+        )}
+        {/* Preview segment prefetches the lazy Shiki chunk on hover/focus so the toggle rarely shows a loader.
+            Labels collapse to icons below sm to keep the toolbar on one line; the text stays as the
+            screen-reader name. */}
         <SegmentedToggle
           size="sm"
           ariaLabel="Editor pane"
@@ -44,8 +55,25 @@ export function EditorWithPreview({
           value={pane}
           onChange={setPane}
           options={[
-            { value: 'write', label: 'Write' },
-            { value: 'preview', label: 'Preview', onPrefetch: importPreview },
+            {
+              value: 'write',
+              label: (
+                <>
+                  <Pencil className="size-4 sm:hidden" aria-hidden />
+                  <span className="sr-only sm:not-sr-only">Write</span>
+                </>
+              ),
+            },
+            {
+              value: 'preview',
+              label: (
+                <>
+                  <Eye className="size-4 sm:hidden" aria-hidden />
+                  <span className="sr-only sm:not-sr-only">Preview</span>
+                </>
+              ),
+              onPrefetch: importPreview,
+            },
           ]}
         />
       </div>
