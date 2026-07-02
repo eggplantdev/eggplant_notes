@@ -65,9 +65,10 @@ export async function rateMemoryCard(
     dailyGoal,
   })
 
-  // Nuclear by design: every review surface (dashboard + /memory-cards list/panel) re-renders so
-  // the next card AND the list's due dates / overview chart reflect the write. Reviewing must never
-  // show stale due dates — correctness over the prefetch speed hack we removed (see lessons.md).
+  // Nuclear by design: every surface that reflects the write re-renders — the /memory-cards
+  // panel/list/overview AND the dashboard's due/streak/reviewed stats (the dashboard no longer hosts
+  // a review panel) — so the next card AND every due date / count stay honest. Reviewing must never
+  // show stale due dates: correctness over the prefetch speed hack we removed (see lessons.md).
   revalidatePath('/', 'layout')
 
   return { success: true, celebrate }

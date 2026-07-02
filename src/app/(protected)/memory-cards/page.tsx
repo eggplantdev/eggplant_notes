@@ -4,11 +4,10 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { PaginationFooter } from '@/components/ui/pagination-footer'
 import { SearchFilterInput } from '@/components/ui/search-filter-input'
 import { UrlMultiSelectFilter } from '@/components/ui/url-multi-select-filter'
-import { CardsOverview } from '@/features/memory-cards/components/cards-overview'
+import { CardsOverviewSection } from '@/features/memory-cards/components/cards-overview-section'
 import { MemoryCardsList } from '@/features/memory-cards/components/memory-cards-list'
-import { FSRS_STATE_LABELS, MATURITY_OPTIONS } from '@/features/memory-cards/constants'
+import { DUE_OPTIONS, FSRS_STATE_LABELS, MATURITY_OPTIONS } from '@/features/memory-cards/constants'
 import {
-  getCardOverview,
   getDueQueue,
   getMemoryCardForReview,
   getMemoryCardsList,
@@ -24,6 +23,8 @@ import { SubjectFilter } from '@/features/subjects/components/subject-filter'
 import { getSubjects } from '@/features/subjects/queries'
 import { buildPaginationMeta, parsePagination } from '@/lib/utils/pagination'
 import { pluralize } from '@/lib/utils/pluralize'
+import { Spinner } from '@/components/ui/spinner'
+import { Suspense } from 'react'
 
 // The "Cards overview" chart is the ONE exception to the filtered/paginated view — it counts the
 // ENTIRE deck via getCardOverview (ignores q/page/subjects), so it stays a stable whole-deck stat.
@@ -35,6 +36,7 @@ export default async function MemoryCardsPage({
     q?: string
     state?: string
     maturity?: string
+    due?: string
     page?: string
     // The card the in-place review panel is showing. Clicking a list card sets it; absent → the
     // panel falls back to the soonest-due card, then (nothing due) the soonest card overall.
@@ -44,20 +46,18 @@ export default async function MemoryCardsPage({
   const sp = await searchParams
   const selectedIds = (sp.subjects ?? '').split(',').filter(Boolean)
   const q = sp.q ?? ''
-  const { states, maturity } = parseCardFilters(sp)
+  const { states, maturity, due } = parseCardFilters(sp)
   const { page, limit } = parsePagination(sp)
-  const filters = { subjectIds: selectedIds, q, states, maturity }
+  const filters = { subjectIds: selectedIds, q, states, maturity, due }
   const [
     subjects,
     { rows: cards, total },
-    overview,
     { first: dueCard },
     dailyGoal,
     { today: reviewedToday },
   ] = await Promise.all([
     getSubjects(),
     getMemoryCardsList({ ...filters, page, limit }),
-    getCardOverview(),
     // Same filters as the listing → the review panel is scoped to the active topic.
     getDueQueue(filters),
     getDailyGoal(),
@@ -76,16 +76,27 @@ export default async function MemoryCardsPage({
   // existing so the notice never stacks above the empty caught-up state.
   const reviewingAhead = dailyGoal > 0 && reviewedToday >= dailyGoal && Boolean(reviewCard)
 
-  // After a rating, RatingButtons replaces to this (filters minus `review`) so the selection clears
-  // and the next card surfaces.
-  const advanceParams = new URLSearchParams()
-  for (const key of ['subjects', 'q', 'state', 'maturity', 'page'] as const) {
-    if (sp[key]) advanceParams.set(key, sp[key])
+  // Only navigate after a rating when there's an explicit `?review` selection to clear. In the normal
+  // due-queue loop (`?review` absent) the rating's `revalidatePath` re-render already advances to the
+  // next card — the rated card's due_at moved to the future, so getDueQueue returns the next one — so
+  // a second navigation would re-run the whole page for nothing. When a specific card WAS clicked we
+  // must strip `?review` (else the panel keeps showing the just-rated card); advanceHref preserves the
+  // other filters. `undefined` → RatingButtons skips router.replace and lets the revalidate advance.
+  let advanceHref: string | undefined
+  if (sp.review) {
+    const advanceParams = new URLSearchParams()
+    for (const key of ['subjects', 'q', 'state', 'maturity', 'due', 'page'] as const) {
+      if (sp[key]) advanceParams.set(key, sp[key])
+    }
+    advanceHref = advanceParams.size ? `/memory-cards?${advanceParams}` : '/memory-cards'
   }
-  const advanceHref = advanceParams.size ? `/memory-cards?${advanceParams}` : '/memory-cards'
 
   const isFiltered =
-    selectedIds.length > 0 || Boolean(q) || states.length > 0 || maturity.length > 0
+    selectedIds.length > 0 ||
+    Boolean(q) ||
+    states.length > 0 ||
+    maturity.length > 0 ||
+    due.length > 0
   const options = subjects.map((subject) => ({ value: subject.id, label: subject.title }))
   const paginationMeta = buildPaginationMeta(total, page, limit)
 
@@ -96,7 +107,17 @@ export default async function MemoryCardsPage({
       actions={<ButtonLink href="/memory-cards/new">New card</ButtonLink>}
     >
       <div className="flex flex-col gap-12">
-        <CardsOverview overview={overview} />
+        {/* Streamed: the whole-deck card_overview RPC is decorative and must not block the review
+          panel. The reserved-height Spinner box keeps the swap-in from shifting the layout below. */}
+        <Suspense
+          fallback={
+            <div className="flex min-h-[220px] items-center justify-center">
+              <Spinner className="size-10 [--spinner-w:4px]" />
+            </div>
+          }
+        >
+          <CardsOverviewSection />
+        </Suspense>
 
         {/* Topic-scoped review: only when cards match the filters — a zero-match search shows the
           list's own empty state below. Clicking a list card sets `?review=<id>` and swaps it into
@@ -121,7 +142,7 @@ export default async function MemoryCardsPage({
         )}
 
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {subjects.length > 0 && (
               <SubjectFilter
                 options={options}
@@ -142,6 +163,14 @@ export default async function MemoryCardsPage({
               options={MATURITY_OPTIONS}
               selectedValues={maturity}
               placeholder="Maturity"
+              searchable={false}
+              triggerClassName="w-full"
+            />
+            <UrlMultiSelectFilter
+              paramKey="due"
+              options={DUE_OPTIONS}
+              selectedValues={due}
+              placeholder="Due"
               searchable={false}
               triggerClassName="w-full"
             />

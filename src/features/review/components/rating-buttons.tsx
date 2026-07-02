@@ -10,10 +10,11 @@ import { GRADES } from '@/features/review/grades'
 import { useReviewCelebration } from '@/features/review/components/review-celebration-context'
 import { useActionTransition } from '@/hooks/use-action-transition'
 
-// advanceHref: where to go after a successful rating. The /memory-cards panel passes the filtered
-// listing URL WITHOUT the `?review` param, so rating a card clears the in-place selection and the
-// re-render shows the next card. The dashboard omits it — there, the action's revalidatePath alone
-// swaps to the next due card in place.
+// advanceHref: where to go after a successful rating. Set ONLY when the panel is showing an
+// explicitly clicked card (`?review=<id>`) — it's the filtered listing URL WITHOUT `?review`, so the
+// navigation clears that selection and the next card surfaces. In the normal due-queue loop it's
+// undefined and the action's revalidatePath alone advances to the next card in place (no second
+// render). See memory-cards/page.tsx for the advanceHref rule.
 type PropsT = {
   memoryCardId: string
   previews: Record<number, string>
@@ -42,7 +43,7 @@ export function RatingButtons({ memoryCardId, previews, goal, advanceHref }: Pro
             onClick={() =>
               run(() => rateMemoryCard(memoryCardId, grade, goal)).then((result) => {
                 if (!result.success) return
-                if (result.celebrate) celebrate(result.celebrate)
+                if (result.celebrate) celebrate()
                 // Clear the in-place selection so the next card surfaces; replace (not push) keeps
                 // the rated card out of history. scroll:false — the panel stays put and fades the
                 // swap (ReviewCardTransition); no jump to the top of the page.
