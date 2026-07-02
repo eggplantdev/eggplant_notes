@@ -39,10 +39,12 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await page.getByLabel('Question').fill(editedPrompt)
   await page.getByRole('button', { name: 'Save changes' }).click()
 
-  // Saving redirects to the /memory-cards listing. Locate the list card by its prompt + Review
-  // button — the due card also shows in the in-place review panel (also a [data-slot=card] but with
-  // NO Review button), so this filter disambiguates the listing row from the panel. Reused for the
-  // visibility assertion and the delete below.
+  // Editing no longer redirects to the listing (stays on the edit route + toasts). Go to the
+  // listing to confirm the edit persisted and to delete. Locate the list card by its prompt +
+  // Review button — the due card also shows in the in-place review panel (also a [data-slot=card]
+  // but with NO Review button), so this filter disambiguates the listing row from the panel.
+  await expect(page.getByText('Card saved')).toBeVisible({ timeout: 15_000 })
+  await page.goto('/memory-cards')
   const editedRow = page
     .locator('[data-slot="card"]')
     .filter({ hasText: editedPrompt })

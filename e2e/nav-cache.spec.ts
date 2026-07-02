@@ -78,7 +78,8 @@ test('an in-app note-title edit busts the cached /notes — new title shows on s
   const edited = `Bust after ${Date.now()}`
   await page.getByLabel('Title').fill(edited)
   await page.getByRole('button', { name: 'Save changes' }).click()
-  await expect(page.getByRole('heading', { name: edited })).toBeVisible({ timeout: 15_000 })
+  // Edit stays in place now (no redirect); the toast confirms the Server Action (revalidatePath) ran.
+  await expect(page.getByText('Note saved')).toBeVisible({ timeout: 15_000 })
 
   // Soft-nav back to /notes → the cache was busted → new title shows, old is gone.
   await softNav(page, 'Notes')

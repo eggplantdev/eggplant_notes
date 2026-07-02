@@ -140,11 +140,13 @@ test('subject in-place edit: rename + description via ?edit, lands back on the s
   await page.getByLabel('Description (optional)').fill(description)
   await page.getByRole('button', { name: 'Save changes' }).click()
 
-  // Save redirects to the bare subject (no notes → empty prompt); header shows the new
-  // title + description and the ?edit state is gone.
+  // Editing no longer redirects off ?edit (stays in place + toasts). Leave edit mode via Cancel →
+  // the read view header shows the new title + description and the ?edit state is gone.
+  await expect(page.getByText('Subject saved')).toBeVisible({ timeout: 15_000 })
+  await page.getByRole('link', { name: 'Cancel' }).click()
+  await expect(page).not.toHaveURL(/\?edit$/)
   await expect(page.getByRole('heading', { name: renamed })).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText(description)).toBeVisible()
-  await expect(page).not.toHaveURL(/\?edit$/)
 })
 
 // subjects-picker-detail-view: the standalone /subjects card list is gone. /subjects no longer

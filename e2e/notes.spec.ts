@@ -38,13 +38,16 @@ test('full CRUD: create a note with code, see it highlighted, edit, delete', asy
   await page.goto('/notes')
   await expect(page.getByText(title)).toBeVisible()
 
-  // Edit the title
+  // Edit the title. Editing no longer navigates away ("do not navigate away after edit") — it stays
+  // on ?edit=note and toasts. Leave edit mode via Cancel to confirm the read view shows the new title.
   await page.getByText(title).click()
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/)
   await page.getByRole('link', { name: 'Edit' }).click()
   const editedTitle = `${title} (edited)`
   await page.getByLabel('Title').fill(editedTitle)
   await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(page.getByText('Note saved')).toBeVisible({ timeout: 15_000 })
+  await page.getByRole('link', { name: 'Cancel' }).click()
   await expect(page.getByRole('heading', { name: editedTitle })).toBeVisible({ timeout: 15_000 })
 
   // Delete via the AlertDialog confirm
@@ -80,9 +83,10 @@ test('unknown fence language falls back to plain text without error (S-13)', asy
 
 // S-14 in-place edit: the body+subject edit moved off the deleted /notes/[id]/edit route into
 // a ?edit=note branch on the detail page. Locks three things the CRUD test above doesn't:
-// (1) the F3 no-redirect property — `?edit=note` must NOT bounce (a regression forwarding
+// (1) the F3 no-redirect property — `?edit=note` must NOT bounce on load (a regression forwarding
 // editId='note' to MemoryCardsSection would trip its stale-?edit guard and redirect to the bare
-// path); (2) the body actually round-trips through the inline form; (3) the old route 404s.
+// path); (2) the body actually round-trips through the inline form (edit stays in place now, so we
+// leave via Cancel to read it back); (3) the old route 404s.
 test('in-place edit: ?edit=note shows the form without redirecting, edits the body, /edit 404s (S-14)', async ({
   page,
 }) => {
@@ -98,7 +102,8 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   await expect(page.getByRole('button', { name: 'Save changes' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Memory cards' })).toBeVisible()
 
-  // Edit the body in place → save → redirected off the ?edit URL with the new content rendered.
+  // Edit the body in place → save. Editing no longer redirects off ?edit=note (it stays + toasts);
+  // leave edit mode via Cancel to confirm the new body persisted to the read view.
   // Since S-17 the add-check form is deferred (collapsed behind "Add card"), so edit mode now
   // mounts only NoteForm's body editor — a single CodeMirror. `.first()` is kept defensively (it
   // would still disambiguate if someone opened the add form), but the page is single-editor here.
@@ -107,7 +112,8 @@ test('in-place edit: ?edit=note shows the form without redirecting, edits the bo
   await bodyEditor.click()
   await bodyEditor.evaluate((_el, text) => document.execCommand('insertText', false, text), marker)
   await page.getByRole('button', { name: 'Save changes' }).click()
-  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+(\?|$)/, { timeout: 15_000 })
+  await expect(page.getByText('Note saved')).toBeVisible({ timeout: 15_000 })
+  await page.getByRole('link', { name: 'Cancel' }).click()
   await expect(page).not.toHaveURL(/\?edit=note/)
   await expect(page.getByText(marker)).toBeVisible({ timeout: 15_000 })
 
