@@ -43,12 +43,12 @@ export default async function MemoryCardsPage({
     review?: string
   }>
 }) {
-  const sp = await searchParams
-  const selectedIds = (sp.subjects ?? '').split(',').filter(Boolean)
-  const q = sp.q ?? ''
-  const { states, maturity, due } = parseCardFilters(sp)
-  const { page, limit } = parsePagination(sp)
-  const filters = { subjectIds: selectedIds, q, states, maturity, due }
+  const resolvedSearchParams = await searchParams
+  const selectedIds = (resolvedSearchParams.subjects ?? '').split(',').filter(Boolean)
+  const searchQuery = resolvedSearchParams.q ?? ''
+  const { states, maturity, due } = parseCardFilters(resolvedSearchParams)
+  const { page, limit } = parsePagination(resolvedSearchParams)
+  const filters = { subjectIds: selectedIds, q: searchQuery, states, maturity, due }
   const [
     subjects,
     { rows: cards, total },
@@ -68,7 +68,9 @@ export default async function MemoryCardsPage({
 
   // The card to review, in priority: an explicitly clicked card (due or not) → the soonest-due card
   // → the soonest card overall so the user can keep reviewing ahead when nothing is due.
-  const selectedCard = sp.review ? await getMemoryCardForReview(sp.review) : undefined
+  const selectedCard = resolvedSearchParams.review
+    ? await getMemoryCardForReview(resolvedSearchParams.review)
+    : undefined
   let reviewCard = selectedCard ?? dueCard
   if (!reviewCard) reviewCard = await getSoonestReviewCard(filters)
   // "Reviewing ahead" = today's goal is met (the persistent counterpart to the one-shot goal-crossing
@@ -83,17 +85,17 @@ export default async function MemoryCardsPage({
   // must strip `?review` (else the panel keeps showing the just-rated card); advanceHref preserves the
   // other filters. `undefined` → RatingButtons skips router.replace and lets the revalidate advance.
   let advanceHref: string | undefined
-  if (sp.review) {
+  if (resolvedSearchParams.review) {
     const advanceParams = new URLSearchParams()
     for (const key of ['subjects', 'q', 'state', 'maturity', 'due', 'page'] as const) {
-      if (sp[key]) advanceParams.set(key, sp[key])
+      if (resolvedSearchParams[key]) advanceParams.set(key, resolvedSearchParams[key])
     }
     advanceHref = advanceParams.size ? `/memory-cards?${advanceParams}` : '/memory-cards'
   }
 
   const isFiltered =
     selectedIds.length > 0 ||
-    Boolean(q) ||
+    Boolean(searchQuery) ||
     states.length > 0 ||
     maturity.length > 0 ||
     due.length > 0
@@ -128,7 +130,7 @@ export default async function MemoryCardsPage({
           <div id={REVIEW_PANEL_ID} className="mx-auto w-full max-w-3xl scroll-mt-24">
             <ReviewCardTransition
               cardKey={reviewCard?.id ?? 'caught-up'}
-              scrollOnMount={Boolean(sp.review)}
+              scrollOnMount={Boolean(resolvedSearchParams.review)}
             >
               <ReviewPanel
                 card={reviewCard}
