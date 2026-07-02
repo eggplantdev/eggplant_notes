@@ -86,8 +86,7 @@ export default async function NotePage({
         </div>
       )}
 
-      {/* The gradient image paints over the Separator's bg-border. */}
-      <Separator className="from-neon-green to-neon-cyan neon-glow bg-linear-to-r" />
+      <Separator variant="ai" className="neon-glow" />
 
       <PromptDefaultsProvider value={systemDefaults}>
         <MemoryCardsSection
