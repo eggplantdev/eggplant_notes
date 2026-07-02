@@ -5,8 +5,8 @@ import { clientFor, createNote, fillEditor, signUp, uniqueEmail } from './helper
 // S-02 acceptance path: on a note, add a memory card (question + a single markdown `example` field
 // holding a fenced code block) → see it listed with highlighted code → edit → delete (FR-012–015).
 // Plus a two-account isolation check on the write/read path. Shared auth/editor/client helpers live
-// in ./helpers. The example field starts as a textarea and upgrades to the markdown editor on
-// "Add formatting" (merge-card-example-and-code-context).
+// in ./helpers. The example field is the markdown editor by default (the "Add formatting" textarea
+// toggle was removed — markdown is always on).
 const CODE_EXAMPLE = ['```ts', 'const sum = (a: number, b: number) => a + b', '```'].join('\n')
 
 test('full CRUD: add a memory card with highlighted code, list, edit, delete', async ({ page }) => {
@@ -21,8 +21,7 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await page.getByRole('button', { name: 'Add card' }).click()
   const prompt = `What does sum do? ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)
-  // Upgrade the example field to the markdown editor, then enter a fenced code block.
-  await page.getByTestId('card-example-rich').click()
+  // The example field is the markdown editor by default — enter a fenced code block.
   await fillEditor(page, CODE_EXAMPLE)
   await page.getByRole('button', { name: 'Add memory card' }).click()
 
@@ -54,12 +53,13 @@ test('full CRUD: add a memory card with highlighted code, list, edit, delete', a
   await expect(page.getByText(editedPrompt)).toHaveCount(0, { timeout: 15_000 })
 })
 
-// S-17 + merge-card-example-and-code-context: the CodeMirror island is now DOUBLY deferred — behind
-// the "Add card" toggle AND the example field's "Add formatting" upgrade (the field starts as a
-// plain textarea). `.cm-content` count is the observable proxy for the editor being mounted (the
-// CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 0 with the form open but the field
-// still a textarea, 1 only after "Add formatting".
-test('add-check form is deferred: no editor on read, reveals, upgrades, hides, collapses after add', async ({
+// S-17: the CodeMirror island is deferred behind the "Add card" toggle — the add form (and its
+// editor) only mounts once the form is revealed. The example field is now the markdown editor by
+// default (the "Add formatting" textarea upgrade was removed), so opening the form mounts exactly
+// one island. `.cm-content` count is the observable proxy for the editor being mounted (the
+// CodeMirror chunk loads on mount via next/dynamic) — 0 on read, 1 with the form open, 0 again once
+// it collapses.
+test('add-check form is deferred: no editor on read, reveals with editor, hides, collapses after add', async ({
   page,
 }) => {
   await signUp(page, uniqueEmail('tc-defer'))
@@ -71,13 +71,9 @@ test('add-check form is deferred: no editor on read, reveals, upgrades, hides, c
   const addCheck = page.getByRole('button', { name: 'Add card' })
   await expect(addCheck).toBeVisible()
 
-  // Reveal the form → its example field is a textarea, so STILL no CodeMirror island.
+  // Reveal the form → its example field is the markdown editor, so exactly one CodeMirror island mounts.
   await addCheck.click()
   await expect(page.getByLabel('Question')).toBeVisible()
-  await expect(page.locator('.cm-content')).toHaveCount(0)
-
-  // Upgrade the example field → exactly one CodeMirror island mounts.
-  await page.getByTestId('card-example-rich').click()
   await expect(page.locator('.cm-content')).toHaveCount(1)
 
   // Hide → form collapses, editor unmounts.
@@ -85,7 +81,7 @@ test('add-check form is deferred: no editor on read, reveals, upgrades, hides, c
   await expect(page.getByLabel('Question')).toBeHidden()
   await expect(page.locator('.cm-content')).toHaveCount(0)
 
-  // Re-open, add a check (textarea-only, no upgrade) → it lists and the form collapses again.
+  // Re-open, add a check → it lists and the form collapses again (editor unmounts).
   await addCheck.click()
   const prompt = `Deferred add ${Date.now()}`
   await page.getByLabel('Question').fill(prompt)

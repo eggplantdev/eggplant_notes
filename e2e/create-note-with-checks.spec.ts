@@ -3,11 +3,11 @@ import { test, expect } from '@playwright/test'
 import { clientFor, signUp, uniqueEmail } from './helpers'
 
 // S-07 acceptance path: stage 0..N memory cards inline on /notes/new and save them atomically
-// with the note (one create_note_with_cards RPC transaction). Rows use the prompt AppField +
-// the optional example field, which starts as a plain textarea; its "Add formatting" markdown
-// editor (a CodeMirror island) is intentionally not driven here — the create page mounts one
-// .cm-content for the note body, and upgrading a row would add more, breaking fillEditor's
-// single-locator. Atomicity/highlight of code is covered by notes.spec.ts.
+// with the note (one create_note_with_cards RPC transaction). Rows use the prompt AppField + the
+// example markdown editor (always on now — the "Add formatting" textarea toggle was removed). This
+// spec drives only Question + staging/removal; the example editors aren't filled here (each staged
+// row mounts its own CodeMirror island). Example round-trip + code highlight are covered by
+// memory-cards.spec.ts; atomicity/highlight of the note body by notes.spec.ts.
 
 const noteIdFromUrl = (url: string) => url.match(/\/notes\/([0-9a-f-]+)$/)?.[1]
 
@@ -29,7 +29,6 @@ test('create a note with two memory cards inline, saved together', async ({ page
   await page.getByRole('button', { name: 'Add card' }).click()
   await page.getByLabel('Question').nth(0).fill(q1)
   await page.getByLabel('Question').nth(1).fill(q2)
-  await page.getByLabel('Example (optional)').nth(0).fill('It runs as the calling user.')
   await page.getByRole('button', { name: 'Remove' }).last().click()
   await expect(page.getByLabel('Question')).toHaveCount(2)
 
