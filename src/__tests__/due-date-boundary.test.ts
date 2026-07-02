@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { isCardOverdue } from '@/features/memory-cards/utils'
-import { APP_TIME_ZONE, daysUntilDue } from '@/lib/utils/date'
+import { APP_TIME_ZONE, MS_PER_DAY, daysUntilDue, zoneStartOfDayInstant } from '@/lib/utils/date'
 
 // R2 (test-plan §2 / Risk Response #2): the timezone + day-boundary correctness of the recall loop's
 // calendar math — the edge `format-review-status.test.ts` deliberately skips ("Noon avoids DST/offset
@@ -82,5 +82,48 @@ describe('isCardOverdue — boundary + state guard (R2)', () => {
     // State guard wins over the date — these cards aren't on the schedule yet.
     expect(isCardOverdue({ state: 0, due_at: '2020-01-01T00:00:00Z' })).toBe(false)
     expect(isCardOverdue({ state: 1, due_at: '2020-01-01T00:00:00Z' })).toBe(false)
+  })
+})
+
+// zoneStartOfDayInstant is the QUERY-side counterpart to daysUntilDue: the due filter turns
+// "Overdue"/"Due today" into `due_at` range bounds, so this must yield the TRUE Warsaw start-of-day
+// instant (not the synthetic zone-midnight label). A wrong offset would leak yesterday's or
+// tomorrow's cards into the "Due today" bucket. Oracle = the known Warsaw UTC offset (+1 winter,
+// +2 summer): Warsaw local 00:00 is the prior day 23:00Z in winter, 22:00Z in summer.
+describe('zoneStartOfDayInstant — true Warsaw start-of-day instant (R2)', () => {
+  const iso = (date: Date) => date.toISOString()
+
+  it('winter (UTC+1): Warsaw midnight is 23:00Z the previous day', () => {
+    // Any instant on Warsaw 2026-01-15 → start = 2026-01-14T23:00:00Z. Matches the isCardOverdue
+    // flip point above (22:59:59Z overdue, 23:00:00Z today).
+    expect(iso(zoneStartOfDayInstant(new Date('2026-01-15T12:00:00Z'), APP_TIME_ZONE))).toBe(
+      '2026-01-14T23:00:00.000Z',
+    )
+  })
+
+  it('summer (UTC+2): Warsaw midnight is 22:00Z the previous day', () => {
+    expect(iso(zoneStartOfDayInstant(new Date('2026-07-02T12:00:00Z'), APP_TIME_ZONE))).toBe(
+      '2026-07-01T22:00:00.000Z',
+    )
+  })
+
+  it('resolves start-of-day on the 23h spring-forward day with the pre-transition offset', () => {
+    // 2026-03-29 00:00 Warsaw is before the 02:00→03:00 jump, so still UTC+1 → 2026-03-28T23:00:00Z.
+    expect(iso(zoneStartOfDayInstant(new Date('2026-03-29T12:00:00Z'), APP_TIME_ZONE))).toBe(
+      '2026-03-28T23:00:00.000Z',
+    )
+  })
+
+  it('the query +1.5d formula lands the true start-of-tomorrow across the 25h fall-back day', () => {
+    // today = Warsaw 2026-10-25 (a 25h day, UTC+2 before the 03:00→02:00 fallback).
+    const startToday = zoneStartOfDayInstant(new Date('2026-10-25T12:00:00Z'), APP_TIME_ZONE)
+    expect(iso(startToday)).toBe('2026-10-24T22:00:00.000Z')
+    // Tomorrow (Oct 26) is post-fallback UTC+1, so its start is 2026-10-25T23:00:00Z — proving a
+    // naive `startToday + 24h` (which would land inside the 25h day) is wrong and +1.5d is right.
+    const startTomorrow = zoneStartOfDayInstant(
+      new Date(startToday.getTime() + 1.5 * MS_PER_DAY),
+      APP_TIME_ZONE,
+    )
+    expect(iso(startTomorrow)).toBe('2026-10-25T23:00:00.000Z')
   })
 })

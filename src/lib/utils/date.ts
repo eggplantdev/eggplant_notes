@@ -37,6 +37,52 @@ export function isoDateInZone(date: Date, timeZone: string): string {
   return zoneDateFormatter(timeZone).format(date)
 }
 
+// A second per-zone formatter that also carries the clock fields, so `zoneOffsetMs` can read back a
+// zone's wall time. `hourCycle: 'h23'` keeps midnight as `00`, not `24`.
+const zoneOffsetFormatters = new Map<string, Intl.DateTimeFormat>()
+function zoneOffsetFormatter(timeZone: string): Intl.DateTimeFormat {
+  let formatter = zoneOffsetFormatters.get(timeZone)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    zoneOffsetFormatters.set(timeZone, formatter)
+  }
+  return formatter
+}
+
+// Milliseconds to add to a UTC instant to get `timeZone`'s wall-clock reading — its UTC offset at
+// that instant, DST included. Positive east of UTC (Warsaw = +1h/+2h).
+function zoneOffsetMs(instant: Date, timeZone: string): number {
+  const parts = zoneOffsetFormatter(timeZone).formatToParts(instant)
+  const field = (type: string) => Number(parts.find((part) => part.type === type)?.value)
+  const asUtc = Date.UTC(
+    field('year'),
+    field('month') - 1,
+    field('day'),
+    field('hour'),
+    field('minute'),
+    field('second'),
+  )
+  return asUtc - instant.getTime()
+}
+
+// The REAL UTC instant of 00:00 for the zone calendar date `date` falls on. Distinct from
+// `zoneMidnight`, which returns a synthetic UTC-anchored day *label* for whole-day diffing — this is
+// the true instant, so it can bound a real timestamp column (`memory_cards.due_at`) in a query. The
+// shift by the offset at that day's wall-midnight makes it DST-correct.
+export function zoneStartOfDayInstant(date: Date, timeZone: string): Date {
+  const wallMidnightAsUtc = new Date(`${isoDateInZone(date, timeZone)}T00:00:00Z`)
+  return new Date(wallMidnightAsUtc.getTime() - zoneOffsetMs(wallMidnightAsUtc, timeZone))
+}
+
 // Anchoring at UTC-midnight lets the toLocale* formatters below (with `timeZone: 'UTC'`) read back
 // the same calendar day on any runtime zone; otherwise a negative-offset zone renders the prior day.
 function parseIsoDateUtc(isoDate: string): Date {

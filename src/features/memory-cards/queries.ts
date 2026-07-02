@@ -1,6 +1,11 @@
 import type { PostgrestFilterBuilder, SupabaseClient } from '@supabase/supabase-js'
 
-import { MATURE_STABILITY_DAYS, type MaturityT } from '@/features/memory-cards/constants'
+import {
+  MATURE_STABILITY_DAYS,
+  SCHEDULED_STATES,
+  type DueFilterT,
+  type MaturityT,
+} from '@/features/memory-cards/constants'
 import type {
   CardOverviewT,
   DueCardT,
@@ -16,6 +21,7 @@ import { runTableQuery } from '@/lib/supabase/run-table-query'
 import { searchOr } from '@/lib/supabase/search-filter'
 import { createClient } from '@/lib/supabase/create-server-client'
 import type { Database } from '@/lib/supabase/types'
+import { APP_TIME_ZONE, MS_PER_DAY, zoneStartOfDayInstant } from '@/lib/utils/date'
 import { pageRange } from '@/lib/utils/pagination'
 
 // The subject/state/maturity/search predicate shared by the listing and the due query, so both
@@ -30,6 +36,7 @@ type CardFilterOptsT = {
   q?: string
   states?: number[]
   maturity?: MaturityT[]
+  due?: DueFilterT[]
 }
 
 // `any` in the bound is deliberate: it sidesteps the builder's per-position generic variance so any
@@ -52,6 +59,27 @@ function applyCardFilters<T extends PostgrestFilterBuilder<any, any, any, any>>(
   }
   const orFilter = opts?.q ? searchOr(['prompt', 'example'], opts.q) : null
   if (orFilter) query = query.or(orFilter)
+  if (opts?.due && opts.due.length > 0) {
+    // Match the 'Overdue'/'Due today' badges: only scheduled cards (Review/Relearning) qualify, and
+    // the window is a whole calendar day in APP_TIME_ZONE. `.in('state', …)` intersects with any
+    // user-picked state filter (PostgREST ANDs same-column filters), so New/Learning can't slip in.
+    query = query.in('state', SCHEDULED_STATES)
+    const startToday = zoneStartOfDayInstant(new Date(), APP_TIME_ZONE)
+    // +1.5 days then re-snap lands squarely inside tomorrow on DST-short/long days (23–25h), so this
+    // is the true start-of-tomorrow instant, not today's start + a naive 24h.
+    const startTomorrow = zoneStartOfDayInstant(
+      new Date(startToday.getTime() + 1.5 * MS_PER_DAY),
+      APP_TIME_ZONE,
+    )
+    const wantsOverdue = opts.due.includes('overdue')
+    const wantsToday = opts.due.includes('today')
+    if (wantsOverdue && wantsToday) query = query.lt('due_at', startTomorrow.toISOString())
+    else if (wantsOverdue) query = query.lt('due_at', startToday.toISOString())
+    else if (wantsToday)
+      query = query
+        .gte('due_at', startToday.toISOString())
+        .lt('due_at', startTomorrow.toISOString())
+  }
   return query
 }
 
